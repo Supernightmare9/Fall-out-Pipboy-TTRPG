@@ -243,6 +243,22 @@
             transform: translateY(0);
         }
 
+        .action-button.danger {
+            background-color: #8b3a3a;
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
+            text-shadow: 0 0 5px #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .action-button.danger:hover {
+            background-color: #a84a4a;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
         .message {
             margin-top: 10px;
             font-size: 11px;
@@ -712,8 +728,9 @@
 
                 <!-- XP INPUT -->
                 <div class="input-form">
-                    <input type="number" id="xpInput" class="input-field" placeholder="Add XP (e.g., 500)" min="0" max="999999">
+                    <input type="number" id="xpInput" class="input-field" placeholder="Add/Remove XP (e.g., 500 or -200)" min="-999999" max="999999">
                     <button class="action-button" onclick="addXP()">ADD XP</button>
+                    <button class="action-button danger" onclick="removeXP()">REMOVE XP</button>
                 </div>
                 <div class="message" id="xpMessage"></div>
             </div>
@@ -943,7 +960,7 @@
         const MAX_TAG_SKILLS = 3;
         const TAG_SKILL_BONUS = 10;
 
-        // Skills with SPECIAL alignments - UPDATED
+        // Skills with SPECIAL alignments
         const SKILLS_BY_SPECIAL = {
             strength: ['Melee Weapons', 'Big Guns', 'Unarmed'],
             perception: ['Small Guns', 'Energy Weapons'],
@@ -1093,14 +1110,20 @@
             }
         }
 
-        // ===== XP FUNCTION =====
+        // ===== ADD XP FUNCTION =====
         async function addXP() {
             const xpInput = document.getElementById('xpInput');
             const messageBox = document.getElementById('xpMessage');
             const xpAmount = parseInt(xpInput.value);
 
-            if (!xpInput.value || isNaN(xpAmount) || xpAmount <= 0) {
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
                 messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            if (xpAmount < 0) {
+                messageBox.textContent = '⚠ ERROR: Use REMOVE XP button for negative values!';
                 messageBox.className = 'message error';
                 return;
             }
@@ -1136,6 +1159,61 @@
                 }, 3000);
             } catch (error) {
                 console.error('Error adding XP:', error);
+                messageBox.textContent = '⚠ ERROR: Failed to save XP!';
+                messageBox.className = 'message error';
+            }
+        }
+
+        // ===== REMOVE XP FUNCTION =====
+        async function removeXP() {
+            const xpInput = document.getElementById('xpInput');
+            const messageBox = document.getElementById('xpMessage');
+            const xpAmount = parseInt(xpInput.value);
+
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            if (xpAmount > 0) {
+                messageBox.textContent = '⚠ ERROR: Use ADD XP button for positive values!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            try {
+                let playerData = await getPlayerDataFromDB();
+                
+                if (!playerData) {
+                    messageBox.textContent = '⚠ ERROR: No player data found!';
+                    messageBox.className = 'message error';
+                    return;
+                }
+
+                playerData.xp = (playerData.xp || 0) + xpAmount;
+                
+                if (playerData.xp < 0) {
+                    playerData.xp = 0;
+                    messageBox.textContent = `⚠ XP cannot be below 0!`;
+                    messageBox.className = 'message error';
+                } else {
+                    messageBox.textContent = `✓ SUCCESS: Removed ${Math.abs(xpAmount)} XP! Total XP: ${playerData.xp}`;
+                    messageBox.className = 'message success';
+                }
+
+                playerData.level = Math.floor(playerData.xp / XP_PER_LEVEL) + 1;
+
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+
+                xpInput.value = '';
+
+                setTimeout(() => {
+                    messageBox.textContent = '';
+                }, 3000);
+            } catch (error) {
+                console.error('Error removing XP:', error);
                 messageBox.textContent = '⚠ ERROR: Failed to save XP!';
                 messageBox.className = 'message error';
             }
