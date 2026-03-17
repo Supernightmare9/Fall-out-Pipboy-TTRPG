@@ -367,14 +367,61 @@
     </div>
 
     <script>
-        // Load player data from localStorage
-        window.addEventListener('DOMContentLoaded', function() {
-            const playerData = JSON.parse(localStorage.getItem('currentPlayer'));
-            if (playerData) {
-                document.getElementById('charName').textContent = playerData.characterName.toUpperCase();
-                document.getElementById('charLevel').textContent = playerData.level || 1;
-                document.getElementById('charHealth').textContent = playerData.health || 100;
-                document.getElementById('charXP').textContent = playerData.xp || 0;
+        // Initialize IndexedDB
+        let db;
+        const DB_NAME = 'PipBoyGameDB';
+        const STORE_NAME = 'players';
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve();
+                };
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+            });
+        }
+
+        function getPlayerDataFromDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(1);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    resolve(request.result || null);
+                };
+            });
+        }
+
+        // Load player data on page load
+        window.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await initDB();
+                const playerData = await getPlayerDataFromDB();
+
+                if (playerData) {
+                    document.getElementById('charName').textContent = playerData.characterName.toUpperCase();
+                    document.getElementById('charLevel').textContent = playerData.level || 1;
+                    document.getElementById('charHealth').textContent = playerData.health || 100;
+                    document.getElementById('charXP').textContent = playerData.xp || 0;
+                } else {
+                    // Redirect to login if no player data
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                console.error('Error loading player data:', error);
+                window.location.href = 'index.html';
             }
         });
     </script>
