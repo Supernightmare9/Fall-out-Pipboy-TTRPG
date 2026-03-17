@@ -4,9 +4,401 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pip-Boy Inventory - Vault 215</title>
-    <link rel="stylesheet" href="branding.css">
     <style>
-        /* Inventory-specific styles */
+        /* ===========================
+           VAULT 215 BRANDING SYSTEM
+           FALLOUT PIP-BOY THEME
+           =========================== */
+
+        :root {
+            --vault-primary: #4ade80;
+            --vault-secondary: #fbbf24;
+            --vault-dark: #0a0a0a;
+            --vault-darker: #1a1a1a;
+            --vault-accent: #c084fc;
+            --vault-success: #4ade80;
+            --vault-error: #ff6b6b;
+            --vault-warning: #fbbf24;
+            --vault-info: #9333ea;
+            --vault-green: #4ade80;
+            --vault-gold: #fbbf24;
+            --vault-blue-dark: #2d5016;
+            --vault-blue-light: #3d6b1f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--vault-dark);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
+        }
+
+        body {
+            padding: 20px;
+        }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* ===== VAULT HEADER ===== */
+        .vault-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background-color: var(--vault-darker);
+            border: 3px solid var(--vault-green);
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
+        }
+
+        .vault-badge {
+            font-size: 10px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .vault-title {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: var(--vault-green);
+            text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
+            animation: vault-glow 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes vault-glow {
+            0%, 100% {
+                text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 15px var(--vault-green), 0 0 30px rgba(74, 222, 128, 0.8);
+            }
+        }
+
+        .vault-subtitle {
+            font-size: 12px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 2px;
+        }
+
+        .vault-info {
+            font-size: 11px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+            margin-top: 8px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            padding-top: 8px;
+        }
+
+        /* ===== VAULT FOOTER ===== */
+        .vault-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            font-size: 10px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+        }
+
+        .vault-footer span {
+            color: var(--vault-gold);
+            text-shadow: 0 0 3px var(--vault-gold);
+            font-weight: bold;
+        }
+
+        /* ===== VAULT SEARCH ===== */
+        .vault-search {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .vault-search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .vault-search-label {
+            color: var(--vault-gold);
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 0 0 3px var(--vault-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .vault-search-input {
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px var(--vault-green);
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .vault-search-input:focus {
+            outline: none;
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: var(--vault-gold);
+        }
+
+        /* ===== VAULT TABS ===== */
+        .vault-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .vault-tab {
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 12px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            text-shadow: 0 0 5px var(--vault-green);
+            position: relative;
+            z-index: 1;
+        }
+
+        .vault-tab:hover {
+            background-color: var(--vault-blue-light);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        .vault-tab.active {
+            background-color: var(--vault-blue-light);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        /* ===== TAB CONTENT ===== */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .tab-content h2 {
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--vault-green);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        /* ===== VAULT FORM ===== */
+        .vault-form {
+            background-color: var(--vault-dark);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            padding: 20px;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .vault-form-title {
+            color: var(--vault-accent);
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px var(--vault-accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .vault-form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 15px;
+        }
+
+        .vault-form-label {
+            color: var(--vault-green);
+            font-size: 10px;
+            text-shadow: 0 0 3px var(--vault-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .vault-form-input {
+            background-color: var(--vault-darker);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-shadow: 0 0 5px var(--vault-green);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .vault-form-input:focus {
+            outline: none;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.4), inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== VAULT BUTTONS ===== */
+        .vault-btn {
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .vault-btn:hover {
+            background-color: var(--vault-blue-light);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        .vault-btn-danger {
+            background-color: #8b3a3a;
+            border-color: var(--vault-error);
+            color: var(--vault-error);
+            text-shadow: 0 0 5px var(--vault-error);
+        }
+
+        .vault-btn-danger:hover {
+            background-color: #a84a4a;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .vault-btn-secondary {
+            background-color: #4a5a3a;
+            border: 1px solid #9ecc71;
+            color: #9ecc71;
+        }
+
+        .vault-btn-secondary:hover {
+            background-color: #5a6a4a;
+            box-shadow: 0 0 10px rgba(158, 204, 113, 0.5);
+        }
+
+        /* ===== MESSAGES ===== */
+        .vault-message {
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+            min-height: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .vault-message.success {
+            color: var(--vault-success);
+            text-shadow: 0 0 5px var(--vault-success);
+        }
+
+        .vault-message.error {
+            color: var(--vault-error);
+            text-shadow: 0 0 5px var(--vault-error);
+        }
+
+        /* ===== ITEM LIST ===== */
         .item-list {
             list-style: none;
             margin-bottom: 30px;
@@ -57,6 +449,7 @@
             position: relative;
             z-index: 1;
             font-family: 'Courier New', monospace;
+            font-weight: bold;
         }
 
         .favorite-btn {
@@ -79,7 +472,6 @@
             background-color: #4a5a3a;
             border: 1px solid #9ecc71;
             color: #9ecc71;
-            font-weight: bold;
         }
 
         .edit-btn:hover {
@@ -91,7 +483,6 @@
             background-color: #8b3a3a;
             border: 1px solid var(--vault-error);
             color: var(--vault-error);
-            font-weight: bold;
         }
 
         .delete-btn:hover {
@@ -176,31 +567,7 @@
             text-shadow: 0 0 2px var(--vault-info);
         }
 
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .tab-content h2 {
-            color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-            font-size: 14px;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--vault-green);
-            padding-bottom: 10px;
-            text-transform: uppercase;
-        }
-
+        /* ===== NAVIGATION ===== */
         .nav-buttons {
             display: flex;
             justify-content: space-between;
@@ -216,7 +583,92 @@
             min-width: 150px;
         }
 
+        /* ===== MODAL ===== */
+        .vault-modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            overflow-y: auto;
+        }
+
+        .vault-modal.active {
+            display: block;
+        }
+
+        .vault-modal-content {
+            background-color: var(--vault-darker);
+            border: 3px solid var(--vault-green);
+            padding: 30px;
+            border-radius: 5px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
+            margin: 50px auto;
+            animation: vault-slideIn 0.3s ease;
+        }
+
+        @keyframes vault-slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .vault-modal-title {
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--vault-green);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .vault-modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
+            .vault-header {
+                padding: 20px;
+            }
+
+            .vault-title {
+                font-size: 20px;
+            }
+
+            .vault-tabs {
+                flex-direction: column;
+            }
+
+            .vault-tab {
+                width: 100%;
+                text-align: left;
+            }
+
+            .vault-search {
+                flex-direction: column;
+            }
+
+            .vault-search-box {
+                width: 100%;
+            }
+
             .item-body {
                 grid-template-columns: 1fr;
             }
@@ -233,6 +685,15 @@
 
             .nav-button {
                 width: 100%;
+            }
+
+            .vault-modal-content {
+                width: 95%;
+                margin: 20px auto;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -281,7 +742,7 @@
             <h2>⚔ Weapons - Vault 215</h2>
             <div class="vault-form">
                 <div class="vault-form-title">+ Add Weapon</div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                <div class="form-grid">
                     <div class="vault-form-group">
                         <label class="vault-form-label">Item Name</label>
                         <input type="text" class="vault-form-input" id="weaponName" placeholder="e.g., Laser Rifle">
@@ -314,7 +775,7 @@
             <h2>👕 Apparel - Vault 215</h2>
             <div class="vault-form">
                 <div class="vault-form-title">+ Add Apparel</div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                <div class="form-grid">
                     <div class="vault-form-group">
                         <label class="vault-form-label">Item Name</label>
                         <input type="text" class="vault-form-input" id="apparelName" placeholder="e.g., Combat Armor">
@@ -343,7 +804,7 @@
             <h2>📦 Miscellaneous - Vault 215</h2>
             <div class="vault-form">
                 <div class="vault-form-title">+ Add Misc Item</div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                <div class="form-grid">
                     <div class="vault-form-group">
                         <label class="vault-form-label">Item Name</label>
                         <input type="text" class="vault-form-input" id="miscName" placeholder="e.g., Fusion Core">
@@ -376,7 +837,7 @@
             <h2>⚕ Aid & Consumables - Vault 215</h2>
             <div class="vault-form">
                 <div class="vault-form-title">+ Add Aid Item</div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                <div class="form-grid">
                     <div class="vault-form-group">
                         <label class="vault-form-label">Item Name</label>
                         <input type="text" class="vault-form-input" id="aidName" placeholder="e.g., Stimpak">
@@ -413,7 +874,7 @@
             <h2>💣 Ammunition - Vault 215</h2>
             <div class="vault-form">
                 <div class="vault-form-title">+ Add Ammo</div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                <div class="form-grid">
                     <div class="vault-form-group">
                         <label class="vault-form-label">Ammo Type</label>
                         <input type="text" class="vault-form-input" id="ammoName" placeholder="e.g., 10mm Round">
@@ -459,7 +920,7 @@
     <div id="editModal" class="vault-modal">
         <div class="vault-modal-content">
             <div class="vault-modal-title">EDIT ITEM - VAULT 215</div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;" id="editFormFields"></div>
+            <div class="form-grid" id="editFormFields"></div>
             <div class="vault-modal-buttons">
                 <button class="vault-btn vault-btn-danger" onclick="closeEditModal()">CANCEL</button>
                 <button class="vault-btn" onclick="saveEditItem()">SAVE CHANGES</button>
@@ -467,461 +928,6 @@
         </div>
     </div>
 
-    <script>
-        // ===== ITEM STORAGE =====
-        let inventory = {
-            weapons: [],
-            apparel: [],
-            misc: [],
-            aid: [],
-            ammo: []
-        };
-
-        let editingItem = null;
-        let editingCategory = null;
-
-        // ===== LOAD DATA ON PAGE LOAD =====
-        window.addEventListener('DOMContentLoaded', function() {
-            loadInventory();
-            renderAllTabs();
-        });
-
-        // ===== LOAD FROM LOCAL STORAGE =====
-        function loadInventory() {
-            const saved = localStorage.getItem('pipboyInventory');
-            if (saved) {
-                inventory = JSON.parse(saved);
-            }
-        }
-
-        // ===== SAVE TO LOCAL STORAGE =====
-        function saveInventory() {
-            localStorage.setItem('pipboyInventory', JSON.stringify(inventory));
-        }
-
-        // ===== SWITCH TABS =====
-        function switchTab(tabName, tabElement) {
-            const contents = document.querySelectorAll('.tab-content');
-            contents.forEach(content => content.classList.remove('active'));
-
-            const tabs = document.querySelectorAll('.vault-tab');
-            tabs.forEach(tab => tab.classList.remove('active'));
-
-            document.getElementById(tabName).classList.add('active');
-            tabElement.classList.add('active');
-
-            filterAndSort();
-        }
-
-        // ===== ADD ITEM =====
-        function addItem(category) {
-            let item = {};
-            let messageEl = document.getElementById(category + 'Message');
-
-            if (category === 'weapons') {
-                if (!document.getElementById('weaponName').value) {
-                    showMessage(messageEl, '⚠ Please enter weapon name!', 'error');
-                    return;
-                }
-                item = {
-                    id: 'item-' + Date.now(),
-                    name: document.getElementById('weaponName').value,
-                    damage: document.getElementById('weaponDamage').value || 'N/A',
-                    damageType: document.getElementById('weaponDamageType').value || 'Unknown',
-                    value: parseFloat(document.getElementById('weaponValue').value) || 0,
-                    description: document.getElementById('weaponDesc').value,
-                    favorite: false
-                };
-                document.getElementById('weaponName').value = '';
-                document.getElementById('weaponDamage').value = '';
-                document.getElementById('weaponDamageType').value = '';
-                document.getElementById('weaponValue').value = '';
-                document.getElementById('weaponDesc').value = '';
-            } else if (category === 'apparel') {
-                if (!document.getElementById('apparelName').value) {
-                    showMessage(messageEl, '⚠ Please enter apparel name!', 'error');
-                    return;
-                }
-                item = {
-                    id: 'item-' + Date.now(),
-                    name: document.getElementById('apparelName').value,
-                    dr: document.getElementById('apparelDR').value || 'N/A',
-                    value: parseFloat(document.getElementById('apparelValue').value) || 0,
-                    description: document.getElementById('apparelDesc').value,
-                    favorite: false
-                };
-                document.getElementById('apparelName').value = '';
-                document.getElementById('apparelDR').value = '';
-                document.getElementById('apparelValue').value = '';
-                document.getElementById('apparelDesc').value = '';
-            } else if (category === 'misc') {
-                if (!document.getElementById('miscName').value) {
-                    showMessage(messageEl, '⚠ Please enter item name!', 'error');
-                    return;
-                }
-                item = {
-                    id: 'item-' + Date.now(),
-                    name: document.getElementById('miscName').value,
-                    quantity: parseInt(document.getElementById('miscQuantity').value) || 1,
-                    value: parseFloat(document.getElementById('miscValue').value) || 0,
-                    rarity: document.getElementById('miscRarity').value || 'Common',
-                    description: document.getElementById('miscDesc').value,
-                    favorite: false
-                };
-                document.getElementById('miscName').value = '';
-                document.getElementById('miscQuantity').value = '1';
-                document.getElementById('miscValue').value = '';
-                document.getElementById('miscRarity').value = '';
-                document.getElementById('miscDesc').value = '';
-            } else if (category === 'aid') {
-                if (!document.getElementById('aidName').value) {
-                    showMessage(messageEl, '⚠ Please enter aid item name!', 'error');
-                    return;
-                }
-                item = {
-                    id: 'item-' + Date.now(),
-                    name: document.getElementById('aidName').value,
-                    quantity: parseInt(document.getElementById('aidQuantity').value) || 1,
-                    effect: document.getElementById('aidEffect').value || 'Unknown',
-                    amount: document.getElementById('aidAmount').value || 'N/A',
-                    value: parseFloat(document.getElementById('aidValue').value) || 0,
-                    description: document.getElementById('aidDesc').value,
-                    favorite: false
-                };
-                document.getElementById('aidName').value = '';
-                document.getElementById('aidQuantity').value = '1';
-                document.getElementById('aidEffect').value = '';
-                document.getElementById('aidAmount').value = '';
-                document.getElementById('aidValue').value = '';
-                document.getElementById('aidDesc').value = '';
-            } else if (category === 'ammo') {
-                if (!document.getElementById('ammoName').value) {
-                    showMessage(messageEl, '⚠ Please enter ammo type!', 'error');
-                    return;
-                }
-                item = {
-                    id: 'item-' + Date.now(),
-                    name: document.getElementById('ammoName').value,
-                    quantity: parseInt(document.getElementById('ammoQuantity').value) || 1,
-                    value: parseFloat(document.getElementById('ammoValue').value) || 0,
-                    weapon: document.getElementById('ammoWeapon').value || 'General',
-                    description: document.getElementById('ammoDesc').value,
-                    favorite: false
-                };
-                document.getElementById('ammoName').value = '';
-                document.getElementById('ammoQuantity').value = '';
-                document.getElementById('ammoValue').value = '';
-                document.getElementById('ammoWeapon').value = '';
-                document.getElementById('ammoDesc').value = '';
-            }
-
-            inventory[category].push(item);
-            saveInventory();
-            renderCategory(category);
-            showMessage(messageEl, `✓ ${item.name} added to Vault 215!`, 'success');
-        }
-
-        // ===== OPEN EDIT MODAL =====
-        function openEditModal(category, itemId) {
-            editingCategory = category;
-            const item = inventory[category].find(i => i.id === itemId);
-            if (!item) return;
-
-            editingItem = { ...item };
-            const formFields = document.getElementById('editFormFields');
-            let html = '';
-
-            if (category === 'weapons') {
-                html = `
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Item Name</label>
-                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Damage</label>
-                        <input type="text" class="vault-form-input" id="editDamage" value="${item.damage}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Damage Type</label>
-                        <input type="text" class="vault-form-input" id="editDamageType" value="${item.damageType}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value (Caps)</label>
-                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
-                    </div>
-                `;
-            } else if (category === 'apparel') {
-                html = `
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Item Name</label>
-                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Defense Rating (DR)</label>
-                        <input type="text" class="vault-form-input" id="editDR" value="${item.dr}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value (Caps)</label>
-                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
-                    </div>
-                `;
-            } else if (category === 'misc') {
-                html = `
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Item Name</label>
-                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Quantity</label>
-                        <input type="number" class="vault-form-input" id="editQuantity" value="${item.quantity}" min="1">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value per Item (Caps)</label>
-                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Rarity</label>
-                        <input type="text" class="vault-form-input" id="editRarity" value="${item.rarity}">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
-                    </div>
-                `;
-            } else if (category === 'aid') {
-                html = `
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Item Name</label>
-                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Quantity</label>
-                        <input type="number" class="vault-form-input" id="editQuantity" value="${item.quantity}" min="1">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Effect Type</label>
-                        <input type="text" class="vault-form-input" id="editEffect" value="${item.effect}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Effect Amount</label>
-                        <input type="text" class="vault-form-input" id="editAmount" value="${item.amount}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value (Caps)</label>
-                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
-                    </div>
-                `;
-            } else if (category === 'ammo') {
-                html = `
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Ammo Type</label>
-                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Quantity</label>
-                        <input type="number" class="vault-form-input" id="editQuantity" value="${item.quantity}" min="1">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value per Round (Caps)</label>
-                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}" step="0.1">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Weapon Type</label>
-                        <input type="text" class="vault-form-input" id="editWeapon" value="${item.weapon}">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
-                    </div>
-                `;
-            }
-
-            formFields.innerHTML = html;
-            document.getElementById('editModal').classList.add('active');
-        }
-
-        // ===== CLOSE EDIT MODAL =====
-        function closeEditModal() {
-            document.getElementById('editModal').classList.remove('active');
-            editingItem = null;
-            editingCategory = null;
-        }
-
-        // ===== SAVE EDITED ITEM =====
-        function saveEditItem() {
-            if (!editingItem || !editingCategory) return;
-
-            const itemIndex = inventory[editingCategory].findIndex(i => i.id === editingItem.id);
-            if (itemIndex === -1) return;
-
-            const updatedItem = { ...editingItem };
-
-            if (editingCategory === 'weapons') {
-                updatedItem.name = document.getElementById('editName').value;
-                updatedItem.damage = document.getElementById('editDamage').value;
-                updatedItem.damageType = document.getElementById('editDamageType').value;
-                updatedItem.value = parseFloat(document.getElementById('editValue').value) || 0;
-                updatedItem.description = document.getElementById('editDesc').value;
-            } else if (editingCategory === 'apparel') {
-                updatedItem.name = document.getElementById('editName').value;
-                updatedItem.dr = document.getElementById('editDR').value;
-                updatedItem.value = parseFloat(document.getElementById('editValue').value) || 0;
-                updatedItem.description = document.getElementById('editDesc').value;
-            } else if (editingCategory === 'misc') {
-                updatedItem.name = document.getElementById('editName').value;
-                updatedItem.quantity = parseInt(document.getElementById('editQuantity').value) || 1;
-                updatedItem.value = parseFloat(document.getElementById('editValue').value) || 0;
-                updatedItem.rarity = document.getElementById('editRarity').value;
-                updatedItem.description = document.getElementById('editDesc').value;
-            } else if (editingCategory === 'aid') {
-                updatedItem.name = document.getElementById('editName').value;
-                updatedItem.quantity = parseInt(document.getElementById('editQuantity').value) || 1;
-                updatedItem.effect = document.getElementById('editEffect').value;
-                updatedItem.amount = document.getElementById('editAmount').value;
-                updatedItem.value = parseFloat(document.getElementById('editValue').value) || 0;
-                updatedItem.description = document.getElementById('editDesc').value;
-            } else if (editingCategory === 'ammo') {
-                updatedItem.name = document.getElementById('editName').value;
-                updatedItem.quantity = parseInt(document.getElementById('editQuantity').value) || 1;
-                updatedItem.value = parseFloat(document.getElementById('editValue').value) || 0;
-                updatedItem.weapon = document.getElementById('editWeapon').value;
-                updatedItem.description = document.getElementById('editDesc').value;
-            }
-
-            inventory[editingCategory][itemIndex] = updatedItem;
-            saveInventory();
-            renderCategory(editingCategory);
-            closeEditModal();
-        }
-
-        // ===== DELETE ITEM =====
-        function deleteItem(category, itemId) {
-            inventory[category] = inventory[category].filter(item => item.id !== itemId);
-            saveInventory();
-            renderCategory(category);
-        }
-
-        // ===== TOGGLE FAVORITE =====
-        function toggleFavorite(category, itemId) {
-            const item = inventory[category].find(i => i.id === itemId);
-            if (item) {
-                item.favorite = !item.favorite;
-                saveInventory();
-                renderCategory(category);
-            }
-        }
-
-        // ===== ADJUST QUANTITY =====
-        function adjustQuantity(category, itemId, delta) {
-            const item = inventory[category].find(i => i.id === itemId);
-            if (item && item.quantity !== undefined) {
-                item.quantity = Math.max(1, item.quantity + delta);
-                saveInventory();
-                renderCategory(category);
-            }
-        }
-
-        // ===== FILTER AND SORT =====
-        function filterAndSort() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const sortOption = document.getElementById('sortSelect').value;
-
-            Object.keys(inventory).forEach(category => {
-                let items = [...inventory[category]];
-
-                items = items.filter(item => 
-                    item.name.toLowerCase().includes(searchTerm)
-                );
-
-                items.sort((a, b) => {
-                    if (sortOption === 'name') {
-                        return a.name.localeCompare(b.name);
-                    } else if (sortOption === 'name-desc') {
-                        return b.name.localeCompare(a.name);
-                    } else if (sortOption === 'quantity') {
-                        return (a.quantity || 0) - (b.quantity || 0);
-                    } else if (sortOption === 'quantity-desc') {
-                        return (b.quantity || 0) - (a.quantity || 0);
-                    } else if (sortOption === 'value') {
-                        return (a.value || 0) - (b.value || 0);
-                    } else if (sortOption === 'value-desc') {
-                        return (b.value || 0) - (a.value || 0);
-                    } else if (sortOption === 'favorites') {
-                        return (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0);
-                    }
-                    return 0;
-                });
-
-                renderItems(category, items);
-            });
-        }
-
-        // ===== RENDER ITEMS =====
-        function renderItems(category, items) {
-            const listEl = document.getElementById(category + 'List');
-            
-            if (items.length === 0) {
-                listEl.innerHTML = '<div class="empty-message">No items in this category. Add one above!</div>';
-                return;
-            }
-
-            let html = '';
-            items.forEach(item => {
-                html += `
-                    <li class="item-card">
-                        <div class="item-header">
-                            <div class="item-name">${item.name}</div>
-                            <div class="item-actions">
-                                <button class="favorite-btn ${item.favorite ? 'favorited' : ''}" onclick="toggleFavorite('${category}', '${item.id}')">★</button>
-                                <button class="edit-btn" onclick="openEditModal('${category}', '${item.id}')">EDIT</button>
-                                <button class="delete-btn" onclick="deleteItem('${category}', '${item.id}')">DELETE</button>
-                            </div>
-                        </div>
-                        ${item.description ? `<div class="item-description">${item.description}</div>` : ''}
-                        <div class="item-body">
-                            ${getItemDetails(item, category)}
-                        </div>
-                        ${getItemFooter(item, category)}
-                    </li>
-                `;
-            });
-
-            listEl.innerHTML = html;
-        }
-
-        // ===== GET ITEM DETAILS =====
-        function getItemDetails(item, category) {
-            let html = '';
-
-            if (category === 'weapons') {
-                html += `<div class="item-detail"><span class="detail-label">Damage:</span> ${item.damage}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Type:</span> ${item.damageType}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value} caps</div>`;
-            } else if (category === 'apparel') {
-                html += `<div class="item-detail"><span class="detail-label">DR:</span> ${item.dr}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value} caps</div>`;
-            } else if (category === 'misc') {
-                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Rarity:</span> ${item.rarity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value * item.quantity} caps</div>`;
-            } else if (category === 'aid') {
-                html += `<div class="item-detail"><span class="detail-label">Effect:</span> ${item.effect}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Amount:</span> ${item.amount}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value * item.quantity} caps</div>`;
-            } else if (category === 'ammo') {
-                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Weapon:</span> ${item.weapon}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${(item.value * item.quantity).toFixed(2)} caps</div
+    <script src="inventory.js"></script>
+</body>
+</html>
