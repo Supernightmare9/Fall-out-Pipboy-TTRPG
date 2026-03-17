@@ -96,6 +96,7 @@
             margin-bottom: 20px;
             border-bottom: 2px solid #4ade80;
             padding-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .subtab-button {
@@ -345,6 +346,12 @@
             border-radius: 3px;
         }
 
+        .skill-left {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
         .skill-name {
             color: #4ade80;
             font-size: 12px;
@@ -443,6 +450,7 @@
             border: 2px solid #ff6b6b;
             padding: 20px;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.2);
+            margin-top: 20px;
         }
 
         .effects-title {
@@ -536,6 +544,7 @@
         <!-- SUBTAB NAVIGATION -->
         <div class="subtab-nav">
             <button class="subtab-button active" onclick="switchTab(event, 'stats')">Stats</button>
+            <button class="subtab-button" onclick="switchTab(event, 'skills')">Skills</button>
             <button class="subtab-button" onclick="switchTab(event, 'perks')">Perks</button>
         </div>
 
@@ -612,30 +621,6 @@
                 </div>
             </div>
 
-            <!-- MAIN GRID (Skills + Status Effects) -->
-            <div class="main-grid">
-                <!-- SKILLS -->
-                <div class="stat-box">
-                    <div class="stat-title">Skills</div>
-                    <div class="skills-grid" id="skillsGrid"></div>
-                </div>
-
-                <!-- STATUS EFFECTS & BOOSTS -->
-                <div class="effects-box">
-                    <div class="effects-title">⚠ Status Effects & Boosts</div>
-                    <div class="effects-content">
-                        <div class="effect-section">
-                            <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 8px;">☢ Status Effects</div>
-                            <div id="effectsList"></div>
-                        </div>
-                        <div class="effect-section">
-                            <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 8px;">✦ Stat Boosts</div>
-                            <div id="boostsList"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- S.P.E.C.I.A.L STATS -->
             <div class="stat-box" style="margin-bottom: 30px;">
                 <div class="stat-title">S.P.E.C.I.A.L Attributes</div>
@@ -686,6 +671,29 @@
             </div>
         </div>
 
+        <!-- SKILLS TAB CONTENT -->
+        <div id="skills" class="subtab-content">
+            <div class="stat-box">
+                <div class="stat-title">Skills</div>
+                <div class="skills-grid" id="skillsGrid"></div>
+            </div>
+
+            <!-- STATUS EFFECTS & BOOSTS -->
+            <div class="effects-box">
+                <div class="effects-title">⚠ Status Effects & Boosts</div>
+                <div class="effects-content">
+                    <div class="effect-section">
+                        <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 8px;">☢ Status Effects</div>
+                        <div id="effectsList"></div>
+                    </div>
+                    <div class="effect-section">
+                        <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 8px;">✦ Stat Boosts</div>
+                        <div id="boostsList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- PERKS TAB CONTENT -->
         <div id="perks" class="subtab-content">
             <div class="stat-box">
@@ -731,6 +739,7 @@
         // ===== SWITCH TABS =====
         function switchTab(event, tabName) {
             document.getElementById('stats').classList.remove('active');
+            document.getElementById('skills').classList.remove('active');
             document.getElementById('perks').classList.remove('active');
             
             const buttons = document.querySelectorAll('.subtab-button');
@@ -907,4 +916,38 @@
             // Update skills grid
             const skillsGrid = document.getElementById('skillsGrid');
             skillsGrid.innerHTML = '';
-            *
+            
+            SKILLS.forEach(skill => {
+                const special = getSpecialForSkill(skill);
+                const skillDiv = document.createElement('div');
+                skillDiv.className = 'skill-item';
+                skillDiv.innerHTML = `
+                    <div class="skill-left">
+                        <div class="skill-name">${skill}</div>
+                        <div class="skill-special">${special}</div>
+                    </div>
+                    <div class="skill-value">0</div>
+                `;
+                skillsGrid.appendChild(skillDiv);
+            });
+
+            // Update SPECIAL skills lists
+            for (const [special, skillsList] of Object.entries(SKILLS_BY_SPECIAL)) {
+                const skillsElement = document.getElementById(`skills-${special}`);
+                skillsElement.innerHTML = skillsList.map(s => `<div>${s}</div>`).join('');
+            }
+        }
+
+        // ===== REMOVE STATUS EFFECT =====
+        function removeStatusEffect(effect) {
+            console.log('Removed status effect:', effect);
+        }
+
+        // ===== ADD STAT BOOST =====
+        function addStatBoost(statName, boostAmount) {
+            console.log(`Added ${boostAmount} to ${statName}`);
+        }
+
+        // ===== REMOVE STAT BOOST =====
+        function removeStatBoost(statName, boostAmount) {
+            console.log(`Removed ${boostAmount} from ${statName*
