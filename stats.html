@@ -227,6 +227,106 @@
             transition: width 0.5s ease;
         }
 
+        /* ===== INPUT FORM STYLES ===== */
+        .input-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .input-field {
+            flex: 1;
+            min-width: 120px;
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px #4ade80;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: #4ade8066;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: #fbbf24;
+        }
+
+        .action-button {
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            white-space: nowrap;
+        }
+
+        .action-button:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .action-button.danger {
+            background-color: #8b3a3a;
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
+            text-shadow: 0 0 5px #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .action-button.danger:hover {
+            background-color: #a84a4a;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .message {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #4ade80;
+            text-shadow: 0 0 3px #4ade80;
+            min-height: 20px;
+            width: 100%;
+        }
+
+        .message.success {
+            color: #4ade80;
+            text-shadow: 0 0 5px #4ade80;
+        }
+
+        .message.error {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px #ff6b6b;
+        }
+
         /* ===== SKILLS SECTION ===== */
         .skills-grid {
             display: grid;
@@ -413,6 +513,9 @@
         }
 
         @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
             .skills-grid {
                 grid-template-columns: 1fr;
             }
@@ -438,6 +541,78 @@
 
         <!-- STATS TAB CONTENT -->
         <div id="stats" class="subtab-content active">
+            <!-- TOP STATS GRID (Experience, Health) -->
+            <div class="stats-grid">
+                <!-- EXPERIENCE & LEVEL -->
+                <div class="stat-box">
+                    <div class="stat-title">Experience</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Current Level:</span>
+                        <span class="stat-value" id="level">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Experience Points:</span>
+                        <span class="stat-value" id="xp">0</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-label">
+                            <span>Level Progress</span>
+                            <span id="xpPercent">0%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill" id="xpBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- XP INPUT -->
+                    <div class="input-form">
+                        <input type="number" id="xpInput" class="input-field" placeholder="Add/Remove XP (e.g., 500 or -200)" min="-999999" max="999999">
+                        <button class="action-button" onclick="addXP()">ADD XP</button>
+                        <button class="action-button danger" onclick="removeXP()">REMOVE XP</button>
+                    </div>
+                    <div class="message" id="xpMessage"></div>
+                </div>
+
+                <!-- HEALTH & ACTION POINTS -->
+                <div class="stat-box">
+                    <div class="stat-title">Vitals</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Health:</span>
+                        <span class="stat-value" id="health">100</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-label">
+                            <span>Health Status</span>
+                            <span id="healthPercent">100%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill" id="healthBar" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- HEALTH INPUT -->
+                    <div class="input-form">
+                        <input type="number" id="healthInput" class="input-field" placeholder="Health (±)" min="-9999" max="9999">
+                        <button class="action-button" onclick="updateHealth()">UPDATE</button>
+                    </div>
+                    <div class="message" id="healthMessage"></div>
+
+                    <!-- ACTION POINTS SECTION -->
+                    <div class="stat-item" style="margin-top: 20px;">
+                        <span class="stat-label">Action Points:</span>
+                        <span class="stat-value" id="actionPoints">10</span>
+                    </div>
+
+                    <!-- ACTION POINTS INPUT -->
+                    <div class="input-form">
+                        <input type="number" id="apInput" class="input-field" placeholder="AP (±)" min="-9999" max="9999">
+                        <button class="action-button" onclick="updateActionPoints()">UPDATE</button>
+                    </div>
+                    <div class="message" id="apMessage"></div>
+                </div>
+            </div>
+
+            <!-- MAIN GRID (Skills + Status Effects) -->
             <div class="main-grid">
                 <!-- SKILLS -->
                 <div class="stat-box">
@@ -521,6 +696,10 @@
     </div>
 
     <script>
+        const XP_PER_LEVEL = 1000;
+        const MAX_HEALTH = 100;
+        const MAX_ACTION_POINTS = 20;
+
         // Skills with SPECIAL alignments
         const SKILLS_BY_SPECIAL = {
             strength: ['Melee Weapons', 'Big Guns', 'Unarmed'],
@@ -561,52 +740,171 @@
             event.target.classList.add('active');
         }
 
+        // ===== ADD XP =====
+        function addXP() {
+            const xpInput = document.getElementById('xpInput');
+            const messageBox = document.getElementById('xpMessage');
+            const xpAmount = parseInt(xpInput.value);
+
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            if (xpAmount < 0) {
+                messageBox.textContent = '⚠ ERROR: Use REMOVE XP button for negative values!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
+            let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+
+            currentXP += xpAmount;
+            currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
+
+            document.getElementById('xp').textContent = currentXP;
+            document.getElementById('level').textContent = currentLevel;
+
+            const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
+            document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
+            document.getElementById('xpBar').style.width = xpProgress + '%';
+
+            messageBox.textContent = `✓ SUCCESS: Added ${xpAmount} XP! Total XP: ${currentXP}`;
+            messageBox.className = 'message success';
+
+            xpInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        // ===== REMOVE XP =====
+        function removeXP() {
+            const xpInput = document.getElementById('xpInput');
+            const messageBox = document.getElementById('xpMessage');
+            const xpAmount = parseInt(xpInput.value);
+
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            if (xpAmount > 0) {
+                messageBox.textContent = '⚠ ERROR: Use ADD XP button for positive values!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
+            let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+
+            currentXP += xpAmount;
+
+            if (currentXP < 0) {
+                currentXP = 0;
+                messageBox.textContent = `⚠ XP cannot be below 0!`;
+                messageBox.className = 'message error';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Removed ${Math.abs(xpAmount)} XP! Total XP: ${currentXP}`;
+                messageBox.className = 'message success';
+            }
+
+            currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
+
+            document.getElementById('xp').textContent = currentXP;
+            document.getElementById('level').textContent = currentLevel;
+
+            const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
+            document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
+            document.getElementById('xpBar').style.width = xpProgress + '%';
+
+            xpInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        // ===== UPDATE HEALTH =====
+        function updateHealth() {
+            const healthInput = document.getElementById('healthInput');
+            const messageBox = document.getElementById('healthMessage');
+            const healthChange = parseInt(healthInput.value);
+
+            if (!healthInput.value || isNaN(healthChange)) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            let currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
+            currentHealth += healthChange;
+
+            if (currentHealth > MAX_HEALTH) {
+                currentHealth = MAX_HEALTH;
+                messageBox.textContent = `⚠ Health capped at ${MAX_HEALTH}!`;
+                messageBox.className = 'message error';
+            } else if (currentHealth < 0) {
+                currentHealth = 0;
+                messageBox.textContent = `⚠ Health cannot be below 0!`;
+                messageBox.className = 'message error';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}`;
+                messageBox.className = 'message success';
+            }
+
+            document.getElementById('health').textContent = currentHealth;
+            const healthPercent = (currentHealth / MAX_HEALTH) * 100;
+            document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
+            document.getElementById('healthBar').style.width = healthPercent + '%';
+
+            healthInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        // ===== UPDATE ACTION POINTS =====
+        function updateActionPoints() {
+            const apInput = document.getElementById('apInput');
+            const messageBox = document.getElementById('apMessage');
+            const apChange = parseInt(apInput.value);
+
+            if (!apInput.value || isNaN(apChange)) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            let currentAP = parseInt(document.getElementById('actionPoints').textContent) || 10;
+            currentAP += apChange;
+
+            if (currentAP > MAX_ACTION_POINTS) {
+                currentAP = MAX_ACTION_POINTS;
+                messageBox.textContent = `⚠ Action Points capped at ${MAX_ACTION_POINTS}!`;
+                messageBox.className = 'message error';
+            } else if (currentAP < 0) {
+                currentAP = 0;
+                messageBox.textContent = `⚠ Action Points cannot be below 0!`;
+                messageBox.className = 'message error';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}`;
+                messageBox.className = 'message success';
+            }
+
+            document.getElementById('actionPoints').textContent = currentAP;
+
+            apInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
         // ===== UPDATE DISPLAY =====
-        function updateDisplay(playerData) {
+        function updateDisplay() {
             // Update skills grid
             const skillsGrid = document.getElementById('skillsGrid');
             skillsGrid.innerHTML = '';
-            
-            SKILLS.forEach(skill => {
-                const special = getSpecialForSkill(skill);
-                const skillDiv = document.createElement('div');
-                skillDiv.className = 'skill-item';
-                skillDiv.innerHTML = `
-                    <div>
-                        <div class="skill-name">${skill}</div>
-                        <div class="skill-special">${special}</div>
-                    </div>
-                    <div class="skill-value">0</div>
-                `;
-                skillsGrid.appendChild(skillDiv);
-            });
-
-            // Update SPECIAL skills lists
-            for (const [special, skillsList] of Object.entries(SKILLS_BY_SPECIAL)) {
-                const skillsElement = document.getElementById(`skills-${special}`);
-                skillsElement.innerHTML = skillsList.map(s => `<div>${s}</div>`).join('');
-            }
-        }
-
-        // ===== REMOVE STATUS EFFECT =====
-        function removeStatusEffect(effect) {
-            console.log('Removed status effect:', effect);
-        }
-
-        // ===== ADD STAT BOOST =====
-        function addStatBoost(statName, boostAmount) {
-            console.log(`Added ${boostAmount} to ${statName}`);
-        }
-
-        // ===== REMOVE STAT BOOST =====
-        function removeStatBoost(statName, boostAmount) {
-            console.log(`Removed ${boostAmount} from ${statName}`);
-        }
-
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            updateDisplay({});
-        });
-    </script>
-</body>
-</html>
+            *
