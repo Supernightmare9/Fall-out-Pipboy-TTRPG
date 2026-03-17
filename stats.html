@@ -691,7 +691,7 @@
                     <div class="stat-title">Vitals</div>
                     <div class="stat-item">
                         <span class="stat-label">Health:</span>
-                        <span class="stat-value" id="health">100</span>
+                        <span class="stat-value"><span id="health">100</span> / <span id="maxHealth">100</span></span>
                     </div>
                     <div class="stat-bar-container">
                         <div class="stat-bar-label">
@@ -713,7 +713,7 @@
                     <!-- ACTION POINTS SECTION -->
                     <div class="stat-item" style="margin-top: 20px;">
                         <span class="stat-label">Action Points:</span>
-                        <span class="stat-value" id="actionPoints">10</span>
+                        <span class="stat-value"><span id="actionPoints">10</span> / <span id="maxActionPoints">20</span></span>
                     </div>
 
                     <!-- ACTION POINTS INPUT -->
@@ -906,6 +906,10 @@
             if (savedLevel) document.getElementById('level').textContent = savedLevel;
             if (savedHealth) document.getElementById('health').textContent = savedHealth;
             if (savedActionPoints) document.getElementById('actionPoints').textContent = savedActionPoints;
+            
+            // Set max values
+            document.getElementById('maxHealth').textContent = MAX_HEALTH;
+            document.getElementById('maxActionPoints').textContent = MAX_ACTION_POINTS;
             
             if (savedXP && savedLevel) {
                 const currentXP = parseInt(savedXP);
@@ -1148,11 +1152,12 @@
                 messageBox.textContent = `⚠ Health cannot be below 0!`;
                 messageBox.className = 'message error';
             } else {
-                messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}`;
+                messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}/${MAX_HEALTH}`;
                 messageBox.className = 'message success';
             }
 
             document.getElementById('health').textContent = currentHealth;
+            document.getElementById('maxHealth').textContent = MAX_HEALTH;
             const healthPercent = (currentHealth / MAX_HEALTH) * 100;
             document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
             document.getElementById('healthBar').style.width = healthPercent + '%';
@@ -1188,11 +1193,12 @@
                 messageBox.textContent = `⚠ Action Points cannot be below 0!`;
                 messageBox.className = 'message error';
             } else {
-                messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}`;
+                messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}/${MAX_ACTION_POINTS}`;
                 messageBox.className = 'message success';
             }
 
             document.getElementById('actionPoints').textContent = currentAP;
+            document.getElementById('maxActionPoints').textContent = MAX_ACTION_POINTS;
 
             savePlayerData();
             apInput.value = '';
