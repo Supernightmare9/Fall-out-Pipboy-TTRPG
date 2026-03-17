@@ -262,155 +262,13 @@
             text-shadow: 0 0 5px #ff6b6b;
         }
 
-        /* ===== TAG SKILLS SECTION ===== */
-        .tag-skills-box {
-            background-color: #1a1a1a;
-            border: 2px solid #c084fc;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(192, 132, 252, 0.2);
-            margin-bottom: 30px;
-        }
-
-        .tag-skills-box:hover {
-            box-shadow: 0 0 30px rgba(192, 132, 252, 0.6);
-            border-color: #fbbf24;
-        }
-
-        .tag-title {
+        /* ===== TAG SKILLS HEADER ===== */
+        .tag-header {
             color: #c084fc;
-            text-shadow: 0 0 5px #c084fc;
-            font-size: 14px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #c084fc;
-            padding-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .tag-count {
-            color: #fbbf24;
             font-size: 12px;
-            margin-bottom: 12px;
-        }
-
-        .tag-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .tag-slot {
-            background-color: #0a0a0a;
-            border: 2px solid #c084fc;
-            padding: 12px;
-            border-radius: 3px;
-            text-align: center;
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .tag-slot-active {
-            border: 2px solid #4ade80;
-            box-shadow: 0 0 10px rgba(192, 132, 252, 0.4);
-        }
-
-        .tag-skill-name {
-            color: #4ade80;
-            font-size: 12px;
-            font-weight: bold;
-            text-shadow: 0 0 3px #4ade80;
-            margin-bottom: 5px;
-        }
-
-        .tag-bonus {
-            color: #fbbf24;
-            font-size: 11px;
-            text-shadow: 0 0 2px #fbbf24;
-        }
-
-        .tag-remove-btn {
-            background-color: #8b3a3a;
-            border: 1px solid #ff6b6b;
-            color: #ff6b6b;
-            padding: 3px 8px;
-            border-radius: 2px;
-            font-size: 9px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: 0 0 3px #ff6b6b;
-            transition: all 0.2s ease;
-            margin-top: 5px;
-        }
-
-        .tag-remove-btn:hover {
-            background-color: #a84a4a;
-            box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
-        }
-
-        .empty-slot-text {
-            color: #666;
-            font-size: 11px;
-            text-align: center;
-        }
-
-        .tag-selector {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .tag-select {
-            flex: 1;
-            min-width: 150px;
-            background-color: #0a0a0a;
-            border: 2px solid #c084fc;
-            color: #4ade80;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tag-select:focus {
-            outline: none;
-            border-color: #fbbf24;
-            box-shadow: 0 0 10px rgba(192, 132, 252, 0.5);
-        }
-
-        .tag-select option {
-            background-color: #1a1a1a;
-            color: #4ade80;
-        }
-
-        .tag-add-btn {
-            background-color: #5d3a8b;
-            border: 2px solid #c084fc;
-            color: #c084fc;
-            padding: 10px 16px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: 0 0 5px #c084fc;
+            margin-bottom: 10px;
+            text-align: right;
             letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(192, 132, 252, 0.3);
-        }
-
-        .tag-add-btn:hover {
-            background-color: #6d4a9b;
-            box-shadow: 0 0 20px rgba(192, 132, 252, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
-            transform: translateY(-2px);
         }
 
         /* ===== SKILLS SECTION ===== */
@@ -429,6 +287,20 @@
             background-color: #0a0a0a;
             border: 1px solid rgba(74, 222, 128, 0.2);
             border-radius: 3px;
+        }
+
+        .skill-left {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 8px;
+        }
+
+        .skill-checkbox {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            accent-color: #c084fc;
         }
 
         .skill-info {
@@ -488,6 +360,16 @@
             box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
             border-color: #fbbf24;
             color: #fbbf24;
+        }
+
+        .tag-count-badge {
+            background-color: #c084fc;
+            color: #0a0a0a;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: bold;
+            text-shadow: none;
         }
 
         /* ===== STATUS EFFECTS ===== */
@@ -728,10 +610,6 @@
                 grid-template-columns: 1fr;
             }
 
-            .tag-grid {
-                grid-template-columns: 1fr;
-            }
-
             .effects-content {
                 grid-template-columns: 1fr;
             }
@@ -761,18 +639,6 @@
             }
 
             .action-button {
-                width: 100%;
-            }
-
-            .tag-selector {
-                flex-direction: column;
-            }
-
-            .tag-select {
-                width: 100%;
-            }
-
-            .tag-add-btn {
                 width: 100%;
             }
 
@@ -873,28 +739,12 @@
             </div>
         </div>
 
-        <!-- TAG SKILLS SECTION -->
-        <div class="tag-skills-box">
-            <div class="tag-title">⭐ Tag Skills (Up to 3)</div>
-            <div class="tag-count" id="tagCount">Selected: 0/3</div>
-            
-            <!-- TAG SKILL SLOTS -->
-            <div class="tag-grid" id="tagGrid"></div>
-
-            <!-- ADD TAG SKILL -->
-            <div class="tag-selector">
-                <select id="tagSelect" class="tag-select">
-                    <option value="">Select Skill to Tag...</option>
-                </select>
-                <button class="tag-add-btn" onclick="addTagSkill()">TAG SKILL</button>
-            </div>
-        </div>
-
         <!-- MAIN GRID (Skills + Status Effects) -->
         <div class="main-grid">
             <!-- SKILLS -->
             <div class="stat-box">
                 <div class="stat-title">Skills</div>
+                <div class="tag-header">Tag <span class="tag-count-badge" id="tagBadge">0/3</span></div>
                 <div class="skills-grid" id="skillsGrid"></div>
             </div>
 
@@ -946,7 +796,7 @@
                             <option value="agility">+1 Agility</option>
                             <option value="luck">+1 Luck</option>
                         </select>
-                        <button class="add-effect-btn" onclick="addStatBoost()">ADD</button>
+                        <button class="add-effect-btn" onclick="addStatusEffect()">ADD</button>
                     </div>
                 </div>
             </div>
@@ -1061,7 +911,7 @@
         const MAX_HEALTH = 100;
         const MAX_ACTION_POINTS = 20;
         const MAX_TAG_SKILLS = 3;
-        const TAG_SKILL_BONUS = 10; // +10 bonus to a tagged skill
+        const TAG_SKILL_BONUS = 10;
 
         // Skills list
         const SKILLS = [
@@ -1104,7 +954,6 @@
 
         // ===== CALCULATE SKILL BONUS =====
         function calculateSkillBonus(skillValue, isTagged = false) {
-            // Apply tag bonus if tagged
             let adjustedValue = skillValue;
             if (isTagged) {
                 adjustedValue = skillValue + TAG_SKILL_BONUS;
@@ -1163,16 +1012,8 @@
             }
         });
 
-        // ===== ADD TAG SKILL =====
-        async function addTagSkill() {
-            const select = document.getElementById('tagSelect');
-            const skill = select.value;
-
-            if (!skill) {
-                alert('Please select a skill to tag!');
-                return;
-            }
-
+        // ===== TOGGLE TAG SKILL =====
+        async function toggleTagSkill(skill) {
             try {
                 let playerData = await getPlayerDataFromDB();
                 
@@ -1182,37 +1023,24 @@
                     playerData.tagSkills = [];
                 }
 
-                if (playerData.tagSkills.length >= MAX_TAG_SKILLS) {
-                    alert(`Maximum tag skills reached (${MAX_TAG_SKILLS})`);
-                    return;
-                }
-
-                if (playerData.tagSkills.includes(skill)) {
-                    alert('Skill already tagged!');
-                    return;
-                }
-
-                playerData.tagSkills.push(skill);
-                await savePlayerDataToDB(playerData);
-                updateDisplay(playerData);
-                select.value = '';
-            } catch (error) {
-                console.error('Error adding tag skill:', error);
-            }
-        }
-
-        // ===== REMOVE TAG SKILL =====
-        async function removeTagSkill(skill) {
-            try {
-                let playerData = await getPlayerDataFromDB();
+                const index = playerData.tagSkills.indexOf(skill);
                 
-                if (!playerData) return;
+                if (index > -1) {
+                    // Remove tag
+                    playerData.tagSkills.splice(index, 1);
+                } else {
+                    // Add tag
+                    if (playerData.tagSkills.length >= MAX_TAG_SKILLS) {
+                        alert(`Maximum tag skills reached (${MAX_TAG_SKILLS})`);
+                        return;
+                    }
+                    playerData.tagSkills.push(skill);
+                }
 
-                playerData.tagSkills = playerData.tagSkills.filter(s => s !== skill);
                 await savePlayerDataToDB(playerData);
                 updateDisplay(playerData);
             } catch (error) {
-                console.error('Error removing tag skill:', error);
+                console.error('Error toggling tag skill:', error);
             }
         }
 
@@ -1509,47 +1337,11 @@
             document.getElementById('xpBar').style.width = xpPercent + '%';
             document.getElementById('xpPercent').textContent = Math.round(xpPercent) + '%';
 
-            // Update tag skills count
+            // Update tag count badge
             const tagCount = playerData.tagSkills ? playerData.tagSkills.length : 0;
-            document.getElementById('tagCount').textContent = `Selected: ${tagCount}/${MAX_TAG_SKILLS}`;
+            document.getElementById('tagBadge').textContent = `${tagCount}/${MAX_TAG_SKILLS}`;
 
-            // Update tag skills grid
-            const tagGrid = document.getElementById('tagGrid');
-            let tagHTML = '';
-            for (let i = 0; i < MAX_TAG_SKILLS; i++) {
-                if (playerData.tagSkills && playerData.tagSkills[i]) {
-                    const tagSkill = playerData.tagSkills[i];
-                    const tagSkillValue = playerData.skills[tagSkill] || 0;
-                    const tagBonus = calculateSkillBonus(tagSkillValue, true);
-                    const tagBonusText = tagBonus >= 0 ? `+${tagBonus}` : `${tagBonus}`;
-                    tagHTML += `
-                        <div class="tag-slot tag-slot-active">
-                            <span class="tag-skill-name">${tagSkill}</span>
-                            <span class="tag-bonus">${tagBonusText}</span>
-                            <button class="tag-remove-btn" onclick="removeTagSkill('${tagSkill}')">REMOVE</button>
-                        </div>
-                    `;
-                } else {
-                    tagHTML += `
-                        <div class="tag-slot">
-                            <span class="empty-slot-text">Empty Slot</span>
-                        </div>
-                    `;
-                }
-            }
-            tagGrid.innerHTML = tagHTML;
-
-            // Update tag select dropdown - only show skills not already tagged
-            const tagSelect = document.getElementById('tagSelect');
-            const taggedSkills = playerData.tagSkills || [];
-            tagSelect.innerHTML = '<option value="">Select Skill to Tag...</option>';
-            SKILLS.forEach(skill => {
-                if (!taggedSkills.includes(skill)) {
-                    tagSelect.innerHTML += `<option value="${skill}">${skill}</option>`;
-                }
-            });
-
-            // Update skills grid with bonuses
+            // Update skills grid with checkboxes and bonuses
             const skillsGrid = document.getElementById('skillsGrid');
             skillsGrid.innerHTML = SKILLS.map(skill => {
                 const skillValue = playerData.skills ? (playerData.skills[skill] || 0) : 0;
@@ -1560,9 +1352,18 @@
 
                 return `
                     <div class="skill-item">
-                        <div class="skill-info">
-                            <span class="skill-name">${skill} ${isTagged ? '⭐' : ''}</span>
-                            <span class="skill-bonus" style="color: ${bonusColor};">Bonus: ${bonusText}</span>
+                        <div class="skill-left">
+                            <input 
+                                type="checkbox" 
+                                class="skill-checkbox" 
+                                ${isTagged ? 'checked' : ''} 
+                                onchange="toggleTagSkill('${skill}')"
+                                title="Tag this skill (max 3)"
+                            >
+                            <div class="skill-info">
+                                <span class="skill-name">${skill}</span>
+                                <span class="skill-bonus" style="color: ${bonusColor};">Bonus: ${bonusText}</span>
+                            </div>
                         </div>
                         <div class="skill-controls">
                             <button class="skill-btn" onclick="updateSkill('${skill}', -5)">−</button>
