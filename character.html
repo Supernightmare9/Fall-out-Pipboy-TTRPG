@@ -172,6 +172,33 @@
             text-transform: uppercase;
         }
 
+        /* Character Portrait */
+        .character-portrait {
+            width: 100%;
+            height: 350px;
+            background-color: var(--vault-dark);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .character-portrait img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .character-portrait-placeholder {
+            color: var(--vault-green);
+            font-size: 12px;
+            opacity: 0.6;
+            text-shadow: 0 0 3px var(--vault-green);
+        }
+
         .stat-row {
             display: flex;
             justify-content: space-between;
@@ -305,6 +332,10 @@
             .character-section h3 {
                 font-size: 12px;
             }
+
+            .character-portrait {
+                height: 250px;
+            }
         }
     </style>
 </head>
@@ -320,7 +351,15 @@
 
         <!-- CHARACTER INFO SECTION -->
         <div class="character-container">
-            <!-- LEFT COLUMN: CHARACTER DATA -->
+            <!-- LEFT COLUMN: CHARACTER PORTRAIT -->
+            <div class="character-section">
+                <h3>📷 Character Portrait</h3>
+                <div class="character-portrait" id="characterPortrait">
+                    <div class="character-portrait-placeholder">No image uploaded</div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: CHARACTER DATA -->
             <div class="character-section">
                 <h3>⚙ Character Information</h3>
                 <div class="stat-row">
@@ -328,47 +367,28 @@
                     <span class="stat-value" id="characterName">No Data</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Level:</span>
-                    <span class="stat-value" id="characterLevel">No Data</span>
+                    <span class="stat-label">Race:</span>
+                    <span class="stat-value" id="characterRace">No Data</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Experience:</span>
-                    <span class="stat-value" id="characterExp">No Data</span>
+                    <span class="stat-label">Class:</span>
+                    <span class="stat-value" id="characterClass">No Data</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Health:</span>
-                    <span class="stat-value" id="characterHealth">No Data</span>
+                    <span class="stat-label">Alignment:</span>
+                    <span class="stat-value" id="characterAlignment">No Data</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Vault:</span>
                     <span class="stat-value">215</span>
                 </div>
             </div>
+        </div>
 
-            <!-- RIGHT COLUMN: STATS DATA -->
-            <div class="character-section">
-                <h3>📊 Character Stats</h3>
-                <div class="stat-row">
-                    <span class="stat-label">Total Kills:</span>
-                    <span class="stat-value" id="totalKills">No Data</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Deaths:</span>
-                    <span class="stat-value" id="totalDeaths">No Data</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Time Played:</span>
-                    <span class="stat-value" id="timePlayed">No Data</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Quests Completed:</span>
-                    <span class="stat-value" id="questsCompleted">No Data</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Locations Found:</span>
-                    <span class="stat-value" id="locationsFound">No Data</span>
-                </div>
-            </div>
+        <!-- BACKSTORY SECTION -->
+        <div class="character-section">
+            <h3>📖 Backstory</h3>
+            <div id="backstoryContent" class="empty-state">No backstory available</div>
         </div>
 
         <!-- INVENTORY SUMMARY SECTION -->
@@ -400,25 +420,37 @@
     <script>
         // ===== LOAD DATA FROM LOCAL STORAGE =====
         function loadAllData() {
-            // Load character data
-            const characterData = localStorage.getItem('pipboyCharacter');
+            // Load character data from character profile page
+            const characterData = localStorage.getItem('characterData');
             if (characterData) {
                 const character = JSON.parse(characterData);
                 document.getElementById('characterName').textContent = character.name || 'Vault Dweller';
-                document.getElementById('characterLevel').textContent = character.level || 'N/A';
-                document.getElementById('characterExp').textContent = character.experience || 'N/A';
-                document.getElementById('characterHealth').textContent = character.health || 'N/A';
+                document.getElementById('characterRace').textContent = character.race || 'N/A';
+                document.getElementById('characterClass').textContent = character.class || 'N/A';
+                document.getElementById('characterAlignment').textContent = character.alignment || 'N/A';
+            }
+
+            // Load character image from character profile page
+            const characterImage = localStorage.getItem('characterImage');
+            if (characterImage) {
+                document.getElementById('characterPortrait').innerHTML = `<img src="${characterImage}" alt="Character Portrait">`;
+            }
+
+            // Load backstory from character profile page
+            const characterBackstory = localStorage.getItem('characterBackstory');
+            if (characterBackstory) {
+                document.getElementById('backstoryContent').textContent = characterBackstory;
+                document.getElementById('backstoryContent').style.color = 'var(--vault-green)';
+                document.getElementById('backstoryContent').style.fontSize = '12px';
+                document.getElementById('backstoryContent').style.lineHeight = '1.6';
+                document.getElementById('backstoryContent').style.textShadow = '0 0 2px var(--vault-green)';
             }
 
             // Load stats data
             const statsData = localStorage.getItem('pipboyStats');
             if (statsData) {
                 const stats = JSON.parse(statsData);
-                document.getElementById('totalKills').textContent = stats.totalKills || 'N/A';
-                document.getElementById('totalDeaths').textContent = stats.totalDeaths || 'N/A';
-                document.getElementById('timePlayed').textContent = stats.timePlayed || 'N/A';
-                document.getElementById('questsCompleted').textContent = stats.quests || 'N/A';
-                document.getElementById('locationsFound').textContent = stats.locations || 'N/A';
+                // Stats data loaded but not displayed per user request
             }
 
             // Load inventory data
@@ -463,21 +495,4 @@
                 } else {
                     let html = '';
                     activeQuests.forEach(quest => {
-                        html += `
-                            <li class="stat-list-item">
-                                <span class="stat-list-label">${quest.title}</span>
-                                <div style="margin-top: 3px; color: var(--vault-green); text-shadow: 0 0 2px var(--vault-green);">${quest.desc}</div>
-                            </li>
-                        `;
-                    });
-                    questsList.innerHTML = html;
-                }
-            } else {
-                document.getElementById('activeQuests').innerHTML = '<li class="stat-list-item empty-state">No quest data available</li>';
-            }
-        }
-
-        // Load data on page load
-        window.addEventListener('DOMContentLoaded', loadAllData);
-
-        // Reload data when page comes into`*
+                        html*
