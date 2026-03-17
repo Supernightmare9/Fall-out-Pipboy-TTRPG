@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pip-Boy Character Menu</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #000;
+            border: 2px solid #4caf50;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #4caf50;
+        }
+        h1 {
+            text-align: center;
+            color: #4caf50;
+        }
+        .stats {
+            margin: 15px 0;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        .button {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pip-Boy Character Menu</h1>
+        <div class="stats">
+            <p><strong>Name:</strong> PlayerName</p>
+            <p><strong>Level:</strong> 1</p>
+            <p><strong>Health:</strong> 100</p>
+            <p><strong>Strength:</strong> 5</p>
+            <p><strong>Perception:</strong> 5</p>
+            <p><strong>Endurance:</strong> 5</p>
+            <p><strong>Charisma:</strong> 5</p>
+            <p><strong>Intelligence:</strong> 5</p>
+            <p><strong>Agility:</strong> 5</p>
+            <p><strong>Luck:</strong> 5</p>
+        </div>
+        <div class="nav">
+            <button class="button">Inventory</button>
+            <button class="button">Quests</button>
+            <button class="button">Map</button>
+            <button class="button">Settings</button>
+        </div>
+    </div>
+</body>
+</html>
