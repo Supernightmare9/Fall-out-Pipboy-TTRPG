@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fallout Pipboy Stats</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         /* ===========================
            FALLOUT PIPBOY STATS STYLE
@@ -173,6 +172,93 @@
             transition: width 0.5s ease;
         }
 
+        /* ===== XP INPUT SECTION ===== */
+        .xp-input-box {
+            background-color: #1a1a1a;
+            border: 2px solid #4ade80;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .xp-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .xp-input {
+            flex: 1;
+            min-width: 150px;
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            text-shadow: 0 0 5px #4ade80;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .xp-input::placeholder {
+            color: #4ade8066;
+        }
+
+        .xp-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: #fbbf24;
+        }
+
+        .xp-button {
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .xp-button:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        .xp-button:active {
+            transform: translateY(0);
+        }
+
+        .xp-message {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #4ade80;
+            text-shadow: 0 0 3px #4ade80;
+            min-height: 20px;
+        }
+
+        .xp-message.success {
+            color: #4ade80;
+            text-shadow: 0 0 5px #4ade80;
+        }
+
+        .xp-message.error {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px #ff6b6b;
+        }
+
         /* ===== SPECIAL SECTION ===== */
         .special-grid {
             display: grid;
@@ -259,6 +345,18 @@
             }
 
             .nav-button {
+                width: 100%;
+            }
+
+            .xp-form {
+                flex-direction: column;
+            }
+
+            .xp-input {
+                width: 100%;
+            }
+
+            .xp-button {
                 width: 100%;
             }
         }
@@ -348,6 +446,16 @@
             </div>
         </div>
 
+        <!-- XP INPUT SECTION -->
+        <div class="xp-input-box">
+            <div class="stat-title">🎮 ADD EXPERIENCE</div>
+            <div class="xp-form">
+                <input type="number" id="xpInput" class="xp-input" placeholder="Enter XP amount (e.g., 500)" min="0" max="999999">
+                <button class="xp-button" onclick="addXP()">ADD XP</button>
+            </div>
+            <div class="xp-message" id="xpMessage"></div>
+        </div>
+
         <!-- S.P.E.C.I.A.L STATS -->
         <div class="stat-box" style="margin-bottom: 30px;">
             <div class="stat-title">S.P.E.C.I.A.L Attributes</div>
@@ -398,24 +506,91 @@
     </div>
 
     <script>
+        // XP per level
+        const XP_PER_LEVEL = 1000;
+
         // Load player data from localStorage
         window.addEventListener('DOMContentLoaded', function() {
             const playerData = JSON.parse(localStorage.getItem('currentPlayer'));
             if (playerData) {
                 document.getElementById('characterName').textContent = playerData.characterName.toUpperCase();
-                document.getElementById('level').textContent = playerData.level || 1;
-                document.getElementById('health').textContent = playerData.health || 100;
-                document.getElementById('xp').textContent = playerData.xp || 0;
-                
-                // Update health bar
-                const healthPercent = (playerData.health / 100) * 100;
-                document.getElementById('healthBar').style.width = healthPercent + '%';
-                document.getElementById('healthPercent').textContent = Math.round(healthPercent) + '%';
-                
-                // Update XP bar
-                const xpPercent = (playerData.xp / 5000) * 100;
-                document.getElementById('xpBar').style.width = Math.min(xpPercent, 100) + '%';
-                document.getElementById('xpPercent').textContent = Math.round(Math.min(xpPercent, 100)) + '%';
+                updateDisplay(playerData);
+            }
+        });
+
+        function addXP() {
+            const xpInput = document.getElementById('xpInput');
+            const messageBox = document.getElementById('xpMessage');
+            const xpAmount = parseInt(xpInput.value);
+
+            // Validation
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount <= 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+                messageBox.className = 'xp-message error';
+                return;
+            }
+
+            if (xpAmount > 999999) {
+                messageBox.textContent = '⚠ ERROR: XP amount too high! Maximum: 999,999';
+                messageBox.className = 'xp-message error';
+                return;
+            }
+
+            // Get current player data
+            const playerData = JSON.parse(localStorage.getItem('currentPlayer'));
+            if (!playerData) {
+                messageBox.textContent = '⚠ ERROR: No player data found!';
+                messageBox.className = 'xp-message error';
+                return;
+            }
+
+            // Add XP
+            playerData.xp = (playerData.xp || 0) + xpAmount;
+
+            // Calculate level (every 1000 XP = 1 level)
+            playerData.level = Math.floor(playerData.xp / XP_PER_LEVEL) + 1;
+
+            // Save updated player data
+            localStorage.setItem('currentPlayer', JSON.stringify(playerData));
+
+            // Update display
+            updateDisplay(playerData);
+
+            // Show success message
+            messageBox.textContent = `✓ SUCCESS: Added ${xpAmount} XP! Total XP: ${playerData.xp}`;
+            messageBox.className = 'xp-message success';
+
+            // Clear input
+            xpInput.value = '';
+
+            // Clear message after 3 seconds
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        function updateDisplay(playerData) {
+            // Update XP display
+            document.getElementById('xp').textContent = playerData.xp || 0;
+            document.getElementById('level').textContent = playerData.level || 1;
+
+            // Update health display
+            document.getElementById('health').textContent = playerData.health || 100;
+            const healthPercent = ((playerData.health || 100) / 100) * 100;
+            document.getElementById('healthBar').style.width = healthPercent + '%';
+            document.getElementById('healthPercent').textContent = Math.round(healthPercent) + '%';
+
+            // Update XP bar (0-100% for current level)
+            const xpInCurrentLevel = (playerData.xp || 0) % XP_PER_LEVEL;
+            const xpPercent = (xpInCurrentLevel / XP_PER_LEVEL) * 100;
+            document.getElementById('xpBar').style.width = xpPercent + '%';
+            document.getElementById('xpPercent').textContent = Math.round(xpPercent) + '%';
+        }
+
+        // Allow Enter key to add XP
+        document.getElementById('xpInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addXP();
             }
         });
     </script>
