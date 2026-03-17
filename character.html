@@ -420,79 +420,121 @@
     <script>
         // ===== LOAD DATA FROM LOCAL STORAGE =====
         function loadAllData() {
+            // Debug: Check what's in localStorage
+            console.log('Available localStorage keys:', Object.keys(localStorage));
+            
             // Load character data from character profile page
-            const characterData = localStorage.getItem('characterData');
-            if (characterData) {
-                const character = JSON.parse(characterData);
-                document.getElementById('characterName').textContent = character.name || 'Vault Dweller';
-                document.getElementById('characterRace').textContent = character.race || 'N/A';
-                document.getElementById('characterClass').textContent = character.class || 'N/A';
-                document.getElementById('characterAlignment').textContent = character.alignment || 'N/A';
+            const characterDataStr = localStorage.getItem('characterData');
+            console.log('characterData raw:', characterDataStr);
+            
+            if (characterDataStr) {
+                try {
+                    const character = JSON.parse(characterDataStr);
+                    console.log('Parsed character data:', character);
+                    document.getElementById('characterName').textContent = character.name || 'Vault Dweller';
+                    document.getElementById('characterRace').textContent = character.race || 'N/A';
+                    document.getElementById('characterClass').textContent = character.class || 'N/A';
+                    document.getElementById('characterAlignment').textContent = character.alignment || 'N/A';
+                } catch (e) {
+                    console.error('Error parsing characterData:', e);
+                }
+            } else {
+                console.log('No characterData found in localStorage');
             }
 
             // Load character image from character profile page
-            const characterImage = localStorage.getItem('characterImage');
-            if (characterImage) {
-                document.getElementById('characterPortrait').innerHTML = `<img src="${characterImage}" alt="Character Portrait">`;
+            const characterImageStr = localStorage.getItem('characterImage');
+            console.log('characterImage exists:', !!characterImageStr);
+            
+            if (characterImageStr) {
+                const portraitDiv = document.getElementById('characterPortrait');
+                portraitDiv.innerHTML = '';
+                const img = document.createElement('img');
+                img.src = characterImageStr;
+                img.alt = 'Character Portrait';
+                portraitDiv.appendChild(img);
             }
 
             // Load backstory from character profile page
             const characterBackstory = localStorage.getItem('characterBackstory');
             if (characterBackstory) {
-                document.getElementById('backstoryContent').textContent = characterBackstory;
-                document.getElementById('backstoryContent').style.color = 'var(--vault-green)';
-                document.getElementById('backstoryContent').style.fontSize = '12px';
-                document.getElementById('backstoryContent').style.lineHeight = '1.6';
-                document.getElementById('backstoryContent').style.textShadow = '0 0 2px var(--vault-green)';
-            }
-
-            // Load stats data
-            const statsData = localStorage.getItem('pipboyStats');
-            if (statsData) {
-                const stats = JSON.parse(statsData);
-                // Stats data loaded but not displayed per user request
+                const backstoryDiv = document.getElementById('backstoryContent');
+                backstoryDiv.textContent = characterBackstory;
+                backstoryDiv.style.color = 'var(--vault-green)';
+                backstoryDiv.style.fontSize = '12px';
+                backstoryDiv.style.lineHeight = '1.6';
+                backstoryDiv.style.textShadow = '0 0 2px var(--vault-green)';
             }
 
             // Load inventory data
-            const inventoryData = localStorage.getItem('pipboyInventory');
-            if (inventoryData) {
-                const inventory = JSON.parse(inventoryData);
-                const summaryDiv = document.getElementById('inventorySummary');
-                let summaryHTML = '';
+            const inventoryDataStr = localStorage.getItem('pipboyInventory');
+            if (inventoryDataStr) {
+                try {
+                    const inventory = JSON.parse(inventoryDataStr);
+                    const summaryDiv = document.getElementById('inventorySummary');
+                    let summaryHTML = '';
 
-                let totalItems = 0;
-                Object.keys(inventory).forEach(category => {
-                    const count = inventory[category].length;
-                    totalItems += count;
-                    summaryHTML += `
-                        <div class="inventory-summary">
-                            <span class="category">${category.toUpperCase()}:</span>
-                            <span class="count">${count} item(s)</span>
-                        </div>
-                    `;
-                });
+                    let totalItems = 0;
+                    Object.keys(inventory).forEach(category => {
+                        const count = inventory[category].length;
+                        totalItems += count;
+                        summaryHTML += `
+                            <div class="inventory-summary">
+                                <span class="category">${category.toUpperCase()}:</span>
+                                <span class="count">${count} item(s)</span>
+                            </div>
+                        `;
+                    });
 
-                if (totalItems === 0) {
-                    summaryHTML = '<div class="empty-state">No items in inventory</div>';
-                } else {
-                    summaryHTML = `<div style="color: var(--vault-gold); text-shadow: 0 0 3px var(--vault-gold); font-weight: bold; margin-bottom: 10px;">Total Items: ${totalItems}</div>` + summaryHTML;
+                    if (totalItems === 0) {
+                        summaryHTML = '<div class="empty-state">No items in inventory</div>';
+                    } else {
+                        summaryHTML = `<div style="color: var(--vault-gold); text-shadow: 0 0 3px var(--vault-gold); font-weight: bold; margin-bottom: 10px;">Total Items: ${totalItems}</div>` + summaryHTML;
+                    }
+
+                    summaryDiv.innerHTML = summaryHTML;
+                } catch (e) {
+                    console.error('Error parsing inventory:', e);
                 }
-
-                summaryDiv.innerHTML = summaryHTML;
             } else {
                 document.getElementById('inventorySummary').innerHTML = '<div class="empty-state">No inventory data available</div>';
             }
 
             // Load quest data
-            const dataData = localStorage.getItem('pipboyData');
-            if (dataData) {
-                const data = JSON.parse(dataData);
-                const questsList = document.getElementById('activeQuests');
-                const activeQuests = data.quests.filter(q => q.status === 'ACTIVE');
+            const dataDataStr = localStorage.getItem('pipboyData');
+            if (dataDataStr) {
+                try {
+                    const data = JSON.parse(dataDataStr);
+                    const questsList = document.getElementById('activeQuests');
+                    const activeQuests = data.quests.filter(q => q.status === 'ACTIVE');
 
-                if (activeQuests.length === 0) {
-                    questsList.innerHTML = '<li class="stat-list-item empty-state">No active quests</li>';
-                } else {
-                    let html = '';
-                    activeQuests.forEach(quest => {
-                        html*
+                    if (activeQuests.length === 0) {
+                        questsList.innerHTML = '<li class="stat-list-item empty-state">No active quests</li>';
+                    } else {
+                        let html = '';
+                        activeQuests.forEach(quest => {
+                            html += `
+                                <li class="stat-list-item">
+                                    <span class="stat-list-label">${quest.title}</span>
+                                    <div style="margin-top: 3px; color: var(--vault-green); text-shadow: 0 0 2px var(--vault-green);">${quest.desc}</div>
+                                </li>
+                            `;
+                        });
+                        questsList.innerHTML = html;
+                    }
+                } catch (e) {
+                    console.error('Error parsing quests:', e);
+                }
+            } else {
+                document.getElementById('activeQuests').innerHTML = '<li class="stat-list-item empty-state">No quest data available</li>';
+            }
+        }
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', loadAllData);
+
+        // Reload data when page comes into focus
+        window.addEventListener('focus', loadAllData);
+    </script>
+</body>
+</html>
