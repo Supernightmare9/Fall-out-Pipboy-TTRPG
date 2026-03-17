@@ -578,12 +578,13 @@
             <div class="character-name" id="characterName">VAULT DWELLER</div>
         </div>
 
-        <!-- SUBTAB NAVIGATION -->
-        <div class="subtab-nav">
-            <button class="subtab-button active" data-tab="stats">Stats</button>
-            <button class="subtab-button" data-tab="skills">Skills</button>
-            <button class="subtab-button" data-tab="perks">Perks</button>
-        </div>
+       <!-- SUBTAB NAVIGATION -->
+<div class="subtab-nav">
+    <button class="subtab-button active" data-tab="stats">Stats</button>
+    <button class="subtab-button" data-tab="skills">Skills</button>
+    <button class="subtab-button" data-tab="effects">Effects</button>
+    <button class="subtab-button" data-tab="perks">Perks</button>
+</div>
 
         <!-- STATS TAB CONTENT -->
         <div id="stats" class="subtab-content active">
@@ -716,6 +717,39 @@
                 <div class="skills-grid" id="skillsGrid"></div>
             </div>
         </div>
+
+        <!-- EFFECTS TAB CONTENT (DEBUFFS & BOOSTS) -->
+<div id="effects" class="subtab-content">
+    <div class="stat-box">
+        <div class="stat-title">Active Effects</div>
+        
+        <!-- DEBUFFS SECTION -->
+        <div style="margin-bottom: 25px;">
+            <div class="effects-subtitle">☢ DEBUFFS</div>
+            <div class="effects-list" id="debuffsList">
+                <div class="empty-message">No active debuffs</div>
+            </div>
+            <div class="input-form">
+                <input type="text" id="debuffInput" class="input-field" placeholder="Debuff name (e.g., Poisoned, Burning)">
+                <input type="number" id="debuffDurationInput" class="input-field" placeholder="Duration (turns)" min="1" max="999">
+                <button class="action-button" onclick="addDebuff()">ADD DEBUFF</button>
+            </div>
+        </div>
+
+        <!-- BOOSTS SECTION -->
+        <div>
+            <div class="effects-subtitle">✦ BOOSTS</div>
+            <div class="effects-list" id="boostsList">
+                <div class="empty-message">No active boosts</div>
+            </div>
+            <div class="input-form">
+                <input type="text" id="boostInput" class="input-field" placeholder="Boost name (e.g., Strength+, Luck+)">
+                <input type="number" id="boostDurationInput" class="input-field" placeholder="Duration (turns)" min="1" max="999">
+                <button class="action-button" onclick="addBoost()">ADD BOOST</button>
+            </div>
+        </div>
+    </div>
+</div>
 
         <!-- PERKS TAB CONTENT -->
         <div id="perks" class="subtab-content">
