@@ -255,6 +255,70 @@
             text-shadow: 0 0 5px #ff6b6b;
         }
 
+        /* ===== SKILLS SECTION ===== */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .skill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #0a0a0a;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 3px;
+        }
+
+        .skill-name {
+            color: #4ade80;
+            font-size: 12px;
+            text-shadow: 0 0 3px #4ade80;
+            flex: 1;
+        }
+
+        .skill-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .skill-value {
+            color: #fbbf24;
+            font-weight: bold;
+            font-size: 12px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .skill-btn {
+            background-color: #2d5016;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 4px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 3px #4ade80;
+            transition: all 0.2s ease;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .skill-btn:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
         /* ===== STATUS EFFECTS ===== */
         .effects-box {
             background-color: #1a1a1a;
@@ -478,6 +542,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
             .header {
                 padding: 20px;
             }
@@ -605,26 +673,7 @@
             <!-- SKILLS -->
             <div class="stat-box">
                 <div class="stat-title">Skills</div>
-                <div class="stat-item">
-                    <span class="stat-label">Barter:</span>
-                    <span class="stat-value">45</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Energy Weapons:</span>
-                    <span class="stat-value">55</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Lockpick:</span>
-                    <span class="stat-value">38</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Medicine:</span>
-                    <span class="stat-value">42</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Science:</span>
-                    <span class="stat-value">50</span>
-                </div>
+                <div class="skills-grid" id="skillsGrid"></div>
             </div>
         </div>
 
@@ -790,6 +839,24 @@
         const MAX_HEALTH = 100;
         const MAX_ACTION_POINTS = 20;
 
+        // Skills list
+        const SKILLS = [
+            'Barter',
+            'Small Guns',
+            'Big Guns',
+            'Melee Weapons',
+            'Energy Weapons',
+            'Explosives',
+            'Lockpick',
+            'Medicine',
+            'Science',
+            'Repair',
+            'Sneak',
+            'Speech',
+            'Unarmed',
+            'Survival'
+        ];
+
         // Status effect labels
         const STATUS_LABELS = {
             radiation: '☢ Radiation Sickness',
@@ -834,8 +901,13 @@
                         actionPoints: 10,
                         vault: '111',
                         statusEffects: [],
-                        statBoosts: []
+                        statBoosts: [],
+                        skills: {}
                     };
+                    // Initialize all skills to 0
+                    SKILLS.forEach(skill => {
+                        defaultPlayer.skills[skill] = 0;
+                    });
                     await savePlayerDataToDB(defaultPlayer);
                     updateDisplay(defaultPlayer);
                 }
@@ -998,6 +1070,33 @@
             }
         }
 
+        // ===== UPDATE SKILL =====
+        async function updateSkill(skillName, amount) {
+            try {
+                let playerData = await getPlayerDataFromDB();
+                
+                if (!playerData) return;
+
+                if (!playerData.skills) {
+                    playerData.skills = {};
+                }
+
+                playerData.skills[skillName] = (playerData.skills[skillName] || 0) + amount;
+
+                // Cap skills at 0-100
+                if (playerData.skills[skillName] < 0) {
+                    playerData.skills[skillName] = 0;
+                } else if (playerData.skills[skillName] > 100) {
+                    playerData.skills[skillName] = 100;
+                }
+
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+            } catch (error) {
+                console.error('Error updating skill:', error);
+            }
+        }
+
         // ===== ADD STATUS EFFECT =====
         async function addStatusEffect() {
             const select = document.getElementById('statusSelect');
@@ -1115,6 +1214,22 @@
             document.getElementById('xpBar').style.width = xpPercent + '%';
             document.getElementById('xpPercent').textContent = Math.round(xpPercent) + '%';
 
+            // Update skills grid
+            const skillsGrid = document.getElementById('skillsGrid');
+            skillsGrid.innerHTML = SKILLS.map(skill => {
+                const skillValue = playerData.skills ? (playerData.skills[skill] || 0) : 0;
+                return `
+                    <div class="skill-item">
+                        <span class="skill-name">${skill}</span>
+                        <div class="skill-controls">
+                            <button class="skill-btn" onclick="updateSkill('${skill}', -5)">−</button>
+                            <span class="skill-value">${skillValue}</span>
+                            <button class="skill-btn" onclick="updateSkill('${skill}', 5)">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
             // Update status effects list
             const effectsList = document.getElementById('effectsList');
             if (playerData.statusEffects && playerData.statusEffects.length > 0) {
@@ -1143,16 +1258,10 @@
         }
 
         // ===== KEY PRESS HANDLERS =====
-        document.getElementById('xpInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') addXP();
-        });
-
-        document.getElementById('healthInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') updateHealth();
-        });
-
-        document.getElementById('apInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') updateActionPoints();
+        document.addEventListener('keypress', function(event) {
+            if (event.target.id === 'xpInput' && event.key === 'Enter') addXP();
+            if (event.target.id === 'healthInput' && event.key === 'Enter') updateHealth();
+            if (event.target.id === 'apInput' && event.key === 'Enter') updateActionPoints();
         });
     </script>
 </body>
