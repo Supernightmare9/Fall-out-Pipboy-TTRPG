@@ -734,365 +734,414 @@
         </div>
     </div>
 
-    <script>
-        const XP_PER_LEVEL = 1000;
-        const MAX_HEALTH = 100;
-        const MAX_ACTION_POINTS = 20;
-        const MAX_TAG_SKILLS = 3;
-        const TAG_SKILL_BONUS = 10;
+    <!-- Add this to your script section, right after the constants and before other functions -->
 
-        // Define page order
-        const pages = ['stats', 'skills', 'perks'];
-        let currentPageIndex = 0;
+<script>
+    const XP_PER_LEVEL = 1000;
+    const MAX_HEALTH = 100;
+    const MAX_ACTION_POINTS = 20;
+    const MAX_TAG_SKILLS = 3;
+    const TAG_SKILL_BONUS = 10;
 
-        // Skills with SPECIAL alignments
-        const SKILLS_BY_SPECIAL = {
-            strength: ['Melee Weapons', 'Big Guns', 'Unarmed'],
-            perception: ['Small Guns', 'Energy Weapons'],
-            endurance: ['Survival', 'Explosives'],
-            charisma: ['Barter', 'Speech'],
-            intelligence: ['Science', 'Repair', 'Medicine'],
-            agility: ['Sneak', 'Lockpick'],
-            luck: []
-        };
+    // Define page order
+    const pages = ['stats', 'skills', 'perks'];
+    let currentPageIndex = 0;
 
-        // Flatten skills list
-        const SKILLS = [
-            'Barter', 'Small Guns', 'Big Guns', 'Melee Weapons',
-            'Energy Weapons', 'Explosives', 'Lockpick', 'Medicine',
-            'Science', 'Repair', 'Sneak', 'Speech', 'Unarmed', 'Survival'
-        ];
+    // Skills with SPECIAL alignments
+    const SKILLS_BY_SPECIAL = {
+        strength: ['Melee Weapons', 'Big Guns', 'Unarmed'],
+        perception: ['Small Guns', 'Energy Weapons'],
+        endurance: ['Survival', 'Explosives'],
+        charisma: ['Barter', 'Speech'],
+        intelligence: ['Science', 'Repair', 'Medicine'],
+        agility: ['Sneak', 'Lockpick'],
+        luck: []
+    };
 
-        // Player data
-        let playerData = {
-            skills: {},
-            tagSkills: []
-        };
+    // Flatten skills list
+    const SKILLS = [
+        'Barter', 'Small Guns', 'Big Guns', 'Melee Weapons',
+        'Energy Weapons', 'Explosives', 'Lockpick', 'Medicine',
+        'Science', 'Repair', 'Sneak', 'Speech', 'Unarmed', 'Survival'
+    ];
 
-        // Initialize skills
-        SKILLS.forEach(skill => {
-            playerData.skills[skill] = 0;
-        });
+    // Player data
+    let playerData = {
+        skills: {},
+        tagSkills: [],
+        xp: 0,
+        level: 1,
+        health: 100,
+        actionPoints: 10
+    };
 
-        // Get SPECIAL for skill
-        function getSpecialForSkill(skill) {
-            for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
-                if (skills.includes(skill)) {
-                    return special.charAt(0).toUpperCase() + special.slice(1);
-                }
-            }
-            return 'Unknown';
+    // Initialize skills
+    SKILLS.forEach(skill => {
+        playerData.skills[skill] = 0;
+    });
+
+    // ===== STORAGE FUNCTIONS =====
+    function savePlayerData() {
+        localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
+        // Also save XP, Health, AP to DOM for display persistence
+        localStorage.setItem('pipboyXP', document.getElementById('xp').textContent);
+        localStorage.setItem('pipboyLevel', document.getElementById('level').textContent);
+        localStorage.setItem('pipboyHealth', document.getElementById('health').textContent);
+        localStorage.setItem('pipboyActionPoints', document.getElementById('actionPoints').textContent);
+    }
+
+    function loadPlayerData() {
+        const saved = localStorage.getItem('pipboyPlayerData');
+        if (saved) {
+            playerData = JSON.parse(saved);
         }
-
-        // Calculate skill bonus
-        function calculateSkillBonus(skillValue, isTagged = false) {
-            let adjustedValue = skillValue;
-            if (isTagged) {
-                adjustedValue = skillValue + TAG_SKILL_BONUS;
-            }
-
-            if (adjustedValue === 50) {
-                return 0;
-            } else if (adjustedValue < 50) {
-                const difference = 50 - adjustedValue;
-                return Math.ceil(-difference / 10);
-            } else {
-                const difference = adjustedValue - 50;
-                return Math.floor(difference / 10);
-            }
-        }
-
-        // Format bonus display (no + prefix for negative numbers)
-        function formatBonus(bonus) {
-            if (bonus < 0) {
-                return bonus.toString();
-            } else if (bonus > 0) {
-                return '+' + bonus;
-            } else {
-                return '0';
-            }
-        }
-
-        // ===== SWITCH TABS =====
-        function switchTab(tabName) {
-            document.getElementById('stats').classList.remove('active');
-            document.getElementById('skills').classList.remove('active');
-            document.getElementById('perks').classList.remove('active');
-            
-            const buttons = document.querySelectorAll('.subtab-button');
-            buttons.forEach(btn => btn.classList.remove('active'));
-            
-            document.getElementById(tabName).classList.add('active');
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-
-            currentPageIndex = pages.indexOf(tabName);
-        }
-
-        // ===== NAVIGATION FUNCTIONS =====
-        function nextPage() {
-            currentPageIndex = (currentPageIndex + 1) % pages.length;
-            switchTab(pages[currentPageIndex]);
-        }
-
-        function previousPage() {
-            currentPageIndex = (currentPageIndex - 1 + pages.length) % pages.length;
-            switchTab(pages[currentPageIndex]);
-        }
-
-        function goToCharacter() {
-            window.location.href = 'character.html';
-        }
-
-        function goToInventory() {
-            window.location.href = 'inventory.html';
-        }
-
-        // ===== UPDATE SKILL =====
-        function updateSkill(skillName, amount) {
-            playerData.skills[skillName] = (playerData.skills[skillName] || 0) + amount;
-            
-            if (playerData.skills[skillName] < 0) {
-                playerData.skills[skillName] = 0;
-            } else if (playerData.skills[skillName] > 100) {
-                playerData.skills[skillName] = 100;
-            }
-            
-            updateDisplay();
-        }
-
-        // ===== TOGGLE TAG SKILL =====
-        function toggleTagSkill(skill) {
-            const index = playerData.tagSkills.indexOf(skill);
-            
-            if (index > -1) {
-                playerData.tagSkills.splice(index, 1);
-            } else {
-                if (playerData.tagSkills.length >= MAX_TAG_SKILLS) {
-                    alert(`Maximum tag skills reached (${MAX_TAG_SKILLS})`);
-                    return;
-                }
-                playerData.tagSkills.push(skill);
-            }
-            
-            updateDisplay();
-        }
-
-        // ===== ADD XP =====
-        function addXP() {
-            const xpInput = document.getElementById('xpInput');
-            const messageBox = document.getElementById('xpMessage');
-            const xpAmount = parseInt(xpInput.value);
-
-            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
-                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
-                messageBox.className = 'message error';
-                return;
-            }
-
-            if (xpAmount < 0) {
-                messageBox.textContent = '⚠ ERROR: Use REMOVE XP button for negative values!';
-                messageBox.className = 'message error';
-                return;
-            }
-
-            let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
-            let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
-
-            currentXP += xpAmount;
-            currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
-
-            document.getElementById('xp').textContent = currentXP;
-            document.getElementById('level').textContent = currentLevel;
-
+        
+        // Load XP, Health, AP if they exist
+        const savedXP = localStorage.getItem('pipboyXP');
+        const savedLevel = localStorage.getItem('pipboyLevel');
+        const savedHealth = localStorage.getItem('pipboyHealth');
+        const savedActionPoints = localStorage.getItem('pipboyActionPoints');
+        
+        if (savedXP) document.getElementById('xp').textContent = savedXP;
+        if (savedLevel) document.getElementById('level').textContent = savedLevel;
+        if (savedHealth) document.getElementById('health').textContent = savedHealth;
+        if (savedActionPoints) document.getElementById('actionPoints').textContent = savedActionPoints;
+        
+        // Update bars
+        if (savedXP && savedLevel) {
+            const currentXP = parseInt(savedXP);
             const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
             document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
             document.getElementById('xpBar').style.width = xpProgress + '%';
-
-            messageBox.textContent = `✓ SUCCESS: Added ${xpAmount} XP! Total XP: ${currentXP}`;
-            messageBox.className = 'message success';
-
-            xpInput.value = '';
-            setTimeout(() => {
-                messageBox.textContent = '';
-            }, 3000);
         }
-
-        // ===== REMOVE XP =====
-        function removeXP() {
-            const xpInput = document.getElementById('xpInput');
-            const messageBox = document.getElementById('xpMessage');
-            const xpAmount = parseInt(xpInput.value);
-
-            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
-                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
-                messageBox.className = 'message error';
-                return;
-            }
-
-            if (xpAmount > 0) {
-                messageBox.textContent = '⚠ ERROR: Use ADD XP button for positive values!';
-                messageBox.className = 'message error';
-                return;
-            }
-
-            let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
-            let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
-
-            currentXP += xpAmount;
-
-            if (currentXP < 0) {
-                currentXP = 0;
-                messageBox.textContent = `⚠ XP cannot be below 0!`;
-                messageBox.className = 'message error';
-            } else {
-                messageBox.textContent = `✓ SUCCESS: Removed ${Math.abs(xpAmount)} XP! Total XP: ${currentXP}`;
-                messageBox.className = 'message success';
-            }
-
-            currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
-
-            document.getElementById('xp').textContent = currentXP;
-            document.getElementById('level').textContent = currentLevel;
-
-            const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
-            document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
-            document.getElementById('xpBar').style.width = xpProgress + '%';
-
-            xpInput.value = '';
-            setTimeout(() => {
-                messageBox.textContent = '';
-            }, 3000);
-        }
-
-        // ===== UPDATE HEALTH =====
-        function updateHealth() {
-            const healthInput = document.getElementById('healthInput');
-            const messageBox = document.getElementById('healthMessage');
-            const healthChange = parseInt(healthInput.value);
-
-            if (!healthInput.value || isNaN(healthChange)) {
-                messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
-                messageBox.className = 'message error';
-                return;
-            }
-
-            let currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
-            currentHealth += healthChange;
-
-            if (currentHealth > MAX_HEALTH) {
-                currentHealth = MAX_HEALTH;
-                messageBox.textContent = `⚠ Health capped at ${MAX_HEALTH}!`;
-                messageBox.className = 'message error';
-            } else if (currentHealth < 0) {
-                currentHealth = 0;
-                messageBox.textContent = `⚠ Health cannot be below 0!`;
-                messageBox.className = 'message error';
-            } else {
-                messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}`;
-                messageBox.className = 'message success';
-            }
-
-            document.getElementById('health').textContent = currentHealth;
+        
+        if (savedHealth) {
+            const currentHealth = parseInt(savedHealth);
             const healthPercent = (currentHealth / MAX_HEALTH) * 100;
             document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
             document.getElementById('healthBar').style.width = healthPercent + '%';
+        }
+    }
 
-            healthInput.value = '';
-            setTimeout(() => {
-                messageBox.textContent = '';
-            }, 3000);
+    // Get SPECIAL for skill
+    function getSpecialForSkill(skill) {
+        for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
+            if (skills.includes(skill)) {
+                return special.charAt(0).toUpperCase() + special.slice(1);
+            }
+        }
+        return 'Unknown';
+    }
+
+    // Calculate skill bonus
+    function calculateSkillBonus(skillValue, isTagged = false) {
+        let adjustedValue = skillValue;
+        if (isTagged) {
+            adjustedValue = skillValue + TAG_SKILL_BONUS;
         }
 
-        // ===== UPDATE ACTION POINTS =====
-        function updateActionPoints() {
-            const apInput = document.getElementById('apInput');
-            const messageBox = document.getElementById('apMessage');
-            const apChange = parseInt(apInput.value);
+        const difference = adjustedValue - 50;
+        return Math.floor(difference / 10);
+    }
 
-            if (!apInput.value || isNaN(apChange)) {
-                messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
-                messageBox.className = 'message error';
+    // Format bonus display (no + prefix for negative numbers)
+    function formatBonus(bonus) {
+        if (bonus < 0) {
+            return bonus.toString();
+        } else if (bonus > 0) {
+            return '+' + bonus;
+        } else {
+            return '0';
+        }
+    }
+
+    // ===== SWITCH TABS =====
+    function switchTab(tabName) {
+        document.getElementById('stats').classList.remove('active');
+        document.getElementById('skills').classList.remove('active');
+        document.getElementById('perks').classList.remove('active');
+        
+        const buttons = document.querySelectorAll('.subtab-button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        document.getElementById(tabName).classList.add('active');
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+        currentPageIndex = pages.indexOf(tabName);
+    }
+
+    // ===== NAVIGATION FUNCTIONS =====
+    function nextPage() {
+        currentPageIndex = (currentPageIndex + 1) % pages.length;
+        switchTab(pages[currentPageIndex]);
+    }
+
+    function previousPage() {
+        currentPageIndex = (currentPageIndex - 1 + pages.length) % pages.length;
+        switchTab(pages[currentPageIndex]);
+    }
+
+    function goToCharacter() {
+        window.location.href = 'character.html';
+    }
+
+    function goToInventory() {
+        window.location.href = 'inventory.html';
+    }
+
+    // ===== UPDATE SKILL =====
+    function updateSkill(skillName, amount) {
+        playerData.skills[skillName] = (playerData.skills[skillName] || 0) + amount;
+        
+        if (playerData.skills[skillName] < 0) {
+            playerData.skills[skillName] = 0;
+        } else if (playerData.skills[skillName] > 100) {
+            playerData.skills[skillName] = 100;
+        }
+        
+        savePlayerData();
+        updateDisplay();
+    }
+
+    // ===== TOGGLE TAG SKILL =====
+    function toggleTagSkill(skill) {
+        const index = playerData.tagSkills.indexOf(skill);
+        
+        if (index > -1) {
+            playerData.tagSkills.splice(index, 1);
+        } else {
+            if (playerData.tagSkills.length >= MAX_TAG_SKILLS) {
+                alert(`Maximum tag skills reached (${MAX_TAG_SKILLS})`);
                 return;
             }
+            playerData.tagSkills.push(skill);
+        }
+        
+        savePlayerData();
+        updateDisplay();
+    }
 
-            let currentAP = parseInt(document.getElementById('actionPoints').textContent) || 10;
-            currentAP += apChange;
+    // ===== ADD XP =====
+    function addXP() {
+        const xpInput = document.getElementById('xpInput');
+        const messageBox = document.getElementById('xpMessage');
+        const xpAmount = parseInt(xpInput.value);
 
-            if (currentAP > MAX_ACTION_POINTS) {
-                currentAP = MAX_ACTION_POINTS;
-                messageBox.textContent = `⚠ Action Points capped at ${MAX_ACTION_POINTS}!`;
-                messageBox.className = 'message error';
-            } else if (currentAP < 0) {
-                currentAP = 0;
-                messageBox.textContent = `⚠ Action Points cannot be below 0!`;
-                messageBox.className = 'message error';
-            } else {
-                messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}`;
-                messageBox.className = 'message success';
-            }
-
-            document.getElementById('actionPoints').textContent = currentAP;
-
-            apInput.value = '';
-            setTimeout(() => {
-                messageBox.textContent = '';
-            }, 3000);
+        if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
+            messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+            messageBox.className = 'message error';
+            return;
         }
 
-        // ===== UPDATE DISPLAY =====
-        function updateDisplay() {
-            // Update skills grid
-            const skillsGrid = document.getElementById('skillsGrid');
-            skillsGrid.innerHTML = '';
+        if (xpAmount < 0) {
+            messageBox.textContent = '⚠ ERROR: Use REMOVE XP button for negative values!';
+            messageBox.className = 'message error';
+            return;
+        }
+
+        let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
+        let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+
+        currentXP += xpAmount;
+        currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
+
+        document.getElementById('xp').textContent = currentXP;
+        document.getElementById('level').textContent = currentLevel;
+
+        const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
+        document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
+        document.getElementById('xpBar').style.width = xpProgress + '%';
+
+        messageBox.textContent = `✓ SUCCESS: Added ${xpAmount} XP! Total XP: ${currentXP}`;
+        messageBox.className = 'message success';
+
+        savePlayerData();
+        xpInput.value = '';
+        setTimeout(() => {
+            messageBox.textContent = '';
+        }, 3000);
+    }
+
+    // ===== REMOVE XP =====
+    function removeXP() {
+        const xpInput = document.getElementById('xpInput');
+        const messageBox = document.getElementById('xpMessage');
+        const xpAmount = parseInt(xpInput.value);
+
+        if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
+            messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+            messageBox.className = 'message error';
+            return;
+        }
+
+        if (xpAmount > 0) {
+            messageBox.textContent = '⚠ ERROR: Use ADD XP button for positive values!';
+            messageBox.className = 'message error';
+            return;
+        }
+
+        let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
+        let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+
+        currentXP += xpAmount;
+
+        if (currentXP < 0) {
+            currentXP = 0;
+            messageBox.textContent = `⚠ XP cannot be below 0!`;
+            messageBox.className = 'message error';
+        } else {
+            messageBox.textContent = `✓ SUCCESS: Removed ${Math.abs(xpAmount)} XP! Total XP: ${currentXP}`;
+            messageBox.className = 'message success';
+        }
+
+        currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
+
+        document.getElementById('xp').textContent = currentXP;
+        document.getElementById('level').textContent = currentLevel;
+
+        const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
+        document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
+        document.getElementById('xpBar').style.width = xpProgress + '%';
+
+        savePlayerData();
+        xpInput.value = '';
+        setTimeout(() => {
+            messageBox.textContent = '';
+        }, 3000);
+    }
+
+    // ===== UPDATE HEALTH =====
+    function updateHealth() {
+        const healthInput = document.getElementById('healthInput');
+        const messageBox = document.getElementById('healthMessage');
+        const healthChange = parseInt(healthInput.value);
+
+        if (!healthInput.value || isNaN(healthChange)) {
+            messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
+            messageBox.className = 'message error';
+            return;
+        }
+
+        let currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
+        currentHealth += healthChange;
+
+        if (currentHealth > MAX_HEALTH) {
+            currentHealth = MAX_HEALTH;
+            messageBox.textContent = `⚠ Health capped at ${MAX_HEALTH}!`;
+            messageBox.className = 'message error';
+        } else if (currentHealth < 0) {
+            currentHealth = 0;
+            messageBox.textContent = `⚠ Health cannot be below 0!`;
+            messageBox.className = 'message error';
+        } else {
+            messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}`;
+            messageBox.className = 'message success';
+        }
+
+        document.getElementById('health').textContent = currentHealth;
+        const healthPercent = (currentHealth / MAX_HEALTH) * 100;
+        document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
+        document.getElementById('healthBar').style.width = healthPercent + '%';
+
+        savePlayerData();
+        healthInput.value = '';
+        setTimeout(() => {
+            messageBox.textContent = '';
+        }, 3000);
+    }
+
+    // ===== UPDATE ACTION POINTS =====
+    function updateActionPoints() {
+        const apInput = document.getElementById('apInput');
+        const messageBox = document.getElementById('apMessage');
+        const apChange = parseInt(apInput.value);
+
+        if (!apInput.value || isNaN(apChange)) {
+            messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
+            messageBox.className = 'message error';
+            return;
+        }
+
+        let currentAP = parseInt(document.getElementById('actionPoints').textContent) || 10;
+        currentAP += apChange;
+
+        if (currentAP > MAX_ACTION_POINTS) {
+            currentAP = MAX_ACTION_POINTS;
+            messageBox.textContent = `⚠ Action Points capped at ${MAX_ACTION_POINTS}!`;
+            messageBox.className = 'message error';
+        } else if (currentAP < 0) {
+            currentAP = 0;
+            messageBox.textContent = `⚠ Action Points cannot be below 0!`;
+            messageBox.className = 'message error';
+        } else {
+            messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}`;
+            messageBox.className = 'message success';
+        }
+
+        document.getElementById('actionPoints').textContent = currentAP;
+
+        savePlayerData();
+        apInput.value = '';
+        setTimeout(() => {
+            messageBox.textContent = '';
+        }, 3000);
+    }
+
+    // ===== UPDATE DISPLAY =====
+    function updateDisplay() {
+        // Update skills grid
+        const skillsGrid = document.getElementById('skillsGrid');
+        skillsGrid.innerHTML = '';
+        
+        SKILLS.forEach(skill => {
+            const special = getSpecialForSkill(skill);
+            const skillValue = playerData.skills[skill] || 0;
+            const isTagged = playerData.tagSkills.includes(skill);
+            const bonus = calculateSkillBonus(skillValue, isTagged);
             
-            SKILLS.forEach(skill => {
-                const special = getSpecialForSkill(skill);
-                const skillValue = playerData.skills[skill] || 0;
-                const isTagged = playerData.tagSkills.includes(skill);
-                const bonus = calculateSkillBonus(skillValue, isTagged);
-                
-                const skillDiv = document.createElement('div');
-                skillDiv.className = 'skill-item';
-                skillDiv.innerHTML = `
-                    <div class="skill-left">
-                        <input type="checkbox" class="skill-checkbox" ${isTagged ? 'checked' : ''} onchange="toggleTagSkill('${skill}')">
-                        <div class="skill-info">
-                            <div class="skill-name">${skill}</div>
-                            <div class="skill-special">${special}</div>
-                            <div class="skill-bonus">${formatBonus(bonus)}</div>
-                        </div>
+            const skillDiv = document.createElement('div');
+            skillDiv.className = 'skill-item';
+            skillDiv.innerHTML = `
+                <div class="skill-left">
+                    <input type="checkbox" class="skill-checkbox" ${isTagged ? 'checked' : ''} onchange="toggleTagSkill('${skill}')">
+                    <div class="skill-info">
+                        <div class="skill-name">${skill}</div>
+                        <div class="skill-special">${special}</div>
+                        <div class="skill-bonus">${formatBonus(bonus)}</div>
                     </div>
-                    <div class="skill-controls">
-                        <button class="skill-btn" onclick="updateSkill('${skill}', -1)">−</button>
-                        <div class="skill-value">${skillValue}</div>
-                        <button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button>
-                    </div>
-                `;
-                skillsGrid.appendChild(skillDiv);
-            });
+                </div>
+                <div class="skill-controls">
+                    <button class="skill-btn" onclick="updateSkill('${skill}', -1)">−</button>
+                    <div class="skill-value">${skillValue}</div>
+                    <button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button>
+                </div>
+            `;
+            skillsGrid.appendChild(skillDiv);
+        });
 
-            // Update tag badge
-            document.getElementById('tagBadge').textContent = `${playerData.tagSkills.length}/3`;
+        // Update tag badge
+        document.getElementById('tagBadge').textContent = `${playerData.tagSkills.length}/3`;
 
-            // Update SPECIAL skills lists
-            for (const [special, skillsList] of Object.entries(SKILLS_BY_SPECIAL)) {
-                const skillsElement = document.getElementById(`skills-${special}`);
-                skillsElement.innerHTML = skillsList.map(s => `<div>${s}</div>`).join('');
-            }
+        // Update SPECIAL skills lists
+        for (const [special, skillsList] of Object.entries(SKILLS_BY_SPECIAL)) {
+            const skillsElement = document.getElementById(`skills-${special}`);
+            skillsElement.innerHTML = skillsList.map(s => `<div>${s}</div>`).join('');
         }
+    }
 
-        // ===== ADD EVENT LISTENERS TO TAB BUTTONS =====
-        document.querySelectorAll('.subtab-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                switchTab(tabName);
-            });
+    // ===== ADD EVENT LISTENERS TO TAB BUTTONS =====
+    document.querySelectorAll('.subtab-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            switchTab(tabName);
         });
+    });
 
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            updateDisplay();
-        });
-    </script>
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', function() {
+        loadPlayerData();
+        updateDisplay();
+    });
+</script>
 </body>
 </html>
