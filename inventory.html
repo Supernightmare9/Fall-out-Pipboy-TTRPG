@@ -595,8 +595,6 @@
                     <option value="quantity-desc">Quantity (High-Low)</option>
                     <option value="value">Value (Low-High)</option>
                     <option value="value-desc">Value (High-Low)</option>
-                    <option value="weight">Weight (Light-Heavy)</option>
-                    <option value="weight-desc">Weight (Heavy-Light)</option>
                     <option value="favorites">Favorites First</option>
                 </select>
             </div>
@@ -624,14 +622,6 @@
                     <div class="form-group">
                         <label class="form-label">Damage</label>
                         <input type="number" class="form-input" id="weaponDamage" placeholder="e.g., 25">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Condition (%)</label>
-                        <input type="number" class="form-input" id="weaponCondition" placeholder="100" min="0" max="100">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Weight</label>
-                        <input type="number" class="form-input" id="weaponWeight" placeholder="e.g., 5.5" step="0.1">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Value (Caps)</label>
@@ -665,14 +655,6 @@
                         <input type="number" class="form-input" id="apparelDR" placeholder="e.g., 35">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Condition (%)</label>
-                        <input type="number" class="form-input" id="apparelCondition" placeholder="100" min="0" max="100">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Weight</label>
-                        <input type="number" class="form-input" id="apparelWeight" placeholder="e.g., 8.5" step="0.1">
-                    </div>
-                    <div class="form-group">
                         <label class="form-label">Value (Caps)</label>
                         <input type="number" class="form-input" id="apparelValue" placeholder="e.g., 300">
                     </div>
@@ -702,10 +684,6 @@
                     <div class="form-group">
                         <label class="form-label">Quantity</label>
                         <input type="number" class="form-input" id="miscQuantity" placeholder="1" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Weight</label>
-                        <input type="number" class="form-input" id="miscWeight" placeholder="e.g., 1.5" step="0.1">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Value per Item (Caps)</label>
@@ -780,10 +758,6 @@
                     <div class="form-group">
                         <label class="form-label">Quantity</label>
                         <input type="number" class="form-input" id="ammoQuantity" placeholder="287" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Weight per Round</label>
-                        <input type="number" class="form-input" id="ammoWeight" placeholder="e.g., 0.1" step="0.01">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Value per Round (Caps)</label>
@@ -875,16 +849,12 @@
                     id: 'item-' + Date.now(),
                     name: document.getElementById('weaponName').value,
                     damage: document.getElementById('weaponDamage').value || 'N/A',
-                    condition: document.getElementById('weaponCondition').value || 100,
-                    weight: parseFloat(document.getElementById('weaponWeight').value) || 0,
                     value: parseFloat(document.getElementById('weaponValue').value) || 0,
                     description: document.getElementById('weaponDesc').value,
                     favorite: false
                 };
                 document.getElementById('weaponName').value = '';
                 document.getElementById('weaponDamage').value = '';
-                document.getElementById('weaponCondition').value = '100';
-                document.getElementById('weaponWeight').value = '';
                 document.getElementById('weaponValue').value = '';
                 document.getElementById('weaponDesc').value = '';
             } else if (category === 'apparel') {
@@ -896,16 +866,12 @@
                     id: 'item-' + Date.now(),
                     name: document.getElementById('apparelName').value,
                     dr: document.getElementById('apparelDR').value || 'N/A',
-                    condition: document.getElementById('apparelCondition').value || 100,
-                    weight: parseFloat(document.getElementById('apparelWeight').value) || 0,
                     value: parseFloat(document.getElementById('apparelValue').value) || 0,
                     description: document.getElementById('apparelDesc').value,
                     favorite: false
                 };
                 document.getElementById('apparelName').value = '';
                 document.getElementById('apparelDR').value = '';
-                document.getElementById('apparelCondition').value = '100';
-                document.getElementById('apparelWeight').value = '';
                 document.getElementById('apparelValue').value = '';
                 document.getElementById('apparelDesc').value = '';
             } else if (category === 'misc') {
@@ -917,7 +883,6 @@
                     id: 'item-' + Date.now(),
                     name: document.getElementById('miscName').value,
                     quantity: parseInt(document.getElementById('miscQuantity').value) || 1,
-                    weight: parseFloat(document.getElementById('miscWeight').value) || 0,
                     value: parseFloat(document.getElementById('miscValue').value) || 0,
                     rarity: document.getElementById('miscRarity').value || 'Common',
                     description: document.getElementById('miscDesc').value,
@@ -925,7 +890,6 @@
                 };
                 document.getElementById('miscName').value = '';
                 document.getElementById('miscQuantity').value = '1';
-                document.getElementById('miscWeight').value = '';
                 document.getElementById('miscValue').value = '';
                 document.getElementById('miscRarity').value = '';
                 document.getElementById('miscDesc').value = '';
@@ -959,7 +923,6 @@
                     id: 'item-' + Date.now(),
                     name: document.getElementById('ammoName').value,
                     quantity: parseInt(document.getElementById('ammoQuantity').value) || 1,
-                    weight: parseFloat(document.getElementById('ammoWeight').value) || 0,
                     value: parseFloat(document.getElementById('ammoValue').value) || 0,
                     weapon: document.getElementById('ammoWeapon').value || 'General',
                     description: document.getElementById('ammoDesc').value,
@@ -967,7 +930,6 @@
                 };
                 document.getElementById('ammoName').value = '';
                 document.getElementById('ammoQuantity').value = '';
-                document.getElementById('ammoWeight').value = '';
                 document.getElementById('ammoValue').value = '';
                 document.getElementById('ammoWeapon').value = '';
                 document.getElementById('ammoDesc').value = '';
@@ -1033,10 +995,6 @@
                         return (a.value || 0) - (b.value || 0);
                     } else if (sortOption === 'value-desc') {
                         return (b.value || 0) - (a.value || 0);
-                    } else if (sortOption === 'weight') {
-                        return (a.weight || 0) - (b.weight || 0);
-                    } else if (sortOption === 'weight-desc') {
-                        return (b.weight || 0) - (a.weight || 0);
                     } else if (sortOption === 'favorites') {
                         return (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0);
                     }
@@ -1085,18 +1043,13 @@
 
             if (category === 'weapons') {
                 html += `<div class="item-detail"><span class="detail-label">Damage:</span> ${item.damage}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Condition:</span> ${item.condition}%</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Weight:</span> ${item.weight} lbs</div>`;
                 html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value} caps</div>`;
             } else if (category === 'apparel') {
                 html += `<div class="item-detail"><span class="detail-label">DR:</span> ${item.dr}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Condition:</span> ${item.condition}%</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Weight:</span> ${item.weight} lbs</div>`;
                 html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value} caps</div>`;
             } else if (category === 'misc') {
                 html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
                 html += `<div class="item-detail"><span class="detail-label">Rarity:</span> ${item.rarity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Weight:</span> ${(item.weight * item.quantity).toFixed(2)} lbs</div>`;
                 html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value * item.quantity} caps</div>`;
             } else if (category === 'aid') {
                 html += `<div class="item-detail"><span class="detail-label">Effect:</span> ${item.effect}</div>`;
@@ -1106,7 +1059,6 @@
             } else if (category === 'ammo') {
                 html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
                 html += `<div class="item-detail"><span class="detail-label">Weapon:</span> ${item.weapon}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Weight:</span> ${(item.weight * item.quantity).toFixed(2)} lbs</div>`;
                 html += `<div class="item-detail"><span class="detail-label">Value:</span> ${(item.value * item.quantity).toFixed(2)} caps</div>`;
             }
 
