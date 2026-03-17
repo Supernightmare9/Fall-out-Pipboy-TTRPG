@@ -510,6 +510,43 @@
             transition: all 0.3s ease;
         }
 
+        /* ===== NAVIGATION BUTTONS ===== */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .nav-button {
+            flex: 1;
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 12px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .nav-button:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .nav-button:active {
+            transform: translateY(2px);
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1200px) {
             .main-grid {
@@ -528,6 +565,9 @@
                 grid-template-columns: 1fr;
             }
             .subtab-nav {
+                flex-direction: column;
+            }
+            .nav-buttons {
                 flex-direction: column;
             }
         }
@@ -701,12 +741,24 @@
                 <div class="perks-grid" id="perksGrid"></div>
             </div>
         </div>
+
+        <!-- NAVIGATION BUTTONS -->
+        <div class="nav-buttons">
+            <button class="nav-button" onclick="goToCharacter()">← BACK TO CHARACTER</button>
+            <button class="nav-button" onclick="previousPage()">← PREVIOUS</button>
+            <button class="nav-button" onclick="nextPage()">NEXT →</button>
+            <button class="nav-button" onclick="goToInventory()">INVENTORY →</button>
+        </div>
     </div>
 
     <script>
         const XP_PER_LEVEL = 1000;
         const MAX_HEALTH = 100;
         const MAX_ACTION_POINTS = 20;
+
+        // Define page order
+        const pages = ['stats', 'skills', 'perks'];
+        let currentPageIndex = 0;
 
         // Skills with SPECIAL alignments
         const SKILLS_BY_SPECIAL = {
@@ -750,6 +802,28 @@
             // Show selected tab and activate button
             document.getElementById(tabName).classList.add('active');
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update current page index
+            currentPageIndex = pages.indexOf(tabName);
+        }
+
+        // ===== NAVIGATION FUNCTIONS =====
+        function nextPage() {
+            currentPageIndex = (currentPageIndex + 1) % pages.length;
+            switchTab(pages[currentPageIndex]);
+        }
+
+        function previousPage() {
+            currentPageIndex = (currentPageIndex - 1 + pages.length) % pages.length;
+            switchTab(pages[currentPageIndex]);
+        }
+
+        function goToCharacter() {
+            window.location.href = 'character.html';
+        }
+
+        function goToInventory() {
+            window.location.href = 'inventory.html';
         }
 
         // ===== ADD EVENT LISTENERS TO TAB BUTTONS =====
