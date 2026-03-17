@@ -802,6 +802,17 @@
             }
         }
 
+        // Format bonus display (no + prefix for negative numbers)
+        function formatBonus(bonus) {
+            if (bonus < 0) {
+                return bonus.toString();
+            } else if (bonus > 0) {
+                return '+' + bonus;
+            } else {
+                return '0';
+            }
+        }
+
         // ===== SWITCH TABS =====
         function switchTab(tabName) {
             document.getElementById('stats').classList.remove('active');
@@ -1048,7 +1059,7 @@
                         <div class="skill-info">
                             <div class="skill-name">${skill}</div>
                             <div class="skill-special">${special}</div>
-                            <div class="skill-bonus">+${bonus}</div>
+                            <div class="skill-bonus">${formatBonus(bonus)}</div>
                         </div>
                     </div>
                     <div class="skill-controls">
