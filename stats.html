@@ -283,28 +283,8 @@
             color: #c084fc;
             font-size: 12px;
             margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: right;
             letter-spacing: 1px;
-        }
-
-        .skill-increment-toggle {
-            background-color: #9333ea;
-            border: 1px solid #c084fc;
-            color: #c084fc;
-            padding: 4px 10px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: 0 0 3px #c084fc;
-            transition: all 0.2s ease;
-        }
-
-        .skill-increment-toggle:hover {
-            background-color: #a84cc0;
-            box-shadow: 0 0 10px rgba(192, 132, 252, 0.5);
         }
 
         /* ===== SKILLS SECTION ===== */
@@ -712,16 +692,6 @@
             .add-effect-btn {
                 width: 100%;
             }
-
-            .tag-header {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .skill-increment-toggle {
-                width: 100%;
-                text-align: center;
-            }
         }
     </style>
 </head>
@@ -813,10 +783,7 @@
         <div class="main-grid">
             <!-- SKILLS -->
             <div class="stat-box">
-                <div class="tag-header">
-                    <span>Skills - Tag <span class="tag-count-badge" id="tagBadge">0/3</span></span>
-                    <button class="skill-increment-toggle" id="incrementToggle" onclick="toggleIncrement()">+1 Mode</button>
-                </div>
+                <div class="tag-header">Tag <span class="tag-count-badge" id="tagBadge">0/3</span></div>
                 <div class="skills-grid" id="skillsGrid"></div>
             </div>
 
@@ -935,7 +902,6 @@
         let db;
         const DB_NAME = 'PipBoyGameDB';
         const STORE_NAME = 'players';
-        let skillIncrement = 5; // Default to 5, can be toggled to 1
 
         // Initialize IndexedDB
         function initDB() {
@@ -1042,13 +1008,6 @@
             agility: '+1 AGI',
             luck: '+1 LCK'
         };
-
-        // ===== TOGGLE SKILL INCREMENT =====
-        function toggleIncrement() {
-            skillIncrement = skillIncrement === 5 ? 1 : 5;
-            const button = document.getElementById('incrementToggle');
-            button.textContent = skillIncrement === 1 ? '+5 Mode' : '+1 Mode';
-        }
 
         // Get SPECIAL for skill
         function getSpecialForSkill(skill) {
@@ -1535,9 +1494,9 @@
                             </div>
                         </div>
                         <div class="skill-controls">
-                            <button class="skill-btn" onclick="updateSkill('${skill}', -${skillIncrement})">−</button>
+                            <button class="skill-btn" onclick="updateSkill('${skill}', -1)">−</button>
                             <span class="skill-value">${skillValue}</span>
-                            <button class="skill-btn" onclick="updateSkill('${skill}', ${skillIncrement})">+</button>
+                            <button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button>
                         </div>
                     </div>
                 `;
