@@ -358,18 +358,18 @@
         }
 
         .data-item {
-            padding: 15px 0;
-            border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+            padding: 15px;
+            background-color: #0a0a0a;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 3px;
+            margin-bottom: 15px;
             transition: all 0.3s ease;
-        }
-
-        .data-item:last-child {
-            border-bottom: none;
+            position: relative;
         }
 
         .data-item:hover {
             background-color: rgba(74, 222, 128, 0.05);
-            padding-left: 10px;
+            border-color: rgba(74, 222, 128, 0.4);
         }
 
         .item-title {
@@ -384,13 +384,98 @@
             color: #4ade80;
             font-size: 11px;
             line-height: 1.6;
+            margin-bottom: 5px;
         }
 
         .item-status {
             color: #4ade80;
             font-size: 10px;
-            margin-top: 5px;
             opacity: 0.8;
+        }
+
+        .item-delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #8b3a3a;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 4px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 3px #ff6b6b;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+
+        .item-delete-btn:hover {
+            background-color: #a84a4a;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        /* ===== ADD FORM SECTION ===== */
+        .add-form {
+            background-color: #0a0a0a;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            padding: 20px;
+            border-radius: 3px;
+            margin-top: 20px;
+        }
+
+        .form-title {
+            color: #c084fc;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #c084fc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            color: #4ade80;
+            font-size: 10px;
+            text-shadow: 0 0 3px #4ade80;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-input {
+            background-color: #1a1a1a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-shadow: 0 0 5px #4ade80;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: #fbbf24;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
         }
 
         /* ===== BUTTON SECTION ===== */
@@ -426,6 +511,13 @@
             color: #fbbf24;
             text-shadow: 0 0 10px #fbbf24;
             transform: translateY(-2px);
+        }
+
+        .action-button.small {
+            flex: 0;
+            min-width: auto;
+            padding: 8px 12px;
+            font-size: 10px;
         }
 
         /* ===== NAVIGATION ===== */
@@ -657,18 +749,47 @@
                             <div class="item-title">Preston Garvey</div>
                             <div class="item-description">Leader of the Minutemen faction. Provides settlement quests and faction opportunities.</div>
                             <div class="item-status">Location: Concord | Faction: Minutemen</div>
+                            <button class="item-delete-btn" onclick="deleteNPC(0)">DELETE</button>
                         </li>
                         <li class="data-item">
                             <div class="item-title">Piper Wright</div>
                             <div class="item-description">Investigative reporter for the Publick Occurrences. Can become a companion.</div>
                             <div class="item-status">Location: Diamond City | Affinity: Friendly</div>
+                            <button class="item-delete-btn" onclick="deleteNPC(1)">DELETE</button>
                         </li>
                         <li class="data-item">
                             <div class="item-title">Codsworth</div>
                             <div class="item-description">Your pre-war Mr. Handy butler. Can become a companion and settlement builder.</div>
                             <div class="item-status">Status: Companion | Affinity: Loyal</div>
+                            <button class="item-delete-btn" onclick="deleteNPC(2)">DELETE</button>
                         </li>
                     </ul>
+
+                    <!-- ADD NPC FORM -->
+                    <div class="add-form">
+                        <div class="form-title">+ Add New NPC</div>
+                        <div class="form-group">
+                            <label class="form-label">NPC Name</label>
+                            <input type="text" class="form-input" id="npcName" placeholder="e.g., Preston Garvey">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-input" id="npcDescription" placeholder="What is this NPC known for?">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-input" id="npcLocation" placeholder="e.g., Diamond City">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Affinity/Notes</label>
+                            <input type="text" class="form-input" id="npcNotes" placeholder="e.g., Faction: Minutemen | Affinity: Friendly">
+                        </div>
+                        <div class="form-buttons">
+                            <button class="action-button small" onclick="addNPC()">ADD NPC</button>
+                            <button class="action-button small" onclick="clearNPCForm()" style="background-color: #8b3a3a; border-color: #ff6b6b; color: #ff6b6b; text-shadow: 0 0 5px #ff6b6b;">CLEAR</button>
+                        </div>
+                        <div class="message" id="npcMessage"></div>
+                    </div>
                 </div>
             </div>
 
@@ -681,18 +802,53 @@
                             <div class="item-title">Minutemen</div>
                             <div class="item-description">Colonial militia dedicated to helping the people of the Commonwealth.</div>
                             <div class="item-status">Reputation: Friendly | Quests Available: Yes</div>
+                            <button class="item-delete-btn" onclick="deleteFaction(0)">DELETE</button>
                         </li>
                         <li class="data-item">
                             <div class="item-title">The Brotherhood of Steel</div>
                             <div class="item-description">Military order seeking to control advanced technology.</div>
                             <div class="item-status">Reputation: Neutral | Quests Available: Yes</div>
+                            <button class="item-delete-btn" onclick="deleteFaction(1)">DELETE</button>
                         </li>
                         <li class="data-item">
                             <div class="item-title">The Institute</div>
                             <div class="item-description">Secret scientific organization hidden beneath the Commonwealth.</div>
                             <div class="item-status">Reputation: Unknown | Quests Available: No</div>
+                            <button class="item-delete-btn" onclick="deleteFaction(2)">DELETE</button>
                         </li>
                     </ul>
+
+                    <!-- ADD FACTION FORM -->
+                    <div class="add-form">
+                        <div class="form-title">+ Add New Faction</div>
+                        <div class="form-group">
+                            <label class="form-label">Faction Name</label>
+                            <input type="text" class="form-input" id="factionName" placeholder="e.g., The Brotherhood of Steel">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-input" id="factionDescription" placeholder="What does this faction do?">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reputation</label>
+                            <select class="form-input" id="factionReputation" style="cursor: pointer;">
+                                <option value="">Select reputation...</option>
+                                <option value="Friendly">Friendly</option>
+                                <option value="Neutral">Neutral</option>
+                                <option value="Hostile">Hostile</option>
+                                <option value="Unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <input type="text" class="form-input" id="factionNotes" placeholder="e.g., Quests Available: Yes">
+                        </div>
+                        <div class="form-buttons">
+                            <button class="action-button small" onclick="addFaction()">ADD FACTION</button>
+                            <button class="action-button small" onclick="clearFactionForm()" style="background-color: #8b3a3a; border-color: #ff6b6b; color: #ff6b6b; text-shadow: 0 0 5px #ff6b6b;">CLEAR</button>
+                        </div>
+                        <div class="message" id="factionMessage"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -707,6 +863,10 @@
     </div>
 
     <script>
+        // ===== DATA ARRAYS =====
+        let customNPCs = [];
+        let customFactions = [];
+
         // ===== MAIN TAB SWITCHING =====
         function switchMainTab(tabName) {
             document.getElementById('profile').classList.remove('active');
@@ -787,6 +947,182 @@
             }, 3000);
         }
 
+        // ===== ADD NPC =====
+        function addNPC() {
+            const name = document.getElementById('npcName').value.trim();
+            const description = document.getElementById('npcDescription').value.trim();
+            const location = document.getElementById('npcLocation').value.trim();
+            const notes = document.getElementById('npcNotes').value.trim();
+
+            if (!name) {
+                const message = document.getElementById('npcMessage');
+                message.textContent = '⚠ Please enter an NPC name!';
+                message.className = 'message error';
+                return;
+            }
+
+            customNPCs.push({
+                id: Date.now(),
+                name: name,
+                description: description,
+                location: location,
+                notes: notes
+            });
+
+            localStorage.setItem('customNPCs', JSON.stringify(customNPCs));
+            clearNPCForm();
+            renderNPCs();
+
+            const message = document.getElementById('npcMessage');
+            message.textContent = `✓ ${name} added successfully!`;
+            message.className = 'message success';
+            setTimeout(() => {
+                message.textContent = '';
+            }, 3000);
+        }
+
+        // ===== DELETE NPC =====
+        function deleteNPC(id) {
+            if (id < 0 || id >= customNPCs.length) return;
+            customNPCs.splice(id, 1);
+            localStorage.setItem('customNPCs', JSON.stringify(customNPCs));
+            renderNPCs();
+        }
+
+        // ===== CLEAR NPC FORM =====
+        function clearNPCForm() {
+            document.getElementById('npcName').value = '';
+            document.getElementById('npcDescription').value = '';
+            document.getElementById('npcLocation').value = '';
+            document.getElementById('npcNotes').value = '';
+        }
+
+        // ===== RENDER NPCs =====
+        function renderNPCs() {
+            const list = document.getElementById('npcsList');
+            let html = '';
+
+            customNPCs.forEach((npc, index) => {
+                html += `
+                    <li class="data-item">
+                        <div class="item-title">${npc.name}</div>
+                        <div class="item-description">${npc.description}</div>
+                        <div class="item-status">Location: ${npc.location} | ${npc.notes}</div>
+                        <button class="item-delete-btn" onclick="deleteNPC(${index})">DELETE</button>
+                    </li>
+                `;
+            });
+
+            // Re-add default NPCs
+            html = `
+                <li class="data-item">
+                    <div class="item-title">Preston Garvey</div>
+                    <div class="item-description">Leader of the Minutemen faction. Provides settlement quests and faction opportunities.</div>
+                    <div class="item-status">Location: Concord | Faction: Minutemen</div>
+                </li>
+                <li class="data-item">
+                    <div class="item-title">Piper Wright</div>
+                    <div class="item-description">Investigative reporter for the Publick Occurrences. Can become a companion.</div>
+                    <div class="item-status">Location: Diamond City | Affinity: Friendly</div>
+                </li>
+                <li class="data-item">
+                    <div class="item-title">Codsworth</div>
+                    <div class="item-description">Your pre-war Mr. Handy butler. Can become a companion and settlement builder.</div>
+                    <div class="item-status">Status: Companion | Affinity: Loyal</div>
+                </li>
+            ` + html;
+
+            list.innerHTML = html;
+        }
+
+        // ===== ADD FACTION =====
+        function addFaction() {
+            const name = document.getElementById('factionName').value.trim();
+            const description = document.getElementById('factionDescription').value.trim();
+            const reputation = document.getElementById('factionReputation').value.trim();
+            const notes = document.getElementById('factionNotes').value.trim();
+
+            if (!name) {
+                const message = document.getElementById('factionMessage');
+                message.textContent = '⚠ Please enter a faction name!';
+                message.className = 'message error';
+                return;
+            }
+
+            customFactions.push({
+                id: Date.now(),
+                name: name,
+                description: description,
+                reputation: reputation,
+                notes: notes
+            });
+
+            localStorage.setItem('customFactions', JSON.stringify(customFactions));
+            clearFactionForm();
+            renderFactions();
+
+            const message = document.getElementById('factionMessage');
+            message.textContent = `✓ ${name} added successfully!`;
+            message.className = 'message success';
+            setTimeout(() => {
+                message.textContent = '';
+            }, 3000);
+        }
+
+        // ===== DELETE FACTION =====
+        function deleteFaction(id) {
+            if (id < 0 || id >= customFactions.length) return;
+            customFactions.splice(id, 1);
+            localStorage.setItem('customFactions', JSON.stringify(customFactions));
+            renderFactions();
+        }
+
+        // ===== CLEAR FACTION FORM =====
+        function clearFactionForm() {
+            document.getElementById('factionName').value = '';
+            document.getElementById('factionDescription').value = '';
+            document.getElementById('factionReputation').value = '';
+            document.getElementById('factionNotes').value = '';
+        }
+
+        // ===== RENDER FACTIONS =====
+        function renderFactions() {
+            const list = document.getElementById('factionsList');
+            let html = '';
+
+            customFactions.forEach((faction, index) => {
+                html += `
+                    <li class="data-item">
+                        <div class="item-title">${faction.name}</div>
+                        <div class="item-description">${faction.description}</div>
+                        <div class="item-status">Reputation: ${faction.reputation} | ${faction.notes}</div>
+                        <button class="item-delete-btn" onclick="deleteFaction(${index})">DELETE</button>
+                    </li>
+                `;
+            });
+
+            // Re-add default factions
+            html = `
+                <li class="data-item">
+                    <div class="item-title">Minutemen</div>
+                    <div class="item-description">Colonial militia dedicated to helping the people of the Commonwealth.</div>
+                    <div class="item-status">Reputation: Friendly | Quests Available: Yes</div>
+                </li>
+                <li class="data-item">
+                    <div class="item-title">The Brotherhood of Steel</div>
+                    <div class="item-description">Military order seeking to control advanced technology.</div>
+                    <div class="item-status">Reputation: Neutral | Quests Available: Yes</div>
+                </li>
+                <li class="data-item">
+                    <div class="item-title">The Institute</div>
+                    <div class="item-description">Secret scientific organization hidden beneath the Commonwealth.</div>
+                    <div class="item-status">Reputation: Unknown | Quests Available: No</div>
+                </li>
+            ` + html;
+
+            list.innerHTML = html;
+        }
+
         // ===== CLEAR CHARACTER DATA =====
         function clearCharacterData() {
             if (confirm('Are you sure you want to clear all character data?')) {
@@ -845,6 +1181,19 @@
             const savedBackstory = localStorage.getItem('characterBackstory');
             if (savedBackstory) {
                 document.getElementById('characterBackstory').value = savedBackstory;
+            }
+
+            // Load custom NPCs and Factions
+            const savedNPCs = localStorage.getItem('customNPCs');
+            if (savedNPCs) {
+                customNPCs = JSON.parse(savedNPCs);
+                renderNPCs();
+            }
+
+            const savedFactions = localStorage.getItem('customFactions');
+            if (savedFactions) {
+                customFactions = JSON.parse(savedFactions);
+                renderFactions();
             }
         }
 
