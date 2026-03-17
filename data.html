@@ -583,6 +583,18 @@
             text-shadow: 0 0 5px #ff6b6b;
         }
 
+        .static-value {
+            background-color: #0a0a0a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px #4ade80;
+            width: 100%;
+            border-radius: 3px;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .character-profile {
@@ -667,7 +679,7 @@
 
                     <div class="info-item">
                         <div class="info-label">Vault Number</div>
-                        <input type="text" class="info-input" id="charVault" placeholder="e.g., Vault 111">
+                        <div class="static-value">VAULT 215</div>
                     </div>
 
                     <div class="info-item">
@@ -884,14 +896,12 @@
         function saveCharacterData() {
             const charName = document.getElementById('charName').value;
             const charRace = document.getElementById('charRace').value;
-            const charVault = document.getElementById('charVault').value;
             const charClass = document.getElementById('charClass').value;
             const charAlignment = document.getElementById('charAlignment').value;
 
             const characterData = {
                 name: charName,
                 race: charRace,
-                vault: charVault,
                 class: charClass,
                 alignment: charAlignment
             };
@@ -1069,7 +1079,6 @@
             if (confirm('Are you sure you want to clear all character data?')) {
                 document.getElementById('charName').value = 'Vault Dweller';
                 document.getElementById('charRace').value = '';
-                document.getElementById('charVault').value = '';
                 document.getElementById('charClass').value = '';
                 document.getElementById('charAlignment').value = '';
                 document.getElementById('characterImageContainer').innerHTML = '<div class="character-image-placeholder">No image uploaded</div>';
@@ -1108,7 +1117,6 @@
                 const data = JSON.parse(savedData);
                 document.getElementById('charName').value = data.name || 'Vault Dweller';
                 document.getElementById('charRace').value = data.race || '';
-                document.getElementById('charVault').value = data.vault || '';
                 document.getElementById('charClass').value = data.class || '';
                 document.getElementById('charAlignment').value = data.alignment || '';
                 document.getElementById('characterNameDisplay').textContent = data.name || 'VAULT DWELLER';
