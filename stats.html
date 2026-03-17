@@ -937,12 +937,12 @@
 
         <!-- SUBTAB NAVIGATION -->
         <div class="subtab-nav">
-            <button class="subtab-button active" onclick="switchTab('stats')">Stats</button>
-            <button class="subtab-button" onclick="switchTab('perks')">Perks</button>
+            <button class="subtab-button active" onclick="switchTab(event, 'stats')">Stats</button>
+            <button class="subtab-button" onclick="switchTab(event, 'perks')">Perks</button>
         </div>
 
         <!-- STATS TAB CONTENT -->
-        <div id="stats-tab" class="subtab-content active">
+        <div id="stats" class="subtab-content active">
             <!-- TOP STATS GRID (Experience, Health, Skills) -->
             <div class="stats-grid">
                 <!-- EXPERIENCE & LEVEL -->
@@ -1023,6 +1023,7 @@
             <div class="main-grid">
                 <!-- SKILLS -->
                 <div class="stat-box">
+                    <div class="stat-title">Skills</div>
                     <div class="tag-header">Tag <span class="tag-count-badge" id="tagBadge">0/3</span></div>
                     <div class="skills-grid" id="skillsGrid"></div>
                 </div>
@@ -1132,7 +1133,7 @@
         </div>
 
         <!-- PERKS TAB CONTENT -->
-        <div id="perks-tab" class="subtab-content">
+        <div id="perks" class="subtab-content">
             <div class="stat-box">
                 <div class="stat-title">Character Perks</div>
                 <div class="perks-grid" id="perksGrid"></div>
@@ -1298,17 +1299,17 @@
         }
 
         // ===== SWITCH TABS =====
-        function switchTab(tabName) {
+        function switchTab(event, tabName) {
             // Hide all tabs
-            document.getElementById('stats-tab').classList.remove('active');
-            document.getElementById('perks-tab').classList.remove('active');
+            document.getElementById('stats').classList.remove('active');
+            document.getElementById('perks').classList.remove('active');
 
             // Remove active class from all buttons
             const buttons = document.querySelectorAll('.subtab-button');
             buttons.forEach(btn => btn.classList.remove('active'));
 
             // Show selected tab and activate button
-            document.getElementById(tabName + '-tab').classList.add('active');
+            document.getElementById(tabName).classList.add('active');
             event.target.classList.add('active');
         }
 
@@ -1695,10 +1696,3 @@
                 let playerData = await getPlayerDataFromDB();
                 
                 if (!playerData) return;
-
-                if (!playerData.statusEffects) {
-                    playerData.statusEffects = [];
-                }
-
-
-        
