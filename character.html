@@ -196,172 +196,44 @@
             text-shadow: 0 0 2px var(--vault-green);
         }
 
-        .stat-value.editable {
-            cursor: pointer;
-            border-bottom: 1px dotted var(--vault-gold);
-            padding: 2px 5px;
-            transition: all 0.2s ease;
-        }
-
-        .stat-value.editable:hover {
-            background-color: rgba(74, 222, 128, 0.1);
-            border-radius: 2px;
-            color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-        }
-
-        .perk-list {
-            list-style: none;
-        }
-
-        .perk-item {
+        .inventory-summary {
             background-color: var(--vault-blue-dark);
-            border-left: 3px solid var(--vault-gold);
+            border: 1px solid var(--vault-green);
             padding: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             border-radius: 2px;
-            transition: all 0.3s ease;
-            position: relative;
+            font-size: 11px;
         }
 
-        .perk-item:hover {
-            background-color: var(--vault-blue-light);
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-        }
-
-        .perk-name {
+        .inventory-summary .category {
             color: var(--vault-gold);
             font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
             text-shadow: 0 0 3px var(--vault-gold);
+            text-transform: uppercase;
         }
 
-        .perk-desc {
+        .inventory-summary .count {
             color: var(--vault-green);
-            font-size: 10px;
-            margin-top: 5px;
-            font-style: italic;
             text-shadow: 0 0 2px var(--vault-green);
         }
 
-        .remove-perk {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            background-color: var(--vault-error);
-            color: var(--vault-dark);
-            border: none;
-            padding: 2px 6px;
-            border-radius: 2px;
-            cursor: pointer;
-            font-size: 9px;
-            font-weight: bold;
-            transition: all 0.2s ease;
-            z-index: 1;
-        }
-
-        .remove-perk:hover {
-            background-color: #ff9999;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
-        }
-
-        .skill-bar {
-            margin-bottom: 15px;
-        }
-
-        .skill-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .skill-name {
-            color: var(--vault-gold);
-            font-weight: bold;
+        .stat-list {
+            list-style: none;
             font-size: 11px;
-            text-transform: uppercase;
-            text-shadow: 0 0 3px var(--vault-gold);
+            margin-bottom: 10px;
         }
 
-        .skill-level {
+        .stat-list-item {
             color: var(--vault-green);
-            font-size: 11px;
-            cursor: pointer;
-            border-bottom: 1px dotted var(--vault-gold);
-            padding: 0 3px;
-            transition: all 0.2s ease;
             text-shadow: 0 0 2px var(--vault-green);
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(74, 222, 128, 0.1);
         }
 
-        .skill-level:hover {
-            background-color: rgba(74, 222, 128, 0.1);
-            border-radius: 2px;
+        .stat-list-label {
             color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-        }
-
-        .skill-bar-bg {
-            background-color: var(--vault-dark);
-            border: 1px solid var(--vault-green);
-            height: 20px;
-            border-radius: 2px;
-            overflow: hidden;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .skill-bar-fill {
-            background: linear-gradient(90deg, var(--vault-green), var(--vault-gold));
-            height: 100%;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
-            transition: width 0.3s ease;
-        }
-
-        .add-button {
-            background-color: var(--vault-blue-dark);
-            border: 1px solid var(--vault-green);
-            color: var(--vault-green);
-            padding: 6px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
             font-weight: bold;
-            cursor: pointer;
-            border-radius: 2px;
-            transition: all 0.2s ease;
-            margin-top: 10px;
-            text-shadow: 0 0 3px var(--vault-green);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            z-index: 1;
-            position: relative;
-        }
-
-        .add-button:hover {
-            background-color: var(--vault-blue-light);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-            text-shadow: 0 0 5px var(--vault-gold);
-        }
-
-        .stat-input {
-            background-color: var(--vault-dark);
-            border: 1px solid var(--vault-gold);
-            color: var(--vault-gold);
-            padding: 2px 5px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            text-shadow: 0 0 5px var(--vault-gold);
-            transition: all 0.3s ease;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-            position: relative;
-            z-index: 2;
-        }
-
-        .stat-input:focus {
-            outline: none;
-            border-color: var(--vault-gold);
-            box-shadow: 0 0 10px rgba(251, 191, 36, 0.4), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            text-shadow: 0 0 3px var(--vault-gold);
         }
 
         .nav-buttons {
@@ -400,6 +272,13 @@
             color: var(--vault-gold);
             text-shadow: 0 0 10px var(--vault-gold);
             transform: translateY(-2px);
+        }
+
+        .empty-state {
+            color: var(--vault-info);
+            font-style: italic;
+            font-size: 11px;
+            text-shadow: 0 0 2px var(--vault-info);
         }
 
         @media (max-width: 768px) {
@@ -441,80 +320,67 @@
 
         <!-- CHARACTER INFO SECTION -->
         <div class="character-container">
-            <!-- LEFT COLUMN: BASIC STATS -->
+            <!-- LEFT COLUMN: CHARACTER DATA -->
             <div class="character-section">
-                <h3>⚙ Basic Stats</h3>
+                <h3>⚙ Character Information</h3>
                 <div class="stat-row">
                     <span class="stat-label">Name:</span>
-                    <span class="stat-value editable" onclick="editStat('name', this)">Vault Dweller</span>
+                    <span class="stat-value" id="characterName">No Data</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Age:</span>
-                    <span class="stat-value editable" onclick="editStat('age', this)">25</span>
+                    <span class="stat-label">Level:</span>
+                    <span class="stat-value" id="characterLevel">No Data</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Experience:</span>
+                    <span class="stat-value" id="characterExp">No Data</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Health:</span>
+                    <span class="stat-value" id="characterHealth">No Data</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Vault:</span>
                     <span class="stat-value">215</span>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Experience:</span>
-                    <span class="stat-value" id="experienceDisplay">5,250</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Level:</span>
-                    <span class="stat-value" id="levelDisplay">10</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Health:</span>
-                    <span class="stat-value editable" onclick="editStat('health', this)">100/100</span>
-                </div>
             </div>
 
-            <!-- RIGHT COLUMN: ATTRIBUTES -->
+            <!-- RIGHT COLUMN: STATS DATA -->
             <div class="character-section">
-                <h3>💪 Attributes</h3>
+                <h3>📊 Character Stats</h3>
                 <div class="stat-row">
-                    <span class="stat-label">Strength:</span>
-                    <span class="stat-value editable" onclick="editStat('strength', this)">8</span>
+                    <span class="stat-label">Total Kills:</span>
+                    <span class="stat-value" id="totalKills">No Data</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Perception:</span>
-                    <span class="stat-value editable" onclick="editStat('perception', this)">7</span>
+                    <span class="stat-label">Deaths:</span>
+                    <span class="stat-value" id="totalDeaths">No Data</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Endurance:</span>
-                    <span class="stat-value editable" onclick="editStat('endurance', this)">8</span>
+                    <span class="stat-label">Time Played:</span>
+                    <span class="stat-value" id="timePlayed">No Data</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Charisma:</span>
-                    <span class="stat-value editable" onclick="editStat('charisma', this)">6</span>
+                    <span class="stat-label">Quests Completed:</span>
+                    <span class="stat-value" id="questsCompleted">No Data</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Intelligence:</span>
-                    <span class="stat-value editable" onclick="editStat('intelligence', this)">9</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Agility:</span>
-                    <span class="stat-value editable" onclick="editStat('agility', this)">7</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Luck:</span>
-                    <span class="stat-value editable" onclick="editStat('luck', this)">5</span>
+                    <span class="stat-label">Locations Found:</span>
+                    <span class="stat-value" id="locationsFound">No Data</span>
                 </div>
             </div>
         </div>
 
-        <!-- SKILLS SECTION -->
+        <!-- INVENTORY SUMMARY SECTION -->
         <div class="character-section">
-            <h3>🎯 Skills</h3>
-            <div id="skillsContainer"></div>
+            <h3>📦 Inventory Summary</h3>
+            <div id="inventorySummary" class="empty-state">Loading inventory data...</div>
         </div>
 
-        <!-- PERKS SECTION -->
+        <!-- ACTIVE QUESTS SECTION -->
         <div class="character-section">
-            <h3>⭐ Perks</h3>
-            <ul class="perk-list" id="perksContainer"></ul>
-            <button class="add-button" onclick="addPerk()">+ Add Perk</button>
+            <h3>📋 Active Quests</h3>
+            <ul class="stat-list" id="activeQuests"></ul>
         </div>
 
         <!-- NAVIGATION -->
@@ -532,183 +398,86 @@
     </div>
 
     <script>
-        // ===== CHARACTER DATA =====
-        let character = {
-            name: 'Vault Dweller',
-            age: 25,
-            vault: 215,
-            experience: 5250,
-            level: 10,
-            health: '100/100',
-            attributes: {
-                strength: 8,
-                perception: 7,
-                endurance: 8,
-                charisma: 6,
-                intelligence: 9,
-                agility: 7,
-                luck: 5
-            },
-            skills: {
-                'Barter': 75,
-                'Energy Weapons': 85,
-                'Explosives': 65,
-                'Lockpick': 80,
-                'Medicine': 70,
-                'Science': 90
-            },
-            perks: [
-                { name: 'Tag!', desc: 'Choose one additional Tag Skill' },
-                { name: 'Educated', desc: '+1 to all skills' },
-                { name: 'Night Person', desc: '+1 Intelligence and Perception at night' },
-                { name: 'Intense Training', desc: 'Increase any attribute by 1' }
-            ]
-        };
-
-        // ===== LOAD DATA =====
-        window.addEventListener('DOMContentLoaded', function() {
-            loadCharacter();
-            renderSkills();
-            renderPerks();
-        });
-
-        // ===== LOAD FROM LOCAL STORAGE =====
-        function loadCharacter() {
-            const saved = localStorage.getItem('pipboyCharacter');
-            if (saved) {
-                character = JSON.parse(saved);
-            }
-        }
-
-        // ===== SAVE TO LOCAL STORAGE =====
-        function saveCharacter() {
-            localStorage.setItem('pipboyCharacter', JSON.stringify(character));
-        }
-
-        // ===== EDIT STAT =====
-        function editStat(statType, element) {
-            const currentValue = element.textContent;
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = currentValue;
-            input.className = 'stat-input';
-            
-            element.textContent = '';
-            element.appendChild(input);
-            input.focus();
-
-            function saveStat() {
-                const newValue = input.value;
-                
-                if (statType === 'name') character.name = newValue;
-                else if (statType === 'age') character.age = newValue;
-                else if (statType === 'health') character.health = newValue;
-                else if (statType === 'strength') character.attributes.strength = parseInt(newValue) || 0;
-                else if (statType === 'perception') character.attributes.perception = parseInt(newValue) || 0;
-                else if (statType === 'endurance') character.attributes.endurance = parseInt(newValue) || 0;
-                else if (statType === 'charisma') character.attributes.charisma = parseInt(newValue) || 0;
-                else if (statType === 'intelligence') character.attributes.intelligence = parseInt(newValue) || 0;
-                else if (statType === 'agility') character.attributes.agility = parseInt(newValue) || 0;
-                else if (statType === 'luck') character.attributes.luck = parseInt(newValue) || 0;
-
-                element.textContent = newValue;
-                element.classList.add('editable');
-                saveCharacter();
+        // ===== LOAD DATA FROM LOCAL STORAGE =====
+        function loadAllData() {
+            // Load character data
+            const characterData = localStorage.getItem('pipboyCharacter');
+            if (characterData) {
+                const character = JSON.parse(characterData);
+                document.getElementById('characterName').textContent = character.name || 'Vault Dweller';
+                document.getElementById('characterLevel').textContent = character.level || 'N/A';
+                document.getElementById('characterExp').textContent = character.experience || 'N/A';
+                document.getElementById('characterHealth').textContent = character.health || 'N/A';
             }
 
-            input.addEventListener('blur', saveStat);
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') saveStat();
-            });
-        }
+            // Load stats data
+            const statsData = localStorage.getItem('pipboyStats');
+            if (statsData) {
+                const stats = JSON.parse(statsData);
+                document.getElementById('totalKills').textContent = stats.totalKills || 'N/A';
+                document.getElementById('totalDeaths').textContent = stats.totalDeaths || 'N/A';
+                document.getElementById('timePlayed').textContent = stats.timePlayed || 'N/A';
+                document.getElementById('questsCompleted').textContent = stats.quests || 'N/A';
+                document.getElementById('locationsFound').textContent = stats.locations || 'N/A';
+            }
 
-        // ===== RENDER SKILLS =====
-        function renderSkills() {
-            const container = document.getElementById('skillsContainer');
-            container.innerHTML = '';
+            // Load inventory data
+            const inventoryData = localStorage.getItem('pipboyInventory');
+            if (inventoryData) {
+                const inventory = JSON.parse(inventoryData);
+                const summaryDiv = document.getElementById('inventorySummary');
+                let summaryHTML = '';
 
-            Object.entries(character.skills).forEach(([skillName, skillValue]) => {
-                const html = `
-                    <div class="skill-bar">
-                        <div class="skill-header">
-                            <span class="skill-name">${skillName}</span>
-                            <span class="skill-level" onclick="editSkill('${skillName}', this)">${skillValue}%</span>
+                let totalItems = 0;
+                Object.keys(inventory).forEach(category => {
+                    const count = inventory[category].length;
+                    totalItems += count;
+                    summaryHTML += `
+                        <div class="inventory-summary">
+                            <span class="category">${category.toUpperCase()}:</span>
+                            <span class="count">${count} item(s)</span>
                         </div>
-                        <div class="skill-bar-bg">
-                            <div class="skill-bar-fill" style="width: ${skillValue}%;"></div>
-                        </div>
-                    </div>
-                `;
-                container.innerHTML += html;
-            });
-        }
+                    `;
+                });
 
-        // ===== EDIT SKILL =====
-        function editSkill(skillName, element) {
-            const currentValue = element.textContent.replace('%', '');
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.min = '0';
-            input.max = '100';
-            input.value = currentValue;
-            input.className = 'stat-input';
-            input.style.width = '50px';
-            
-            element.textContent = '';
-            element.appendChild(input);
-            input.focus();
+                if (totalItems === 0) {
+                    summaryHTML = '<div class="empty-state">No items in inventory</div>';
+                } else {
+                    summaryHTML = `<div style="color: var(--vault-gold); text-shadow: 0 0 3px var(--vault-gold); font-weight: bold; margin-bottom: 10px;">Total Items: ${totalItems}</div>` + summaryHTML;
+                }
 
-            function saveSkill() {
-                const newValue = Math.max(0, Math.min(100, parseInt(input.value) || 0));
-                character.skills[skillName] = newValue;
-                renderSkills();
-                saveCharacter();
+                summaryDiv.innerHTML = summaryHTML;
+            } else {
+                document.getElementById('inventorySummary').innerHTML = '<div class="empty-state">No inventory data available</div>';
             }
 
-            input.addEventListener('blur', saveSkill);
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') saveSkill();
-            });
-        }
+            // Load quest data
+            const dataData = localStorage.getItem('pipboyData');
+            if (dataData) {
+                const data = JSON.parse(dataData);
+                const questsList = document.getElementById('activeQuests');
+                const activeQuests = data.quests.filter(q => q.status === 'ACTIVE');
 
-        // ===== RENDER PERKS =====
-        function renderPerks() {
-            const container = document.getElementById('perksContainer');
-            container.innerHTML = '';
-
-            character.perks.forEach((perk, index) => {
-                const html = `
-                    <li class="perk-item">
-                        <button class="remove-perk" onclick="removePerk(${index})">✕</button>
-                        <div class="perk-name">${perk.name}</div>
-                        <div class="perk-desc">${perk.desc}</div>
-                    </li>
-                `;
-                container.innerHTML += html;
-            });
-        }
-
-        // ===== ADD PERK =====
-        function addPerk() {
-            const perkName = prompt('Enter perk name:');
-            if (!perkName) return;
-
-            const perkDesc = prompt('Enter perk description:');
-            if (!perkDesc) return;
-
-            character.perks.push({ name: perkName, desc: perkDesc });
-            renderPerks();
-            saveCharacter();
-        }
-
-        // ===== REMOVE PERK =====
-        function removePerk(index) {
-            if (confirm('Remove this perk?')) {
-                character.perks.splice(index, 1);
-                renderPerks();
-                saveCharacter();
+                if (activeQuests.length === 0) {
+                    questsList.innerHTML = '<li class="stat-list-item empty-state">No active quests</li>';
+                } else {
+                    let html = '';
+                    activeQuests.forEach(quest => {
+                        html += `
+                            <li class="stat-list-item">
+                                <span class="stat-list-label">${quest.title}</span>
+                                <div style="margin-top: 3px; color: var(--vault-green); text-shadow: 0 0 2px var(--vault-green);">${quest.desc}</div>
+                            </li>
+                        `;
+                    });
+                    questsList.innerHTML = html;
+                }
+            } else {
+                document.getElementById('activeQuests').innerHTML = '<li class="stat-list-item empty-state">No quest data available</li>';
             }
         }
-    </script>
-</body>
-</html>
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', loadAllData);
+
+        // Reload data when page comes into`*
