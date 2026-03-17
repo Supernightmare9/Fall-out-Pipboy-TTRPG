@@ -1,1 +1,73 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Fallout Pipboy Login</title><link rel="stylesheet" href="css/style.css"></head><body><div class="login-container"><h1>Welcome to Fallout Pipboy</h1><form id="loginForm" onsubmit="handleLogin(event)"><label for="username">Username:</label><input type="text" id="username" name="username" required><label for="password">Password:</label><input type="password" id="password" name="password" required><button type="submit">Login</button></form></div><script>function handleLogin(event) {event.preventDefault(); const username = document.getElementById('username').value; const password = document.getElementById('password').value; const validAccounts = {'Dillon': 'test','Vault Dweller': 'vault111','Survivor': '2077','Agent': 'minutemen','Overseer': 'vault101'}; if (validAccounts[username] === password) {const playerData = {characterName: username,vault: '111',level: 1,health: 100,xp: 0}; localStorage.setItem('currentPlayer', JSON.stringify(playerData)); window.location.href = 'character.html';} else {alert('Invalid username or password!');}}</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fallout Pipboy Login</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="pip-boy-logo">PIP-BOY</div>
+            <div class="pip-version">3000</div>
+            <h1>VAULT NETWORK</h1>
+        </div>
+
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label for="username">VAULT DWELLER:</label>
+                <input type="text" id="username" name="username" placeholder="Enter Username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">SECURITY CODE:</label>
+                <input type="password" id="password" name="password" placeholder="Enter Password" required>
+            </div>
+            
+            <button type="submit">ACCESS VAULT</button>
+        </form>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-indicator"></span>
+                <span>SYSTEM ONLINE</span>
+            </div>
+            <div class="status-item">
+                <span>VAULT 111</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const validAccounts = {
+                'Dillon': 'test',
+                'Vault Dweller': 'vault111',
+                'Survivor': '2077',
+                'Agent': 'minutemen',
+                'Overseer': 'vault101'
+            };
+            
+            if (validAccounts[username] === password) {
+                const playerData = {
+                    characterName: username,
+                    vault: '111',
+                    level: 1,
+                    health: 100,
+                    xp: 0
+                };
+                localStorage.setItem('currentPlayer', JSON.stringify(playerData));
+                window.location.href = 'character.html';
+            } else {
+                alert('Invalid Vault Dweller credentials!');
+            }
+        }
+    </script>
+</body>
+</html>
