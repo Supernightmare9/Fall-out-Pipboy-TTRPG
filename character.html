@@ -3,184 +3,294 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pip-Boy Character - Vault 215</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Pip-Boy Character Menu</title>
+    <link rel="stylesheet" href="css/branding.css">
     <style>
-        /* Character-specific styles */
-        .character-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
+        /* ===========================
+           FALLOUT PIPBOY CHARACTER MENU
+           =========================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .character-section {
-            background-color: var(--vault-darker);
-            border: 1px solid rgba(74, 222, 128, 0.3);
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #0a0a0a;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
-            border-radius: 3px;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
         }
 
-        .character-section h3 {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--vault-green);
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 700px;
+            background-color: #1a1a1a;
+            border: 3px solid #4ade80;
+            padding: 40px;
+            box-shadow: 0 0 40px rgba(74, 222, 128, 0.5),
+                        inset 0 0 20px rgba(74, 222, 128, 0.1);
+            animation: bootUp 1s ease-out;
+        }
+
+        @keyframes bootUp {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+                box-shadow: 0 0 0 rgba(74, 222, 128, 0);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 40px rgba(74, 222, 128, 0.5),
+                            inset 0 0 20px rgba(74, 222, 128, 0.1);
+            }
+        }
+
+        /* Corner decorations */
+        .container::before,
+        .container::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #4ade80;
+        }
+
+        .container::before {
+            top: -8px;
+            left: -8px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .container::after {
+            bottom: -8px;
+            right: -8px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4ade80;
+            padding-bottom: 20px;
+        }
+
+        .pip-boy-title {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: #4ade80;
+            text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
+            animation: glow 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 15px #4ade80, 0 0 30px rgba(74, 222, 128, 0.8);
+            }
+        }
+
+        .character-title {
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* ===== STATS SECTION ===== */
+        .stats {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.1);
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(74, 222, 128, 0.1);
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+            font-size: 13px;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
         }
 
         .stat-label {
-            color: var(--vault-gold);
+            color: #fbbf24;
+            text-shadow: 0 0 3px #fbbf24;
             font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .stat-value {
-            color: var(--vault-green);
-            font-size: 12px;
+            color: #4ade80;
+            text-shadow: 0 0 5px #4ade80;
             font-weight: bold;
+            font-size: 14px;
         }
 
-        .stat-value.editable {
-            cursor: pointer;
-            border-bottom: 1px dotted var(--vault-gold);
-            padding: 2px 5px;
+        /* ===== SPECIAL GRID ===== */
+        .special-container {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.1);
         }
 
-        .stat-value.editable:hover {
-            background-color: rgba(74, 222, 128, 0.1);
-            border-radius: 2px;
-        }
-
-        .perk-list {
-            list-style: none;
-        }
-
-        .perk-item {
-            background-color: var(--vault-blue-dark);
-            border-left: 3px solid var(--vault-gold);
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 2px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .perk-item:hover {
-            background-color: var(--vault-blue-light);
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-        }
-
-        .perk-name {
-            color: var(--vault-gold);
-            font-weight: bold;
+        .special-title {
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
             font-size: 11px;
-            text-transform: uppercase;
-        }
-
-        .perk-desc {
-            color: var(--vault-green);
-            font-size: 10px;
-            margin-top: 5px;
-            font-style: italic;
-        }
-
-        .remove-perk {
-            position: absolute;
-            right: 10px;
-            top: 10px;
-            background-color: var(--vault-error);
-            color: var(--vault-dark);
-            border: none;
-            padding: 2px 6px;
-            border-radius: 2px;
-            cursor: pointer;
-            font-size: 9px;
             font-weight: bold;
-            transition: all 0.2s ease;
-        }
-
-        .remove-perk:hover {
-            background-color: #ff9999;
-        }
-
-        .skill-bar {
+            letter-spacing: 2px;
             margin-bottom: 15px;
+            text-transform: uppercase;
+            text-align: center;
         }
 
-        .skill-header {
-            display: flex;
-            justify-content: space-between;
+        .special-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .special-stat {
+            background-color: #1a1a1a;
+            border: 1px solid #4ade80;
+            padding: 10px 5px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(74, 222, 128, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .special-stat:hover {
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+            border-color: #fbbf24;
+        }
+
+        .special-letter {
+            color: #fbbf24;
+            font-size: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #fbbf24;
             margin-bottom: 5px;
         }
 
-        .skill-name {
-            color: var(--vault-gold);
+        .special-value {
+            color: #4ade80;
+            font-size: 16px;
             font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
+            text-shadow: 0 0 5px #4ade80;
         }
 
-        .skill-level {
-            color: var(--vault-green);
-            font-size: 11px;
-            cursor: pointer;
-            border-bottom: 1px dotted var(--vault-gold);
+        /* ===== NAVIGATION BUTTONS ===== */
+        .nav {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
         }
 
-        .skill-level:hover {
-            background-color: rgba(74, 222, 128, 0.1);
-            border-radius: 2px;
-            padding: 0 3px;
-        }
-
-        .skill-bar-bg {
-            background-color: var(--vault-dark);
-            border: 1px solid var(--vault-green);
-            height: 20px;
-            border-radius: 2px;
-            overflow: hidden;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .skill-bar-fill {
-            background: linear-gradient(90deg, var(--vault-green), var(--vault-gold));
-            height: 100%;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
-            transition: width 0.3s ease;
-        }
-
-        .add-button {
-            background-color: var(--vault-blue-dark);
-            border: 1px solid var(--vault-green);
-            color: var(--vault-green);
-            padding: 6px 12px;
+        .button {
+            background-color: #2d5016;
+            color: #4ade80;
+            border: 2px solid #4ade80;
+            padding: 15px 20px;
             font-family: 'Courier New', monospace;
-            font-size: 10px;
+            font-size: 12px;
             font-weight: bold;
             cursor: pointer;
-            border-radius: 2px;
-            transition: all 0.2s ease;
-            margin-top: 10px;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
         }
 
-        .add-button:hover {
-            background-color: var(--vault-blue-light);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
+        .button:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+            transform: translateY(-2px);
         }
 
-        @media (max-width: 768px) {
-            .character-container {
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .pip-boy-title {
+                font-size: 22px;
+            }
+
+            .special-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+
+            .special-value {
+                font-size: 14px;
+            }
+
+            .nav {
                 grid-template-columns: 1fr;
+            }
+
+            .stat-row {
+                font-size: 12px;
+                padding: 8px 0;
             }
         }
     </style>
@@ -188,282 +298,133 @@
 <body>
     <div class="container">
         <!-- HEADER -->
-        <div class="vault-header">
-            <div class="vault-badge">VAULT-TEC INDUSTRIES CHARACTER PROFILE</div>
-            <div class="vault-title">PIP-BOY CHARACTER</div>
-            <div class="vault-subtitle">PERSONAL INFORMATION PROCESSOR</div>
-            <div class="vault-info">Vault 215 Resident • Character Profile System</div>
+        <div class="header">
+            <div class="pip-boy-title">PIP-BOY 3000</div>
+            <div class="character-title">CHARACTER MENU</div>
         </div>
 
-        <!-- CHARACTER INFO SECTION -->
-        <div class="character-container">
-            <!-- LEFT COLUMN: BASIC STATS -->
-            <div class="character-section">
-                <h3>⚙ Basic Stats</h3>
-                <div class="stat-row">
-                    <span class="stat-label">Name:</span>
-                    <span class="stat-value editable" onclick="editStat('name', this)">Vault Dweller</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Age:</span>
-                    <span class="stat-value editable" onclick="editStat('age', this)">25</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Vault:</span>
-                    <span class="stat-value">215</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Experience:</span>
-                    <span class="stat-value" id="experienceDisplay">5,250</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Level:</span>
-                    <span class="stat-value" id="levelDisplay">10</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Health:</span>
-                    <span class="stat-value editable" onclick="editStat('health', this)">100/100</span>
-                </div>
+        <!-- CHARACTER STATS -->
+        <div class="stats">
+            <div class="stat-row">
+                <span class="stat-label">Name:</span>
+                <span class="stat-value" id="charName">Vault Dweller</span>
             </div>
-
-            <!-- RIGHT COLUMN: ATTRIBUTES -->
-            <div class="character-section">
-                <h3>💪 Attributes</h3>
-                <div class="stat-row">
-                    <span class="stat-label">Strength:</span>
-                    <span class="stat-value editable" onclick="editStat('strength', this)">8</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Perception:</span>
-                    <span class="stat-value editable" onclick="editStat('perception', this)">7</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Endurance:</span>
-                    <span class="stat-value editable" onclick="editStat('endurance', this)">8</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Charisma:</span>
-                    <span class="stat-value editable" onclick="editStat('charisma', this)">6</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Intelligence:</span>
-                    <span class="stat-value editable" onclick="editStat('intelligence', this)">9</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Agility:</span>
-                    <span class="stat-value editable" onclick="editStat('agility', this)">7</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">Luck:</span>
-                    <span class="stat-value editable" onclick="editStat('luck', this)">5</span>
-                </div>
+            <div class="stat-row">
+                <span class="stat-label">Level:</span>
+                <span class="stat-value" id="charLevel">1</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Experience:</span>
+                <span class="stat-value" id="charXP">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Health:</span>
+                <span class="stat-value" id="charHealth">100</span>
             </div>
         </div>
 
-        <!-- SKILLS SECTION -->
-        <div class="character-section">
-            <h3>🎯 Skills</h3>
-            <div id="skillsContainer"></div>
-        </div>
-
-        <!-- PERKS SECTION -->
-        <div class="character-section">
-            <h3>⭐ Perks</h3>
-            <ul class="perk-list" id="perksContainer"></ul>
-            <button class="add-button" onclick="addPerk()">+ Add Perk</button>
+        <!-- S.P.E.C.I.A.L STATS -->
+        <div class="special-container">
+            <div class="special-title">S.P.E.C.I.A.L Attributes</div>
+            <div class="special-grid">
+                <div class="special-stat">
+                    <div class="special-letter">S</div>
+                    <div class="special-value" id="stat-s">5</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">P</div>
+                    <div class="special-value" id="stat-p">6</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">E</div>
+                    <div class="special-value" id="stat-e">7</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">C</div>
+                    <div class="special-value" id="stat-c">4</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">I</div>
+                    <div class="special-value" id="stat-i">5</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">A</div>
+                    <div class="special-value" id="stat-a">5</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">L</div>
+                    <div class="special-value" id="stat-l">3</div>
+                </div>
+            </div>
         </div>
 
         <!-- NAVIGATION -->
-        <div class="nav-buttons">
-            <button class="nav-button vault-btn" onclick="window.location.href='inventory.html'">← INVENTORY</button>
-            <button class="nav-button vault-btn" onclick="window.location.href='stats.html'">STATS</button>
-            <button class="nav-button vault-btn" onclick="window.location.href='data.html'">DATA →</button>
-        </div>
-
-        <!-- FOOTER -->
-        <div class="vault-footer">
-            <p>VAULT <span>215</span> RESIDENT • CHARACTER PROFILE DATA</p>
-            <p style="margin-top: 5px;">Profile Data Secured and Synchronized</p>
+        <div class="nav">
+            <button class="button" onclick="window.location.href='stats.html'">STATS</button>
+            <button class="button" onclick="window.location.href='inventory.html'">INVENTORY</button>
+            <button class="button" onclick="window.location.href='data.html'">DATA</button>
+            <button class="button" onclick="window.location.href='index.html'">LOGOUT</button>
         </div>
     </div>
 
     <script>
-        // ===== CHARACTER DATA =====
-        let character = {
-            name: 'Vault Dweller',
-            age: 25,
-            vault: 215,
-            experience: 5250,
-            level: 10,
-            health: '100/100',
-            attributes: {
-                strength: 8,
-                perception: 7,
-                endurance: 8,
-                charisma: 6,
-                intelligence: 9,
-                agility: 7,
-                luck: 5
-            },
-            skills: {
-                'Barter': 75,
-                'Energy Weapons': 85,
-                'Explosives': 65,
-                'Lockpick': 80,
-                'Medicine': 70,
-                'Science': 90
-            },
-            perks: [
-                { name: 'Tag!', desc: 'Choose one additional Tag Skill' },
-                { name: 'Educated', desc: '+1 to all skills' },
-                { name: 'Night Person', desc: '+1 Intelligence and Perception at night' },
-                { name: 'Intense Training', desc: 'Increase any attribute by 1' }
-            ]
-        };
+        // Initialize IndexedDB
+        let db;
+        const DB_NAME = 'PipBoyGameDB';
+        const STORE_NAME = 'players';
 
-        // ===== LOAD DATA =====
-        window.addEventListener('DOMContentLoaded', function() {
-            loadCharacter();
-            renderSkills();
-            renderPerks();
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve();
+                };
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+            });
+        }
+
+        function getPlayerDataFromDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(1);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    resolve(request.result || null);
+                };
+            });
+        }
+
+        // Load player data on page load
+        window.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await initDB();
+                const playerData = await getPlayerDataFromDB();
+
+                if (playerData) {
+                    document.getElementById('charName').textContent = playerData.characterName.toUpperCase();
+                    document.getElementById('charLevel').textContent = playerData.level || 1;
+                    document.getElementById('charHealth').textContent = playerData.health || 100;
+                    document.getElementById('charXP').textContent = playerData.xp || 0;
+                } else {
+                    // Redirect to login if no player data
+                    window.location.href = 'index.html';
+                }
+            } catch (error) {
+                console.error('Error loading player data:', error);
+                window.location.href = 'index.html';
+            }
         });
-
-        // ===== LOAD FROM LOCAL STORAGE =====
-        function loadCharacter() {
-            const saved = localStorage.getItem('pipboyCharacter');
-            if (saved) {
-                character = JSON.parse(saved);
-            }
-        }
-
-        // ===== SAVE TO LOCAL STORAGE =====
-        function saveCharacter() {
-            localStorage.setItem('pipboyCharacter', JSON.stringify(character));
-        }
-
-        // ===== EDIT STAT =====
-        function editStat(statType, element) {
-            const currentValue = element.textContent;
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = currentValue;
-            input.style.cssText = 'background-color: var(--vault-dark); border: 1px solid var(--vault-gold); color: var(--vault-gold); padding: 2px 5px; font-family: Courier New; font-size: 12px;';
-            
-            element.textContent = '';
-            element.appendChild(input);
-            input.focus();
-
-            function saveStat() {
-                const newValue = input.value;
-                
-                if (statType === 'name') character.name = newValue;
-                else if (statType === 'age') character.age = newValue;
-                else if (statType === 'health') character.health = newValue;
-                else if (statType === 'strength') character.attributes.strength = parseInt(newValue) || 0;
-                else if (statType === 'perception') character.attributes.perception = parseInt(newValue) || 0;
-                else if (statType === 'endurance') character.attributes.endurance = parseInt(newValue) || 0;
-                else if (statType === 'charisma') character.attributes.charisma = parseInt(newValue) || 0;
-                else if (statType === 'intelligence') character.attributes.intelligence = parseInt(newValue) || 0;
-                else if (statType === 'agility') character.attributes.agility = parseInt(newValue) || 0;
-                else if (statType === 'luck') character.attributes.luck = parseInt(newValue) || 0;
-
-                element.textContent = newValue;
-                element.classList.add('editable');
-                saveCharacter();
-            }
-
-            input.addEventListener('blur', saveStat);
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') saveStat();
-            });
-        }
-
-        // ===== RENDER SKILLS =====
-        function renderSkills() {
-            const container = document.getElementById('skillsContainer');
-            container.innerHTML = '';
-
-            Object.entries(character.skills).forEach(([skillName, skillValue]) => {
-                const html = `
-                    <div class="skill-bar">
-                        <div class="skill-header">
-                            <span class="skill-name">${skillName}</span>
-                            <span class="skill-level" onclick="editSkill('${skillName}', this)">${skillValue}%</span>
-                        </div>
-                        <div class="skill-bar-bg">
-                            <div class="skill-bar-fill" style="width: ${skillValue}%;"></div>
-                        </div>
-                    </div>
-                `;
-                container.innerHTML += html;
-            });
-        }
-
-        // ===== EDIT SKILL =====
-        function editSkill(skillName, element) {
-            const currentValue = element.textContent.replace('%', '');
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.min = '0';
-            input.max = '100';
-            input.value = currentValue;
-            input.style.cssText = 'width: 50px; background-color: var(--vault-dark); border: 1px solid var(--vault-gold); color: var(--vault-gold); padding: 2px 5px; font-family: Courier New;';
-            
-            element.textContent = '';
-            element.appendChild(input);
-            input.focus();
-
-            function saveSkill() {
-                const newValue = Math.max(0, Math.min(100, parseInt(input.value) || 0));
-                character.skills[skillName] = newValue;
-                renderSkills();
-                saveCharacter();
-            }
-
-            input.addEventListener('blur', saveSkill);
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') saveSkill();
-            });
-        }
-
-        // ===== RENDER PERKS =====
-        function renderPerks() {
-            const container = document.getElementById('perksContainer');
-            container.innerHTML = '';
-
-            character.perks.forEach((perk, index) => {
-                const html = `
-                    <li class="perk-item">
-                        <button class="remove-perk" onclick="removePerk(${index})">✕</button>
-                        <div class="perk-name">${perk.name}</div>
-                        <div class="perk-desc">${perk.desc}</div>
-                    </li>
-                `;
-                container.innerHTML += html;
-            });
-        }
-
-        // ===== ADD PERK =====
-        function addPerk() {
-            const perkName = prompt('Enter perk name:');
-            if (!perkName) return;
-
-            const perkDesc = prompt('Enter perk description:');
-            if (!perkDesc) return;
-
-            character.perks.push({ name: perkName, desc: perkDesc });
-            renderPerks();
-            saveCharacter();
-        }
-
-        // ===== REMOVE PERK =====
-        function removePerk(index) {
-            if (confirm('Remove this perk?')) {
-                character.perks.splice(index, 1);
-                renderPerks();
-                saveCharacter();
-            }
-        }
     </script>
 </body>
 </html>
