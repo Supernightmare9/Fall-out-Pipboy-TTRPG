@@ -518,6 +518,39 @@
             text-shadow: 0 0 5px #ff6b6b;
         }
 
+        /* ===== DAMAGE TYPE TAGS ===== */
+        .damage-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .damage-tag {
+            background-color: #1a3a1a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 4px 10px;
+            font-size: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-shadow: 0 0 3px #4ade80;
+        }
+
+        .damage-tag:hover {
+            background-color: #2d5016;
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .damage-tag.selected {
+            background-color: #3d6b1f;
+            border-color: #fbbf24;
+            color: #fbbf24;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
         /* ===== MODAL ===== */
         .modal {
             display: none;
@@ -529,6 +562,7 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.8);
             animation: fadeIn 0.3s ease;
+            overflow-y: auto;
         }
 
         .modal.active {
@@ -542,9 +576,10 @@
             border: 3px solid #4ade80;
             padding: 30px;
             border-radius: 5px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             box-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
+            margin: 20px;
         }
 
         .modal-title {
@@ -669,6 +704,10 @@
                 align-items: flex-start;
                 gap: 10px;
             }
+
+            .modal-content {
+                width: 95%;
+            }
         }
     </style>
 </head>
@@ -730,6 +769,18 @@
                     <div class="form-group">
                         <label class="form-label">Description</label>
                         <input type="text" class="form-input" id="weaponDesc" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Damage Types (Select all that apply)</label>
+                    <div class="damage-types" id="weaponDamageTypes">
+                        <div class="damage-tag" onclick="toggleDamageType(event, 'add-weapon')">Physical</div>
+                        <div class="damage-tag" onclick="toggleDamageType(event, 'add-weapon')">Energy</div>
+                        <div class="damage-tag" onclick="toggleDamageType(event, 'add-weapon')">Radiation</div>
+                        <div class="damage-tag" onclick="toggleDamageType(event, 'add-weapon')">Poison</div>
+                        <div class="damage-tag" onclick="toggleDamageType(event, 'add-weapon')">Explosive</div>
+                        <div class="damage-tag" onclick="toggleDamageType(event, 'add-weapon')">Fire</div>
+                        <div class="damage-tag" onclick="toggleDamageType(event, 'add-weapon')">Cryogenic</div>
                     </div>
                 </div>
                 <div class="form-buttons">
@@ -893,6 +944,7 @@
         <div class="modal-content">
             <div class="modal-title">EDIT ITEM</div>
             <div class="form-grid" id="editFormFields"></div>
+            <div id="editDamageTypesContainer"></div>
             <div class="modal-buttons">
                 <button class="modal-btn cancel" onclick="closeEditModal()">CANCEL</button>
                 <button class="modal-btn" onclick="saveEditItem()">SAVE CHANGES</button>
@@ -910,6 +962,8 @@
             ammo: []
         };
 
+        const damageTypes = ['Physical', 'Energy', 'Radiation', 'Poison', 'Explosive', 'Fire', 'Cryogenic'];
+        let selectedDamageTypes = [];
         let editingItem = null;
         let editingCategory = null;
 
@@ -932,21 +986,31 @@
             localStorage.setItem('pipboyInventory', JSON.stringify(inventory));
         }
 
+        // ===== TOGGLE DAMAGE TYPE =====
+        function toggleDamageType(event, context) {
+            const tag = event.target;
+            const damageType = tag.textContent;
+            
+            if (tag.classList.contains('selected')) {
+                tag.classList.remove('selected');
+                selectedDamageTypes = selectedDamageTypes.filter(d => d !== damageType);
+            } else {
+                tag.classList.add('selected');
+                selectedDamageTypes.push(damageType);
+            }
+        }
+
         // ===== SWITCH TABS =====
         function switchTab(tabName, tabElement) {
-            // Hide all tabs
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
 
-            // Remove active from all tab buttons
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => tab.classList.remove('active'));
 
-            // Show selected tab
             document.getElementById(tabName).classList.add('active');
             tabElement.classList.add('active');
 
-            // Re-render to apply search/sort
             filterAndSort();
         }
 
@@ -964,6 +1028,7 @@
                     id: 'item-' + Date.now(),
                     name: document.getElementById('weaponName').value,
                     damage: document.getElementById('weaponDamage').value || 'N/A',
+                    damageTypes: [...selectedDamageTypes],
                     value: parseFloat(document.getElementById('weaponValue').value) || 0,
                     description: document.getElementById('weaponDesc').value,
                     favorite: false
@@ -972,6 +1037,11 @@
                 document.getElementById('weaponDamage').value = '';
                 document.getElementById('weaponValue').value = '';
                 document.getElementById('weaponDesc').value = '';
+                // Clear damage type selections
+                document.querySelectorAll('#weaponDamageTypes .damage-tag').forEach(tag => {
+                    tag.classList.remove('selected');
+                });
+                selectedDamageTypes = [];
             } else if (category === 'apparel') {
                 if (!document.getElementById('apparelName').value) {
                     showMessage(messageEl, '⚠ Please enter apparel name!', 'error');
@@ -1063,6 +1133,7 @@
             if (!item) return;
 
             editingItem = { ...item };
+            selectedDamageTypes = item.damageTypes ? [...item.damageTypes] : [];
             const formFields = document.getElementById('editFormFields');
             let html = '';
 
@@ -1085,6 +1156,19 @@
                         <input type="text" class="form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
+                
+                const damageTypesHtml = `
+                    <div class="form-group">
+                        <label class="form-label">Damage Types</label>
+                        <div class="damage-types" id="editDamageTypes">
+                            ${damageTypes.map(dt => `
+                                <div class="damage-tag ${item.damageTypes && item.damageTypes.includes(dt) ? 'selected' : ''}" 
+                                     onclick="toggleDamageType(event, 'edit-modal')">${dt}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                document.getElementById('editDamageTypesContainer').innerHTML = damageTypesHtml;
             } else if (category === 'apparel') {
                 html = `
                     <div class="form-group">
@@ -1104,6 +1188,7 @@
                         <input type="text" class="form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
+                document.getElementById('editDamageTypesContainer').innerHTML = '';
             } else if (category === 'misc') {
                 html = `
                     <div class="form-group">
@@ -1127,6 +1212,7 @@
                         <input type="text" class="form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
+                document.getElementById('editDamageTypesContainer').innerHTML = '';
             } else if (category === 'aid') {
                 html = `
                     <div class="form-group">
@@ -1154,6 +1240,7 @@
                         <input type="text" class="form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
+                document.getElementById('editDamageTypesContainer').innerHTML = '';
             } else if (category === 'ammo') {
                 html = `
                     <div class="form-group">
@@ -1177,6 +1264,7 @@
                         <input type="text" class="form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
+                document.getElementById('editDamageTypesContainer').innerHTML = '';
             }
 
             formFields.innerHTML = html;
@@ -1188,6 +1276,7 @@
             document.getElementById('editModal').classList.remove('active');
             editingItem = null;
             editingCategory = null;
+            selectedDamageTypes = [];
         }
 
         // ===== SAVE EDITED ITEM =====
@@ -1202,6 +1291,7 @@
             if (editingCategory === 'weapons') {
                 updatedItem.name = document.getElementById('editName').value;
                 updatedItem.damage = document.getElementById('editDamage').value;
+                updatedItem.damageTypes = [...selectedDamageTypes];
                 updatedItem.value = parseFloat(document.getElementById('editValue').value) || 0;
                 updatedItem.description = document.getElementById('editDesc').value;
             } else if (editingCategory === 'apparel') {
@@ -1271,12 +1361,10 @@
             Object.keys(inventory).forEach(category => {
                 let items = [...inventory[category]];
 
-                // Filter by search term
                 items = items.filter(item => 
                     item.name.toLowerCase().includes(searchTerm)
                 );
 
-                // Sort
                 items.sort((a, b) => {
                     if (sortOption === 'name') {
                         return a.name.localeCompare(b.name);
@@ -1321,92 +1409,4 @@
                                 <button class="delete-btn" onclick="deleteItem('${category}', '${item.id}')">DELETE</button>
                             </div>
                         </div>
-                        ${item.description ? `<div class="item-description">${item.description}</div>` : ''}
-                        <div class="item-body">
-                            ${getItemDetails(item, category)}
-                        </div>
-                        ${getItemFooter(item, category)}
-                    </li>
-                `;
-            });
-
-            listEl.innerHTML = html;
-        }
-
-        // ===== GET ITEM DETAILS =====
-        function getItemDetails(item, category) {
-            let html = '';
-
-            if (category === 'weapons') {
-                html += `<div class="item-detail"><span class="detail-label">Damage:</span> ${item.damage}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value} caps</div>`;
-            } else if (category === 'apparel') {
-                html += `<div class="item-detail"><span class="detail-label">DR:</span> ${item.dr}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value} caps</div>`;
-            } else if (category === 'misc') {
-                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Rarity:</span> ${item.rarity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value * item.quantity} caps</div>`;
-            } else if (category === 'aid') {
-                html += `<div class="item-detail"><span class="detail-label">Effect:</span> ${item.effect}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Amount:</span> ${item.amount}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value * item.quantity} caps</div>`;
-            } else if (category === 'ammo') {
-                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Weapon:</span> ${item.weapon}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${(item.value * item.quantity).toFixed(2)} caps</div>`;
-            }
-
-            return html;
-        }
-
-        // ===== GET ITEM FOOTER =====
-        function getItemFooter(item, category) {
-            if (category === 'weapons' || category === 'apparel') {
-                return '';
-            }
-
-            return `
-                <div class="item-footer">
-                    <div class="quantity-control">
-                        <button onclick="adjustQuantity('${category}', '${item.id}', -1)">-</button>
-                        <div class="quantity-display">${item.quantity}</div>
-                        <button onclick="adjustQuantity('${category}', '${item.id}', 1)">+</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ===== RENDER CATEGORY =====
-        function renderCategory(category) {
-            renderItems(category, inventory[category]);
-        }
-
-        // ===== RENDER ALL TABS =====
-        function renderAllTabs() {
-            Object.keys(inventory).forEach(category => {
-                renderItems(category, inventory[category]);
-            });
-        }
-
-        // ===== SHOW MESSAGE =====
-        function showMessage(element, message, type) {
-            element.textContent = message;
-            element.className = 'message ' + type;
-            setTimeout(() => {
-                element.textContent = '';
-                element.className = 'message';
-            }, 3000);
-        }
-
-        // ===== CLOSE MODAL ON OUTSIDE CLICK =====
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target === modal) {
-                closeEditModal();
-            }
-        });
-    </script>
-</body>
-</html>
+                        ${item.description ? `<div class="item-`*
