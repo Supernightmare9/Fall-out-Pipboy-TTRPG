@@ -40,7 +40,55 @@
     </div>
 
     <script>
-        function handleLogin(event) {
+        // Initialize IndexedDB
+        let db;
+        const DB_NAME = 'PipBoyGameDB';
+        const STORE_NAME = 'players';
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, 1);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve();
+                };
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+            });
+        }
+
+        // Save player data to IndexedDB
+        function savePlayerDataToDB(playerData) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.put({ ...playerData, id: 1 });
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    localStorage.setItem('currentPlayer', JSON.stringify(playerData));
+                    resolve();
+                };
+            });
+        }
+
+        // Initialize database on page load
+        window.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await initDB();
+            } catch (error) {
+                console.error('Error initializing database:', error);
+            }
+        });
+
+        async function handleLogin(event) {
             event.preventDefault();
             
             const username = document.getElementById('username').value;
@@ -56,14 +104,23 @@
             
             if (validAccounts[username] === password) {
                 const playerData = {
+                    id: 1,
                     characterName: username,
                     vault: '111',
                     level: 1,
                     health: 100,
                     xp: 0
                 };
-                localStorage.setItem('currentPlayer', JSON.stringify(playerData));
-                window.location.href = 'character.html';
+                
+                try {
+                    // Save to IndexedDB
+                    await savePlayerDataToDB(playerData);
+                    // Redirect to character page
+                    window.location.href = 'character.html';
+                } catch (error) {
+                    console.error('Error saving player data:', error);
+                    alert('Error saving player data!');
+                }
             } else {
                 alert('Invalid Vault Dweller credentials!');
             }
