@@ -1,31 +1,29 @@
-// JavaScript code for login form validation and player data storage
+function validateForm() {
+    const accounts = {
+        'Dillon': 'test',
+        'Vault Dweller': 'vault111',
+        'Survivor': '2077',
+        'Agent': 'minutemen',
+        'Overseer': 'vault101'
+    };
+    const usernameInput = document.getElementById('username').value;
+    const passwordInput = document.getElementById('password').value;
 
-document.addEventListener('DOMContentLoaded', function() {
-    const loginForm = document.getElementById('loginForm');
-
-    // Validate login form
-    loginForm.addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent form submission
-        const username = loginForm.username.value;
-        const password = loginForm.password.value;
-
-        if (validateForm(username, password)) {
-            storePlayerData(username);
-            window.location.href = 'character-menu.html'; // Redirect to character menu
-        } else {
-            alert('Invalid username or password!');
-        }
-    });
-
-    // Function to validate login form
-    function validateForm(username, password) {
-        // Simple validation checks (can be enhanced)
-        return username.trim() !== '' && password.trim() !== '';
+    if (accounts[usernameInput] && accounts[usernameInput] === passwordInput) {
+        return true;
+    } else {
+        alert('Invalid username or password.');
+        return false;
     }
+}
 
-    // Function to store player data in browser storage
-    function storePlayerData(username) {
-        localStorage.setItem('playerUsername', username);
-        // Additional player data can be stored here
-    }
-});
+function storePlayerData(characterName, vault, level, health, xp) {
+    const playerData = {
+        characterName: characterName,
+        vault: vault,
+        level: level,
+        health: health,
+        xp: xp
+    };
+    localStorage.setItem('playerData', JSON.stringify(playerData));
+}
