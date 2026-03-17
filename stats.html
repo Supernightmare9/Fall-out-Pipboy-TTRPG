@@ -89,6 +89,55 @@
             }
         }
 
+        /* ===== SUBTAB NAVIGATION ===== */
+        .subtab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4ade80;
+            padding-bottom: 10px;
+        }
+
+        .subtab-button {
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .subtab-button:hover {
+            background-color: #1a1a1a;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .subtab-button.active {
+            background-color: #2d5016;
+            border-color: #fbbf24;
+            color: #fbbf24;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .subtab-content {
+            display: none;
+        }
+
+        .subtab-content.active {
+            display: block;
+        }
+
         /* ===== STATS SECTIONS ===== */
         .stats-grid {
             display: grid;
@@ -395,6 +444,165 @@
             text-shadow: none;
         }
 
+        /* ===== PERKS SECTION ===== */
+        .perks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .perk-card {
+            background-color: #0a0a0a;
+            border: 2px solid #8b5cf6;
+            padding: 15px;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .perk-card:hover {
+            border-color: #fbbf24;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .perk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .perk-name {
+            color: #8b5cf6;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #8b5cf6;
+            flex: 1;
+        }
+
+        .perk-level {
+            color: #fbbf24;
+            font-size: 10px;
+            text-shadow: 0 0 2px #fbbf24;
+            background-color: #2d5016;
+            padding: 2px 6px;
+            border-radius: 2px;
+            margin-left: 8px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .perk-description {
+            color: #4ade80;
+            font-size: 10px;
+            text-shadow: 0 0 2px #4ade80;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .perk-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .perk-btn {
+            flex: 1;
+            background-color: #8b5cf6;
+            border: 1px solid #8b5cf6;
+            color: #0a0a0a;
+            padding: 6px;
+            border-radius: 2px;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: none;
+            transition: all 0.2s ease;
+        }
+
+        .perk-btn:hover {
+            background-color: #a78bfa;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+
+        .perk-remove {
+            background-color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            color: #0a0a0a;
+        }
+
+        .perk-remove:hover {
+            background-color: #ff8787;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .no-perks {
+            color: #666;
+            font-size: 11px;
+            text-align: center;
+            padding: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .add-perk-section {
+            background-color: #0a0a0a;
+            border: 2px solid #8b5cf6;
+            padding: 15px;
+            border-radius: 3px;
+            margin-top: 15px;
+        }
+
+        .add-perk-form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .perk-input {
+            flex: 1;
+            min-width: 150px;
+            background-color: #1a1a1a;
+            border: 2px solid #8b5cf6;
+            color: #4ade80;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .perk-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+
+        .perk-action-btn {
+            background-color: #5d3a8b;
+            border: 2px solid #8b5cf6;
+            color: #8b5cf6;
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 3px #8b5cf6;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .perk-action-btn:hover {
+            background-color: #6d4a9b;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+            transform: translateY(-2px);
+        }
+
         /* ===== STATUS EFFECTS ===== */
         .effects-box {
             background-color: #1a1a1a;
@@ -653,6 +861,18 @@
                 grid-template-columns: 1fr;
             }
 
+            .perks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .subtab-nav {
+                flex-direction: column;
+            }
+
+            .subtab-button {
+                width: 100%;
+            }
+
             .header {
                 padding: 20px;
             }
@@ -692,6 +912,18 @@
             .add-effect-btn {
                 width: 100%;
             }
+
+            .add-perk-form {
+                flex-direction: column;
+            }
+
+            .perk-input {
+                width: 100%;
+            }
+
+            .perk-action-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -703,189 +935,217 @@
             <div class="character-name" id="characterName">VAULT DWELLER</div>
         </div>
 
-        <!-- TOP STATS GRID (Experience, Health, Skills) -->
-        <div class="stats-grid">
-            <!-- EXPERIENCE & LEVEL -->
-            <div class="stat-box">
-                <div class="stat-title">Experience</div>
-                <div class="stat-item">
-                    <span class="stat-label">Current Level:</span>
-                    <span class="stat-value" id="level">1</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Experience Points:</span>
-                    <span class="stat-value" id="xp">0</span>
-                </div>
-                <div class="stat-bar-container">
-                    <div class="stat-bar-label">
-                        <span>Level Progress</span>
-                        <span id="xpPercent">0%</span>
+        <!-- SUBTAB NAVIGATION -->
+        <div class="subtab-nav">
+            <button class="subtab-button active" onclick="switchTab('stats')">Stats</button>
+            <button class="subtab-button" onclick="switchTab('perks')">Perks</button>
+        </div>
+
+        <!-- STATS TAB CONTENT -->
+        <div id="stats-tab" class="subtab-content active">
+            <!-- TOP STATS GRID (Experience, Health, Skills) -->
+            <div class="stats-grid">
+                <!-- EXPERIENCE & LEVEL -->
+                <div class="stat-box">
+                    <div class="stat-title">Experience</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Current Level:</span>
+                        <span class="stat-value" id="level">1</span>
                     </div>
-                    <div class="stat-bar">
-                        <div class="stat-bar-fill" id="xpBar" style="width: 0%"></div>
+                    <div class="stat-item">
+                        <span class="stat-label">Experience Points:</span>
+                        <span class="stat-value" id="xp">0</span>
                     </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-label">
+                            <span>Level Progress</span>
+                            <span id="xpPercent">0%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill" id="xpBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- XP INPUT -->
+                    <div class="input-form">
+                        <input type="number" id="xpInput" class="input-field" placeholder="Add/Remove XP (e.g., 500 or -200)" min="-999999" max="999999">
+                        <button class="action-button" onclick="addXP()">ADD XP</button>
+                        <button class="action-button danger" onclick="removeXP()">REMOVE XP</button>
+                    </div>
+                    <div class="message" id="xpMessage"></div>
                 </div>
 
-                <!-- XP INPUT -->
-                <div class="input-form">
-                    <input type="number" id="xpInput" class="input-field" placeholder="Add/Remove XP (e.g., 500 or -200)" min="-999999" max="999999">
-                    <button class="action-button" onclick="addXP()">ADD XP</button>
-                    <button class="action-button danger" onclick="removeXP()">REMOVE XP</button>
+                <!-- HEALTH & ACTION POINTS -->
+                <div class="stat-box">
+                    <div class="stat-title">Vitals</div>
+                    <div class="stat-item">
+                        <span class="stat-label">Health:</span>
+                        <span class="stat-value" id="health">100</span>
+                    </div>
+                    <div class="stat-bar-container">
+                        <div class="stat-bar-label">
+                            <span>Health Status</span>
+                            <span id="healthPercent">100%</span>
+                        </div>
+                        <div class="stat-bar">
+                            <div class="stat-bar-fill" id="healthBar" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- HEALTH INPUT -->
+                    <div class="input-form">
+                        <input type="number" id="healthInput" class="input-field" placeholder="Health (±)" min="-9999" max="9999">
+                        <button class="action-button" onclick="updateHealth()">UPDATE</button>
+                    </div>
+                    <div class="message" id="healthMessage"></div>
+
+                    <!-- ACTION POINTS SECTION -->
+                    <div class="stat-item" style="margin-top: 20px;">
+                        <span class="stat-label">Action Points:</span>
+                        <span class="stat-value" id="actionPoints">10</span>
+                    </div>
+
+                    <!-- ACTION POINTS INPUT -->
+                    <div class="input-form">
+                        <input type="number" id="apInput" class="input-field" placeholder="AP (±)" min="-9999" max="9999">
+                        <button class="action-button" onclick="updateActionPoints()">UPDATE</button>
+                    </div>
+                    <div class="message" id="apMessage"></div>
+
+                    <div class="stat-item" style="margin-top: 15px;">
+                        <span class="stat-label">Ability Points:</span>
+                        <span class="stat-value">5</span>
+                    </div>
                 </div>
-                <div class="message" id="xpMessage"></div>
             </div>
 
-            <!-- HEALTH & ACTION POINTS -->
-            <div class="stat-box">
-                <div class="stat-title">Vitals</div>
-                <div class="stat-item">
-                    <span class="stat-label">Health:</span>
-                    <span class="stat-value" id="health">100</span>
+            <!-- MAIN GRID (Skills + Status Effects) -->
+            <div class="main-grid">
+                <!-- SKILLS -->
+                <div class="stat-box">
+                    <div class="tag-header">Tag <span class="tag-count-badge" id="tagBadge">0/3</span></div>
+                    <div class="skills-grid" id="skillsGrid"></div>
                 </div>
-                <div class="stat-bar-container">
-                    <div class="stat-bar-label">
-                        <span>Health Status</span>
-                        <span id="healthPercent">100%</span>
+
+                <!-- STATUS EFFECTS & BOOSTS -->
+                <div class="effects-box">
+                    <div class="effects-title">⚠ Status Effects & Boosts</div>
+
+                    <!-- EFFECTS AND BOOSTS CONTENT -->
+                    <div class="effects-content">
+                        <!-- STATUS EFFECTS -->
+                        <div class="effect-section">
+                            <div class="effect-section-title">☢ Status Effects</div>
+                            <div id="effectsList"></div>
+                        </div>
+
+                        <!-- STAT BOOSTS -->
+                        <div class="effect-section">
+                            <div class="effect-section-title">✦ Stat Boosts</div>
+                            <div id="boostsList"></div>
+                        </div>
                     </div>
-                    <div class="stat-bar">
-                        <div class="stat-bar-fill" id="healthBar" style="width: 100%"></div>
+
+                    <!-- ADD EFFECTS AND BOOSTS -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <!-- ADD STATUS EFFECT -->
+                        <div class="status-selector">
+                            <select id="statusSelect" class="status-select">
+                                <option value="">Select Effect...</option>
+                                <option value="radiation">Radiation Sickness</option>
+                                <option value="poisoned">Poisoned</option>
+                                <option value="infected">Infected</option>
+                                <option value="fatigued">Fatigued</option>
+                                <option value="freezing">Freezing</option>
+                                <option value="burning">Burning</option>
+                                <option value="blighted">Blighted</option>
+                            </select>
+                            <button class="add-effect-btn" onclick="addStatusEffect()">ADD</button>
+                        </div>
+
+                        <!-- ADD STAT BOOST -->
+                        <div class="status-selector">
+                            <select id="boostSelect" class="status-select">
+                                <option value="">Select Boost...</option>
+                                <option value="strength">+1 Strength</option>
+                                <option value="perception">+1 Perception</option>
+                                <option value="endurance">+1 Endurance</option>
+                                <option value="charisma">+1 Charisma</option>
+                                <option value="intelligence">+1 Intelligence</option>
+                                <option value="agility">+1 Agility</option>
+                                <option value="luck">+1 Luck</option>
+                            </select>
+                            <button class="add-effect-btn" onclick="addStatBoost()">ADD</button>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- HEALTH INPUT -->
-                <div class="input-form">
-                    <input type="number" id="healthInput" class="input-field" placeholder="Health (±)" min="-9999" max="9999">
-                    <button class="action-button" onclick="updateHealth()">UPDATE</button>
-                </div>
-                <div class="message" id="healthMessage"></div>
-
-                <!-- ACTION POINTS SECTION -->
-                <div class="stat-item" style="margin-top: 20px;">
-                    <span class="stat-label">Action Points:</span>
-                    <span class="stat-value" id="actionPoints">10</span>
-                </div>
-
-                <!-- ACTION POINTS INPUT -->
-                <div class="input-form">
-                    <input type="number" id="apInput" class="input-field" placeholder="AP (±)" min="-9999" max="9999">
-                    <button class="action-button" onclick="updateActionPoints()">UPDATE</button>
-                </div>
-                <div class="message" id="apMessage"></div>
-
-                <div class="stat-item" style="margin-top: 15px;">
-                    <span class="stat-label">Ability Points:</span>
-                    <span class="stat-value">5</span>
+            <!-- S.P.E.C.I.A.L STATS -->
+            <div class="stat-box" style="margin-bottom: 30px;">
+                <div class="stat-title">S.P.E.C.I.A.L Attributes</div>
+                <div class="special-grid">
+                    <div class="special-stat">
+                        <div class="special-letter">S</div>
+                        <div class="special-value">5</div>
+                        <div class="special-name">Strength</div>
+                        <div class="special-skills" id="skills-strength"></div>
+                    </div>
+                    <div class="special-stat">
+                        <div class="special-letter">P</div>
+                        <div class="special-value">6</div>
+                        <div class="special-name">Perception</div>
+                        <div class="special-skills" id="skills-perception"></div>
+                    </div>
+                    <div class="special-stat">
+                        <div class="special-letter">E</div>
+                        <div class="special-value">7</div>
+                        <div class="special-name">Endurance</div>
+                        <div class="special-skills" id="skills-endurance"></div>
+                    </div>
+                    <div class="special-stat">
+                        <div class="special-letter">C</div>
+                        <div class="special-value">4</div>
+                        <div class="special-name">Charisma</div>
+                        <div class="special-skills" id="skills-charisma"></div>
+                    </div>
+                    <div class="special-stat">
+                        <div class="special-letter">I</div>
+                        <div class="special-value">5</div>
+                        <div class="special-name">Intelligence</div>
+                        <div class="special-skills" id="skills-intelligence"></div>
+                    </div>
+                    <div class="special-stat">
+                        <div class="special-letter">A</div>
+                        <div class="special-value">5</div>
+                        <div class="special-name">Agility</div>
+                        <div class="special-skills" id="skills-agility"></div>
+                    </div>
+                    <div class="special-stat">
+                        <div class="special-letter">L</div>
+                        <div class="special-value">3</div>
+                        <div class="special-name">Luck</div>
+                        <div class="special-skills" id="skills-luck"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- MAIN GRID (Skills + Status Effects) -->
-        <div class="main-grid">
-            <!-- SKILLS -->
+        <!-- PERKS TAB CONTENT -->
+        <div id="perks-tab" class="subtab-content">
             <div class="stat-box">
-                <div class="tag-header">Tag <span class="tag-count-badge" id="tagBadge">0/3</span></div>
-                <div class="skills-grid" id="skillsGrid"></div>
-            </div>
-
-            <!-- STATUS EFFECTS & BOOSTS -->
-            <div class="effects-box">
-                <div class="effects-title">⚠ Status Effects & Boosts</div>
-
-                <!-- EFFECTS AND BOOSTS CONTENT -->
-                <div class="effects-content">
-                    <!-- STATUS EFFECTS -->
-                    <div class="effect-section">
-                        <div class="effect-section-title">☢ Status Effects</div>
-                        <div id="effectsList"></div>
+                <div class="stat-title">Character Perks</div>
+                <div class="perks-grid" id="perksGrid"></div>
+                
+                <!-- ADD PERK SECTION -->
+                <div class="add-perk-section">
+                    <div style="color: #8b5cf6; font-size: 12px; font-weight: bold; margin-bottom: 10px; text-shadow: 0 0 3px #8b5cf6;">ADD NEW PERK</div>
+                    <div class="add-perk-form">
+                        <input type="text" id="perkNameInput" class="perk-input" placeholder="Perk Name" maxlength="30">
+                        <input type="text" id="perkDescInput" class="perk-input" placeholder="Description" maxlength="100" style="flex: 2;">
+                        <input type="number" id="perkLevelInput" class="perk-input" placeholder="Level" min="1" max="3" value="1">
+                        <button class="perk-action-btn" onclick="addPerk()">ADD PERK</button>
                     </div>
-
-                    <!-- STAT BOOSTS -->
-                    <div class="effect-section">
-                        <div class="effect-section-title">✦ Stat Boosts</div>
-                        <div id="boostsList"></div>
-                    </div>
-                </div>
-
-                <!-- ADD EFFECTS AND BOOSTS -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                    <!-- ADD STATUS EFFECT -->
-                    <div class="status-selector">
-                        <select id="statusSelect" class="status-select">
-                            <option value="">Select Effect...</option>
-                            <option value="radiation">Radiation Sickness</option>
-                            <option value="poisoned">Poisoned</option>
-                            <option value="infected">Infected</option>
-                            <option value="fatigued">Fatigued</option>
-                            <option value="freezing">Freezing</option>
-                            <option value="burning">Burning</option>
-                            <option value="blighted">Blighted</option>
-                        </select>
-                        <button class="add-effect-btn" onclick="addStatusEffect()">ADD</button>
-                    </div>
-
-                    <!-- ADD STAT BOOST -->
-                    <div class="status-selector">
-                        <select id="boostSelect" class="status-select">
-                            <option value="">Select Boost...</option>
-                            <option value="strength">+1 Strength</option>
-                            <option value="perception">+1 Perception</option>
-                            <option value="endurance">+1 Endurance</option>
-                            <option value="charisma">+1 Charisma</option>
-                            <option value="intelligence">+1 Intelligence</option>
-                            <option value="agility">+1 Agility</option>
-                            <option value="luck">+1 Luck</option>
-                        </select>
-                        <button class="add-effect-btn" onclick="addStatBoost()">ADD</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- S.P.E.C.I.A.L STATS -->
-        <div class="stat-box" style="margin-bottom: 30px;">
-            <div class="stat-title">S.P.E.C.I.A.L Attributes</div>
-            <div class="special-grid">
-                <div class="special-stat">
-                    <div class="special-letter">S</div>
-                    <div class="special-value">5</div>
-                    <div class="special-name">Strength</div>
-                    <div class="special-skills" id="skills-strength"></div>
-                </div>
-                <div class="special-stat">
-                    <div class="special-letter">P</div>
-                    <div class="special-value">6</div>
-                    <div class="special-name">Perception</div>
-                    <div class="special-skills" id="skills-perception"></div>
-                </div>
-                <div class="special-stat">
-                    <div class="special-letter">E</div>
-                    <div class="special-value">7</div>
-                    <div class="special-name">Endurance</div>
-                    <div class="special-skills" id="skills-endurance"></div>
-                </div>
-                <div class="special-stat">
-                    <div class="special-letter">C</div>
-                    <div class="special-value">4</div>
-                    <div class="special-name">Charisma</div>
-                    <div class="special-skills" id="skills-charisma"></div>
-                </div>
-                <div class="special-stat">
-                    <div class="special-letter">I</div>
-                    <div class="special-value">5</div>
-                    <div class="special-name">Intelligence</div>
-                    <div class="special-skills" id="skills-intelligence"></div>
-                </div>
-                <div class="special-stat">
-                    <div class="special-letter">A</div>
-                    <div class="special-value">5</div>
-                    <div class="special-name">Agility</div>
-                    <div class="special-skills" id="skills-agility"></div>
-                </div>
-                <div class="special-stat">
-                    <div class="special-letter">L</div>
-                    <div class="special-value">3</div>
-                    <div class="special-name">Luck</div>
-                    <div class="special-skills" id="skills-luck"></div>
                 </div>
             </div>
         </div>
@@ -1037,6 +1297,21 @@
             }
         }
 
+        // ===== SWITCH TABS =====
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.getElementById('stats-tab').classList.remove('active');
+            document.getElementById('perks-tab').classList.remove('active');
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.subtab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab and activate button
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
         // Initialize and load player data
         window.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -1062,7 +1337,8 @@
                         statusEffects: [],
                         statBoosts: [],
                         skills: {},
-                        tagSkills: []
+                        tagSkills: [],
+                        perks: []
                     };
                     SKILLS.forEach(skill => {
                         defaultPlayer.skills[skill] = 0;
@@ -1106,6 +1382,65 @@
                 updateDisplay(playerData);
             } catch (error) {
                 console.error('Error toggling tag skill:', error);
+            }
+        }
+
+        // ===== ADD PERK =====
+        async function addPerk() {
+            const nameInput = document.getElementById('perkNameInput');
+            const descInput = document.getElementById('perkDescInput');
+            const levelInput = document.getElementById('perkLevelInput');
+
+            const name = nameInput.value.trim();
+            const desc = descInput.value.trim();
+            const level = parseInt(levelInput.value) || 1;
+
+            if (!name) {
+                alert('Please enter a perk name!');
+                return;
+            }
+
+            try {
+                let playerData = await getPlayerDataFromDB();
+                
+                if (!playerData) return;
+
+                if (!playerData.perks) {
+                    playerData.perks = [];
+                }
+
+                const newPerk = {
+                    id: Date.now(),
+                    name: name,
+                    description: desc || 'No description',
+                    level: level
+                };
+
+                playerData.perks.push(newPerk);
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+
+                // Clear inputs
+                nameInput.value = '';
+                descInput.value = '';
+                levelInput.value = '1';
+            } catch (error) {
+                console.error('Error adding perk:', error);
+            }
+        }
+
+        // ===== REMOVE PERK =====
+        async function removePerk(perkId) {
+            try {
+                let playerData = await getPlayerDataFromDB();
+                
+                if (!playerData) return;
+
+                playerData.perks = playerData.perks.filter(p => p.id !== perkId);
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+            } catch (error) {
+                console.error('Error removing perk:', error);
             }
         }
 
@@ -1365,188 +1700,5 @@
                     playerData.statusEffects = [];
                 }
 
-                if (playerData.statusEffects.includes(effect)) {
-                    alert('Effect already applied!');
-                    return;
-                }
 
-                playerData.statusEffects.push(effect);
-                await savePlayerDataToDB(playerData);
-                updateDisplay(playerData);
-                select.value = '';
-            } catch (error) {
-                console.error('Error adding status effect:', error);
-            }
-        }
-
-        // ===== REMOVE STATUS EFFECT =====
-        async function removeStatusEffect(effect) {
-            try {
-                let playerData = await getPlayerDataFromDB();
-                
-                if (!playerData) return;
-
-                playerData.statusEffects = playerData.statusEffects.filter(e => e !== effect);
-                await savePlayerDataToDB(playerData);
-                updateDisplay(playerData);
-            } catch (error) {
-                console.error('Error removing status effect:', error);
-            }
-        }
-
-        // ===== ADD STAT BOOST =====
-        async function addStatBoost() {
-            const select = document.getElementById('boostSelect');
-            const boost = select.value;
-
-            if (!boost) {
-                alert('Please select a boost!');
-                return;
-            }
-
-            try {
-                let playerData = await getPlayerDataFromDB();
-                
-                if (!playerData) return;
-
-                if (!playerData.statBoosts) {
-                    playerData.statBoosts = [];
-                }
-
-                if (playerData.statBoosts.includes(boost)) {
-                    alert('Boost already applied!');
-                    return;
-                }
-
-                playerData.statBoosts.push(boost);
-                await savePlayerDataToDB(playerData);
-                updateDisplay(playerData);
-                select.value = '';
-            } catch (error) {
-                console.error('Error adding stat boost:', error);
-            }
-        }
-
-        // ===== REMOVE STAT BOOST =====
-        async function removeStatBoost(boost) {
-            try {
-                let playerData = await getPlayerDataFromDB();
-                
-                if (!playerData) return;
-
-                playerData.statBoosts = playerData.statBoosts.filter(b => b !== boost);
-                await savePlayerDataToDB(playerData);
-                updateDisplay(playerData);
-            } catch (error) {
-                console.error('Error removing stat boost:', error);
-            }
-        }
-
-        // ===== DISPLAY UPDATE =====
-        function updateDisplay(playerData) {
-            // Update XP display
-            document.getElementById('xp').textContent = playerData.xp || 0;
-            document.getElementById('level').textContent = playerData.level || 1;
-
-            // Update health display
-            document.getElementById('health').textContent = playerData.health || MAX_HEALTH;
-            const healthPercent = ((playerData.health || MAX_HEALTH) / MAX_HEALTH) * 100;
-            document.getElementById('healthBar').style.width = healthPercent + '%';
-            document.getElementById('healthPercent').textContent = Math.round(healthPercent) + '%';
-
-            // Update action points
-            document.getElementById('actionPoints').textContent = playerData.actionPoints || 10;
-
-            // Update XP bar
-            const xpInCurrentLevel = (playerData.xp || 0) % XP_PER_LEVEL;
-            const xpPercent = (xpInCurrentLevel / XP_PER_LEVEL) * 100;
-            document.getElementById('xpBar').style.width = xpPercent + '%';
-            document.getElementById('xpPercent').textContent = Math.round(xpPercent) + '%';
-
-            // Update tag count badge
-            const tagCount = playerData.tagSkills ? playerData.tagSkills.length : 0;
-            document.getElementById('tagBadge').textContent = `${tagCount}/${MAX_TAG_SKILLS}`;
-
-            // Update skills grid with checkboxes and bonuses
-            const skillsGrid = document.getElementById('skillsGrid');
-            skillsGrid.innerHTML = SKILLS.map(skill => {
-                const skillValue = playerData.skills ? (playerData.skills[skill] || 0) : 0;
-                const isTagged = playerData.tagSkills && playerData.tagSkills.includes(skill);
-                const bonus = calculateSkillBonus(skillValue, isTagged);
-                const bonusText = bonus >= 0 ? `+${bonus}` : `${bonus}`;
-                const bonusColor = bonus > 0 ? '#4ade80' : bonus < 0 ? '#ff6b6b' : '#fbbf24';
-                const special = getSpecialForSkill(skill);
-
-                return `
-                    <div class="skill-item">
-                        <div class="skill-left">
-                            <input 
-                                type="checkbox" 
-                                class="skill-checkbox" 
-                                ${isTagged ? 'checked' : ''} 
-                                onchange="toggleTagSkill('${skill}')"
-                                title="Tag this skill (max 3)"
-                            >
-                            <div class="skill-info">
-                                <span class="skill-name">${skill}</span>
-                                <span class="skill-special">${special}</span>
-                                <span class="skill-bonus" style="color: ${bonusColor};">Bonus: ${bonusText}</span>
-                            </div>
-                        </div>
-                        <div class="skill-controls">
-                            <button class="skill-btn" onclick="updateSkill('${skill}', -1)">−</button>
-                            <span class="skill-value">${skillValue}</span>
-                            <button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            // Update SPECIAL sections with skill lists
-            for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
-                if (skills.length > 0) {
-                    const skillsList = skills
-                        .map(s => `<div>${s}</div>`)
-                        .join('');
-                    document.getElementById(`skills-${special}`).innerHTML = skillsList;
-                } else {
-                    document.getElementById(`skills-${special}`).innerHTML = '<div style="color: #666; font-size: 9px;">None</div>';
-                }
-            }
-
-            // Update status effects list
-            const effectsList = document.getElementById('effectsList');
-            if (playerData.statusEffects && playerData.statusEffects.length > 0) {
-                effectsList.innerHTML = playerData.statusEffects.map(effect => 
-                    `<div class="effect-item effect-active">
-                        <span class="effect-label">${STATUS_LABELS[effect]}</span>
-                        <span class="effect-badge" onclick="removeStatusEffect('${effect}')" style="cursor: pointer;">X</span>
-                    </div>`
-                ).join('');
-            } else {
-                effectsList.innerHTML = '<div class="no-effects">None</div>';
-            }
-
-            // Update stat boosts list
-            const boostsList = document.getElementById('boostsList');
-            if (playerData.statBoosts && playerData.statBoosts.length > 0) {
-                boostsList.innerHTML = playerData.statBoosts.map(boost => 
-                    `<div class="effect-item effect-active">
-                        <span class="effect-label">${BOOST_LABELS[boost]}</span>
-                        <span class="effect-badge" onclick="removeStatBoost('${boost}')" style="cursor: pointer;">X</span>
-                    </div>`
-                ).join('');
-            } else {
-                boostsList.innerHTML = '<div class="no-effects">None</div>';
-            }
-        }
-
-        // ===== KEY PRESS HANDLERS =====
-        document.addEventListener('keypress', function(event) {
-            if (event.target.id === 'xpInput' && event.key === 'Enter') addXP();
-            if (event.target.id === 'healthInput' && event.key === 'Enter') updateHealth();
-            if (event.target.id === 'apInput' && event.key === 'Enter') updateActionPoints();
-        });
-    </script>
-</body>
-</html>
+        
