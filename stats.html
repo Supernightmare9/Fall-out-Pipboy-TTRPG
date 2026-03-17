@@ -280,11 +280,24 @@
             border-radius: 3px;
         }
 
+        .skill-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 2px;
+        }
+
         .skill-name {
             color: #4ade80;
             font-size: 12px;
             text-shadow: 0 0 3px #4ade80;
-            flex: 1;
+            font-weight: bold;
+        }
+
+        .skill-bonus {
+            color: #fbbf24;
+            font-size: 10px;
+            text-shadow: 0 0 2px #fbbf24;
         }
 
         .skill-controls {
@@ -903,6 +916,21 @@
             luck: '+1 LCK'
         };
 
+        // ===== CALCULATE SKILL BONUS =====
+        function calculateSkillBonus(skillValue) {
+            if (skillValue === 50) {
+                return 0;
+            } else if (skillValue < 50) {
+                // For every 10 below 50, subtract 1
+                const difference = 50 - skillValue;
+                return Math.ceil(-difference / 10);
+            } else {
+                // For every 10 above 50, add 1
+                const difference = skillValue - 50;
+                return Math.floor(difference / 10);
+            }
+        }
+
         // Initialize and load player data
         window.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -1237,13 +1265,20 @@
             document.getElementById('xpBar').style.width = xpPercent + '%';
             document.getElementById('xpPercent').textContent = Math.round(xpPercent) + '%';
 
-            // Update skills grid
+            // Update skills grid with bonuses
             const skillsGrid = document.getElementById('skillsGrid');
             skillsGrid.innerHTML = SKILLS.map(skill => {
                 const skillValue = playerData.skills ? (playerData.skills[skill] || 0) : 0;
+                const bonus = calculateSkillBonus(skillValue);
+                const bonusText = bonus >= 0 ? `+${bonus}` : `${bonus}`;
+                const bonusColor = bonus > 0 ? '#4ade80' : bonus < 0 ? '#ff6b6b' : '#fbbf24';
+
                 return `
                     <div class="skill-item">
-                        <span class="skill-name">${skill}</span>
+                        <div class="skill-info">
+                            <span class="skill-name">${skill}</span>
+                            <span class="skill-bonus" style="color: ${bonusColor};">Bonus: ${bonusText}</span>
+                        </div>
                         <div class="skill-controls">
                             <button class="skill-btn" onclick="updateSkill('${skill}', -5)">−</button>
                             <span class="skill-value">${skillValue}</span>
