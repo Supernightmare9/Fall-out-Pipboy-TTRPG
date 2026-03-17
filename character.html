@@ -5,70 +5,378 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pip-Boy Character Menu</title>
     <style>
-        body {
-            font-family: 'Courier New', monospace;
-            background-color: #2b2b2b;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        /* ===========================
+           FALLOUT PIPBOY CHARACTER MENU
+           =========================== */
+
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container {
-            background-color: #000;
-            border: 2px solid #4caf50;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px #4caf50;
-        }
-        h1 {
-            text-align: center;
-            color: #4caf50;
-        }
-        .stats {
-            margin: 15px 0;
-        }
-        .nav {
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #0a0a0a;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
             display: flex;
-            justify-content: space-around;
-            margin-top: 20px;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
         }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 700px;
+            background-color: #1a1a1a;
+            border: 3px solid #4ade80;
+            padding: 40px;
+            box-shadow: 0 0 40px rgba(74, 222, 128, 0.5),
+                        inset 0 0 20px rgba(74, 222, 128, 0.1);
+            animation: bootUp 1s ease-out;
+        }
+
+        @keyframes bootUp {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+                box-shadow: 0 0 0 rgba(74, 222, 128, 0);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 40px rgba(74, 222, 128, 0.5),
+                            inset 0 0 20px rgba(74, 222, 128, 0.1);
+            }
+        }
+
+        /* Corner decorations */
+        .container::before,
+        .container::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #4ade80;
+        }
+
+        .container::before {
+            top: -8px;
+            left: -8px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .container::after {
+            bottom: -8px;
+            right: -8px;
+            border-left: none;
+            border-top: none;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #4ade80;
+            padding-bottom: 20px;
+        }
+
+        .pip-boy-title {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: #4ade80;
+            text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
+            animation: glow 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 15px #4ade80, 0 0 30px rgba(74, 222, 128, 0.8);
+            }
+        }
+
+        .character-title {
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            font-size: 12px;
+            letter-spacing: 2px;
+        }
+
+        /* ===== STATS SECTION ===== */
+        .stats {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.1);
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+            font-size: 13px;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #fbbf24;
+            text-shadow: 0 0 3px #fbbf24;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            color: #4ade80;
+            text-shadow: 0 0 5px #4ade80;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* ===== SPECIAL GRID ===== */
+        .special-container {
+            margin: 25px 0;
+            padding: 20px;
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            box-shadow: inset 0 0 10px rgba(74, 222, 128, 0.1);
+        }
+
+        .special-title {
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .special-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .special-stat {
+            background-color: #1a1a1a;
+            border: 1px solid #4ade80;
+            padding: 10px 5px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(74, 222, 128, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .special-stat:hover {
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+            border-color: #fbbf24;
+        }
+
+        .special-letter {
+            color: #fbbf24;
+            font-size: 10px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #fbbf24;
+            margin-bottom: 5px;
+        }
+
+        .special-value {
+            color: #4ade80;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #4ade80;
+        }
+
+        /* ===== NAVIGATION BUTTONS ===== */
+        .nav {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
         .button {
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            background-color: #2d5016;
+            color: #4ade80;
+            border: 2px solid #4ade80;
+            padding: 15px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
             cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
         }
+
         .button:hover {
-            background-color: #45a049;
+            background-color: #3d6b1f;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .pip-boy-title {
+                font-size: 22px;
+            }
+
+            .special-grid {
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+            }
+
+            .special-value {
+                font-size: 14px;
+            }
+
+            .nav {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-row {
+                font-size: 12px;
+                padding: 8px 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Pip-Boy Character Menu</h1>
-        <div class="stats">
-            <p><strong>Name:</strong> PlayerName</p>
-            <p><strong>Level:</strong> 1</p>
-            <p><strong>Health:</strong> 100</p>
-            <p><strong>Strength:</strong> 5</p>
-            <p><strong>Perception:</strong> 5</p>
-            <p><strong>Endurance:</strong> 5</p>
-            <p><strong>Charisma:</strong> 5</p>
-            <p><strong>Intelligence:</strong> 5</p>
-            <p><strong>Agility:</strong> 5</p>
-            <p><strong>Luck:</strong> 5</p>
+        <!-- HEADER -->
+        <div class="header">
+            <div class="pip-boy-title">PIP-BOY 3000</div>
+            <div class="character-title">CHARACTER MENU</div>
         </div>
+
+        <!-- CHARACTER STATS -->
+        <div class="stats">
+            <div class="stat-row">
+                <span class="stat-label">Name:</span>
+                <span class="stat-value" id="charName">Vault Dweller</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Level:</span>
+                <span class="stat-value" id="charLevel">1</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Experience:</span>
+                <span class="stat-value" id="charXP">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Health:</span>
+                <span class="stat-value" id="charHealth">100</span>
+            </div>
+        </div>
+
+        <!-- S.P.E.C.I.A.L STATS -->
+        <div class="special-container">
+            <div class="special-title">S.P.E.C.I.A.L Attributes</div>
+            <div class="special-grid">
+                <div class="special-stat">
+                    <div class="special-letter">S</div>
+                    <div class="special-value" id="stat-s">5</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">P</div>
+                    <div class="special-value" id="stat-p">6</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">E</div>
+                    <div class="special-value" id="stat-e">7</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">C</div>
+                    <div class="special-value" id="stat-c">4</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">I</div>
+                    <div class="special-value" id="stat-i">5</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">A</div>
+                    <div class="special-value" id="stat-a">5</div>
+                </div>
+                <div class="special-stat">
+                    <div class="special-letter">L</div>
+                    <div class="special-value" id="stat-l">3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NAVIGATION -->
         <div class="nav">
-            <button class="button">Inventory</button>
-            <button class="button">Quests</button>
-            <button class="button">Map</button>
-            <button class="button">Settings</button>
+            <button class="button" onclick="window.location.href='stats.html'">STATS</button>
+            <button class="button" onclick="window.location.href='inventory.html'">INVENTORY</button>
+            <button class="button" onclick="window.location.href='data.html'">DATA</button>
+            <button class="button" onclick="window.location.href='index.html'">LOGOUT</button>
         </div>
     </div>
+
+    <script>
+        // Load player data from localStorage
+        window.addEventListener('DOMContentLoaded', function() {
+            const playerData = JSON.parse(localStorage.getItem('currentPlayer'));
+            if (playerData) {
+                document.getElementById('charName').textContent = playerData.characterName.toUpperCase();
+                document.getElementById('charLevel').textContent = playerData.level || 1;
+                document.getElementById('charHealth').textContent = playerData.health || 100;
+                document.getElementById('charXP').textContent = playerData.xp || 0;
+            }
+        });
+    </script>
 </body>
 </html>
