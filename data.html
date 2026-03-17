@@ -89,6 +89,56 @@
             letter-spacing: 2px;
         }
 
+        /* ===== SUBTAB NAVIGATION ===== */
+        .subtab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4ade80;
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .subtab-button {
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .subtab-button:hover {
+            background-color: #1a1a1a;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .subtab-button.active {
+            background-color: #2d5016;
+            border-color: #fbbf24;
+            color: #fbbf24;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .subtab-content {
+            display: none;
+        }
+
+        .subtab-content.active {
+            display: block;
+        }
+
         /* ===== SECTION BOXES ===== */
         .data-section {
             background-color: #1a1a1a;
@@ -156,6 +206,37 @@
             opacity: 0.8;
         }
 
+        /* ===== CHARACTER DATA SECTION ===== */
+        .character-data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .character-stat-box {
+            background-color: #0a0a0a;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            padding: 15px;
+            border-radius: 3px;
+        }
+
+        .stat-label {
+            color: #4ade80;
+            font-size: 10px;
+            text-shadow: 0 0 3px #4ade80;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            color: #fbbf24;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #fbbf24;
+        }
+
         /* ===== NAVIGATION ===== */
         .nav-buttons {
             display: flex;
@@ -217,6 +298,10 @@
             .data-section {
                 padding: 15px;
             }
+
+            .subtab-nav {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -228,95 +313,255 @@
             <div class="data-subtitle">QUEST & NPC INFORMATION</div>
         </div>
 
-        <!-- QUESTS SECTION -->
-        <div class="data-section">
-            <h2 class="section-title">📜 Active Quests</h2>
-            <ul class="data-list">
-                <li class="data-item">
-                    <div class="item-title">War Never Changes</div>
-                    <div class="item-description">Learn the history of the Great War and its impact on the wasteland.</div>
-                    <div class="item-status">Status: In Progress | Objectives: 3/5</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">Escape the Vault</div>
-                    <div class="item-description">Find a way out of Vault 111 and discover what happened to the world.</div>
-                    <div class="item-status">Status: Active | Location: Vault 111</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">The Way of the Minuteman</div>
-                    <div class="item-description">Join the Minutemen and help defend the Commonwealth.</div>
-                    <div class="item-status">Status: Available | Faction: Minutemen</div>
-                </li>
-            </ul>
+        <!-- SUBTAB NAVIGATION -->
+        <div class="subtab-nav">
+            <button class="subtab-button active" data-tab="quests">📜 QUESTS</button>
+            <button class="subtab-button" data-tab="factions">⚔ FACTIONS</button>
+            <button class="subtab-button" data-tab="npcs">👥 NPCs</button>
+            <button class="subtab-button" data-tab="character">📊 CHARACTER DATA</button>
         </div>
 
-        <!-- COMPLETED QUESTS -->
-        <div class="data-section">
-            <h2 class="section-title">✓ Completed Quests</h2>
-            <ul class="data-list">
-                <li class="data-item">
-                    <div class="item-title">Out of the Shadows</div>
-                    <div class="item-description">Complete the Fallout Shelter Underground Tutorial</div>
-                    <div class="item-status">Status: Completed | Reward: 100 XP</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">Tutorial Complete</div>
-                    <div class="item-description">Successfully complete the starter quest sequence.</div>
-                    <div class="item-status">Status: Completed | Date: 03/17/2026</div>
-                </li>
-            </ul>
+        <!-- QUESTS TAB -->
+        <div id="quests" class="subtab-content active">
+            <!-- ACTIVE QUESTS SECTION -->
+            <div class="data-section">
+                <h2 class="section-title">Active Quests</h2>
+                <ul class="data-list" id="activeQuestsList">
+                    <li class="data-item">
+                        <div class="item-title">War Never Changes</div>
+                        <div class="item-description">Learn the history of the Great War and its impact on the wasteland.</div>
+                        <div class="item-status">Status: In Progress | Objectives: 3/5</div>
+                    </li>
+                    <li class="data-item">
+                        <div class="item-title">Escape the Vault</div>
+                        <div class="item-description">Find a way out of Vault 111 and discover what happened to the world.</div>
+                        <div class="item-status">Status: Active | Location: Vault 111</div>
+                    </li>
+                    <li class="data-item">
+                        <div class="item-title">The Way of the Minuteman</div>
+                        <div class="item-description">Join the Minutemen and help defend the Commonwealth.</div>
+                        <div class="item-status">Status: Available | Faction: Minutemen</div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- COMPLETED QUESTS SECTION -->
+            <div class="data-section">
+                <h2 class="section-title">Completed Quests</h2>
+                <ul class="data-list" id="completedQuestsList">
+                    <li class="data-item">
+                        <div class="item-title">Out of the Shadows</div>
+                        <div class="item-description">Complete the Fallout Shelter Underground Tutorial</div>
+                        <div class="item-status">Status: Completed | Reward: 100 XP</div>
+                    </li>
+                    <li class="data-item">
+                        <div class="item-title">Tutorial Complete</div>
+                        <div class="item-description">Successfully complete the starter quest sequence.</div>
+                        <div class="item-status">Status: Completed | Date: 03/17/2026</div>
+                    </li>
+                </ul>
+            </div>
         </div>
 
-        <!-- NPCS SECTION -->
-        <div class="data-section">
-            <h2 class="section-title">👥 Notable NPCs</h2>
-            <ul class="data-list">
-                <li class="data-item">
-                    <div class="item-title">Preston Garvey</div>
-                    <div class="item-description">Leader of the Minutemen faction. Provides settlement quests and faction opportunities.</div>
-                    <div class="item-status">Location: Concord | Faction: Minutemen</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">Piper Wright</div>
-                    <div class="item-description">Investigative reporter for the Publick Occurrences. Can become a companion.</div>
-                    <div class="item-status">Location: Diamond City | Affinity: Friendly</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">Codsworth</div>
-                    <div class="item-description">Your pre-war Mr. Handy butler. Can become a companion and settlement builder.</div>
-                    <div class="item-status">Status: Companion | Affinity: Loyal</div>
-                </li>
-            </ul>
+        <!-- FACTIONS TAB -->
+        <div id="factions" class="subtab-content">
+            <div class="data-section">
+                <h2 class="section-title">Factions</h2>
+                <ul class="data-list" id="factionsList">
+                    <li class="data-item">
+                        <div class="item-title">Minutemen</div>
+                        <div class="item-description">Colonial militia dedicated to helping the people of the Commonwealth.</div>
+                        <div class="item-status">Reputation: Friendly | Quests Available: Yes</div>
+                    </li>
+                    <li class="data-item">
+                        <div class="item-title">The Brotherhood of Steel</div>
+                        <div class="item-description">Military order seeking to control advanced technology.</div>
+                        <div class="item-status">Reputation: Neutral | Quests Available: Yes</div>
+                    </li>
+                    <li class="data-item">
+                        <div class="item-title">The Institute</div>
+                        <div class="item-description">Secret scientific organization hidden beneath the Commonwealth.</div>
+                        <div class="item-status">Reputation: Unknown | Quests Available: No</div>
+                    </li>
+                </ul>
+            </div>
         </div>
 
-        <!-- FACTIONS SECTION -->
-        <div class="data-section">
-            <h2 class="section-title">⚔ Factions</h2>
-            <ul class="data-list">
-                <li class="data-item">
-                    <div class="item-title">Minutemen</div>
-                    <div class="item-description">Colonial militia dedicated to helping the people of the Commonwealth.</div>
-                    <div class="item-status">Reputation: Friendly | Quests Available: Yes</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">The Brotherhood of Steel</div>
-                    <div class="item-description">Military order seeking to control advanced technology.</div>
-                    <div class="item-status">Reputation: Neutral | Quests Available: Yes</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">The Institute</div>
-                    <div class="item-description">Secret scientific organization hidden beneath the Commonwealth.</div>
-                    <div class="item-status">Reputation: Unknown | Quests Available: No</div>
-                </li>
-            </ul>
+        <!-- NPCs TAB -->
+        <div id="npcs" class="subtab-content">
+            <div class="data-section">
+                <h2 class="section-title">Notable NPCs</h2>
+                <ul class="data-list" id="npcsList">
+                    <li class="data-item">
+                        <div class="item-title">Preston Garvey</div>
+                        <div class="item-description">Leader of the Minutemen faction. Provides settlement quests and faction opportunities.</div>
+                        <div class="item-status">Location: Concord | Faction: Minutemen</div>
+                    </li>
+                    <li class="data-item">
+                        <div class="item-title">Piper Wright</div>
+                        <div class="item-description">Investigative reporter for the Publick Occurrences. Can become a companion.</div>
+                        <div class="item-status">Location: Diamond City | Affinity: Friendly</div>
+                    </li>
+                    <li class="data-item">
+                        <div class="item-title">Codsworth</div>
+                        <div class="item-description">Your pre-war Mr. Handy butler. Can become a companion and settlement builder.</div>
+                        <div class="item-status">Status: Companion | Affinity: Loyal</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- CHARACTER DATA TAB -->
+        <div id="character" class="subtab-content">
+            <div class="data-section">
+                <h2 class="section-title">Character Statistics</h2>
+                <div class="character-data-grid">
+                    <div class="character-stat-box">
+                        <div class="stat-label">Level</div>
+                        <div class="stat-value" id="dataLevel">1</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Experience</div>
+                        <div class="stat-value" id="dataXP">0</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Health</div>
+                        <div class="stat-value" id="dataHealth">100</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Action Points</div>
+                        <div class="stat-value" id="dataAP">10</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-section">
+                <h2 class="section-title">S.P.E.C.I.A.L Attributes</h2>
+                <div class="character-data-grid">
+                    <div class="character-stat-box">
+                        <div class="stat-label">Strength</div>
+                        <div class="stat-value">5</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Perception</div>
+                        <div class="stat-value">6</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Endurance</div>
+                        <div class="stat-value">7</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Charisma</div>
+                        <div class="stat-value">4</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Intelligence</div>
+                        <div class="stat-value">5</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Agility</div>
+                        <div class="stat-value">5</div>
+                    </div>
+                    <div class="character-stat-box">
+                        <div class="stat-label">Luck</div>
+                        <div class="stat-value">3</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-section">
+                <h2 class="section-title">Skills Summary</h2>
+                <div class="character-data-grid" id="skillsSummary">
+                    <!-- Skills will be loaded from stats.html -->
+                </div>
+            </div>
         </div>
 
         <!-- NAVIGATION -->
         <div class="nav-buttons">
-            <button class="nav-button" onclick="window.location.href='inventory.html'">← INVENTORY</button>
+            <button class="nav-button" onclick="window.location.href='stats.html'">← STATS</button>
+            <button class="nav-button" onclick="window.location.href='inventory.html'">INVENTORY</button>
             <button class="nav-button" onclick="window.location.href='character.html'">CHARACTER MENU</button>
             <button class="nav-button" onclick="window.location.href='index.html'">LOGOUT →</button>
         </div>
     </div>
+
+    <script>
+        // ===== TAB SWITCHING =====
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.getElementById('quests').classList.remove('active');
+            document.getElementById('factions').classList.remove('active');
+            document.getElementById('npcs').classList.remove('active');
+            document.getElementById('character').classList.remove('active');
+            
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.subtab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            // Load character data if viewing character tab
+            if (tabName === 'character') {
+                loadCharacterData();
+            }
+        }
+
+        // ===== LOAD CHARACTER DATA FROM STATS.HTML =====
+        function loadCharacterData() {
+            const level = localStorage.getItem('pipboyLevel') || '1';
+            const xp = localStorage.getItem('pipboyXP') || '0';
+            const health = localStorage.getItem('pipboyHealth') || '100';
+            const ap = localStorage.getItem('pipboyActionPoints') || '10';
+
+            document.getElementById('dataLevel').textContent = level;
+            document.getElementById('dataXP').textContent = xp;
+            document.getElementById('dataHealth').textContent = health;
+            document.getElementById('dataAP').textContent = ap;
+
+            // Load skills summary
+            const playerDataString = localStorage.getItem('pipboyPlayerData');
+            if (playerDataString) {
+                const playerData = JSON.parse(playerDataString);
+                const skillsSummary = document.getElementById('skillsSummary');
+                skillsSummary.innerHTML = '';
+
+                // Get top 5 skills
+                const skills = playerData.skills || {};
+                const skillsArray = Object.entries(skills)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5);
+
+                if (skillsArray.length === 0) {
+                    skillsSummary.innerHTML = '<div style="color: #9333ea; grid-column: 1/-1; text-align: center;">No skills trained yet</div>';
+                } else {
+                    skillsArray.forEach(([skillName, skillValue]) => {
+                        const skillBox = document.createElement('div');
+                        skillBox.className = 'character-stat-box';
+                        skillBox.innerHTML = `
+                            <div class="stat-label">${skillName}</div>
+                            <div class="stat-value">${skillValue}</div>
+                        `;
+                        skillsSummary.appendChild(skillBox);
+                    });
+                }
+            }
+        }
+
+        // ===== ADD EVENT LISTENERS =====
+        document.querySelectorAll('.subtab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+
+        // Load character data on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCharacterData();
+        });
+    </script>
 </body>
 </html>
