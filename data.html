@@ -415,6 +415,15 @@
             box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
         }
 
+        .empty-message {
+            color: #9333ea;
+            text-align: center;
+            padding: 30px;
+            font-size: 12px;
+            font-style: italic;
+            text-shadow: 0 0 2px #9333ea;
+        }
+
         /* ===== ADD FORM SECTION ===== */
         .add-form {
             background-color: #0a0a0a;
@@ -965,44 +974,20 @@
             const list = document.getElementById('npcsList');
             let html = '';
 
-            // Default NPCs
-            const defaultNPCs = [
-                {
-                    id: 'default-1',
-                    name: 'Preston Garvey',
-                    description: 'Leader of the Minutemen faction. Provides settlement quests and faction opportunities.',
-                    location: 'Concord',
-                    notes: 'Faction: Minutemen'
-                },
-                {
-                    id: 'default-2',
-                    name: 'Piper Wright',
-                    description: 'Investigative reporter for the Publick Occurrences. Can become a companion.',
-                    location: 'Diamond City',
-                    notes: 'Affinity: Friendly'
-                },
-                {
-                    id: 'default-3',
-                    name: 'Codsworth',
-                    description: 'Your pre-war Mr. Handy butler. Can become a companion and settlement builder.',
-                    location: 'Sanctuary Hills',
-                    notes: 'Status: Companion | Affinity: Loyal'
-                }
-            ];
-
-            // Render all NPCs (default + custom)
-            const allNPCs = [...defaultNPCs, ...customNPCs];
-            
-            allNPCs.forEach((npc) => {
-                html += `
-                    <li class="data-item">
-                        <div class="item-title">${npc.name}</div>
-                        <div class="item-description">${npc.description}</div>
-                        <div class="item-status">Location: ${npc.location} | ${npc.notes}</div>
-                        ${npc.id.startsWith('default') ? '' : `<button class="item-delete-btn" onclick="deleteNPC('${npc.id}')">DELETE</button>`}
-                    </li>
-                `;
-            });
+            if (customNPCs.length === 0) {
+                html = '<div class="empty-message">No NPCs added yet. Create your first NPC below!</div>';
+            } else {
+                customNPCs.forEach((npc) => {
+                    html += `
+                        <li class="data-item">
+                            <div class="item-title">${npc.name}</div>
+                            <div class="item-description">${npc.description}</div>
+                            <div class="item-status">Location: ${npc.location} | ${npc.notes}</div>
+                            <button class="item-delete-btn" onclick="deleteNPC('${npc.id}')">DELETE</button>
+                        </li>
+                    `;
+                });
+            }
 
             list.innerHTML = html;
         }
@@ -1061,44 +1046,20 @@
             const list = document.getElementById('factionsList');
             let html = '';
 
-            // Default Factions
-            const defaultFactions = [
-                {
-                    id: 'default-1',
-                    name: 'Minutemen',
-                    description: 'Colonial militia dedicated to helping the people of the Commonwealth.',
-                    reputation: 'Friendly',
-                    notes: 'Quests Available: Yes'
-                },
-                {
-                    id: 'default-2',
-                    name: 'The Brotherhood of Steel',
-                    description: 'Military order seeking to control advanced technology.',
-                    reputation: 'Neutral',
-                    notes: 'Quests Available: Yes'
-                },
-                {
-                    id: 'default-3',
-                    name: 'The Institute',
-                    description: 'Secret scientific organization hidden beneath the Commonwealth.',
-                    reputation: 'Unknown',
-                    notes: 'Quests Available: No'
-                }
-            ];
-
-            // Render all factions (default + custom)
-            const allFactions = [...defaultFactions, ...customFactions];
-            
-            allFactions.forEach((faction) => {
-                html += `
-                    <li class="data-item">
-                        <div class="item-title">${faction.name}</div>
-                        <div class="item-description">${faction.description}</div>
-                        <div class="item-status">Reputation: ${faction.reputation} | ${faction.notes}</div>
-                        ${faction.id.startsWith('default') ? '' : `<button class="item-delete-btn" onclick="deleteFaction('${faction.id}')">DELETE</button>`}
-                    </li>
-                `;
-            });
+            if (customFactions.length === 0) {
+                html = '<div class="empty-message">No Factions added yet. Create your first faction below!</div>';
+            } else {
+                customFactions.forEach((faction) => {
+                    html += `
+                        <li class="data-item">
+                            <div class="item-title">${faction.name}</div>
+                            <div class="item-description">${faction.description}</div>
+                            <div class="item-status">Reputation: ${faction.reputation} | ${faction.notes}</div>
+                            <button class="item-delete-btn" onclick="deleteFaction('${faction.id}')">DELETE</button>
+                        </li>
+                    `;
+                });
+            }
 
             list.innerHTML = html;
         }
