@@ -4,264 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pip-Boy Inventory - Vault 215</title>
+    <link rel="stylesheet" href="branding.css">
     <style>
-        /* ===========================
-           FALLOUT PIPBOY INVENTORY
-           VAULT 215 EDITION
-           =========================== */
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            width: 100%;
-            min-height: 100vh;
-            background-color: #0a0a0a;
-            color: #4ade80;
-            font-family: 'Courier New', monospace;
-            padding: 20px;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
-        }
-
-        /* Scanline effect */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        /* ===== HEADER ===== */
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background-color: #1a1a1a;
-            border: 3px solid #4ade80;
-            box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
-        }
-
-        .vault-badge {
-            font-size: 10px;
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .pip-title {
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            color: #4ade80;
-            text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
-            animation: glow 2s ease-in-out infinite;
-            margin-bottom: 10px;
-        }
-
-        @keyframes glow {
-            0%, 100% {
-                text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
-            }
-            50% {
-                text-shadow: 0 0 15px #4ade80, 0 0 30px rgba(74, 222, 128, 0.8);
-            }
-        }
-
-        .inventory-subtitle {
-            font-size: 12px;
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
-            letter-spacing: 2px;
-        }
-
-        .vault-info {
-            font-size: 11px;
-            color: #4ade80;
-            text-shadow: 0 0 3px #4ade80;
-            margin-top: 8px;
-            border-top: 1px solid rgba(74, 222, 128, 0.3);
-            padding-top: 8px;
-        }
-
-        /* ===== SEARCH & FILTER ===== */
-        .search-filter {
-            background-color: #1a1a1a;
-            border: 2px solid #4ade80;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .search-box label {
-            color: #fbbf24;
-            font-size: 11px;
-            font-weight: bold;
-            text-shadow: 0 0 3px #fbbf24;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .search-box input {
-            background-color: #0a0a0a;
-            border: 1px solid #4ade80;
-            color: #4ade80;
-            padding: 8px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            text-shadow: 0 0 5px #4ade80;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #fbbf24;
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
-            color: #fbbf24;
-        }
-
-        .sort-box {
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .sort-box label {
-            color: #fbbf24;
-            font-size: 11px;
-            font-weight: bold;
-            text-shadow: 0 0 3px #fbbf24;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .sort-box select {
-            background-color: #0a0a0a;
-            border: 1px solid #4ade80;
-            color: #4ade80;
-            padding: 8px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            text-shadow: 0 0 5px #4ade80;
-            width: 100%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .sort-box select:focus {
-            outline: none;
-            border-color: #fbbf24;
-            color: #fbbf24;
-        }
-
-        /* ===== TABS ===== */
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .tab {
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
-            padding: 12px 20px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-            text-shadow: 0 0 5px #4ade80;
-            position: relative;
-            z-index: 1;
-        }
-
-        .tab:hover {
-            background-color: #3d6b1f;
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
-        }
-
-        .tab.active {
-            background-color: #3d6b1f;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
-        }
-
-        /* ===== TAB CONTENT ===== */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .tab-content h2 {
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
-            font-size: 14px;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #4ade80;
-            padding-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        /* ===== ITEM LIST ===== */
+        /* Inventory-specific styles */
         .item-list {
             list-style: none;
             margin-bottom: 30px;
@@ -269,7 +14,7 @@
 
         .item-card {
             padding: 15px;
-            background-color: #0a0a0a;
+            background-color: var(--vault-dark);
             border: 1px solid rgba(74, 222, 128, 0.2);
             border-radius: 3px;
             margin-bottom: 15px;
@@ -290,8 +35,8 @@
         }
 
         .item-name {
-            color: #fbbf24;
-            text-shadow: 0 0 3px #fbbf24;
+            color: var(--vault-gold);
+            text-shadow: 0 0 3px var(--vault-gold);
             font-weight: bold;
             font-size: 13px;
             flex: 1;
@@ -303,10 +48,7 @@
             align-items: center;
         }
 
-        .favorite-btn {
-            background: none;
-            border: 1px solid #fbbf24;
-            color: #fbbf24;
+        .favorite-btn, .edit-btn, .delete-btn {
             padding: 4px 8px;
             cursor: pointer;
             font-size: 12px;
@@ -314,30 +56,30 @@
             border-radius: 2px;
             position: relative;
             z-index: 1;
+            font-family: 'Courier New', monospace;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: 1px solid var(--vault-gold);
+            color: var(--vault-gold);
         }
 
         .favorite-btn:hover {
-            background-color: #fbbf24;
-            color: #0a0a0a;
+            background-color: var(--vault-gold);
+            color: var(--vault-dark);
         }
 
         .favorite-btn.favorited {
-            background-color: #fbbf24;
-            color: #0a0a0a;
+            background-color: var(--vault-gold);
+            color: var(--vault-dark);
         }
 
         .edit-btn {
             background-color: #4a5a3a;
             border: 1px solid #9ecc71;
             color: #9ecc71;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-            border-radius: 2px;
             font-weight: bold;
-            position: relative;
-            z-index: 1;
         }
 
         .edit-btn:hover {
@@ -347,16 +89,9 @@
 
         .delete-btn {
             background-color: #8b3a3a;
-            border: 1px solid #ff6b6b;
-            color: #ff6b6b;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-            border-radius: 2px;
+            border: 1px solid var(--vault-error);
+            color: var(--vault-error);
             font-weight: bold;
-            position: relative;
-            z-index: 1;
         }
 
         .delete-btn:hover {
@@ -372,20 +107,20 @@
         }
 
         .item-detail {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 11px;
-            text-shadow: 0 0 3px #4ade80;
+            text-shadow: 0 0 3px var(--vault-green);
         }
 
         .detail-label {
-            color: #fbbf24;
+            color: var(--vault-gold);
             font-weight: bold;
-            text-shadow: 0 0 3px #fbbf24;
+            text-shadow: 0 0 3px var(--vault-gold);
             font-size: 10px;
         }
 
         .item-description {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 11px;
             margin-bottom: 10px;
             font-style: italic;
@@ -406,9 +141,9 @@
         }
 
         .quantity-control button {
-            background-color: #2d5016;
-            border: 1px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-blue-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 4px 8px;
             cursor: pointer;
             font-size: 11px;
@@ -419,13 +154,13 @@
         }
 
         .quantity-control button:hover {
-            background-color: #3d6b1f;
-            border-color: #fbbf24;
-            color: #fbbf24;
+            background-color: var(--vault-blue-light);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
         }
 
         .quantity-display {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 12px;
             min-width: 50px;
             text-align: center;
@@ -433,227 +168,39 @@
         }
 
         .empty-message {
-            color: #9333ea;
+            color: var(--vault-info);
             text-align: center;
             padding: 40px 20px;
             font-size: 12px;
             font-style: italic;
-            text-shadow: 0 0 2px #9333ea;
+            text-shadow: 0 0 2px var(--vault-info);
         }
 
-        /* ===== ADD ITEM FORM ===== */
-        .add-item-form {
-            background-color: #0a0a0a;
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            padding: 20px;
-            border-radius: 3px;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .form-title {
-            color: #c084fc;
-            font-size: 12px;
-            font-weight: bold;
-            text-shadow: 0 0 3px #c084fc;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            z-index: 1;
-        }
-
-        .form-label {
-            color: #4ade80;
-            font-size: 10px;
-            text-shadow: 0 0 3px #4ade80;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-
-        .form-input {
-            background-color: #1a1a1a;
-            border: 1px solid #4ade80;
-            color: #4ade80;
-            padding: 8px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            text-shadow: 0 0 5px #4ade80;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-            position: relative;
-            z-index: 1;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: #fbbf24;
-            color: #fbbf24;
-        }
-
-        .form-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .submit-btn {
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
-            padding: 10px 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .submit-btn:hover {
-            background-color: #3d6b1f;
-            border-color: #fbbf24;
-            color: #fbbf24;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            text-shadow: 0 0 10px #fbbf24;
-        }
-
-        .message {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #4ade80;
-            text-shadow: 0 0 3px #4ade80;
-            min-height: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .message.success {
-            color: #4ade80;
-            text-shadow: 0 0 5px #4ade80;
-        }
-
-        .message.error {
-            color: #ff6b6b;
-            text-shadow: 0 0 5px #ff6b6b;
-        }
-
-        /* ===== MODAL ===== */
-        .modal {
+        .tab-content {
             display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            overflow-y: auto;
         }
 
-        .modal.active {
+        .tab-content.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        .modal-content {
-            background-color: #1a1a1a;
-            border: 3px solid #4ade80;
-            padding: 30px;
-            border-radius: 5px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
-            margin: 50px auto;
-            animation: slideIn 0.3s ease;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-title {
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
-            font-size: 16px;
-            font-weight: bold;
+        .tab-content h2 {
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            font-size: 14px;
             letter-spacing: 2px;
             margin-bottom: 20px;
-            border-bottom: 1px solid #4ade80;
+            border-bottom: 1px solid var(--vault-green);
             padding-bottom: 10px;
             text-transform: uppercase;
         }
 
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: flex-end;
-        }
-
-        .modal-btn {
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
-            padding: 10px 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-            position: relative;
-            z-index: 1000;
-        }
-
-        .modal-btn:hover {
-            background-color: #3d6b1f;
-            border-color: #fbbf24;
-            color: #fbbf24;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-        }
-
-        .modal-btn.cancel {
-            background-color: #8b3a3a;
-            border-color: #ff6b6b;
-            color: #ff6b6b;
-            text-shadow: 0 0 5px #ff6b6b;
-        }
-
-        .modal-btn.cancel:hover {
-            background-color: #a84a4a;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
-        }
-
-        /* ===== NAVIGATION ===== */
         .nav-buttons {
             display: flex;
             justify-content: space-between;
@@ -667,69 +214,9 @@
         .nav-button {
             flex: 1;
             min-width: 150px;
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
-            padding: 12px 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
         }
 
-        .nav-button:hover {
-            background-color: #3d6b1f;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
-            transform: translateY(-2px);
-        }
-
-        .footer-vault {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(74, 222, 128, 0.3);
-            font-size: 10px;
-            color: #4ade80;
-            text-shadow: 0 0 3px #4ade80;
-        }
-
-        .footer-vault span {
-            color: #fbbf24;
-            text-shadow: 0 0 3px #fbbf24;
-            font-weight: bold;
-        }
-
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .tabs {
-                flex-direction: column;
-            }
-
-            .tab {
-                width: 100%;
-                text-align: left;
-            }
-
-            .nav-buttons {
-                flex-direction: column;
-            }
-
-            .nav-button {
-                width: 100%;
-            }
-
-            .search-filter {
-                flex-direction: column;
-            }
-
             .item-body {
                 grid-template-columns: 1fr;
             }
@@ -740,9 +227,12 @@
                 gap: 10px;
             }
 
-            .modal-content {
-                width: 95%;
-                margin: 20px auto;
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .nav-button {
+                width: 100%;
             }
         }
     </style>
@@ -750,22 +240,22 @@
 <body>
     <div class="container">
         <!-- HEADER -->
-        <div class="header">
+        <div class="vault-header">
             <div class="vault-badge">VAULT-TEC INDUSTRIES AUTOMATED INVENTORY SYSTEM</div>
-            <div class="pip-title">PIP-BOY INVENTORY</div>
-            <div class="inventory-subtitle">ITEM MANAGEMENT SYSTEM</div>
+            <div class="vault-title">PIP-BOY INVENTORY</div>
+            <div class="vault-subtitle">ITEM MANAGEMENT SYSTEM</div>
             <div class="vault-info">Vault 215 Resident • Portable Information Processor</div>
         </div>
 
         <!-- SEARCH & FILTER -->
-        <div class="search-filter">
-            <div class="search-box">
-                <label>Search Items</label>
-                <input type="text" id="searchInput" placeholder="Search by name..." onkeyup="filterAndSort()">
+        <div class="vault-search">
+            <div class="vault-search-box">
+                <label class="vault-search-label">Search Items</label>
+                <input type="text" class="vault-search-input" id="searchInput" placeholder="Search by name..." onkeyup="filterAndSort()">
             </div>
-            <div class="sort-box">
-                <label>Sort By</label>
-                <select id="sortSelect" onchange="filterAndSort()">
+            <div class="vault-search-box">
+                <label class="vault-search-label">Sort By</label>
+                <select id="sortSelect" class="vault-search-input" onchange="filterAndSort()" style="cursor: pointer;">
                     <option value="name">Name (A-Z)</option>
                     <option value="name-desc">Name (Z-A)</option>
                     <option value="quantity">Quantity (Low-High)</option>
@@ -778,45 +268,43 @@
         </div>
 
         <!-- TABS -->
-        <div class="tabs">
-            <div class="tab active" onclick="switchTab('weapons', this)">⚔ Weapons</div>
-            <div class="tab" onclick="switchTab('apparel', this)">👕 Apparel</div>
-            <div class="tab" onclick="switchTab('misc', this)">📦 Misc</div>
-            <div class="tab" onclick="switchTab('aid', this)">⚕ Aid</div>
-            <div class="tab" onclick="switchTab('ammo', this)">💣 Ammo</div>
+        <div class="vault-tabs">
+            <div class="vault-tab active" onclick="switchTab('weapons', this)">⚔ Weapons</div>
+            <div class="vault-tab" onclick="switchTab('apparel', this)">👕 Apparel</div>
+            <div class="vault-tab" onclick="switchTab('misc', this)">📦 Misc</div>
+            <div class="vault-tab" onclick="switchTab('aid', this)">⚕ Aid</div>
+            <div class="vault-tab" onclick="switchTab('ammo', this)">💣 Ammo</div>
         </div>
 
         <!-- WEAPONS TAB -->
         <div id="weapons" class="tab-content active">
             <h2>⚔ Weapons - Vault 215</h2>
-            <div class="add-item-form">
-                <div class="form-title">+ Add Weapon</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-input" id="weaponName" placeholder="e.g., Laser Rifle">
+            <div class="vault-form">
+                <div class="vault-form-title">+ Add Weapon</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Item Name</label>
+                        <input type="text" class="vault-form-input" id="weaponName" placeholder="e.g., Laser Rifle">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Damage</label>
-                        <input type="number" class="form-input" id="weaponDamage" placeholder="e.g., 25">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Damage</label>
+                        <input type="number" class="vault-form-input" id="weaponDamage" placeholder="e.g., 25">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value (Caps)</label>
-                        <input type="number" class="form-input" id="weaponValue" placeholder="e.g., 500">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value (Caps)</label>
+                        <input type="number" class="vault-form-input" id="weaponValue" placeholder="e.g., 500">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Damage Type (Open-Ended)</label>
-                        <input type="text" class="form-input" id="weaponDamageType" placeholder="e.g., Energy, Physical, Explosive">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Damage Type</label>
+                        <input type="text" class="vault-form-input" id="weaponDamageType" placeholder="e.g., Energy">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="weaponDesc" placeholder="Optional description">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="weaponDesc" placeholder="Optional description">
                     </div>
                 </div>
-                <div class="form-buttons">
-                    <button class="submit-btn" onclick="addItem('weapons')">ADD WEAPON</button>
-                </div>
-                <div class="message" id="weaponsMessage"></div>
+                <button class="vault-btn" onclick="addItem('weapons')">ADD WEAPON</button>
+                <div class="vault-message" id="weaponsMessage"></div>
             </div>
             <ul class="item-list" id="weaponsList"></ul>
         </div>
@@ -824,30 +312,28 @@
         <!-- APPAREL TAB -->
         <div id="apparel" class="tab-content">
             <h2>👕 Apparel - Vault 215</h2>
-            <div class="add-item-form">
-                <div class="form-title">+ Add Apparel</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-input" id="apparelName" placeholder="e.g., Combat Armor">
+            <div class="vault-form">
+                <div class="vault-form-title">+ Add Apparel</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Item Name</label>
+                        <input type="text" class="vault-form-input" id="apparelName" placeholder="e.g., Combat Armor">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Defense Rating (DR)</label>
-                        <input type="number" class="form-input" id="apparelDR" placeholder="e.g., 35">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Defense Rating (DR)</label>
+                        <input type="number" class="vault-form-input" id="apparelDR" placeholder="e.g., 35">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value (Caps)</label>
-                        <input type="number" class="form-input" id="apparelValue" placeholder="e.g., 300">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value (Caps)</label>
+                        <input type="number" class="vault-form-input" id="apparelValue" placeholder="e.g., 300">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="apparelDesc" placeholder="Optional description">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="apparelDesc" placeholder="Optional description">
                     </div>
                 </div>
-                <div class="form-buttons">
-                    <button class="submit-btn" onclick="addItem('apparel')">ADD APPAREL</button>
-                </div>
-                <div class="message" id="apparelMessage"></div>
+                <button class="vault-btn" onclick="addItem('apparel')">ADD APPAREL</button>
+                <div class="vault-message" id="apparelMessage"></div>
             </div>
             <ul class="item-list" id="apparelList"></ul>
         </div>
@@ -855,34 +341,32 @@
         <!-- MISCELLANEOUS TAB -->
         <div id="misc" class="tab-content">
             <h2>📦 Miscellaneous - Vault 215</h2>
-            <div class="add-item-form">
-                <div class="form-title">+ Add Misc Item</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-input" id="miscName" placeholder="e.g., Fusion Core">
+            <div class="vault-form">
+                <div class="vault-form-title">+ Add Misc Item</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Item Name</label>
+                        <input type="text" class="vault-form-input" id="miscName" placeholder="e.g., Fusion Core">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" class="form-input" id="miscQuantity" placeholder="1" min="1">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Quantity</label>
+                        <input type="number" class="vault-form-input" id="miscQuantity" placeholder="1" min="1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value per Item (Caps)</label>
-                        <input type="number" class="form-input" id="miscValue" placeholder="e.g., 100">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value per Item (Caps)</label>
+                        <input type="number" class="vault-form-input" id="miscValue" placeholder="e.g., 100">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Rarity</label>
-                        <input type="text" class="form-input" id="miscRarity" placeholder="e.g., Common">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Rarity</label>
+                        <input type="text" class="vault-form-input" id="miscRarity" placeholder="e.g., Common">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="miscDesc" placeholder="Optional description">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="miscDesc" placeholder="Optional description">
                     </div>
                 </div>
-                <div class="form-buttons">
-                    <button class="submit-btn" onclick="addItem('misc')">ADD ITEM</button>
-                </div>
-                <div class="message" id="miscMessage"></div>
+                <button class="vault-btn" onclick="addItem('misc')">ADD ITEM</button>
+                <div class="vault-message" id="miscMessage"></div>
             </div>
             <ul class="item-list" id="miscList"></ul>
         </div>
@@ -890,38 +374,36 @@
         <!-- AID TAB -->
         <div id="aid" class="tab-content">
             <h2>⚕ Aid & Consumables - Vault 215</h2>
-            <div class="add-item-form">
-                <div class="form-title">+ Add Aid Item</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-input" id="aidName" placeholder="e.g., Stimpak">
+            <div class="vault-form">
+                <div class="vault-form-title">+ Add Aid Item</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Item Name</label>
+                        <input type="text" class="vault-form-input" id="aidName" placeholder="e.g., Stimpak">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" class="form-input" id="aidQuantity" placeholder="1" min="1">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Quantity</label>
+                        <input type="number" class="vault-form-input" id="aidQuantity" placeholder="1" min="1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Effect Type</label>
-                        <input type="text" class="form-input" id="aidEffect" placeholder="e.g., Health, Radiation, Fatigue">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Effect Type</label>
+                        <input type="text" class="vault-form-input" id="aidEffect" placeholder="e.g., Health">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Effect Amount</label>
-                        <input type="text" class="form-input" id="aidAmount" placeholder="e.g., Restores 100 HP">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Effect Amount</label>
+                        <input type="text" class="vault-form-input" id="aidAmount" placeholder="e.g., Restores 100 HP">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value (Caps)</label>
-                        <input type="number" class="form-input" id="aidValue" placeholder="e.g., 25">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value (Caps)</label>
+                        <input type="number" class="vault-form-input" id="aidValue" placeholder="e.g., 25">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="aidDesc" placeholder="Optional description">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="aidDesc" placeholder="Optional description">
                     </div>
                 </div>
-                <div class="form-buttons">
-                    <button class="submit-btn" onclick="addItem('aid')">ADD AID ITEM</button>
-                </div>
-                <div class="message" id="aidMessage"></div>
+                <button class="vault-btn" onclick="addItem('aid')">ADD AID ITEM</button>
+                <div class="vault-message" id="aidMessage"></div>
             </div>
             <ul class="item-list" id="aidList"></ul>
         </div>
@@ -929,60 +411,58 @@
         <!-- AMMO TAB -->
         <div id="ammo" class="tab-content">
             <h2>💣 Ammunition - Vault 215</h2>
-            <div class="add-item-form">
-                <div class="form-title">+ Add Ammo</div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Ammo Type</label>
-                        <input type="text" class="form-input" id="ammoName" placeholder="e.g., 10mm Round">
+            <div class="vault-form">
+                <div class="vault-form-title">+ Add Ammo</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Ammo Type</label>
+                        <input type="text" class="vault-form-input" id="ammoName" placeholder="e.g., 10mm Round">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" class="form-input" id="ammoQuantity" placeholder="287" min="1">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Quantity</label>
+                        <input type="number" class="vault-form-input" id="ammoQuantity" placeholder="287" min="1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value per Round (Caps)</label>
-                        <input type="number" class="form-input" id="ammoValue" placeholder="e.g., 1" step="0.1">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value per Round (Caps)</label>
+                        <input type="number" class="vault-form-input" id="ammoValue" placeholder="e.g., 1" step="0.1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Weapon Type</label>
-                        <input type="text" class="form-input" id="ammoWeapon" placeholder="e.g., 10mm Pistol">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Weapon Type</label>
+                        <input type="text" class="vault-form-input" id="ammoWeapon" placeholder="e.g., 10mm Pistol">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="ammoDesc" placeholder="Optional description">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="ammoDesc" placeholder="Optional description">
                     </div>
                 </div>
-                <div class="form-buttons">
-                    <button class="submit-btn" onclick="addItem('ammo')">ADD AMMO</button>
-                </div>
-                <div class="message" id="ammoMessage"></div>
+                <button class="vault-btn" onclick="addItem('ammo')">ADD AMMO</button>
+                <div class="vault-message" id="ammoMessage"></div>
             </div>
             <ul class="item-list" id="ammoList"></ul>
         </div>
 
         <!-- NAVIGATION -->
         <div class="nav-buttons">
-            <button class="nav-button" onclick="window.location.href='character.html'">← CHARACTER</button>
-            <button class="nav-button" onclick="window.location.href='stats.html'">STATS</button>
-            <button class="nav-button" onclick="window.location.href='data.html'">DATA →</button>
+            <button class="nav-button vault-btn" onclick="window.location.href='character.html'">← CHARACTER</button>
+            <button class="nav-button vault-btn" onclick="window.location.href='stats.html'">STATS</button>
+            <button class="nav-button vault-btn" onclick="window.location.href='data.html'">DATA →</button>
         </div>
 
         <!-- FOOTER -->
-        <div class="footer-vault">
+        <div class="vault-footer">
             <p>VAULT <span>215</span> RESIDENT • PROPERTY OF VAULT-TEC INDUSTRIES</p>
             <p style="margin-top: 5px;">Inventory Data Secured and Synchronized</p>
         </div>
     </div>
 
     <!-- EDIT MODAL -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-title">EDIT ITEM - VAULT 215</div>
-            <div class="form-grid" id="editFormFields"></div>
-            <div class="modal-buttons">
-                <button class="modal-btn cancel" onclick="closeEditModal()">CANCEL</button>
-                <button class="modal-btn" onclick="saveEditItem()">SAVE CHANGES</button>
+    <div id="editModal" class="vault-modal">
+        <div class="vault-modal-content">
+            <div class="vault-modal-title">EDIT ITEM - VAULT 215</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px;" id="editFormFields"></div>
+            <div class="vault-modal-buttons">
+                <button class="vault-btn vault-btn-danger" onclick="closeEditModal()">CANCEL</button>
+                <button class="vault-btn" onclick="saveEditItem()">SAVE CHANGES</button>
             </div>
         </div>
     </div>
@@ -1024,7 +504,7 @@
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
 
-            const tabs = document.querySelectorAll('.tab');
+            const tabs = document.querySelectorAll('.vault-tab');
             tabs.forEach(tab => tab.classList.remove('active'));
 
             document.getElementById(tabName).classList.add('active');
@@ -1138,7 +618,7 @@
             inventory[category].push(item);
             saveInventory();
             renderCategory(category);
-            showMessage(messageEl, `✓ ${item.name} added successfully to Vault 215!`, 'success');
+            showMessage(messageEl, `✓ ${item.name} added to Vault 215!`, 'success');
         }
 
         // ===== OPEN EDIT MODAL =====
@@ -1153,117 +633,117 @@
 
             if (category === 'weapons') {
                 html = `
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-input" id="editName" value="${item.name}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Item Name</label>
+                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Damage</label>
-                        <input type="text" class="form-input" id="editDamage" value="${item.damage}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Damage</label>
+                        <input type="text" class="vault-form-input" id="editDamage" value="${item.damage}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Damage Type</label>
-                        <input type="text" class="form-input" id="editDamageType" value="${item.damageType}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Damage Type</label>
+                        <input type="text" class="vault-form-input" id="editDamageType" value="${item.damageType}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value (Caps)</label>
-                        <input type="number" class="form-input" id="editValue" value="${item.value}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value (Caps)</label>
+                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="editDesc" value="${item.description}">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
             } else if (category === 'apparel') {
                 html = `
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-input" id="editName" value="${item.name}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Item Name</label>
+                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Defense Rating (DR)</label>
-                        <input type="text" class="form-input" id="editDR" value="${item.dr}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Defense Rating (DR)</label>
+                        <input type="text" class="vault-form-input" id="editDR" value="${item.dr}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value (Caps)</label>
-                        <input type="number" class="form-input" id="editValue" value="${item.value}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value (Caps)</label>
+                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="editDesc" value="${item.description}">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
             } else if (category === 'misc') {
                 html = `
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-input" id="editName" value="${item.name}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Item Name</label>
+                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" class="form-input" id="editQuantity" value="${item.quantity}" min="1">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Quantity</label>
+                        <input type="number" class="vault-form-input" id="editQuantity" value="${item.quantity}" min="1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value per Item (Caps)</label>
-                        <input type="number" class="form-input" id="editValue" value="${item.value}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value per Item (Caps)</label>
+                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Rarity</label>
-                        <input type="text" class="form-input" id="editRarity" value="${item.rarity}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Rarity</label>
+                        <input type="text" class="vault-form-input" id="editRarity" value="${item.rarity}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="editDesc" value="${item.description}">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
             } else if (category === 'aid') {
                 html = `
-                    <div class="form-group">
-                        <label class="form-label">Item Name</label>
-                        <input type="text" class="form-input" id="editName" value="${item.name}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Item Name</label>
+                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" class="form-input" id="editQuantity" value="${item.quantity}" min="1">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Quantity</label>
+                        <input type="number" class="vault-form-input" id="editQuantity" value="${item.quantity}" min="1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Effect Type</label>
-                        <input type="text" class="form-input" id="editEffect" value="${item.effect}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Effect Type</label>
+                        <input type="text" class="vault-form-input" id="editEffect" value="${item.effect}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Effect Amount</label>
-                        <input type="text" class="form-input" id="editAmount" value="${item.amount}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Effect Amount</label>
+                        <input type="text" class="vault-form-input" id="editAmount" value="${item.amount}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value (Caps)</label>
-                        <input type="number" class="form-input" id="editValue" value="${item.value}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value (Caps)</label>
+                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="editDesc" value="${item.description}">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
             } else if (category === 'ammo') {
                 html = `
-                    <div class="form-group">
-                        <label class="form-label">Ammo Type</label>
-                        <input type="text" class="form-input" id="editName" value="${item.name}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Ammo Type</label>
+                        <input type="text" class="vault-form-input" id="editName" value="${item.name}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Quantity</label>
-                        <input type="number" class="form-input" id="editQuantity" value="${item.quantity}" min="1">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Quantity</label>
+                        <input type="number" class="vault-form-input" id="editQuantity" value="${item.quantity}" min="1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Value per Round (Caps)</label>
-                        <input type="number" class="form-input" id="editValue" value="${item.value}" step="0.1">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Value per Round (Caps)</label>
+                        <input type="number" class="vault-form-input" id="editValue" value="${item.value}" step="0.1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Weapon Type</label>
-                        <input type="text" class="form-input" id="editWeapon" value="${item.weapon}">
+                    <div class="vault-form-group">
+                        <label class="vault-form-label">Weapon Type</label>
+                        <input type="text" class="vault-form-input" id="editWeapon" value="${item.weapon}">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <input type="text" class="form-input" id="editDesc" value="${item.description}">
+                    <div class="vault-form-group" style="grid-column: 1 / -1;">
+                        <label class="vault-form-label">Description</label>
+                        <input type="text" class="vault-form-input" id="editDesc" value="${item.description}">
                     </div>
                 `;
             }
@@ -1444,32 +924,4 @@
             } else if (category === 'ammo') {
                 html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
                 html += `<div class="item-detail"><span class="detail-label">Weapon:</span> ${item.weapon}</div>`;
-                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${(item.value * item.quantity).toFixed(2)} caps</div>`;
-            }
-
-            return html;
-        }
-
-        // ===== GET ITEM FOOTER =====
-        function getItemFooter(item, category) {
-            if (category === 'weapons' || category === 'apparel') {
-                return '';
-            }
-
-            return `
-                <div class="item-footer">
-                    <div class="quantity-control">
-                        <button onclick="adjustQuantity('${category}', '${item.id}', -1)">-</button>
-                        <div class="quantity-display">${item.quantity}</div>
-                        <button onclick="adjustQuantity('${category}', '${item.id}', 1)">+</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ===== RENDER CATEGORY =====
-        function renderCategory(category) {
-            renderItems(category, inventory[category]);
-        }
-
-        // ===
+                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${(item.value * item.quantity).toFixed(2)} caps</div
