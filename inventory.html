@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pip-Boy Inventory</title>
+    <title>Pip-Boy Inventory - Vault 215</title>
     <style>
         /* ===========================
            FALLOUT PIPBOY INVENTORY
+           VAULT 215 EDITION
            =========================== */
 
         * {
@@ -63,6 +64,15 @@
             box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
         }
 
+        .vault-badge {
+            font-size: 10px;
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
         .pip-title {
             font-size: 28px;
             font-weight: bold;
@@ -87,6 +97,15 @@
             color: #fbbf24;
             text-shadow: 0 0 5px #fbbf24;
             letter-spacing: 2px;
+        }
+
+        .vault-info {
+            font-size: 11px;
+            color: #4ade80;
+            text-shadow: 0 0 3px #4ade80;
+            margin-top: 8px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            padding-top: 8px;
         }
 
         /* ===== SEARCH & FILTER ===== */
@@ -672,6 +691,22 @@
             transform: translateY(-2px);
         }
 
+        .footer-vault {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            font-size: 10px;
+            color: #4ade80;
+            text-shadow: 0 0 3px #4ade80;
+        }
+
+        .footer-vault span {
+            color: #fbbf24;
+            text-shadow: 0 0 3px #fbbf24;
+            font-weight: bold;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .tabs {
@@ -716,8 +751,10 @@
     <div class="container">
         <!-- HEADER -->
         <div class="header">
+            <div class="vault-badge">VAULT-TEC INDUSTRIES AUTOMATED INVENTORY SYSTEM</div>
             <div class="pip-title">PIP-BOY INVENTORY</div>
             <div class="inventory-subtitle">ITEM MANAGEMENT SYSTEM</div>
+            <div class="vault-info">Vault 215 Resident • Portable Information Processor</div>
         </div>
 
         <!-- SEARCH & FILTER -->
@@ -751,7 +788,7 @@
 
         <!-- WEAPONS TAB -->
         <div id="weapons" class="tab-content active">
-            <h2>⚔ Weapons</h2>
+            <h2>⚔ Weapons - Vault 215</h2>
             <div class="add-item-form">
                 <div class="form-title">+ Add Weapon</div>
                 <div class="form-grid">
@@ -786,7 +823,7 @@
 
         <!-- APPAREL TAB -->
         <div id="apparel" class="tab-content">
-            <h2>👕 Apparel</h2>
+            <h2>👕 Apparel - Vault 215</h2>
             <div class="add-item-form">
                 <div class="form-title">+ Add Apparel</div>
                 <div class="form-grid">
@@ -817,7 +854,7 @@
 
         <!-- MISCELLANEOUS TAB -->
         <div id="misc" class="tab-content">
-            <h2>📦 Miscellaneous</h2>
+            <h2>📦 Miscellaneous - Vault 215</h2>
             <div class="add-item-form">
                 <div class="form-title">+ Add Misc Item</div>
                 <div class="form-grid">
@@ -852,7 +889,7 @@
 
         <!-- AID TAB -->
         <div id="aid" class="tab-content">
-            <h2>⚕ Aid & Consumables</h2>
+            <h2>⚕ Aid & Consumables - Vault 215</h2>
             <div class="add-item-form">
                 <div class="form-title">+ Add Aid Item</div>
                 <div class="form-grid">
@@ -891,7 +928,7 @@
 
         <!-- AMMO TAB -->
         <div id="ammo" class="tab-content">
-            <h2>💣 Ammunition</h2>
+            <h2>💣 Ammunition - Vault 215</h2>
             <div class="add-item-form">
                 <div class="form-title">+ Add Ammo</div>
                 <div class="form-grid">
@@ -930,12 +967,18 @@
             <button class="nav-button" onclick="window.location.href='stats.html'">STATS</button>
             <button class="nav-button" onclick="window.location.href='data.html'">DATA →</button>
         </div>
+
+        <!-- FOOTER -->
+        <div class="footer-vault">
+            <p>VAULT <span>215</span> RESIDENT • PROPERTY OF VAULT-TEC INDUSTRIES</p>
+            <p style="margin-top: 5px;">Inventory Data Secured and Synchronized</p>
+        </div>
     </div>
 
     <!-- EDIT MODAL -->
     <div id="editModal" class="modal">
         <div class="modal-content">
-            <div class="modal-title">EDIT ITEM</div>
+            <div class="modal-title">EDIT ITEM - VAULT 215</div>
             <div class="form-grid" id="editFormFields"></div>
             <div class="modal-buttons">
                 <button class="modal-btn cancel" onclick="closeEditModal()">CANCEL</button>
@@ -1095,7 +1138,7 @@
             inventory[category].push(item);
             saveInventory();
             renderCategory(category);
-            showMessage(messageEl, `✓ ${item.name} added successfully!`, 'success');
+            showMessage(messageEl, `✓ ${item.name} added successfully to Vault 215!`, 'success');
         }
 
         // ===== OPEN EDIT MODAL =====
@@ -1429,30 +1472,4 @@
             renderItems(category, inventory[category]);
         }
 
-        // ===== RENDER ALL TABS =====
-        function renderAllTabs() {
-            Object.keys(inventory).forEach(category => {
-                renderItems(category, inventory[category]);
-            });
-        }
-
-        // ===== SHOW MESSAGE =====
-        function showMessage(element, message, type) {
-            element.textContent = message;
-            element.className = 'message ' + type;
-            setTimeout(() => {
-                element.textContent = '';
-                element.className = 'message';
-            }, 3000);
-        }
-
-        // ===== CLOSE MODAL ON OUTSIDE CLICK =====
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('editModal');
-            if (event.target === modal) {
-                closeEditModal();
-            }
-        });
-    </script>
-</body>
-</html>
+        // ===
