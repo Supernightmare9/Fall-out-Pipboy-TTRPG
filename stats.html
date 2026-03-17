@@ -543,9 +543,9 @@
 
         <!-- SUBTAB NAVIGATION -->
         <div class="subtab-nav">
-            <button class="subtab-button active" onclick="switchTab(event, 'stats')">Stats</button>
-            <button class="subtab-button" onclick="switchTab(event, 'skills')">Skills</button>
-            <button class="subtab-button" onclick="switchTab(event, 'perks')">Perks</button>
+            <button class="subtab-button active" data-tab="stats">Stats</button>
+            <button class="subtab-button" data-tab="skills">Skills</button>
+            <button class="subtab-button" data-tab="perks">Perks</button>
         </div>
 
         <!-- STATS TAB CONTENT -->
@@ -737,17 +737,28 @@
         }
 
         // ===== SWITCH TABS =====
-        function switchTab(event, tabName) {
+        function switchTab(tabName) {
+            // Hide all tabs
             document.getElementById('stats').classList.remove('active');
             document.getElementById('skills').classList.remove('active');
             document.getElementById('perks').classList.remove('active');
             
+            // Remove active class from all buttons
             const buttons = document.querySelectorAll('.subtab-button');
             buttons.forEach(btn => btn.classList.remove('active'));
             
+            // Show selected tab and activate button
             document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
         }
+
+        // ===== ADD EVENT LISTENERS TO TAB BUTTONS =====
+        document.querySelectorAll('.subtab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
 
         // ===== ADD XP =====
         function addXP() {
@@ -950,4 +961,13 @@
 
         // ===== REMOVE STAT BOOST =====
         function removeStatBoost(statName, boostAmount) {
-            console.log(`Removed ${boostAmount} from ${statName*
+            console.log(`Removed ${boostAmount} from ${statName}`);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
