@@ -729,7 +729,7 @@
                     <div class="stat-item">
                         <span class="stat-label">Health:</span>
                         <span class="stat-value"><span id="health">100</span> / <span id="maxHealth">100</span></span>
-                        <span class="temp-value">(+<span id="tempHealth">0</span>)</span>
+                        <span class="temp-value" id="tempHealthDisplay"></span>
                     </div>
                     <div class="stat-bar-container">
                         <div class="stat-bar-label">
@@ -747,6 +747,7 @@
                         <input type="number" id="healthInput" class="input-field" placeholder="Health (±)" min="-9999" max="9999">
                         <button class="action-button" onclick="updateHealth()">UPDATE</button>
                         <button class="action-button temp" onclick="addTempHealth()">+ TEMP HP</button>
+                        <button class="action-button danger" onclick="removeTempHealth()">- TEMP HP</button>
                     </div>
                     <div class="message" id="healthMessage"></div>
 
@@ -754,7 +755,7 @@
                     <div class="stat-item" style="margin-top: 20px;">
                         <span class="stat-label">Action Points:</span>
                         <span class="stat-value"><span id="actionPoints">10</span> / <span id="maxActionPoints">20</span></span>
-                        <span class="temp-value">(+<span id="tempActionPoints">0</span>)</span>
+                        <span class="temp-value" id="tempActionPointsDisplay"></span>
                     </div>
 
                     <!-- ACTION POINTS INPUT -->
@@ -762,6 +763,7 @@
                         <input type="number" id="apInput" class="input-field" placeholder="AP (±)" min="-9999" max="9999">
                         <button class="action-button" onclick="updateActionPoints()">UPDATE</button>
                         <button class="action-button temp" onclick="addTempAP()">+ TEMP AP</button>
+                        <button class="action-button danger" onclick="removeTempAP()">- TEMP AP</button>
                     </div>
                     <div class="message" id="apMessage"></div>
                 </div>
@@ -933,8 +935,8 @@
             localStorage.setItem('pipboyLevel', document.getElementById('level').textContent);
             localStorage.setItem('pipboyHealth', document.getElementById('health').textContent);
             localStorage.setItem('pipboyActionPoints', document.getElementById('actionPoints').textContent);
-            localStorage.setItem('pipboyTempHealth', document.getElementById('tempHealth').textContent);
-            localStorage.setItem('pipboyTempActionPoints', document.getElementById('tempActionPoints').textContent);
+            localStorage.setItem('pipboyTempHealth', document.getElementById('tempHealth').textContent || '0');
+            localStorage.setItem('pipboyTempActionPoints', document.getElementById('tempActionPoints').textContent || '0');
         }
 
         function loadPlayerData() {
@@ -954,8 +956,12 @@
             if (savedLevel) document.getElementById('level').textContent = savedLevel;
             if (savedHealth) document.getElementById('health').textContent = savedHealth;
             if (savedActionPoints) document.getElementById('actionPoints').textContent = savedActionPoints;
-            if (savedTempHealth) document.getElementById('tempHealth').textContent = savedTempHealth;
-            if (savedTempActionPoints) document.getElementById('tempActionPoints').textContent = savedTempActionPoints;
+            
+            // Set temp values
+            let tempHP = savedTempHealth ? parseInt(savedTempHealth) : 0;
+            let tempAP = savedTempActionPoints ? parseInt(savedTempActionPoints) : 0;
+            playerData.tempHealth = tempHP;
+            playerData.tempActionPoints = tempAP;
             
             // Set max values
             document.getElementById('maxHealth').textContent = MAX_HEALTH;
@@ -975,6 +981,8 @@
                 document.getElementById('healthBar').style.width = healthPercent + '%';
                 updateTempHealthBar();
             }
+            
+            updateTempDisplays();
         }
 
         // ===== EFFECTS STORAGE FUNCTIONS =====
@@ -1023,11 +1031,31 @@
             }
         }
 
+        // ===== UPDATE TEMP DISPLAYS =====
+        function updateTempDisplays() {
+            const tempHP = playerData.tempHealth || 0;
+            const tempAP = playerData.tempActionPoints || 0;
+            
+            const tempHealthDisplay = document.getElementById('tempHealthDisplay');
+            const tempAPDisplay = document.getElementById('tempActionPointsDisplay');
+            
+            if (tempHP > 0) {
+                tempHealthDisplay.textContent = `(+${tempHP})`;
+            } else {
+                tempHealthDisplay.textContent = '';
+            }
+            
+            if (tempAP > 0) {
+                tempAPDisplay.textContent = `(+${tempAP})`;
+            } else {
+                tempAPDisplay.textContent = '';
+            }
+        }
+
         // ===== UPDATE TEMP HEALTH BAR =====
         function updateTempHealthBar() {
             const currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
-            const tempHealth = parseInt(document.getElementById('tempHealth').textContent) || 0;
-            const totalHealth = currentHealth + tempHealth;
+            const tempHealth = playerData.tempHealth || 0;
             const healthPercent = (currentHealth / MAX_HEALTH) * 100;
             const tempHealthPercent = (tempHealth / MAX_HEALTH) * 100;
             
@@ -1244,11 +1272,31 @@
                 return;
             }
 
-            let currentTempHealth = parseInt(document.getElementById('tempHealth').textContent) || 0;
-            currentTempHealth += tempAmount;
-
-            document.getElementById('tempHealth').textContent = currentTempHealth;
+            playerData.tempHealth = (playerData.tempHealth || 0) + tempAmount;
             updateTempHealthBar();
+            updateTempDisplays();
+            savePlayerData();
+        }
+
+        // ===== REMOVE TEMP HEALTH =====
+        function removeTempHealth() {
+            const tempHealthInput = prompt('Enter temporary health amount to remove:');
+            if (tempHealthInput === null || tempHealthInput === '') return;
+            
+            const tempAmount = parseInt(tempHealthInput);
+            if (isNaN(tempAmount) || tempAmount <= 0) {
+                alert('Please enter a valid positive number!');
+                return;
+            }
+
+            playerData.tempHealth = (playerData.tempHealth || 0) - tempAmount;
+            
+            if (playerData.tempHealth < 0) {
+                playerData.tempHealth = 0;
+            }
+            
+            updateTempHealthBar();
+            updateTempDisplays();
             savePlayerData();
         }
 
@@ -1301,10 +1349,29 @@
                 return;
             }
 
-            let currentTempAP = parseInt(document.getElementById('tempActionPoints').textContent) || 0;
-            currentTempAP += tempAmount;
+            playerData.tempActionPoints = (playerData.tempActionPoints || 0) + tempAmount;
+            updateTempDisplays();
+            savePlayerData();
+        }
 
-            document.getElementById('tempActionPoints').textContent = currentTempAP;
+        // ===== REMOVE TEMP ACTION POINTS =====
+        function removeTempAP() {
+            const tempAPInput = prompt('Enter temporary action points amount to remove:');
+            if (tempAPInput === null || tempAPInput === '') return;
+            
+            const tempAmount = parseInt(tempAPInput);
+            if (isNaN(tempAmount) || tempAmount <= 0) {
+                alert('Please enter a valid positive number!');
+                return;
+            }
+
+            playerData.tempActionPoints = (playerData.tempActionPoints || 0) - tempAmount;
+            
+            if (playerData.tempActionPoints < 0) {
+                playerData.tempActionPoints = 0;
+            }
+            
+            updateTempDisplays();
             savePlayerData();
         }
 
