@@ -52,13 +52,15 @@
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
                     db = request.result;
+                    console.log('✓ IndexedDB initialized');
                     resolve();
                 };
 
                 request.onupgradeneeded = (event) => {
                     db = event.target.result;
                     if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                        console.log('✓ Object store created');
                     }
                 };
             });
@@ -73,6 +75,7 @@
 
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
+                    console.log('Player data retrieved:', request.result);
                     resolve(request.result || null);
                 };
             });
@@ -87,6 +90,7 @@
 
                 request.onerror = () => reject(request.error);
                 request.onsuccess = () => {
+                    console.log('✓ Player data saved to IndexedDB:', playerData);
                     localStorage.setItem('currentPlayer', JSON.stringify(playerData));
                     resolve();
                 };
@@ -97,6 +101,7 @@
         window.addEventListener('DOMContentLoaded', async function() {
             try {
                 await initDB();
+                console.log('✓ Database ready');
             } catch (error) {
                 console.error('Error initializing database:', error);
             }
@@ -118,15 +123,19 @@
             
             if (validAccounts[username] === password) {
                 try {
-                    // Check if player already exists in database
+                    // Get existing player data if it exists
                     const existingPlayer = await getPlayerDataFromDB();
+                    console.log('Existing player data:', existingPlayer);
                     
                     let playerData;
+                    
                     if (existingPlayer && existingPlayer.characterName === username) {
-                        // Player exists - preserve their existing data (XP, level, health)
+                        // Player exists - KEEP their existing data (XP, level, health)
+                        console.log('✓ Found existing player, preserving data');
                         playerData = existingPlayer;
                     } else {
-                        // New player - create fresh data
+                        // New player or different account - create fresh data
+                        console.log('✓ Creating new player data');
                         playerData = {
                             id: 1,
                             characterName: username,
@@ -137,8 +146,9 @@
                         };
                     }
                     
-                    // Save player data to IndexedDB
+                    // Save to IndexedDB
                     await savePlayerDataToDB(playerData);
+                    
                     // Redirect to character page
                     window.location.href = 'character.html';
                 } catch (error) {
