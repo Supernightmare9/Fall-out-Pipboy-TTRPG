@@ -501,34 +501,16 @@
             margin-bottom: 10px;
         }
 
-        .perk-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .perk-btn {
-            flex: 1;
-            background-color: #8b5cf6;
-            border: 1px solid #8b5cf6;
-            color: #0a0a0a;
-            padding: 6px;
-            border-radius: 2px;
-            font-size: 9px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: none;
-            transition: all 0.2s ease;
-        }
-
-        .perk-btn:hover {
-            background-color: #a78bfa;
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
-        }
-
         .perk-remove {
             background-color: #ff6b6b;
             border: 1px solid #ff6b6b;
             color: #0a0a0a;
+            padding: 6px 12px;
+            border-radius: 2px;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .perk-remove:hover {
@@ -943,7 +925,7 @@
 
         <!-- STATS TAB CONTENT -->
         <div id="stats" class="subtab-content active">
-            <!-- TOP STATS GRID (Experience, Health, Skills) -->
+            <!-- TOP STATS GRID (Experience, Health) -->
             <div class="stats-grid">
                 <!-- EXPERIENCE & LEVEL -->
                 <div class="stat-box">
@@ -1696,3 +1678,24 @@
                 let playerData = await getPlayerDataFromDB();
                 
                 if (!playerData) return;
+
+                if (!playerData.statusEffects) {
+                    playerData.statusEffects = [];
+                }
+
+                if (playerData.statusEffects.includes(effect)) {
+                    alert('Effect already applied!');
+                    return;
+                }
+
+                playerData.statusEffects.push(effect);
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+                select.value = '';
+            } catch (error) {
+                console.error('Error adding status effect:', error);
+            }
+        }
+
+        // ===== REMOVE STATUS EFFECT =====
+        async function removeStatusEffect(
