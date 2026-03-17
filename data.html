@@ -745,24 +745,6 @@
                 <div class="data-section">
                     <div class="section-title">Notable NPCs</div>
                     <ul class="data-list" id="npcsList">
-                        <li class="data-item">
-                            <div class="item-title">Preston Garvey</div>
-                            <div class="item-description">Leader of the Minutemen faction. Provides settlement quests and faction opportunities.</div>
-                            <div class="item-status">Location: Concord | Faction: Minutemen</div>
-                            <button class="item-delete-btn" onclick="deleteNPC(0)">DELETE</button>
-                        </li>
-                        <li class="data-item">
-                            <div class="item-title">Piper Wright</div>
-                            <div class="item-description">Investigative reporter for the Publick Occurrences. Can become a companion.</div>
-                            <div class="item-status">Location: Diamond City | Affinity: Friendly</div>
-                            <button class="item-delete-btn" onclick="deleteNPC(1)">DELETE</button>
-                        </li>
-                        <li class="data-item">
-                            <div class="item-title">Codsworth</div>
-                            <div class="item-description">Your pre-war Mr. Handy butler. Can become a companion and settlement builder.</div>
-                            <div class="item-status">Status: Companion | Affinity: Loyal</div>
-                            <button class="item-delete-btn" onclick="deleteNPC(2)">DELETE</button>
-                        </li>
                     </ul>
 
                     <!-- ADD NPC FORM -->
@@ -798,24 +780,6 @@
                 <div class="data-section">
                     <div class="section-title">Factions</div>
                     <ul class="data-list" id="factionsList">
-                        <li class="data-item">
-                            <div class="item-title">Minutemen</div>
-                            <div class="item-description">Colonial militia dedicated to helping the people of the Commonwealth.</div>
-                            <div class="item-status">Reputation: Friendly | Quests Available: Yes</div>
-                            <button class="item-delete-btn" onclick="deleteFaction(0)">DELETE</button>
-                        </li>
-                        <li class="data-item">
-                            <div class="item-title">The Brotherhood of Steel</div>
-                            <div class="item-description">Military order seeking to control advanced technology.</div>
-                            <div class="item-status">Reputation: Neutral | Quests Available: Yes</div>
-                            <button class="item-delete-btn" onclick="deleteFaction(1)">DELETE</button>
-                        </li>
-                        <li class="data-item">
-                            <div class="item-title">The Institute</div>
-                            <div class="item-description">Secret scientific organization hidden beneath the Commonwealth.</div>
-                            <div class="item-status">Reputation: Unknown | Quests Available: No</div>
-                            <button class="item-delete-btn" onclick="deleteFaction(2)">DELETE</button>
-                        </li>
                     </ul>
 
                     <!-- ADD FACTION FORM -->
@@ -962,7 +926,7 @@
             }
 
             customNPCs.push({
-                id: Date.now(),
+                id: 'custom-' + Date.now(),
                 name: name,
                 description: description,
                 location: location,
@@ -983,8 +947,7 @@
 
         // ===== DELETE NPC =====
         function deleteNPC(id) {
-            if (id < 0 || id >= customNPCs.length) return;
-            customNPCs.splice(id, 1);
+            customNPCs = customNPCs.filter(npc => npc.id !== id);
             localStorage.setItem('customNPCs', JSON.stringify(customNPCs));
             renderNPCs();
         }
@@ -1002,35 +965,44 @@
             const list = document.getElementById('npcsList');
             let html = '';
 
-            customNPCs.forEach((npc, index) => {
+            // Default NPCs
+            const defaultNPCs = [
+                {
+                    id: 'default-1',
+                    name: 'Preston Garvey',
+                    description: 'Leader of the Minutemen faction. Provides settlement quests and faction opportunities.',
+                    location: 'Concord',
+                    notes: 'Faction: Minutemen'
+                },
+                {
+                    id: 'default-2',
+                    name: 'Piper Wright',
+                    description: 'Investigative reporter for the Publick Occurrences. Can become a companion.',
+                    location: 'Diamond City',
+                    notes: 'Affinity: Friendly'
+                },
+                {
+                    id: 'default-3',
+                    name: 'Codsworth',
+                    description: 'Your pre-war Mr. Handy butler. Can become a companion and settlement builder.',
+                    location: 'Sanctuary Hills',
+                    notes: 'Status: Companion | Affinity: Loyal'
+                }
+            ];
+
+            // Render all NPCs (default + custom)
+            const allNPCs = [...defaultNPCs, ...customNPCs];
+            
+            allNPCs.forEach((npc) => {
                 html += `
                     <li class="data-item">
                         <div class="item-title">${npc.name}</div>
                         <div class="item-description">${npc.description}</div>
                         <div class="item-status">Location: ${npc.location} | ${npc.notes}</div>
-                        <button class="item-delete-btn" onclick="deleteNPC(${index})">DELETE</button>
+                        ${npc.id.startsWith('default') ? '' : `<button class="item-delete-btn" onclick="deleteNPC('${npc.id}')">DELETE</button>`}
                     </li>
                 `;
             });
-
-            // Re-add default NPCs
-            html = `
-                <li class="data-item">
-                    <div class="item-title">Preston Garvey</div>
-                    <div class="item-description">Leader of the Minutemen faction. Provides settlement quests and faction opportunities.</div>
-                    <div class="item-status">Location: Concord | Faction: Minutemen</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">Piper Wright</div>
-                    <div class="item-description">Investigative reporter for the Publick Occurrences. Can become a companion.</div>
-                    <div class="item-status">Location: Diamond City | Affinity: Friendly</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">Codsworth</div>
-                    <div class="item-description">Your pre-war Mr. Handy butler. Can become a companion and settlement builder.</div>
-                    <div class="item-status">Status: Companion | Affinity: Loyal</div>
-                </li>
-            ` + html;
 
             list.innerHTML = html;
         }
@@ -1050,7 +1022,7 @@
             }
 
             customFactions.push({
-                id: Date.now(),
+                id: 'custom-' + Date.now(),
                 name: name,
                 description: description,
                 reputation: reputation,
@@ -1071,8 +1043,7 @@
 
         // ===== DELETE FACTION =====
         function deleteFaction(id) {
-            if (id < 0 || id >= customFactions.length) return;
-            customFactions.splice(id, 1);
+            customFactions = customFactions.filter(faction => faction.id !== id);
             localStorage.setItem('customFactions', JSON.stringify(customFactions));
             renderFactions();
         }
@@ -1090,35 +1061,44 @@
             const list = document.getElementById('factionsList');
             let html = '';
 
-            customFactions.forEach((faction, index) => {
+            // Default Factions
+            const defaultFactions = [
+                {
+                    id: 'default-1',
+                    name: 'Minutemen',
+                    description: 'Colonial militia dedicated to helping the people of the Commonwealth.',
+                    reputation: 'Friendly',
+                    notes: 'Quests Available: Yes'
+                },
+                {
+                    id: 'default-2',
+                    name: 'The Brotherhood of Steel',
+                    description: 'Military order seeking to control advanced technology.',
+                    reputation: 'Neutral',
+                    notes: 'Quests Available: Yes'
+                },
+                {
+                    id: 'default-3',
+                    name: 'The Institute',
+                    description: 'Secret scientific organization hidden beneath the Commonwealth.',
+                    reputation: 'Unknown',
+                    notes: 'Quests Available: No'
+                }
+            ];
+
+            // Render all factions (default + custom)
+            const allFactions = [...defaultFactions, ...customFactions];
+            
+            allFactions.forEach((faction) => {
                 html += `
                     <li class="data-item">
                         <div class="item-title">${faction.name}</div>
                         <div class="item-description">${faction.description}</div>
                         <div class="item-status">Reputation: ${faction.reputation} | ${faction.notes}</div>
-                        <button class="item-delete-btn" onclick="deleteFaction(${index})">DELETE</button>
+                        ${faction.id.startsWith('default') ? '' : `<button class="item-delete-btn" onclick="deleteFaction('${faction.id}')">DELETE</button>`}
                     </li>
                 `;
             });
-
-            // Re-add default factions
-            html = `
-                <li class="data-item">
-                    <div class="item-title">Minutemen</div>
-                    <div class="item-description">Colonial militia dedicated to helping the people of the Commonwealth.</div>
-                    <div class="item-status">Reputation: Friendly | Quests Available: Yes</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">The Brotherhood of Steel</div>
-                    <div class="item-description">Military order seeking to control advanced technology.</div>
-                    <div class="item-status">Reputation: Neutral | Quests Available: Yes</div>
-                </li>
-                <li class="data-item">
-                    <div class="item-title">The Institute</div>
-                    <div class="item-description">Secret scientific organization hidden beneath the Commonwealth.</div>
-                    <div class="item-status">Reputation: Unknown | Quests Available: No</div>
-                </li>
-            ` + html;
 
             list.innerHTML = html;
         }
@@ -1187,14 +1167,14 @@
             const savedNPCs = localStorage.getItem('customNPCs');
             if (savedNPCs) {
                 customNPCs = JSON.parse(savedNPCs);
-                renderNPCs();
             }
+            renderNPCs();
 
             const savedFactions = localStorage.getItem('customFactions');
             if (savedFactions) {
                 customFactions = JSON.parse(savedFactions);
-                renderFactions();
             }
+            renderFactions();
         }
 
         // ===== ADD EVENT LISTENERS =====
