@@ -64,6 +64,20 @@
             });
         }
 
+        // Get player data from IndexedDB
+        function getPlayerDataFromDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(1);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    resolve(request.result || null);
+                };
+            });
+        }
+
         // Save player data to IndexedDB
         function savePlayerDataToDB(playerData) {
             return new Promise((resolve, reject) => {
@@ -103,23 +117,33 @@
             };
             
             if (validAccounts[username] === password) {
-                const playerData = {
-                    id: 1,
-                    characterName: username,
-                    vault: '111',
-                    level: 1,
-                    health: 100,
-                    xp: 0
-                };
-                
                 try {
-                    // Save to IndexedDB
+                    // Check if player already exists in database
+                    const existingPlayer = await getPlayerDataFromDB();
+                    
+                    let playerData;
+                    if (existingPlayer && existingPlayer.characterName === username) {
+                        // Player exists - preserve their existing data (XP, level, health)
+                        playerData = existingPlayer;
+                    } else {
+                        // New player - create fresh data
+                        playerData = {
+                            id: 1,
+                            characterName: username,
+                            vault: '111',
+                            level: 1,
+                            health: 100,
+                            xp: 0
+                        };
+                    }
+                    
+                    // Save player data to IndexedDB
                     await savePlayerDataToDB(playerData);
                     // Redirect to character page
                     window.location.href = 'character.html';
                 } catch (error) {
-                    console.error('Error saving player data:', error);
-                    alert('Error saving player data!');
+                    console.error('Error during login:', error);
+                    alert('Error loading player data!');
                 }
             } else {
                 alert('Invalid Vault Dweller credentials!');
