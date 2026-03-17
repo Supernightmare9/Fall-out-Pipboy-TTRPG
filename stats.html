@@ -97,6 +97,13 @@
             margin-bottom: 30px;
         }
 
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
         .stat-box {
             background-color: #1a1a1a;
             border: 2px solid #4ade80;
@@ -325,7 +332,6 @@
             border: 2px solid #ff6b6b;
             padding: 20px;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.2);
-            margin-bottom: 30px;
         }
 
         .effects-title {
@@ -343,15 +349,17 @@
         .effects-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 15px;
             margin-bottom: 15px;
         }
 
         .effect-section {
             background-color: #0a0a0a;
             border: 1px solid rgba(255, 107, 107, 0.3);
-            padding: 15px;
+            padding: 12px;
             border-radius: 3px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
         .effect-section-title {
@@ -359,7 +367,7 @@
             font-size: 11px;
             font-weight: bold;
             letter-spacing: 1px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             text-transform: uppercase;
         }
 
@@ -367,11 +375,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 8px 0;
-            padding: 8px;
+            margin: 6px 0;
+            padding: 6px;
             background-color: #1a1a1a;
             border: 1px solid rgba(255, 107, 107, 0.2);
-            border-radius: 3px;
+            border-radius: 2px;
         }
 
         .effect-active {
@@ -382,15 +390,15 @@
         .effect-label {
             color: #4ade80;
             text-shadow: 0 0 3px #4ade80;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .effect-badge {
             background-color: #ff6b6b;
             color: #0a0a0a;
-            padding: 4px 10px;
-            border-radius: 3px;
-            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 2px;
+            font-size: 9px;
             font-weight: bold;
             text-shadow: none;
             cursor: pointer;
@@ -405,26 +413,26 @@
 
         .no-effects {
             color: #666;
-            font-size: 11px;
+            font-size: 10px;
             text-align: center;
-            padding: 15px;
+            padding: 10px;
         }
 
         .status-selector {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .status-select {
             flex: 1;
-            min-width: 150px;
+            min-width: 120px;
             background-color: #0a0a0a;
             border: 2px solid #ff6b6b;
             color: #4ade80;
-            padding: 10px;
+            padding: 8px;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -444,9 +452,9 @@
             background-color: #8b3a3a;
             border: 2px solid #ff6b6b;
             color: #ff6b6b;
-            padding: 10px 16px;
+            padding: 8px 12px;
             font-family: 'Courier New', monospace;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             cursor: pointer;
             text-shadow: 0 0 5px #ff6b6b;
@@ -533,16 +541,30 @@
         }
 
         /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .stats-grid {
+        @media (max-width: 1200px) {
+            .main-grid {
                 grid-template-columns: 1fr;
             }
 
             .effects-content {
                 grid-template-columns: 1fr;
             }
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
 
             .skills-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .effects-content {
                 grid-template-columns: 1fr;
             }
 
@@ -596,7 +618,7 @@
             <div class="character-name" id="characterName">VAULT DWELLER</div>
         </div>
 
-        <!-- STATS GRID -->
+        <!-- TOP STATS GRID (Experience, Health, Skills) -->
         <div class="stats-grid">
             <!-- EXPERIENCE & LEVEL -->
             <div class="stat-box">
@@ -619,7 +641,7 @@
                     </div>
                 </div>
 
-                <!-- XP INPUT INSIDE EXPERIENCE BOX -->
+                <!-- XP INPUT -->
                 <div class="input-form">
                     <input type="number" id="xpInput" class="input-field" placeholder="Add XP (e.g., 500)" min="0" max="999999">
                     <button class="action-button" onclick="addXP()">ADD XP</button>
@@ -669,63 +691,66 @@
                     <span class="stat-value">5</span>
                 </div>
             </div>
+        </div>
 
+        <!-- MAIN GRID (Skills + Status Effects) -->
+        <div class="main-grid">
             <!-- SKILLS -->
             <div class="stat-box">
                 <div class="stat-title">Skills</div>
                 <div class="skills-grid" id="skillsGrid"></div>
             </div>
-        </div>
 
-        <!-- STATUS EFFECTS & BOOSTS SECTION -->
-        <div class="effects-box">
-            <div class="effects-title">⚠ Status Effects & Boosts</div>
+            <!-- STATUS EFFECTS & BOOSTS -->
+            <div class="effects-box">
+                <div class="effects-title">⚠ Status Effects & Boosts</div>
 
-            <!-- EFFECTS AND BOOSTS CONTENT -->
-            <div class="effects-content">
-                <!-- STATUS EFFECTS -->
-                <div class="effect-section">
-                    <div class="effect-section-title">☢ Status Effects</div>
-                    <div id="effectsList"></div>
+                <!-- EFFECTS AND BOOSTS CONTENT -->
+                <div class="effects-content">
+                    <!-- STATUS EFFECTS -->
+                    <div class="effect-section">
+                        <div class="effect-section-title">☢ Status Effects</div>
+                        <div id="effectsList"></div>
+                    </div>
+
+                    <!-- STAT BOOSTS -->
+                    <div class="effect-section">
+                        <div class="effect-section-title">✦ Stat Boosts</div>
+                        <div id="boostsList"></div>
+                    </div>
                 </div>
 
-                <!-- STAT BOOSTS -->
-                <div class="effect-section">
-                    <div class="effect-section-title">✦ Stat Boosts</div>
-                    <div id="boostsList"></div>
-                </div>
-            </div>
+                <!-- ADD EFFECTS AND BOOSTS -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <!-- ADD STATUS EFFECT -->
+                    <div class="status-selector">
+                        <select id="statusSelect" class="status-select">
+                            <option value="">Select Effect...</option>
+                            <option value="radiation">Radiation Sickness</option>
+                            <option value="poisoned">Poisoned</option>
+                            <option value="infected">Infected</option>
+                            <option value="fatigued">Fatigued</option>
+                            <option value="freezing">Freezing</option>
+                            <option value="burning">Burning</option>
+                            <option value="blighted">Blighted</option>
+                        </select>
+                        <button class="add-effect-btn" onclick="addStatusEffect()">ADD</button>
+                    </div>
 
-            <!-- ADD EFFECTS AND BOOSTS -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <!-- ADD STATUS EFFECT -->
-                <div class="status-selector">
-                    <select id="statusSelect" class="status-select">
-                        <option value="">Select Effect...</option>
-                        <option value="radiation">Radiation Sickness</option>
-                        <option value="poisoned">Poisoned</option>
-                        <option value="infected">Infected</option>
-                        <option value="fatigued">Fatigued</option>
-                        <option value="freezing">Freezing</option>
-                        <option value="burning">Burning</option>
-                        <option value="blighted">Blighted</option>
-                    </select>
-                    <button class="add-effect-btn" onclick="addStatusEffect()">ADD</button>
-                </div>
-
-                <!-- ADD STAT BOOST -->
-                <div class="status-selector">
-                    <select id="boostSelect" class="status-select">
-                        <option value="">Select Boost...</option>
-                        <option value="strength">+1 Strength</option>
-                        <option value="perception">+1 Perception</option>
-                        <option value="endurance">+1 Endurance</option>
-                        <option value="charisma">+1 Charisma</option>
-                        <option value="intelligence">+1 Intelligence</option>
-                        <option value="agility">+1 Agility</option>
-                        <option value="luck">+1 Luck</option>
-                    </select>
-                    <button class="add-effect-btn" onclick="addStatBoost()">ADD</button>
+                    <!-- ADD STAT BOOST -->
+                    <div class="status-selector">
+                        <select id="boostSelect" class="status-select">
+                            <option value="">Select Boost...</option>
+                            <option value="strength">+1 Strength</option>
+                            <option value="perception">+1 Perception</option>
+                            <option value="endurance">+1 Endurance</option>
+                            <option value="charisma">+1 Charisma</option>
+                            <option value="intelligence">+1 Intelligence</option>
+                            <option value="agility">+1 Agility</option>
+                            <option value="luck">+1 Luck</option>
+                        </select>
+                        <button class="add-effect-btn" onclick="addStatBoost()">ADD</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -904,7 +929,6 @@
                         statBoosts: [],
                         skills: {}
                     };
-                    // Initialize all skills to 0
                     SKILLS.forEach(skill => {
                         defaultPlayer.skills[skill] = 0;
                     });
@@ -1083,7 +1107,6 @@
 
                 playerData.skills[skillName] = (playerData.skills[skillName] || 0) + amount;
 
-                // Cap skills at 0-100
                 if (playerData.skills[skillName] < 0) {
                     playerData.skills[skillName] = 0;
                 } else if (playerData.skills[skillName] > 100) {
@@ -1236,7 +1259,7 @@
                 effectsList.innerHTML = playerData.statusEffects.map(effect => 
                     `<div class="effect-item effect-active">
                         <span class="effect-label">${STATUS_LABELS[effect]}</span>
-                        <span class="effect-badge" onclick="removeStatusEffect('${effect}')" style="cursor: pointer;">REMOVE</span>
+                        <span class="effect-badge" onclick="removeStatusEffect('${effect}')" style="cursor: pointer;">X</span>
                     </div>`
                 ).join('');
             } else {
@@ -1249,7 +1272,7 @@
                 boostsList.innerHTML = playerData.statBoosts.map(boost => 
                     `<div class="effect-item effect-active">
                         <span class="effect-label">${BOOST_LABELS[boost]}</span>
-                        <span class="effect-badge" onclick="removeStatBoost('${boost}')" style="cursor: pointer;">REMOVE</span>
+                        <span class="effect-badge" onclick="removeStatBoost('${boost}')" style="cursor: pointer;">X</span>
                     </div>`
                 ).join('');
             } else {
