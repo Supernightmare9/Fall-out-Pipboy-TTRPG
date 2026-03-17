@@ -49,7 +49,7 @@
         .container {
             position: relative;
             z-index: 1;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
         }
 
@@ -87,6 +87,91 @@
             color: #fbbf24;
             text-shadow: 0 0 5px #fbbf24;
             letter-spacing: 2px;
+        }
+
+        /* ===== SEARCH & FILTER ===== */
+        .search-filter {
+            background-color: #1a1a1a;
+            border: 2px solid #4ade80;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box label {
+            color: #fbbf24;
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .search-box input {
+            background-color: #0a0a0a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px #4ade80;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: #fbbf24;
+        }
+
+        .sort-box {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .sort-box label {
+            color: #fbbf24;
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .sort-box select {
+            background-color: #0a0a0a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px #4ade80;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .sort-box select:focus {
+            outline: none;
+            border-color: #fbbf24;
+            color: #fbbf24;
         }
 
         /* ===== TABS ===== */
@@ -132,10 +217,6 @@
         /* ===== TAB CONTENT ===== */
         .tab-content {
             display: none;
-            background-color: #1a1a1a;
-            border: 2px solid #4ade80;
-            padding: 25px;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
         }
 
         .tab-content.active {
@@ -159,31 +240,265 @@
             text-transform: uppercase;
         }
 
+        /* ===== ITEM LIST ===== */
         .item-list {
             list-style: none;
+            margin-bottom: 30px;
         }
 
-        .item-list li {
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(74, 222, 128, 0.2);
-            font-size: 12px;
-            color: #4ade80;
+        .item-card {
+            padding: 15px;
+            background-color: #0a0a0a;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 3px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .item-list li:last-child {
-            border-bottom: none;
+        .item-card:hover {
+            background-color: rgba(74, 222, 128, 0.05);
+            border-color: rgba(74, 222, 128, 0.4);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
         .item-name {
             color: #fbbf24;
             text-shadow: 0 0 3px #fbbf24;
             font-weight: bold;
+            font-size: 13px;
+            flex: 1;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .favorite-btn {
+            background: none;
+            border: 1px solid #fbbf24;
+            color: #fbbf24;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+
+        .favorite-btn:hover {
+            background-color: #fbbf24;
+            color: #0a0a0a;
+        }
+
+        .favorite-btn.favorited {
+            background-color: #fbbf24;
+            color: #0a0a0a;
+        }
+
+        .delete-btn {
+            background-color: #8b3a3a;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover {
+            background-color: #a84a4a;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .item-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .item-detail {
+            color: #4ade80;
+            font-size: 11px;
+            text-shadow: 0 0 3px #4ade80;
+        }
+
+        .detail-label {
+            color: #fbbf24;
+            font-weight: bold;
+            text-shadow: 0 0 3px #fbbf24;
+            font-size: 10px;
         }
 
         .item-description {
             color: #4ade80;
             font-size: 11px;
-            margin-top: 3px;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .item-footer {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-top: 1px solid rgba(74, 222, 128, 0.2);
+            padding-top: 10px;
+        }
+
+        .quantity-control {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .quantity-control button {
+            background-color: #2d5016;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+
+        .quantity-control button:hover {
+            background-color: #3d6b1f;
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .quantity-display {
+            color: #4ade80;
+            font-size: 12px;
+            min-width: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .empty-message {
+            color: #9333ea;
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 12px;
+            font-style: italic;
+            text-shadow: 0 0 2px #9333ea;
+        }
+
+        /* ===== ADD ITEM FORM ===== */
+        .add-item-form {
+            background-color: #0a0a0a;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            padding: 20px;
+            border-radius: 3px;
+            margin-bottom: 30px;
+        }
+
+        .form-title {
+            color: #c084fc;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #c084fc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            color: #4ade80;
+            font-size: 10px;
+            text-shadow: 0 0 3px #4ade80;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .form-input {
+            background-color: #1a1a1a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-shadow: 0 0 5px #4ade80;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .submit-btn {
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .submit-btn:hover {
+            background-color: #3d6b1f;
+            border-color: #fbbf24;
+            color: #fbbf24;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #4ade80;
+            text-shadow: 0 0 3px #4ade80;
+            min-height: 20px;
+        }
+
+        .message.success {
+            color: #4ade80;
+            text-shadow: 0 0 5px #4ade80;
+        }
+
+        .message.error {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px #ff6b6b;
         }
 
         /* ===== NAVIGATION ===== */
@@ -222,10 +537,6 @@
             transform: translateY(-2px);
         }
 
-        .nav-button:active {
-            transform: translateY(0);
-        }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .tabs {
@@ -244,6 +555,20 @@
             .nav-button {
                 width: 100%;
             }
+
+            .search-filter {
+                flex-direction: column;
+            }
+
+            .item-body {
+                grid-template-columns: 1fr;
+            }
+
+            .item-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
         }
     </style>
 </head>
@@ -255,139 +580,576 @@
             <div class="inventory-subtitle">ITEM MANAGEMENT SYSTEM</div>
         </div>
 
+        <!-- SEARCH & FILTER -->
+        <div class="search-filter">
+            <div class="search-box">
+                <label>Search Items</label>
+                <input type="text" id="searchInput" placeholder="Search by name..." onkeyup="filterAndSort()">
+            </div>
+            <div class="sort-box">
+                <label>Sort By</label>
+                <select id="sortSelect" onchange="filterAndSort()">
+                    <option value="name">Name (A-Z)</option>
+                    <option value="name-desc">Name (Z-A)</option>
+                    <option value="quantity">Quantity (Low-High)</option>
+                    <option value="quantity-desc">Quantity (High-Low)</option>
+                    <option value="value">Value (Low-High)</option>
+                    <option value="value-desc">Value (High-Low)</option>
+                    <option value="weight">Weight (Light-Heavy)</option>
+                    <option value="weight-desc">Weight (Heavy-Light)</option>
+                    <option value="favorites">Favorites First</option>
+                </select>
+            </div>
+        </div>
+
         <!-- TABS -->
         <div class="tabs">
-            <div class="tab active" onclick="showTab('weapons', this)">Weapons</div>
-            <div class="tab" onclick="showTab('apparel', this)">Apparel</div>
-            <div class="tab" onclick="showTab('misc', this)">Misc</div>
-            <div class="tab" onclick="showTab('keyItems', this)">Key Items</div>
-            <div class="tab" onclick="showTab('ammo', this)">Ammo</div>
+            <div class="tab active" onclick="switchTab('weapons', this)">⚔ Weapons</div>
+            <div class="tab" onclick="switchTab('apparel', this)">👕 Apparel</div>
+            <div class="tab" onclick="switchTab('misc', this)">📦 Misc</div>
+            <div class="tab" onclick="switchTab('aid', this)">⚕ Aid</div>
+            <div class="tab" onclick="switchTab('ammo', this)">💣 Ammo</div>
         </div>
 
-        <!-- TAB CONTENTS -->
+        <!-- WEAPONS TAB -->
         <div id="weapons" class="tab-content active">
             <h2>⚔ Weapons</h2>
-            <ul class="item-list">
-                <li>
-                    <div class="item-name">Laser Rifle</div>
-                    <div class="item-description">Condition: 100% | Damage: 25</div>
-                </li>
-                <li>
-                    <div class="item-name">Minigun</div>
-                    <div class="item-description">Condition: 85% | Damage: 18</div>
-                </li>
-                <li>
-                    <div class="item-name">Combat Shotgun</div>
-                    <div class="item-description">Condition: 100% | Damage: 45</div>
-                </li>
-                <li>
-                    <div class="item-name">10mm Pistol</div>
-                    <div class="item-description">Condition: 100% | Damage: 12</div>
-                </li>
-            </ul>
+            <div class="add-item-form">
+                <div class="form-title">+ Add Weapon</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" class="form-input" id="weaponName" placeholder="e.g., Laser Rifle">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Damage</label>
+                        <input type="number" class="form-input" id="weaponDamage" placeholder="e.g., 25">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Condition (%)</label>
+                        <input type="number" class="form-input" id="weaponCondition" placeholder="100" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Weight</label>
+                        <input type="number" class="form-input" id="weaponWeight" placeholder="e.g., 5.5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Value (Caps)</label>
+                        <input type="number" class="form-input" id="weaponValue" placeholder="e.g., 500">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="weaponDesc" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button class="submit-btn" onclick="addItem('weapons')">ADD WEAPON</button>
+                </div>
+                <div class="message" id="weaponsMessage"></div>
+            </div>
+            <ul class="item-list" id="weaponsList"></ul>
         </div>
 
+        <!-- APPAREL TAB -->
         <div id="apparel" class="tab-content">
             <h2>👕 Apparel</h2>
-            <ul class="item-list">
-                <li>
-                    <div class="item-name">Vault 111 Jumpsuit</div>
-                    <div class="item-description">Condition: 100% | DR: 15</div>
-                </li>
-                <li>
-                    <div class="item-name">Combat Armor</div>
-                    <div class="item-description">Condition: 85% | DR: 35</div>
-                </li>
-                <li>
-                    <div class="item-name">Power Armor T-45</div>
-                    <div class="item-description">Condition: 100% | DR: 60</div>
-                </li>
-            </ul>
+            <div class="add-item-form">
+                <div class="form-title">+ Add Apparel</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" class="form-input" id="apparelName" placeholder="e.g., Combat Armor">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Defense Rating (DR)</label>
+                        <input type="number" class="form-input" id="apparelDR" placeholder="e.g., 35">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Condition (%)</label>
+                        <input type="number" class="form-input" id="apparelCondition" placeholder="100" min="0" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Weight</label>
+                        <input type="number" class="form-input" id="apparelWeight" placeholder="e.g., 8.5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Value (Caps)</label>
+                        <input type="number" class="form-input" id="apparelValue" placeholder="e.g., 300">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="apparelDesc" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button class="submit-btn" onclick="addItem('apparel')">ADD APPAREL</button>
+                </div>
+                <div class="message" id="apparelMessage"></div>
+            </div>
+            <ul class="item-list" id="apparelList"></ul>
         </div>
 
+        <!-- MISCELLANEOUS TAB -->
         <div id="misc" class="tab-content">
             <h2>📦 Miscellaneous</h2>
-            <ul class="item-list">
-                <li>
-                    <div class="item-name">Fusion Core</div>
-                    <div class="item-description">Quantity: 5 | Power: 100%</div>
-                </li>
-                <li>
-                    <div class="item-name">Nuka-Cola</div>
-                    <div class="item-description">Quantity: 12 | HP Recovery: 50</div>
-                </li>
-                <li>
-                    <div class="item-name">Stimpak</div>
-                    <div class="item-description">Quantity: 8 | HP Recovery: 100</div>
-                </li>
-                <li>
-                    <div class="item-name">Purified Water</div>
-                    <div class="item-description">Quantity: 15 | Healing: 30</div>
-                </li>
-            </ul>
+            <div class="add-item-form">
+                <div class="form-title">+ Add Misc Item</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" class="form-input" id="miscName" placeholder="e.g., Fusion Core">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-input" id="miscQuantity" placeholder="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Weight</label>
+                        <input type="number" class="form-input" id="miscWeight" placeholder="e.g., 1.5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Value per Item (Caps)</label>
+                        <input type="number" class="form-input" id="miscValue" placeholder="e.g., 100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rarity</label>
+                        <input type="text" class="form-input" id="miscRarity" placeholder="e.g., Common">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="miscDesc" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button class="submit-btn" onclick="addItem('misc')">ADD ITEM</button>
+                </div>
+                <div class="message" id="miscMessage"></div>
+            </div>
+            <ul class="item-list" id="miscList"></ul>
         </div>
 
-        <div id="keyItems" class="tab-content">
-            <h2>🔑 Key Items</h2>
-            <ul class="item-list">
-                <li>
-                    <div class="item-name">Vault 111 Overseer's Password</div>
-                    <div class="item-description">Access Level: 3 | Status: Active</div>
-                </li>
-                <li>
-                    <div class="item-name">Pipboy 3000</div>
-                    <div class="item-description">Device Status: Online | Signal: Strong</div>
-                </li>
-                <li>
-                    <div class="item-name">Holotape - Voice of the Wasteland</div>
-                    <div class="item-description">Data Status: Intact | Playable</div>
-                </li>
-            </ul>
+        <!-- AID TAB -->
+        <div id="aid" class="tab-content">
+            <h2>⚕ Aid & Consumables</h2>
+            <div class="add-item-form">
+                <div class="form-title">+ Add Aid Item</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" class="form-input" id="aidName" placeholder="e.g., Stimpak">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-input" id="aidQuantity" placeholder="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Effect Type</label>
+                        <input type="text" class="form-input" id="aidEffect" placeholder="e.g., Health, Radiation, Fatigue">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Effect Amount</label>
+                        <input type="text" class="form-input" id="aidAmount" placeholder="e.g., Restores 100 HP">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Value (Caps)</label>
+                        <input type="number" class="form-input" id="aidValue" placeholder="e.g., 25">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="aidDesc" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button class="submit-btn" onclick="addItem('aid')">ADD AID ITEM</button>
+                </div>
+                <div class="message" id="aidMessage"></div>
+            </div>
+            <ul class="item-list" id="aidList"></ul>
         </div>
 
+        <!-- AMMO TAB -->
         <div id="ammo" class="tab-content">
             <h2>💣 Ammunition</h2>
-            <ul class="item-list">
-                <li>
-                    <div class="item-name">10mm Round</div>
-                    <div class="item-description">Quantity: 287</div>
-                </li>
-                <li>
-                    <div class="item-name">Fusion Cell</div>
-                    <div class="item-description">Quantity: 94</div>
-                </li>
-                <li>
-                    <div class="item-name">Shotgun Shell</div>
-                    <div class="item-description">Quantity: 42</div>
-                </li>
-                <li>
-                    <div class="item-name">5.56 NATO Round</div>
-                    <div class="item-description">Quantity: 156</div>
-                </li>
-            </ul>
+            <div class="add-item-form">
+                <div class="form-title">+ Add Ammo</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Ammo Type</label>
+                        <input type="text" class="form-input" id="ammoName" placeholder="e.g., 10mm Round">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input type="number" class="form-input" id="ammoQuantity" placeholder="287" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Weight per Round</label>
+                        <input type="number" class="form-input" id="ammoWeight" placeholder="e.g., 0.1" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Value per Round (Caps)</label>
+                        <input type="number" class="form-input" id="ammoValue" placeholder="e.g., 1" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Weapon Type</label>
+                        <input type="text" class="form-input" id="ammoWeapon" placeholder="e.g., 10mm Pistol">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" id="ammoDesc" placeholder="Optional description">
+                    </div>
+                </div>
+                <div class="form-buttons">
+                    <button class="submit-btn" onclick="addItem('ammo')">ADD AMMO</button>
+                </div>
+                <div class="message" id="ammoMessage"></div>
+            </div>
+            <ul class="item-list" id="ammoList"></ul>
         </div>
 
         <!-- NAVIGATION -->
         <div class="nav-buttons">
-            <button class="nav-button" onclick="window.location.href='character.html'">← BACK</button>
+            <button class="nav-button" onclick="window.location.href='character.html'">← CHARACTER</button>
             <button class="nav-button" onclick="window.location.href='stats.html'">STATS</button>
             <button class="nav-button" onclick="window.location.href='data.html'">DATA →</button>
         </div>
     </div>
 
     <script>
-        function showTab(tabName, tabElement) {
-            // Hide all tab contents
+        // ===== ITEM STORAGE =====
+        let inventory = {
+            weapons: [],
+            apparel: [],
+            misc: [],
+            aid: [],
+            ammo: []
+        };
+
+        // ===== LOAD DATA ON PAGE LOAD =====
+        window.addEventListener('DOMContentLoaded', function() {
+            loadInventory();
+            renderAllTabs();
+        });
+
+        // ===== LOAD FROM LOCAL STORAGE =====
+        function loadInventory() {
+            const saved = localStorage.getItem('pipboyInventory');
+            if (saved) {
+                inventory = JSON.parse(saved);
+            }
+        }
+
+        // ===== SAVE TO LOCAL STORAGE =====
+        function saveInventory() {
+            localStorage.setItem('pipboyInventory', JSON.stringify(inventory));
+        }
+
+        // ===== SWITCH TABS =====
+        function switchTab(tabName, tabElement) {
+            // Hide all tabs
             const contents = document.querySelectorAll('.tab-content');
             contents.forEach(content => content.classList.remove('active'));
 
-            // Remove active class from all tabs
+            // Remove active from all tab buttons
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => tab.classList.remove('active'));
 
-            // Show selected tab content and activate button
+            // Show selected tab
             document.getElementById(tabName).classList.add('active');
             tabElement.classList.add('active');
+
+            // Re-render to apply search/sort
+            filterAndSort();
+        }
+
+        // ===== ADD ITEM =====
+        function addItem(category) {
+            let item = {};
+            let messageEl = document.getElementById(category + 'Message');
+
+            if (category === 'weapons') {
+                if (!document.getElementById('weaponName').value) {
+                    showMessage(messageEl, '⚠ Please enter weapon name!', 'error');
+                    return;
+                }
+                item = {
+                    id: 'item-' + Date.now(),
+                    name: document.getElementById('weaponName').value,
+                    damage: document.getElementById('weaponDamage').value || 'N/A',
+                    condition: document.getElementById('weaponCondition').value || 100,
+                    weight: parseFloat(document.getElementById('weaponWeight').value) || 0,
+                    value: parseFloat(document.getElementById('weaponValue').value) || 0,
+                    description: document.getElementById('weaponDesc').value,
+                    favorite: false
+                };
+                document.getElementById('weaponName').value = '';
+                document.getElementById('weaponDamage').value = '';
+                document.getElementById('weaponCondition').value = '100';
+                document.getElementById('weaponWeight').value = '';
+                document.getElementById('weaponValue').value = '';
+                document.getElementById('weaponDesc').value = '';
+            } else if (category === 'apparel') {
+                if (!document.getElementById('apparelName').value) {
+                    showMessage(messageEl, '⚠ Please enter apparel name!', 'error');
+                    return;
+                }
+                item = {
+                    id: 'item-' + Date.now(),
+                    name: document.getElementById('apparelName').value,
+                    dr: document.getElementById('apparelDR').value || 'N/A',
+                    condition: document.getElementById('apparelCondition').value || 100,
+                    weight: parseFloat(document.getElementById('apparelWeight').value) || 0,
+                    value: parseFloat(document.getElementById('apparelValue').value) || 0,
+                    description: document.getElementById('apparelDesc').value,
+                    favorite: false
+                };
+                document.getElementById('apparelName').value = '';
+                document.getElementById('apparelDR').value = '';
+                document.getElementById('apparelCondition').value = '100';
+                document.getElementById('apparelWeight').value = '';
+                document.getElementById('apparelValue').value = '';
+                document.getElementById('apparelDesc').value = '';
+            } else if (category === 'misc') {
+                if (!document.getElementById('miscName').value) {
+                    showMessage(messageEl, '⚠ Please enter item name!', 'error');
+                    return;
+                }
+                item = {
+                    id: 'item-' + Date.now(),
+                    name: document.getElementById('miscName').value,
+                    quantity: parseInt(document.getElementById('miscQuantity').value) || 1,
+                    weight: parseFloat(document.getElementById('miscWeight').value) || 0,
+                    value: parseFloat(document.getElementById('miscValue').value) || 0,
+                    rarity: document.getElementById('miscRarity').value || 'Common',
+                    description: document.getElementById('miscDesc').value,
+                    favorite: false
+                };
+                document.getElementById('miscName').value = '';
+                document.getElementById('miscQuantity').value = '1';
+                document.getElementById('miscWeight').value = '';
+                document.getElementById('miscValue').value = '';
+                document.getElementById('miscRarity').value = '';
+                document.getElementById('miscDesc').value = '';
+            } else if (category === 'aid') {
+                if (!document.getElementById('aidName').value) {
+                    showMessage(messageEl, '⚠ Please enter aid item name!', 'error');
+                    return;
+                }
+                item = {
+                    id: 'item-' + Date.now(),
+                    name: document.getElementById('aidName').value,
+                    quantity: parseInt(document.getElementById('aidQuantity').value) || 1,
+                    effect: document.getElementById('aidEffect').value || 'Unknown',
+                    amount: document.getElementById('aidAmount').value || 'N/A',
+                    value: parseFloat(document.getElementById('aidValue').value) || 0,
+                    description: document.getElementById('aidDesc').value,
+                    favorite: false
+                };
+                document.getElementById('aidName').value = '';
+                document.getElementById('aidQuantity').value = '1';
+                document.getElementById('aidEffect').value = '';
+                document.getElementById('aidAmount').value = '';
+                document.getElementById('aidValue').value = '';
+                document.getElementById('aidDesc').value = '';
+            } else if (category === 'ammo') {
+                if (!document.getElementById('ammoName').value) {
+                    showMessage(messageEl, '⚠ Please enter ammo type!', 'error');
+                    return;
+                }
+                item = {
+                    id: 'item-' + Date.now(),
+                    name: document.getElementById('ammoName').value,
+                    quantity: parseInt(document.getElementById('ammoQuantity').value) || 1,
+                    weight: parseFloat(document.getElementById('ammoWeight').value) || 0,
+                    value: parseFloat(document.getElementById('ammoValue').value) || 0,
+                    weapon: document.getElementById('ammoWeapon').value || 'General',
+                    description: document.getElementById('ammoDesc').value,
+                    favorite: false
+                };
+                document.getElementById('ammoName').value = '';
+                document.getElementById('ammoQuantity').value = '';
+                document.getElementById('ammoWeight').value = '';
+                document.getElementById('ammoValue').value = '';
+                document.getElementById('ammoWeapon').value = '';
+                document.getElementById('ammoDesc').value = '';
+            }
+
+            inventory[category].push(item);
+            saveInventory();
+            renderCategory(category);
+            showMessage(messageEl, `✓ ${item.name} added successfully!`, 'success');
+        }
+
+        // ===== DELETE ITEM =====
+        function deleteItem(category, itemId) {
+            inventory[category] = inventory[category].filter(item => item.id !== itemId);
+            saveInventory();
+            renderCategory(category);
+        }
+
+        // ===== TOGGLE FAVORITE =====
+        function toggleFavorite(category, itemId) {
+            const item = inventory[category].find(i => i.id === itemId);
+            if (item) {
+                item.favorite = !item.favorite;
+                saveInventory();
+                renderCategory(category);
+            }
+        }
+
+        // ===== ADJUST QUANTITY =====
+        function adjustQuantity(category, itemId, delta) {
+            const item = inventory[category].find(i => i.id === itemId);
+            if (item && item.quantity !== undefined) {
+                item.quantity = Math.max(1, item.quantity + delta);
+                saveInventory();
+                renderCategory(category);
+            }
+        }
+
+        // ===== FILTER AND SORT =====
+        function filterAndSort() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const sortOption = document.getElementById('sortSelect').value;
+
+            Object.keys(inventory).forEach(category => {
+                let items = [...inventory[category]];
+
+                // Filter by search term
+                items = items.filter(item => 
+                    item.name.toLowerCase().includes(searchTerm)
+                );
+
+                // Sort
+                items.sort((a, b) => {
+                    if (sortOption === 'name') {
+                        return a.name.localeCompare(b.name);
+                    } else if (sortOption === 'name-desc') {
+                        return b.name.localeCompare(a.name);
+                    } else if (sortOption === 'quantity') {
+                        return (a.quantity || 0) - (b.quantity || 0);
+                    } else if (sortOption === 'quantity-desc') {
+                        return (b.quantity || 0) - (a.quantity || 0);
+                    } else if (sortOption === 'value') {
+                        return (a.value || 0) - (b.value || 0);
+                    } else if (sortOption === 'value-desc') {
+                        return (b.value || 0) - (a.value || 0);
+                    } else if (sortOption === 'weight') {
+                        return (a.weight || 0) - (b.weight || 0);
+                    } else if (sortOption === 'weight-desc') {
+                        return (b.weight || 0) - (a.weight || 0);
+                    } else if (sortOption === 'favorites') {
+                        return (b.favorite ? 1 : 0) - (a.favorite ? 1 : 0);
+                    }
+                    return 0;
+                });
+
+                renderItems(category, items);
+            });
+        }
+
+        // ===== RENDER ITEMS =====
+        function renderItems(category, items) {
+            const listEl = document.getElementById(category + 'List');
+            
+            if (items.length === 0) {
+                listEl.innerHTML = '<div class="empty-message">No items in this category. Add one above!</div>';
+                return;
+            }
+
+            let html = '';
+            items.forEach(item => {
+                html += `
+                    <li class="item-card">
+                        <div class="item-header">
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-actions">
+                                <button class="favorite-btn ${item.favorite ? 'favorited' : ''}" onclick="toggleFavorite('${category}', '${item.id}')">★</button>
+                                <button class="delete-btn" onclick="deleteItem('${category}', '${item.id}')">DELETE</button>
+                            </div>
+                        </div>
+                        ${item.description ? `<div class="item-description">${item.description}</div>` : ''}
+                        <div class="item-body">
+                            ${getItemDetails(item, category)}
+                        </div>
+                        ${getItemFooter(item, category)}
+                    </li>
+                `;
+            });
+
+            listEl.innerHTML = html;
+        }
+
+        // ===== GET ITEM DETAILS =====
+        function getItemDetails(item, category) {
+            let html = '';
+
+            if (category === 'weapons') {
+                html += `<div class="item-detail"><span class="detail-label">Damage:</span> ${item.damage}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Condition:</span> ${item.condition}%</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Weight:</span> ${item.weight} lbs</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value} caps</div>`;
+            } else if (category === 'apparel') {
+                html += `<div class="item-detail"><span class="detail-label">DR:</span> ${item.dr}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Condition:</span> ${item.condition}%</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Weight:</span> ${item.weight} lbs</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value} caps</div>`;
+            } else if (category === 'misc') {
+                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Rarity:</span> ${item.rarity}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Weight:</span> ${(item.weight * item.quantity).toFixed(2)} lbs</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value * item.quantity} caps</div>`;
+            } else if (category === 'aid') {
+                html += `<div class="item-detail"><span class="detail-label">Effect:</span> ${item.effect}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Amount:</span> ${item.amount}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${item.value * item.quantity} caps</div>`;
+            } else if (category === 'ammo') {
+                html += `<div class="item-detail"><span class="detail-label">Qty:</span> ${item.quantity}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Weapon:</span> ${item.weapon}</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Weight:</span> ${(item.weight * item.quantity).toFixed(2)} lbs</div>`;
+                html += `<div class="item-detail"><span class="detail-label">Value:</span> ${(item.value * item.quantity).toFixed(2)} caps</div>`;
+            }
+
+            return html;
+        }
+
+        // ===== GET ITEM FOOTER =====
+        function getItemFooter(item, category) {
+            if (category === 'weapons' || category === 'apparel') {
+                return '';
+            }
+
+            return `
+                <div class="item-footer">
+                    <div class="quantity-control">
+                        <button onclick="adjustQuantity('${category}', '${item.id}', -1)">-</button>
+                        <div class="quantity-display">${item.quantity}</div>
+                        <button onclick="adjustQuantity('${category}', '${item.id}', 1)">+</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===== RENDER CATEGORY =====
+        function renderCategory(category) {
+            renderItems(category, inventory[category]);
+        }
+
+        // ===== RENDER ALL TABS =====
+        function renderAllTabs() {
+            Object.keys(inventory).forEach(category => {
+                renderItems(category, inventory[category]);
+            });
+        }
+
+        // ===== SHOW MESSAGE =====
+        function showMessage(element, message, type) {
+            element.textContent = message;
+            element.className = 'message ' + type;
+            setTimeout(() => {
+                element.textContent = '';
+                element.className = 'message';
+            }, 3000);
         }
     </script>
 </body>
