@@ -1,1 +1,394 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Inventory System</title>\n    <style>\n        body { font-family: Arial, sans-serif; }\n        .tabs { display: flex; }\n        .tab { margin-right: 10px; padding: 10px; background-color: #f1f1f1; cursor: pointer; }\n        .tab-content { display: none; border: 1px solid #ccc; padding: 10px; }\n        .active { background-color: #ddd; display: block; }\n    </style>\n</head>\n<body>\n    <h1>Inventory</h1>\n    <div class="tabs">\n        <div class="tab" onclick="showTab('weapons')">Weapons</div>\n        <div class="tab" onclick="showTab('apparel')">Apparel</div>\n        <div class="tab" onclick="showTab('misc')">Misc</div>\n        <div class="tab" onclick="showTab('keyItems')">Key Items</div>\n        <div class="tab" onclick="showTab('ammo')">Ammo</div>\n    </div>\n    <div id="weapons" class="tab-content">\n        <h2>Weapons</h2>\n        <p>List of weapons will go here.</p>\n    </div>\n    <div id="apparel" class="tab-content">\n        <h2>Apparel</h2>\n        <p>List of apparel will go here.</p>\n    </div>\n    <div id="misc" class="tab-content">\n        <h2>Misc</h2>\n        <p>List of miscellaneous items will go here.</p>\n    </div>\n    <div id="keyItems" class="tab-content">\n        <h2>Key Items</h2>\n        <p>List of key items will go here.</p>\n    </div>\n    <div id="ammo" class="tab-content">\n        <h2>Ammo</h2>\n        <p>List of ammo will go here.</p>\n    </div>\n    <script>\n        function showTab(tabName) {\n            var contents = document.getElementsByClassName('tab-content');\n            for (var i = 0; i < contents.length; i++) {\n                contents[i].style.display = 'none';\n            }\n            document.getElementById(tabName).style.display = 'block';\n        }\n        // Show weapons tab by default\n        showTab('weapons');\n    </script>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pip-Boy Inventory</title>
+    <style>
+        /* ===========================
+           FALLOUT PIPBOY INVENTORY
+           =========================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #0a0a0a;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
+        }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background-color: #1a1a1a;
+            border: 3px solid #4ade80;
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
+        }
+
+        .pip-title {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: #4ade80;
+            text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
+            animation: glow 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 15px #4ade80, 0 0 30px rgba(74, 222, 128, 0.8);
+            }
+        }
+
+        .inventory-subtitle {
+            font-size: 12px;
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            letter-spacing: 2px;
+        }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            text-shadow: 0 0 5px #4ade80;
+        }
+
+        .tab:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .tab.active {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        /* ===== TAB CONTENT ===== */
+        .tab-content {
+            display: none;
+            background-color: #1a1a1a;
+            border: 2px solid #4ade80;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .tab-content h2 {
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #4ade80;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .item-list {
+            list-style: none;
+        }
+
+        .item-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+            font-size: 12px;
+            color: #4ade80;
+        }
+
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            color: #fbbf24;
+            text-shadow: 0 0 3px #fbbf24;
+            font-weight: bold;
+        }
+
+        .item-description {
+            color: #4ade80;
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        /* ===== NAVIGATION ===== */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .nav-button {
+            flex: 1;
+            min-width: 150px;
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 12px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .nav-button:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        .nav-button:active {
+            transform: translateY(0);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                width: 100%;
+                text-align: left;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .nav-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="pip-title">PIP-BOY INVENTORY</div>
+            <div class="inventory-subtitle">ITEM MANAGEMENT SYSTEM</div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('weapons', this)">Weapons</div>
+            <div class="tab" onclick="showTab('apparel', this)">Apparel</div>
+            <div class="tab" onclick="showTab('misc', this)">Misc</div>
+            <div class="tab" onclick="showTab('keyItems', this)">Key Items</div>
+            <div class="tab" onclick="showTab('ammo', this)">Ammo</div>
+        </div>
+
+        <!-- TAB CONTENTS -->
+        <div id="weapons" class="tab-content active">
+            <h2>⚔ Weapons</h2>
+            <ul class="item-list">
+                <li>
+                    <div class="item-name">Laser Rifle</div>
+                    <div class="item-description">Condition: 100% | Damage: 25</div>
+                </li>
+                <li>
+                    <div class="item-name">Minigun</div>
+                    <div class="item-description">Condition: 85% | Damage: 18</div>
+                </li>
+                <li>
+                    <div class="item-name">Combat Shotgun</div>
+                    <div class="item-description">Condition: 100% | Damage: 45</div>
+                </li>
+                <li>
+                    <div class="item-name">10mm Pistol</div>
+                    <div class="item-description">Condition: 100% | Damage: 12</div>
+                </li>
+            </ul>
+        </div>
+
+        <div id="apparel" class="tab-content">
+            <h2>👕 Apparel</h2>
+            <ul class="item-list">
+                <li>
+                    <div class="item-name">Vault 111 Jumpsuit</div>
+                    <div class="item-description">Condition: 100% | DR: 15</div>
+                </li>
+                <li>
+                    <div class="item-name">Combat Armor</div>
+                    <div class="item-description">Condition: 85% | DR: 35</div>
+                </li>
+                <li>
+                    <div class="item-name">Power Armor T-45</div>
+                    <div class="item-description">Condition: 100% | DR: 60</div>
+                </li>
+            </ul>
+        </div>
+
+        <div id="misc" class="tab-content">
+            <h2>📦 Miscellaneous</h2>
+            <ul class="item-list">
+                <li>
+                    <div class="item-name">Fusion Core</div>
+                    <div class="item-description">Quantity: 5 | Power: 100%</div>
+                </li>
+                <li>
+                    <div class="item-name">Nuka-Cola</div>
+                    <div class="item-description">Quantity: 12 | HP Recovery: 50</div>
+                </li>
+                <li>
+                    <div class="item-name">Stimpak</div>
+                    <div class="item-description">Quantity: 8 | HP Recovery: 100</div>
+                </li>
+                <li>
+                    <div class="item-name">Purified Water</div>
+                    <div class="item-description">Quantity: 15 | Healing: 30</div>
+                </li>
+            </ul>
+        </div>
+
+        <div id="keyItems" class="tab-content">
+            <h2>🔑 Key Items</h2>
+            <ul class="item-list">
+                <li>
+                    <div class="item-name">Vault 111 Overseer's Password</div>
+                    <div class="item-description">Access Level: 3 | Status: Active</div>
+                </li>
+                <li>
+                    <div class="item-name">Pipboy 3000</div>
+                    <div class="item-description">Device Status: Online | Signal: Strong</div>
+                </li>
+                <li>
+                    <div class="item-name">Holotape - Voice of the Wasteland</div>
+                    <div class="item-description">Data Status: Intact | Playable</div>
+                </li>
+            </ul>
+        </div>
+
+        <div id="ammo" class="tab-content">
+            <h2>💣 Ammunition</h2>
+            <ul class="item-list">
+                <li>
+                    <div class="item-name">10mm Round</div>
+                    <div class="item-description">Quantity: 287</div>
+                </li>
+                <li>
+                    <div class="item-name">Fusion Cell</div>
+                    <div class="item-description">Quantity: 94</div>
+                </li>
+                <li>
+                    <div class="item-name">Shotgun Shell</div>
+                    <div class="item-description">Quantity: 42</div>
+                </li>
+                <li>
+                    <div class="item-name">5.56 NATO Round</div>
+                    <div class="item-description">Quantity: 156</div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- NAVIGATION -->
+        <div class="nav-buttons">
+            <button class="nav-button" onclick="window.location.href='character.html'">← BACK</button>
+            <button class="nav-button" onclick="window.location.href='stats.html'">STATS</button>
+            <button class="nav-button" onclick="window.location.href='data.html'">DATA →</button>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName, tabElement) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Show selected tab content and activate button
+            document.getElementById(tabName).classList.add('active');
+            tabElement.classList.add('active');
+        }
+    </script>
+</body>
+</html>
