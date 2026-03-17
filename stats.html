@@ -255,6 +255,144 @@
             text-shadow: 0 0 5px #ff6b6b;
         }
 
+        /* ===== STATUS EFFECTS ===== */
+        .status-effects-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .effects-box {
+            background-color: #1a1a1a;
+            border: 2px solid #ff6b6b;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.2);
+        }
+
+        .effects-title {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px #ff6b6b;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ff6b6b;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .effect-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+            padding: 10px;
+            background-color: #0a0a0a;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 3px;
+        }
+
+        .effect-active {
+            border: 1px solid #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+        }
+
+        .effect-label {
+            color: #4ade80;
+            text-shadow: 0 0 3px #4ade80;
+            font-size: 12px;
+        }
+
+        .effect-badge {
+            background-color: #ff6b6b;
+            color: #0a0a0a;
+            padding: 4px 12px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .effect-badge:hover {
+            background-color: #ff8787;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+            transform: scale(1.05);
+        }
+
+        .effect-badge.inactive {
+            background-color: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .status-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 107, 107, 0.3);
+            flex-wrap: wrap;
+        }
+
+        .status-select {
+            flex: 1;
+            min-width: 150px;
+            background-color: #0a0a0a;
+            border: 2px solid #ff6b6b;
+            color: #4ade80;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+        }
+
+        .status-select option {
+            background-color: #1a1a1a;
+            color: #4ade80;
+        }
+
+        .add-effect-btn {
+            background-color: #8b3a3a;
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #ff6b6b;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .add-effect-btn:hover {
+            background-color: #a84a4a;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        .no-effects {
+            color: #888;
+            font-size: 12px;
+            text-align: center;
+            padding: 20px;
+        }
+
         /* ===== SPECIAL SECTION ===== */
         .special-grid {
             display: grid;
@@ -328,6 +466,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .status-effects-section {
+                grid-template-columns: 1fr;
+            }
+
             .header {
                 padding: 20px;
             }
@@ -353,6 +495,18 @@
             }
 
             .action-button {
+                width: 100%;
+            }
+
+            .status-selector {
+                flex-direction: column;
+            }
+
+            .status-select {
+                width: 100%;
+            }
+
+            .add-effect-btn {
                 width: 100%;
             }
         }
@@ -466,6 +620,49 @@
             </div>
         </div>
 
+        <!-- STATUS EFFECTS SECTION -->
+        <div class="status-effects-section">
+            <div class="effects-box">
+                <div class="effects-title">⚠ Status Effects</div>
+                <div id="effectsList"></div>
+
+                <!-- ADD EFFECT SELECTOR -->
+                <div class="status-selector">
+                    <select id="statusSelect" class="status-select">
+                        <option value="">Select Effect...</option>
+                        <option value="radiation">Radiation Sickness</option>
+                        <option value="poisoned">Poisoned</option>
+                        <option value="infected">Infected</option>
+                        <option value="fatigued">Fatigued</option>
+                        <option value="freezing">Freezing</option>
+                        <option value="burning">Burning</option>
+                        <option value="blighted">Blighted</option>
+                    </select>
+                    <button class="add-effect-btn" onclick="addStatusEffect()">ADD</button>
+                </div>
+            </div>
+
+            <div class="effects-box">
+                <div class="effects-title">✦ Stat Boosts</div>
+                <div id="boostsList"></div>
+
+                <!-- ADD BOOST SELECTOR -->
+                <div class="status-selector">
+                    <select id="boostSelect" class="status-select">
+                        <option value="">Select Boost...</option>
+                        <option value="strength">+1 Strength</option>
+                        <option value="perception">+1 Perception</option>
+                        <option value="endurance">+1 Endurance</option>
+                        <option value="charisma">+1 Charisma</option>
+                        <option value="intelligence">+1 Intelligence</option>
+                        <option value="agility">+1 Agility</option>
+                        <option value="luck">+1 Luck</option>
+                    </select>
+                    <button class="add-effect-btn" onclick="addStatBoost()">ADD</button>
+                </div>
+            </div>
+        </div>
+
         <!-- S.P.E.C.I.A.L STATS -->
         <div class="stat-box" style="margin-bottom: 30px;">
             <div class="stat-title">S.P.E.C.I.A.L Attributes</div>
@@ -575,6 +772,27 @@
         const MAX_HEALTH = 100;
         const MAX_ACTION_POINTS = 20;
 
+        // Status effect labels
+        const STATUS_LABELS = {
+            radiation: '☢ Radiation Sickness',
+            poisoned: '☣ Poisoned',
+            infected: '✗ Infected',
+            fatigued: 'Z Fatigued',
+            freezing: '❄ Freezing',
+            burning: '🔥 Burning',
+            blighted: '◇ Blighted'
+        };
+
+        const BOOST_LABELS = {
+            strength: '+1 STR',
+            perception: '+1 PER',
+            endurance: '+1 END',
+            charisma: '+1 CHA',
+            intelligence: '+1 INT',
+            agility: '+1 AGI',
+            luck: '+1 LCK'
+        };
+
         // Initialize and load player data
         window.addEventListener('DOMContentLoaded', async function() {
             try {
@@ -596,7 +814,9 @@
                         xp: 0,
                         health: 100,
                         actionPoints: 10,
-                        vault: '111'
+                        vault: '111',
+                        statusEffects: [],
+                        statBoosts: []
                     };
                     await savePlayerDataToDB(defaultPlayer);
                     updateDisplay(defaultPlayer);
@@ -681,7 +901,6 @@
 
                 playerData.health = (playerData.health || MAX_HEALTH) + healthChange;
                 
-                // Cap health between 0 and MAX_HEALTH
                 if (playerData.health > MAX_HEALTH) {
                     playerData.health = MAX_HEALTH;
                     messageBox.textContent = `⚠ Health capped at ${MAX_HEALTH}!`;
@@ -733,7 +952,6 @@
 
                 playerData.actionPoints = (playerData.actionPoints || 10) + apChange;
                 
-                // Cap action points between 0 and MAX_ACTION_POINTS
                 if (playerData.actionPoints > MAX_ACTION_POINTS) {
                     playerData.actionPoints = MAX_ACTION_POINTS;
                     messageBox.textContent = `⚠ Action Points capped at ${MAX_ACTION_POINTS}!`;
@@ -762,6 +980,104 @@
             }
         }
 
+        // ===== ADD STATUS EFFECT =====
+        async function addStatusEffect() {
+            const select = document.getElementById('statusSelect');
+            const effect = select.value;
+
+            if (!effect) {
+                alert('Please select an effect!');
+                return;
+            }
+
+            try {
+                let playerData = await getPlayerDataFromDB();
+                
+                if (!playerData) return;
+
+                if (!playerData.statusEffects) {
+                    playerData.statusEffects = [];
+                }
+
+                // Check if effect already exists
+                if (playerData.statusEffects.includes(effect)) {
+                    alert('Effect already applied!');
+                    return;
+                }
+
+                playerData.statusEffects.push(effect);
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+                select.value = '';
+            } catch (error) {
+                console.error('Error adding status effect:', error);
+            }
+        }
+
+        // ===== REMOVE STATUS EFFECT =====
+        async function removeStatusEffect(effect) {
+            try {
+                let playerData = await getPlayerDataFromDB();
+                
+                if (!playerData) return;
+
+                playerData.statusEffects = playerData.statusEffects.filter(e => e !== effect);
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+            } catch (error) {
+                console.error('Error removing status effect:', error);
+            }
+        }
+
+        // ===== ADD STAT BOOST =====
+        async function addStatBoost() {
+            const select = document.getElementById('boostSelect');
+            const boost = select.value;
+
+            if (!boost) {
+                alert('Please select a boost!');
+                return;
+            }
+
+            try {
+                let playerData = await getPlayerDataFromDB();
+                
+                if (!playerData) return;
+
+                if (!playerData.statBoosts) {
+                    playerData.statBoosts = [];
+                }
+
+                // Check if boost already exists
+                if (playerData.statBoosts.includes(boost)) {
+                    alert('Boost already applied!');
+                    return;
+                }
+
+                playerData.statBoosts.push(boost);
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+                select.value = '';
+            } catch (error) {
+                console.error('Error adding stat boost:', error);
+            }
+        }
+
+        // ===== REMOVE STAT BOOST =====
+        async function removeStatBoost(boost) {
+            try {
+                let playerData = await getPlayerDataFromDB();
+                
+                if (!playerData) return;
+
+                playerData.statBoosts = playerData.statBoosts.filter(b => b !== boost);
+                await savePlayerDataToDB(playerData);
+                updateDisplay(playerData);
+            } catch (error) {
+                console.error('Error removing stat boost:', error);
+            }
+        }
+
         // ===== DISPLAY UPDATE =====
         function updateDisplay(playerData) {
             // Update XP display
@@ -782,6 +1098,32 @@
             const xpPercent = (xpInCurrentLevel / XP_PER_LEVEL) * 100;
             document.getElementById('xpBar').style.width = xpPercent + '%';
             document.getElementById('xpPercent').textContent = Math.round(xpPercent) + '%';
+
+            // Update status effects list
+            const effectsList = document.getElementById('effectsList');
+            if (playerData.statusEffects && playerData.statusEffects.length > 0) {
+                effectsList.innerHTML = playerData.statusEffects.map(effect => 
+                    `<div class="effect-item effect-active">
+                        <span class="effect-label">${STATUS_LABELS[effect]}</span>
+                        <span class="effect-badge" onclick="removeStatusEffect('${effect}')" style="cursor: pointer;">REMOVE</span>
+                    </div>`
+                ).join('');
+            } else {
+                effectsList.innerHTML = '<div class="no-effects">No active effects</div>';
+            }
+
+            // Update stat boosts list
+            const boostsList = document.getElementById('boostsList');
+            if (playerData.statBoosts && playerData.statBoosts.length > 0) {
+                boostsList.innerHTML = playerData.statBoosts.map(boost => 
+                    `<div class="effect-item effect-active">
+                        <span class="effect-label">${BOOST_LABELS[boost]}</span>
+                        <span class="effect-badge" onclick="removeStatBoost('${boost}')" style="cursor: pointer;">REMOVE</span>
+                    </div>`
+                ).join('');
+            } else {
+                boostsList.innerHTML = '<div class="no-effects">No active boosts</div>';
+            }
         }
 
         // ===== KEY PRESS HANDLERS =====
