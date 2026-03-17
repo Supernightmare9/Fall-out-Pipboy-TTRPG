@@ -495,25 +495,91 @@
             margin-top: 15px;
         }
 
-        /* ===== STATUS EFFECTS ===== */
-        .effects-box {
-            background-color: #1a1a1a;
-            border: 2px solid #ff6b6b;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.2);
-            margin-top: 20px;
-        }
-
-        .effects-title {
+        /* ===== EFFECTS TAB STYLES ===== */
+        .effects-subtitle {
             color: #ff6b6b;
             text-shadow: 0 0 5px #ff6b6b;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             letter-spacing: 2px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #ff6b6b;
-            padding-bottom: 10px;
+            margin: 15px 0 10px 0;
             text-transform: uppercase;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .effects-list {
+            background-color: #0a0a0a;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            padding: 12px;
+            border-radius: 3px;
+            margin-bottom: 15px;
+            min-height: 50px;
+        }
+
+        .effect-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #1a1a1a;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+
+        .effect-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .effect-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .effect-name {
+            color: #fbbf24;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px #fbbf24;
+        }
+
+        .effect-duration {
+            color: #4ade80;
+            font-size: 10px;
+            text-shadow: 0 0 2px #4ade80;
+        }
+
+        .effect-remove-btn {
+            background-color: #8b3a3a;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            padding: 4px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 3px #ff6b6b;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+
+        .effect-remove-btn:hover {
+            background-color: #a84a4a;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+
+        .empty-message {
+            color: #9333ea;
+            text-align: center;
+            padding: 15px;
+            font-size: 11px;
+            font-style: italic;
+            text-shadow: 0 0 2px #9333ea;
         }
 
         /* ===== NAVIGATION BUTTONS ===== */
@@ -578,13 +644,13 @@
             <div class="character-name" id="characterName">VAULT DWELLER</div>
         </div>
 
-       <!-- SUBTAB NAVIGATION -->
-<div class="subtab-nav">
-    <button class="subtab-button active" data-tab="stats">Stats</button>
-    <button class="subtab-button" data-tab="skills">Skills</button>
-    <button class="subtab-button" data-tab="effects">Effects</button>
-    <button class="subtab-button" data-tab="perks">Perks</button>
-</div>
+        <!-- SUBTAB NAVIGATION -->
+        <div class="subtab-nav">
+            <button class="subtab-button active" data-tab="stats">Stats</button>
+            <button class="subtab-button" data-tab="skills">Skills</button>
+            <button class="subtab-button" data-tab="effects">Effects</button>
+            <button class="subtab-button" data-tab="perks">Perks</button>
+        </div>
 
         <!-- STATS TAB CONTENT -->
         <div id="stats" class="subtab-content active">
@@ -719,37 +785,37 @@
         </div>
 
         <!-- EFFECTS TAB CONTENT (DEBUFFS & BOOSTS) -->
-<div id="effects" class="subtab-content">
-    <div class="stat-box">
-        <div class="stat-title">Active Effects</div>
-        
-        <!-- DEBUFFS SECTION -->
-        <div style="margin-bottom: 25px;">
-            <div class="effects-subtitle">☢ DEBUFFS</div>
-            <div class="effects-list" id="debuffsList">
-                <div class="empty-message">No active debuffs</div>
-            </div>
-            <div class="input-form">
-                <input type="text" id="debuffInput" class="input-field" placeholder="Debuff name (e.g., Poisoned, Burning)">
-                <input type="number" id="debuffDurationInput" class="input-field" placeholder="Duration (turns)" min="1" max="999">
-                <button class="action-button" onclick="addDebuff()">ADD DEBUFF</button>
-            </div>
-        </div>
+        <div id="effects" class="subtab-content">
+            <div class="stat-box">
+                <div class="stat-title">Active Effects</div>
+                
+                <!-- DEBUFFS SECTION -->
+                <div style="margin-bottom: 25px;">
+                    <div class="effects-subtitle">☢ DEBUFFS</div>
+                    <div class="effects-list" id="debuffsList">
+                        <div class="empty-message">No active debuffs</div>
+                    </div>
+                    <div class="input-form">
+                        <input type="text" id="debuffInput" class="input-field" placeholder="Debuff name (e.g., Poisoned, Burning)">
+                        <input type="number" id="debuffDurationInput" class="input-field" placeholder="Duration (turns)" min="1" max="999">
+                        <button class="action-button" onclick="addDebuff()">ADD DEBUFF</button>
+                    </div>
+                </div>
 
-        <!-- BOOSTS SECTION -->
-        <div>
-            <div class="effects-subtitle">✦ BOOSTS</div>
-            <div class="effects-list" id="boostsList">
-                <div class="empty-message">No active boosts</div>
-            </div>
-            <div class="input-form">
-                <input type="text" id="boostInput" class="input-field" placeholder="Boost name (e.g., Strength+, Luck+)">
-                <input type="number" id="boostDurationInput" class="input-field" placeholder="Duration (turns)" min="1" max="999">
-                <button class="action-button" onclick="addBoost()">ADD BOOST</button>
+                <!-- BOOSTS SECTION -->
+                <div>
+                    <div class="effects-subtitle">✦ BOOSTS</div>
+                    <div class="effects-list" id="boostsList">
+                        <div class="empty-message">No active boosts</div>
+                    </div>
+                    <div class="input-form">
+                        <input type="text" id="boostInput" class="input-field" placeholder="Boost name (e.g., Strength+, Luck+)">
+                        <input type="number" id="boostDurationInput" class="input-field" placeholder="Duration (turns)" min="1" max="999">
+                        <button class="action-button" onclick="addBoost()">ADD BOOST</button>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
         <!-- PERKS TAB CONTENT -->
         <div id="perks" class="subtab-content">
@@ -768,414 +834,562 @@
         </div>
     </div>
 
-    <!-- Add this to your script section, right after the constants and before other functions -->
+    <script>
+        const XP_PER_LEVEL = 1000;
+        const MAX_HEALTH = 100;
+        const MAX_ACTION_POINTS = 20;
+        const MAX_TAG_SKILLS = 3;
+        const TAG_SKILL_BONUS = 10;
 
-<script>
-    const XP_PER_LEVEL = 1000;
-    const MAX_HEALTH = 100;
-    const MAX_ACTION_POINTS = 20;
-    const MAX_TAG_SKILLS = 3;
-    const TAG_SKILL_BONUS = 10;
+        // Define page order
+        const pages = ['stats', 'skills', 'effects', 'perks'];
+        let currentPageIndex = 0;
 
-    // Define page order
-    const pages = ['stats', 'skills', 'perks'];
-    let currentPageIndex = 0;
+        // Skills with SPECIAL alignments
+        const SKILLS_BY_SPECIAL = {
+            strength: ['Melee Weapons', 'Big Guns', 'Unarmed'],
+            perception: ['Small Guns', 'Energy Weapons'],
+            endurance: ['Survival', 'Explosives'],
+            charisma: ['Barter', 'Speech'],
+            intelligence: ['Science', 'Repair', 'Medicine'],
+            agility: ['Sneak', 'Lockpick'],
+            luck: []
+        };
 
-    // Skills with SPECIAL alignments
-    const SKILLS_BY_SPECIAL = {
-        strength: ['Melee Weapons', 'Big Guns', 'Unarmed'],
-        perception: ['Small Guns', 'Energy Weapons'],
-        endurance: ['Survival', 'Explosives'],
-        charisma: ['Barter', 'Speech'],
-        intelligence: ['Science', 'Repair', 'Medicine'],
-        agility: ['Sneak', 'Lockpick'],
-        luck: []
-    };
+        // Flatten skills list
+        const SKILLS = [
+            'Barter', 'Small Guns', 'Big Guns', 'Melee Weapons',
+            'Energy Weapons', 'Explosives', 'Lockpick', 'Medicine',
+            'Science', 'Repair', 'Sneak', 'Speech', 'Unarmed', 'Survival'
+        ];
 
-    // Flatten skills list
-    const SKILLS = [
-        'Barter', 'Small Guns', 'Big Guns', 'Melee Weapons',
-        'Energy Weapons', 'Explosives', 'Lockpick', 'Medicine',
-        'Science', 'Repair', 'Sneak', 'Speech', 'Unarmed', 'Survival'
-    ];
+        // Player data
+        let playerData = {
+            skills: {},
+            tagSkills: [],
+            xp: 0,
+            level: 1,
+            health: 100,
+            actionPoints: 10
+        };
 
-    // Player data
-    let playerData = {
-        skills: {},
-        tagSkills: [],
-        xp: 0,
-        level: 1,
-        health: 100,
-        actionPoints: 10
-    };
+        // Effects data
+        let debuffs = [];
+        let boosts = [];
 
-    // Initialize skills
-    SKILLS.forEach(skill => {
-        playerData.skills[skill] = 0;
-    });
+        // Initialize skills
+        SKILLS.forEach(skill => {
+            playerData.skills[skill] = 0;
+        });
 
-    // ===== STORAGE FUNCTIONS =====
-    function savePlayerData() {
-        localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
-        // Also save XP, Health, AP to DOM for display persistence
-        localStorage.setItem('pipboyXP', document.getElementById('xp').textContent);
-        localStorage.setItem('pipboyLevel', document.getElementById('level').textContent);
-        localStorage.setItem('pipboyHealth', document.getElementById('health').textContent);
-        localStorage.setItem('pipboyActionPoints', document.getElementById('actionPoints').textContent);
-    }
-
-    function loadPlayerData() {
-        const saved = localStorage.getItem('pipboyPlayerData');
-        if (saved) {
-            playerData = JSON.parse(saved);
+        // ===== STORAGE FUNCTIONS =====
+        function savePlayerData() {
+            localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
+            localStorage.setItem('pipboyXP', document.getElementById('xp').textContent);
+            localStorage.setItem('pipboyLevel', document.getElementById('level').textContent);
+            localStorage.setItem('pipboyHealth', document.getElementById('health').textContent);
+            localStorage.setItem('pipboyActionPoints', document.getElementById('actionPoints').textContent);
         }
-        
-        // Load XP, Health, AP if they exist
-        const savedXP = localStorage.getItem('pipboyXP');
-        const savedLevel = localStorage.getItem('pipboyLevel');
-        const savedHealth = localStorage.getItem('pipboyHealth');
-        const savedActionPoints = localStorage.getItem('pipboyActionPoints');
-        
-        if (savedXP) document.getElementById('xp').textContent = savedXP;
-        if (savedLevel) document.getElementById('level').textContent = savedLevel;
-        if (savedHealth) document.getElementById('health').textContent = savedHealth;
-        if (savedActionPoints) document.getElementById('actionPoints').textContent = savedActionPoints;
-        
-        // Update bars
-        if (savedXP && savedLevel) {
-            const currentXP = parseInt(savedXP);
+
+        function loadPlayerData() {
+            const saved = localStorage.getItem('pipboyPlayerData');
+            if (saved) {
+                playerData = JSON.parse(saved);
+            }
+            
+            const savedXP = localStorage.getItem('pipboyXP');
+            const savedLevel = localStorage.getItem('pipboyLevel');
+            const savedHealth = localStorage.getItem('pipboyHealth');
+            const savedActionPoints = localStorage.getItem('pipboyActionPoints');
+            
+            if (savedXP) document.getElementById('xp').textContent = savedXP;
+            if (savedLevel) document.getElementById('level').textContent = savedLevel;
+            if (savedHealth) document.getElementById('health').textContent = savedHealth;
+            if (savedActionPoints) document.getElementById('actionPoints').textContent = savedActionPoints;
+            
+            if (savedXP && savedLevel) {
+                const currentXP = parseInt(savedXP);
+                const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
+                document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
+                document.getElementById('xpBar').style.width = xpProgress + '%';
+            }
+            
+            if (savedHealth) {
+                const currentHealth = parseInt(savedHealth);
+                const healthPercent = (currentHealth / MAX_HEALTH) * 100;
+                document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
+                document.getElementById('healthBar').style.width = healthPercent + '%';
+            }
+        }
+
+        // ===== EFFECTS STORAGE FUNCTIONS =====
+        function saveEffects() {
+            localStorage.setItem('pipboyDebuffs', JSON.stringify(debuffs));
+            localStorage.setItem('pipboyBoosts', JSON.stringify(boosts));
+        }
+
+        function loadEffects() {
+            const savedDebuffs = localStorage.getItem('pipboyDebuffs');
+            const savedBoosts = localStorage.getItem('pipboyBoosts');
+            
+            if (savedDebuffs) debuffs = JSON.parse(savedDebuffs);
+            if (savedBoosts) boosts = JSON.parse(savedBoosts);
+        }
+
+        // Get SPECIAL for skill
+        function getSpecialForSkill(skill) {
+            for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
+                if (skills.includes(skill)) {
+                    return special.charAt(0).toUpperCase() + special.slice(1);
+                }
+            }
+            return 'Unknown';
+        }
+
+        // Calculate skill bonus
+        function calculateSkillBonus(skillValue, isTagged = false) {
+            let adjustedValue = skillValue;
+            if (isTagged) {
+                adjustedValue = skillValue + TAG_SKILL_BONUS;
+            }
+
+            const difference = adjustedValue - 50;
+            return Math.floor(difference / 10);
+        }
+
+        // Format bonus display
+        function formatBonus(bonus) {
+            if (bonus < 0) {
+                return bonus.toString();
+            } else if (bonus > 0) {
+                return '+' + bonus;
+            } else {
+                return '0';
+            }
+        }
+
+        // ===== SWITCH TABS =====
+        function switchTab(tabName) {
+            document.getElementById('stats').classList.remove('active');
+            document.getElementById('skills').classList.remove('active');
+            document.getElementById('effects').classList.remove('active');
+            document.getElementById('perks').classList.remove('active');
+            
+            const buttons = document.querySelectorAll('.subtab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+            currentPageIndex = pages.indexOf(tabName);
+        }
+
+        // ===== NAVIGATION FUNCTIONS =====
+        function nextPage() {
+            currentPageIndex = (currentPageIndex + 1) % pages.length;
+            switchTab(pages[currentPageIndex]);
+        }
+
+        function previousPage() {
+            currentPageIndex = (currentPageIndex - 1 + pages.length) % pages.length;
+            switchTab(pages[currentPageIndex]);
+        }
+
+        function goToCharacter() {
+            window.location.href = 'character.html';
+        }
+
+        function goToInventory() {
+            window.location.href = 'inventory.html';
+        }
+
+        // ===== UPDATE SKILL =====
+        function updateSkill(skillName, amount) {
+            playerData.skills[skillName] = (playerData.skills[skillName] || 0) + amount;
+            
+            if (playerData.skills[skillName] < 0) {
+                playerData.skills[skillName] = 0;
+            } else if (playerData.skills[skillName] > 100) {
+                playerData.skills[skillName] = 100;
+            }
+            
+            savePlayerData();
+            updateDisplay();
+        }
+
+        // ===== TOGGLE TAG SKILL =====
+        function toggleTagSkill(skill) {
+            const index = playerData.tagSkills.indexOf(skill);
+            
+            if (index > -1) {
+                playerData.tagSkills.splice(index, 1);
+            } else {
+                if (playerData.tagSkills.length >= MAX_TAG_SKILLS) {
+                    alert(`Maximum tag skills reached (${MAX_TAG_SKILLS})`);
+                    return;
+                }
+                playerData.tagSkills.push(skill);
+            }
+            
+            savePlayerData();
+            updateDisplay();
+        }
+
+        // ===== ADD XP =====
+        function addXP() {
+            const xpInput = document.getElementById('xpInput');
+            const messageBox = document.getElementById('xpMessage');
+            const xpAmount = parseInt(xpInput.value);
+
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            if (xpAmount < 0) {
+                messageBox.textContent = '⚠ ERROR: Use REMOVE XP button for negative values!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
+            let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+
+            currentXP += xpAmount;
+            currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
+
+            document.getElementById('xp').textContent = currentXP;
+            document.getElementById('level').textContent = currentLevel;
+
             const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
             document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
             document.getElementById('xpBar').style.width = xpProgress + '%';
+
+            messageBox.textContent = `✓ SUCCESS: Added ${xpAmount} XP! Total XP: ${currentXP}`;
+            messageBox.className = 'message success';
+
+            savePlayerData();
+            xpInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
         }
-        
-        if (savedHealth) {
-            const currentHealth = parseInt(savedHealth);
+
+        // ===== REMOVE XP =====
+        function removeXP() {
+            const xpInput = document.getElementById('xpInput');
+            const messageBox = document.getElementById('xpMessage');
+            const xpAmount = parseInt(xpInput.value);
+
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            if (xpAmount > 0) {
+                messageBox.textContent = '⚠ ERROR: Use ADD XP button for positive values!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
+            let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+
+            currentXP += xpAmount;
+
+            if (currentXP < 0) {
+                currentXP = 0;
+                messageBox.textContent = `⚠ XP cannot be below 0!`;
+                messageBox.className = 'message error';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Removed ${Math.abs(xpAmount)} XP! Total XP: ${currentXP}`;
+                messageBox.className = 'message success';
+            }
+
+            currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
+
+            document.getElementById('xp').textContent = currentXP;
+            document.getElementById('level').textContent = currentLevel;
+
+            const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
+            document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
+            document.getElementById('xpBar').style.width = xpProgress + '%';
+
+            savePlayerData();
+            xpInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        // ===== UPDATE HEALTH =====
+        function updateHealth() {
+            const healthInput = document.getElementById('healthInput');
+            const messageBox = document.getElementById('healthMessage');
+            const healthChange = parseInt(healthInput.value);
+
+            if (!healthInput.value || isNaN(healthChange)) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            let currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
+            currentHealth += healthChange;
+
+            if (currentHealth > MAX_HEALTH) {
+                currentHealth = MAX_HEALTH;
+                messageBox.textContent = `⚠ Health capped at ${MAX_HEALTH}!`;
+                messageBox.className = 'message error';
+            } else if (currentHealth < 0) {
+                currentHealth = 0;
+                messageBox.textContent = `⚠ Health cannot be below 0!`;
+                messageBox.className = 'message error';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}`;
+                messageBox.className = 'message success';
+            }
+
+            document.getElementById('health').textContent = currentHealth;
             const healthPercent = (currentHealth / MAX_HEALTH) * 100;
             document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
             document.getElementById('healthBar').style.width = healthPercent + '%';
-        }
-    }
 
-    // Get SPECIAL for skill
-    function getSpecialForSkill(skill) {
-        for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
-            if (skills.includes(skill)) {
-                return special.charAt(0).toUpperCase() + special.slice(1);
-            }
-        }
-        return 'Unknown';
-    }
-
-    // Calculate skill bonus
-    function calculateSkillBonus(skillValue, isTagged = false) {
-        let adjustedValue = skillValue;
-        if (isTagged) {
-            adjustedValue = skillValue + TAG_SKILL_BONUS;
+            savePlayerData();
+            healthInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
         }
 
-        const difference = adjustedValue - 50;
-        return Math.floor(difference / 10);
-    }
+        // ===== UPDATE ACTION POINTS =====
+        function updateActionPoints() {
+            const apInput = document.getElementById('apInput');
+            const messageBox = document.getElementById('apMessage');
+            const apChange = parseInt(apInput.value);
 
-    // Format bonus display (no + prefix for negative numbers)
-    function formatBonus(bonus) {
-        if (bonus < 0) {
-            return bonus.toString();
-        } else if (bonus > 0) {
-            return '+' + bonus;
-        } else {
-            return '0';
-        }
-    }
-
-    // ===== SWITCH TABS =====
-    function switchTab(tabName) {
-        document.getElementById('stats').classList.remove('active');
-        document.getElementById('skills').classList.remove('active');
-        document.getElementById('perks').classList.remove('active');
-        
-        const buttons = document.querySelectorAll('.subtab-button');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        
-        document.getElementById(tabName).classList.add('active');
-        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-
-        currentPageIndex = pages.indexOf(tabName);
-    }
-
-    // ===== NAVIGATION FUNCTIONS =====
-    function nextPage() {
-        currentPageIndex = (currentPageIndex + 1) % pages.length;
-        switchTab(pages[currentPageIndex]);
-    }
-
-    function previousPage() {
-        currentPageIndex = (currentPageIndex - 1 + pages.length) % pages.length;
-        switchTab(pages[currentPageIndex]);
-    }
-
-    function goToCharacter() {
-        window.location.href = 'character.html';
-    }
-
-    function goToInventory() {
-        window.location.href = 'inventory.html';
-    }
-
-    // ===== UPDATE SKILL =====
-    function updateSkill(skillName, amount) {
-        playerData.skills[skillName] = (playerData.skills[skillName] || 0) + amount;
-        
-        if (playerData.skills[skillName] < 0) {
-            playerData.skills[skillName] = 0;
-        } else if (playerData.skills[skillName] > 100) {
-            playerData.skills[skillName] = 100;
-        }
-        
-        savePlayerData();
-        updateDisplay();
-    }
-
-    // ===== TOGGLE TAG SKILL =====
-    function toggleTagSkill(skill) {
-        const index = playerData.tagSkills.indexOf(skill);
-        
-        if (index > -1) {
-            playerData.tagSkills.splice(index, 1);
-        } else {
-            if (playerData.tagSkills.length >= MAX_TAG_SKILLS) {
-                alert(`Maximum tag skills reached (${MAX_TAG_SKILLS})`);
+            if (!apInput.value || isNaN(apChange)) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
+                messageBox.className = 'message error';
                 return;
             }
-            playerData.tagSkills.push(skill);
-        }
-        
-        savePlayerData();
-        updateDisplay();
-    }
 
-    // ===== ADD XP =====
-    function addXP() {
-        const xpInput = document.getElementById('xpInput');
-        const messageBox = document.getElementById('xpMessage');
-        const xpAmount = parseInt(xpInput.value);
+            let currentAP = parseInt(document.getElementById('actionPoints').textContent) || 10;
+            currentAP += apChange;
 
-        if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
-            messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
-            messageBox.className = 'message error';
-            return;
-        }
+            if (currentAP > MAX_ACTION_POINTS) {
+                currentAP = MAX_ACTION_POINTS;
+                messageBox.textContent = `⚠ Action Points capped at ${MAX_ACTION_POINTS}!`;
+                messageBox.className = 'message error';
+            } else if (currentAP < 0) {
+                currentAP = 0;
+                messageBox.textContent = `⚠ Action Points cannot be below 0!`;
+                messageBox.className = 'message error';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}`;
+                messageBox.className = 'message success';
+            }
 
-        if (xpAmount < 0) {
-            messageBox.textContent = '⚠ ERROR: Use REMOVE XP button for negative values!';
-            messageBox.className = 'message error';
-            return;
-        }
+            document.getElementById('actionPoints').textContent = currentAP;
 
-        let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
-        let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
-
-        currentXP += xpAmount;
-        currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
-
-        document.getElementById('xp').textContent = currentXP;
-        document.getElementById('level').textContent = currentLevel;
-
-        const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
-        document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
-        document.getElementById('xpBar').style.width = xpProgress + '%';
-
-        messageBox.textContent = `✓ SUCCESS: Added ${xpAmount} XP! Total XP: ${currentXP}`;
-        messageBox.className = 'message success';
-
-        savePlayerData();
-        xpInput.value = '';
-        setTimeout(() => {
-            messageBox.textContent = '';
-        }, 3000);
-    }
-
-    // ===== REMOVE XP =====
-    function removeXP() {
-        const xpInput = document.getElementById('xpInput');
-        const messageBox = document.getElementById('xpMessage');
-        const xpAmount = parseInt(xpInput.value);
-
-        if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
-            messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
-            messageBox.className = 'message error';
-            return;
+            savePlayerData();
+            apInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
         }
 
-        if (xpAmount > 0) {
-            messageBox.textContent = '⚠ ERROR: Use ADD XP button for positive values!';
-            messageBox.className = 'message error';
-            return;
-        }
-
-        let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
-        let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
-
-        currentXP += xpAmount;
-
-        if (currentXP < 0) {
-            currentXP = 0;
-            messageBox.textContent = `⚠ XP cannot be below 0!`;
-            messageBox.className = 'message error';
-        } else {
-            messageBox.textContent = `✓ SUCCESS: Removed ${Math.abs(xpAmount)} XP! Total XP: ${currentXP}`;
-            messageBox.className = 'message success';
-        }
-
-        currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
-
-        document.getElementById('xp').textContent = currentXP;
-        document.getElementById('level').textContent = currentLevel;
-
-        const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
-        document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
-        document.getElementById('xpBar').style.width = xpProgress + '%';
-
-        savePlayerData();
-        xpInput.value = '';
-        setTimeout(() => {
-            messageBox.textContent = '';
-        }, 3000);
-    }
-
-    // ===== UPDATE HEALTH =====
-    function updateHealth() {
-        const healthInput = document.getElementById('healthInput');
-        const messageBox = document.getElementById('healthMessage');
-        const healthChange = parseInt(healthInput.value);
-
-        if (!healthInput.value || isNaN(healthChange)) {
-            messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
-            messageBox.className = 'message error';
-            return;
-        }
-
-        let currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
-        currentHealth += healthChange;
-
-        if (currentHealth > MAX_HEALTH) {
-            currentHealth = MAX_HEALTH;
-            messageBox.textContent = `⚠ Health capped at ${MAX_HEALTH}!`;
-            messageBox.className = 'message error';
-        } else if (currentHealth < 0) {
-            currentHealth = 0;
-            messageBox.textContent = `⚠ Health cannot be below 0!`;
-            messageBox.className = 'message error';
-        } else {
-            messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}`;
-            messageBox.className = 'message success';
-        }
-
-        document.getElementById('health').textContent = currentHealth;
-        const healthPercent = (currentHealth / MAX_HEALTH) * 100;
-        document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
-        document.getElementById('healthBar').style.width = healthPercent + '%';
-
-        savePlayerData();
-        healthInput.value = '';
-        setTimeout(() => {
-            messageBox.textContent = '';
-        }, 3000);
-    }
-
-    // ===== UPDATE ACTION POINTS =====
-    function updateActionPoints() {
-        const apInput = document.getElementById('apInput');
-        const messageBox = document.getElementById('apMessage');
-        const apChange = parseInt(apInput.value);
-
-        if (!apInput.value || isNaN(apChange)) {
-            messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
-            messageBox.className = 'message error';
-            return;
-        }
-
-        let currentAP = parseInt(document.getElementById('actionPoints').textContent) || 10;
-        currentAP += apChange;
-
-        if (currentAP > MAX_ACTION_POINTS) {
-            currentAP = MAX_ACTION_POINTS;
-            messageBox.textContent = `⚠ Action Points capped at ${MAX_ACTION_POINTS}!`;
-            messageBox.className = 'message error';
-        } else if (currentAP < 0) {
-            currentAP = 0;
-            messageBox.textContent = `⚠ Action Points cannot be below 0!`;
-            messageBox.className = 'message error';
-        } else {
-            messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}`;
-            messageBox.className = 'message success';
-        }
-
-        document.getElementById('actionPoints').textContent = currentAP;
-
-        savePlayerData();
-        apInput.value = '';
-        setTimeout(() => {
-            messageBox.textContent = '';
-        }, 3000);
-    }
-
-    // ===== UPDATE DISPLAY =====
-    function updateDisplay() {
-        // Update skills grid
-        const skillsGrid = document.getElementById('skillsGrid');
-        skillsGrid.innerHTML = '';
-        
-        SKILLS.forEach(skill => {
-            const special = getSpecialForSkill(skill);
-            const skillValue = playerData.skills[skill] || 0;
-            const isTagged = playerData.tagSkills.includes(skill);
-            const bonus = calculateSkillBonus(skillValue, isTagged);
+        // ===== ADD DEBUFF =====
+        function addDebuff() {
+            const nameInput = document.getElementById('debuffInput');
+            const durationInput = document.getElementById('debuffDurationInput');
             
-            const skillDiv = document.createElement('div');
-            skillDiv.className = 'skill-item';
-            skillDiv.innerHTML = `
-                <div class="skill-left">
-                    <input type="checkbox" class="skill-checkbox" ${isTagged ? 'checked' : ''} onchange="toggleTagSkill('${skill}')">
-                    <div class="skill-info">
-                        <div class="skill-name">${skill}</div>
-                        <div class="skill-special">${special}</div>
-                        <div class="skill-bonus">${formatBonus(bonus)}</div>
-                    </div>
-                </div>
-                <div class="skill-controls">
-                    <button class="skill-btn" onclick="updateSkill('${skill}', -1)">−</button>
-                    <div class="skill-value">${skillValue}</div>
-                    <button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button>
-                </div>
-            `;
-            skillsGrid.appendChild(skillDiv);
-        });
-
-        // Update tag badge
-        document.getElementById('tagBadge').textContent = `${playerData.tagSkills.length}/3`;
-
-        // Update SPECIAL skills lists
-        for (const [special, skillsList] of Object.entries(SKILLS_BY_SPECIAL)) {
-            const skillsElement = document.getElementById(`skills-${special}`);
-            skillsElement.innerHTML = skillsList.map(s => `<div>${s}</div>`).join('');
+            const name = nameInput.value.trim();
+            const duration = parseInt(durationInput.value);
+            
+            if (!name || !duration || isNaN(duration)) {
+                alert('Please enter a debuff name and duration!');
+                return;
+            }
+            
+            debuffs.push({
+                name: name,
+                duration: duration,
+                id: Date.now()
+            });
+            
+            nameInput.value = '';
+            durationInput.value = '';
+            
+            saveEffects();
+            updateEffectsDisplay();
         }
-    }
 
-    // ===== ADD EVENT LISTENERS TO TAB BUTTONS =====
-    document.querySelectorAll('.subtab-button').forEach(button => {
-        button.addEventListener('click', function() {
-            const tabName = this.getAttribute('data-tab');
-            switchTab(tabName);
+        // ===== ADD BOOST =====
+        function addBoost() {
+            const nameInput = document.getElementById('boostInput');
+            const durationInput = document.getElementById('boostDurationInput');
+            
+            const name = nameInput.value.trim();
+            const duration = parseInt(durationInput.value);
+            
+            if (!name || !duration || isNaN(duration)) {
+                alert('Please enter a boost name and duration!');
+                return;
+            }
+            
+            boosts.push({
+                name: name,
+                duration: duration,
+                id: Date.now()
+            });
+            
+            nameInput.value = '';
+            durationInput.value = '';
+            
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        // ===== REMOVE DEBUFF =====
+        function removeDebuff(id) {
+            debuffs = debuffs.filter(d => d.id !== id);
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        // ===== REMOVE BOOST =====
+        function removeBoost(id) {
+            boosts = boosts.filter(b => b.id !== id);
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        // ===== DECREASE DURATION =====
+        function decreaseDuration(type, id) {
+            if (type === 'debuff') {
+                const debuff = debuffs.find(d => d.id === id);
+                if (debuff) {
+                    debuff.duration--;
+                    if (debuff.duration <= 0) {
+                        removeDebuff(id);
+                        return;
+                    }
+                }
+            } else if (type === 'boost') {
+                const boost = boosts.find(b => b.id === id);
+                if (boost) {
+                    boost.duration--;
+                    if (boost.duration <= 0) {
+                        removeBoost(id);
+                        return;
+                    }
+                }
+            }
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        // ===== UPDATE EFFECTS DISPLAY =====
+        function updateEffectsDisplay() {
+            // Update debuffs
+            const debuffsList = document.getElementById('debuffsList');
+            if (debuffs.length === 0) {
+                debuffsList.innerHTML = '<div class="empty-message">No active debuffs</div>';
+            } else {
+                debuffsList.innerHTML = debuffs.map(debuff => `
+                    <div class="effect-item">
+                        <div class="effect-info">
+                            <div class="effect-name">${debuff.name}</div>
+                            <div class="effect-duration">Duration: ${debuff.duration} turn(s)</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="effect-remove-btn" onclick="decreaseDuration('debuff', ${debuff.id})">Turn</button>
+                            <button class="effect-remove-btn" onclick="removeDebuff(${debuff.id})">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Update boosts
+            const boostsList = document.getElementById('boostsList');
+            if (boosts.length === 0) {
+                boostsList.innerHTML = '<div class="empty-message">No active boosts</div>';
+            } else {
+                boostsList.innerHTML = boosts.map(boost => `
+                    <div class="effect-item">
+                        <div class="effect-info">
+                            <div class="effect-name">${boost.name}</div>
+                            <div class="effect-duration">Duration: ${boost.duration} turn(s)</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="effect-remove-btn" onclick="decreaseDuration('boost', ${boost.id})">Turn</button>
+                            <button class="effect-remove-btn" onclick="removeBoost(${boost.id})">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // ===== UPDATE DISPLAY =====
+        function updateDisplay() {
+            // Update skills grid
+            const skillsGrid = document.getElementById('skillsGrid');
+            skillsGrid.innerHTML = '';
+            
+            SKILLS.forEach(skill => {
+                const special = getSpecialForSkill(skill);
+                const skillValue = playerData.skills[skill] || 0;
+                const isTagged = playerData.tagSkills.includes(skill);
+                const bonus = calculateSkillBonus(skillValue, isTagged);
+                
+                const skillDiv = document.createElement('div');
+                skillDiv.className = 'skill-item';
+                skillDiv.innerHTML = `
+                    <div class="skill-left">
+                        <input type="checkbox" class="skill-checkbox" ${isTagged ? 'checked' : ''} onchange="toggleTagSkill('${skill}')">
+                        <div class="skill-info">
+                            <div class="skill-name">${skill}</div>
+                            <div class="skill-special">${special}</div>
+                            <div class="skill-bonus">${formatBonus(bonus)}</div>
+                        </div>
+                    </div>
+                    <div class="skill-controls">
+                        <button class="skill-btn" onclick="updateSkill('${skill}', -1)">−</button>
+                        <div class="skill-value">${skillValue}</div>
+                        <button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button>
+                    </div>
+                `;
+                skillsGrid.appendChild(skillDiv);
+            });
+
+            // Update tag badge
+            document.getElementById('tagBadge').textContent = `${playerData.tagSkills.length}/3`;
+
+            // Update SPECIAL skills lists
+            for (const [special, skillsList] of Object.entries(SKILLS_BY_SPECIAL)) {
+                const skillsElement = document.getElementById(`skills-${special}`);
+                skillsElement.innerHTML = skillsList.map(s => `<div>${s}</div>`).join('');
+            }
+        }
+
+        // ===== ADD EVENT LISTENERS TO TAB BUTTONS =====
+        document.querySelectorAll('.subtab-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                switchTab(tabName);
+            });
         });
-    });
 
-    // Initialize on page load
-    window.addEventListener('DOMContentLoaded', function() {
-        loadPlayerData();
-        updateDisplay();
-    });
-</script>
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            loadPlayerData();
+            loadEffects();
+            updateDisplay();
+            updateEffectsDisplay();
+        });
+    </script>
 </body>
 </html>
