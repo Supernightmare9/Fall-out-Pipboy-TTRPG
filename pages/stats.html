@@ -874,6 +874,30 @@
                     </div>
                     <div class="message" id="apMessage"></div>
                 </div>
+
+                <div class="stat-box">
+                    <div class="stat-title">🛡 Armor Class</div>
+                    <div class="stat-item">
+                        <span class="stat-label">AC:</span>
+                        <span class="stat-value" id="armorClass">10</span>
+                    </div>
+                    <div class="input-form">
+                        <input type="number" id="acInput" class="input-field" placeholder="Set AC value" min="10" max="30">
+                        <button class="action-button" onclick="setAC()">SET</button>
+                        <button class="action-button temp" onclick="increaseAC()">+</button>
+                        <button class="action-button danger" onclick="decreaseAC()">-</button>
+                    </div>
+                    <div class="message" id="acMessage"></div>
+                </div>
+            </div>
+
+            <div class="stat-box" style="margin-bottom: 30px;">
+                <div class="stat-title">💤 Rest</div>
+                <div class="input-form">
+                    <button class="action-button temp" onclick="shortRest()">SHORT REST</button>
+                    <button class="action-button" onclick="longRest()">LONG REST</button>
+                </div>
+                <div class="message" id="restMessage"></div>
             </div>
 
             <div class="stat-box" style="margin-bottom: 30px;">
@@ -970,16 +994,6 @@
             </div>
         </div>
 
-        <div class="nav-buttons">
-            <button class="nav-button" onclick="goToCharacter()">← CHARACTER</button>
-            <button class="nav-button" onclick="goToInventory()">INVENTORY</button>
-            <button class="nav-button" onclick="goToData()">DATA →</button>
-        </div>
-
-        <div class="vault-footer">
-            <p>VAULT <span>215</span> RESIDENT • STATS MODULE</p>
-            <p style="margin-top: 5px;">Statistical Data Secured and Synchronized</p>
-        </div>
     </div>
 
     <script src="../assets/xp_system.js"></script>
@@ -1404,6 +1418,95 @@
             setTimeout(() => messageBox.textContent = '', 3000);
         }
 
+        function saveAC() {
+            const ac = parseInt(document.getElementById('armorClass').textContent) || 10;
+            localStorage.setItem('pipboyAC', ac);
+        }
+
+        function loadAC() {
+            const saved = localStorage.getItem('pipboyAC');
+            if (saved) document.getElementById('armorClass').textContent = parseInt(saved);
+        }
+
+        function setAC() {
+            const acInput = document.getElementById('acInput');
+            const messageBox = document.getElementById('acMessage');
+            const newAC = parseInt(acInput.value);
+
+            if (!acInput.value || isNaN(newAC)) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            const clampedAC = Math.max(10, Math.min(30, newAC));
+            document.getElementById('armorClass').textContent = clampedAC;
+            messageBox.textContent = `✓ Armor Class set to ${clampedAC}`;
+            messageBox.className = 'message success';
+            saveAC();
+            acInput.value = '';
+            setTimeout(() => messageBox.textContent = '', 3000);
+        }
+
+        function increaseAC() {
+            const current = parseInt(document.getElementById('armorClass').textContent) || 10;
+            const newAC = Math.min(30, current + 1);
+            document.getElementById('armorClass').textContent = newAC;
+            const messageBox = document.getElementById('acMessage');
+            messageBox.textContent = newAC === 30 ? '⚠ Armor Class at maximum (30)!' : `✓ Armor Class increased to ${newAC}`;
+            messageBox.className = newAC === 30 ? 'message error' : 'message success';
+            saveAC();
+            setTimeout(() => messageBox.textContent = '', 3000);
+        }
+
+        function decreaseAC() {
+            const current = parseInt(document.getElementById('armorClass').textContent) || 10;
+            const newAC = Math.max(10, current - 1);
+            document.getElementById('armorClass').textContent = newAC;
+            const messageBox = document.getElementById('acMessage');
+            messageBox.textContent = newAC === 10 ? '⚠ Armor Class at minimum (10)!' : `✓ Armor Class decreased to ${newAC}`;
+            messageBox.className = newAC === 10 ? 'message error' : 'message success';
+            saveAC();
+            setTimeout(() => messageBox.textContent = '', 3000);
+        }
+
+        function shortRest() {
+            const halfHealth = Math.floor(MAX_HEALTH / 2);
+            const halfAP = Math.floor(MAX_ACTION_POINTS / 2);
+            const currentHealth = parseInt(document.getElementById('health').textContent) || 0;
+            const currentAP = parseInt(document.getElementById('actionPoints').textContent) || 0;
+
+            const newHealth = Math.max(currentHealth, halfHealth);
+            const newAP = Math.max(currentAP, halfAP);
+
+            document.getElementById('health').textContent = newHealth;
+            const healthPercent = (newHealth / MAX_HEALTH) * 100;
+            document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
+            document.getElementById('healthBar').style.width = healthPercent + '%';
+
+            document.getElementById('actionPoints').textContent = newAP;
+
+            const messageBox = document.getElementById('restMessage');
+            messageBox.textContent = `✓ SHORT REST: Health restored to ${newHealth}/${MAX_HEALTH}, AP restored to ${newAP}/${MAX_ACTION_POINTS}`;
+            messageBox.className = 'message success';
+            savePlayerData();
+            setTimeout(() => messageBox.textContent = '', 4000);
+        }
+
+        function longRest() {
+            document.getElementById('health').textContent = MAX_HEALTH;
+            document.getElementById('healthPercent').textContent = '100%';
+            document.getElementById('healthBar').style.width = '100%';
+
+            document.getElementById('actionPoints').textContent = MAX_ACTION_POINTS;
+
+            const messageBox = document.getElementById('restMessage');
+            messageBox.textContent = `✓ LONG REST: Health fully restored to ${MAX_HEALTH}/${MAX_HEALTH}, AP fully restored to ${MAX_ACTION_POINTS}/${MAX_ACTION_POINTS}`;
+            messageBox.className = 'message success';
+            savePlayerData();
+            setTimeout(() => messageBox.textContent = '', 4000);
+        }
+
         function goToCharacter() { window.location.href = 'character.html'; }
         function goToInventory() { window.location.href = 'inventory.html'; }
         function goToData() { window.location.href = 'data.html'; }
@@ -1413,6 +1516,7 @@
             loadSpecialStats();
             loadEffects();
             loadCharacterName();
+            loadAC();
             updateDisplay();
             updatePerksDisplay();
             updateEffectsDisplay();
