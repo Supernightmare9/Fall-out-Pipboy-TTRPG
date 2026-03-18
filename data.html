@@ -654,9 +654,9 @@
 
         <!-- MAIN TAB NAVIGATION -->
         <div class="main-tab-nav">
-            <button class="main-tab-button active" data-tab="profile">PROFILE</button>
-            <button class="main-tab-button" data-tab="backstory">BACKSTORY</button>
-            <button class="main-tab-button" data-tab="data">DATA</button>
+            <button class="main-tab-button active" data-tab="profile" onclick="switchMainTab('profile')">PROFILE</button>
+            <button class="main-tab-button" data-tab="backstory" onclick="switchMainTab('backstory')">BACKSTORY</button>
+            <button class="main-tab-button" data-tab="data" onclick="switchMainTab('data')">DATA</button>
         </div>
 
         <!-- PROFILE TAB -->
@@ -741,9 +741,9 @@
         <div id="data" class="main-tab-content">
             <!-- SUB-TABS FOR DATA -->
             <div class="subtab-nav">
-                <button class="subtab-button active" data-subtab="quests">QUESTS</button>
-                <button class="subtab-button" data-subtab="npcs">NPCs</button>
-                <button class="subtab-button" data-subtab="factions">FACTIONS</button>
+                <button class="subtab-button active" data-subtab="quests" onclick="switchSubTab('quests')">QUESTS</button>
+                <button class="subtab-button" data-subtab="npcs" onclick="switchSubTab('npcs')">NPCs</button>
+                <button class="subtab-button" data-subtab="factions" onclick="switchSubTab('factions')">FACTIONS</button>
             </div>
 
             <!-- QUESTS SUB-TAB -->
@@ -1122,13 +1122,4 @@
             if (savedNPCs) {
                 customNPCs = JSON.parse(savedNPCs);
             }
-            renderNPCs();
-
-            const savedFactions = localStorage.getItem('customFactions');
-            if (savedFactions) {
-                customFactions = JSON.parse(savedFactions);
-            }
-            renderFactions();
-        }
-
-        document
+            render
