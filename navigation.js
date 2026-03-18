@@ -1,551 +1,274 @@
-/* ===========================
-   VAULT 215 NAVIGATION SYSTEM
-   navigation.js
-   Shared bottom nav + settings
-   =========================== */
+// ═══════════════════════════════════════════════════════════
+// VAULT 215 HAMBURGER NAVIGATION SYSTEM
+// Slides in from left, highlights current page
+// ═══════════════════════════════════════════════════════════
 
-(function () {
-    'use strict';
+document.addEventListener('DOMContentLoaded', function() {
+    // Create hamburger menu HTML
+    const menuHTML = `
+        <!-- HAMBURGER TOGGLE BUTTON -->
+        <button id="hamburgerBtn" class="hamburger-btn" title="Open Menu">
+            <span class="hamburger-icon">☰</span>
+        </button>
 
-    /* ---- Configuration ---- */
+        <!-- NAVIGATION MENU -->
+        <nav id="sideNav" class="side-nav">
+            <button id="closeBtn" class="close-btn">✕</button>
+            <div class="nav-header">
+                <div class="nav-title">VAULT 215</div>
+                <div class="nav-subtitle">NAVIGATION SYSTEM</div>
+            </div>
+            <ul class="nav-list">
+                <li><a href="character.html" class="nav-link" data-page="character">⚔ CHARACTER</a></li>
+                <li><a href="stats.html" class="nav-link" data-page="stats">📊 STATS</a></li>
+                <li><a href="inventory.html" class="nav-link" data-page="inventory">🎒 INVENTORY</a></li>
+                <li><a href="data.html" class="nav-link" data-page="data">📋 DATA</a></li>
+                <li><a href="messages.html" class="nav-link" data-page="messages">📻 MESSAGES</a></li>
+            </ul>
+        </nav>
 
-    // Pages on which the nav bar should NOT appear
-    var SKIP_PAGES = ['index.html', 'login_hub.html', 'terminal.html', ''];
+        <!-- OVERLAY BACKDROP -->
+        <div id="navOverlay" class="nav-overlay"></div>
+    `;
 
-    // Player navigation buttons (left → right)
-    var PLAYER_NAV = [
-        { id: 'stats',     icon: '📊', label: 'STATS',     href: 'stats.html' },
-        { id: 'inventory', icon: '🎒', label: 'INVENTORY', href: 'inventory.html' },
-        { id: 'home',      icon: '🏠', label: 'HOME',      href: 'character.html', isHome: true },
-        { id: 'messages',  icon: '💬', label: 'MESSAGES',  href: 'messages.html' },
-        { id: 'settings',  icon: '⚙️', label: 'SETTINGS',  isSettings: true }
-    ];
+    // Insert menu at start of body
+    document.body.insertAdjacentHTML('afterbegin', menuHTML);
 
-    // Overseer navigation buttons (left → right)
-    var OVERSEER_NAV = [
-        { id: 'players',  icon: '📊', label: 'PLAYERS',  href: '#overseer-characters', isAnchor: true },
-        { id: 'items',    icon: '🎒', label: 'ITEMS',     href: '#overseer-campaign',   isAnchor: true },
-        { id: 'home',     icon: '🏠', label: 'HOME',      href: 'overseer.html',        isHome: true },
-        { id: 'messages', icon: '💬', label: 'MESSAGES',  href: '#overseer-messages',   isAnchor: true },
-        { id: 'settings', icon: '⚙️', label: 'SETTINGS',  isSettings: true }
-    ];
+    // Create and inject CSS
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+        /* ═══════════════════════════════════════════════════════════
+           VAULT 215 HAMBURGER MENU STYLES
+           ═══════════════════════════════════════════════════════════ */
 
-    // Map page filename → active button id
-    var PLAYER_ACTIVE_MAP = {
-        'stats.html':               'stats',
-        'inventory.html':           'inventory',
-        'character-dashboard.html': 'home',
-        'character.html':           'home',
-        'data.html':                'home'
-    };
+        :root {
+            --vault-green: #4ade80;
+            --vault-gold: #fbbf24;
+            --vault-dark: #0a0a0a;
+            --vault-darker: #1a1a1a;
+        }
 
-    /* ---- Helpers ---- */
+        /* HAMBURGER BUTTON */
+        .hamburger-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            width: 50px;
+            height: 50px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            text-shadow: 0 0 10px var(--vault-green);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
 
+        .hamburger-btn:hover {
+            background-color: var(--vault-dark);
+            box-shadow: 0 0 25px rgba(74, 222, 128, 0.6);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 15px var(--vault-gold);
+            transform: scale(1.05);
+        }
+
+        .hamburger-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* SIDE NAVIGATION MENU */
+        .side-nav {
+            position: fixed;
+            left: -350px;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background-color: var(--vault-darker);
+            border-right: 3px solid var(--vault-green);
+            box-shadow: 5px 0 30px rgba(74, 222, 128, 0.4);
+            z-index: 999;
+            transition: left 0.4s ease;
+            overflow-y: auto;
+            padding-top: 20px;
+        }
+
+        .side-nav.active {
+            left: 0;
+        }
+
+        /* CLOSE BUTTON */
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: transparent;
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            text-shadow: 0 0 5px var(--vault-green);
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            background-color: var(--vault-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        /* MENU HEADER */
+        .nav-header {
+            text-align: center;
+            padding: 20px 15px;
+            border-bottom: 2px solid var(--vault-green);
+            margin-bottom: 20px;
+        }
+
+        .nav-title {
+            color: var(--vault-gold);
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-family: 'Courier New', monospace;
+        }
+
+        .nav-subtitle {
+            color: var(--vault-green);
+            font-size: 10px;
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* NAVIGATION LIST */
+        .nav-list {
+            list-style: none;
+            padding: 0 10px;
+        }
+
+        .nav-list li {
+            margin-bottom: 10px;
+        }
+
+        /* NAVIGATION LINKS */
+        .nav-link {
+            display: block;
+            padding: 15px 15px;
+            background-color: var(--vault-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+        }
+
+        .nav-link:hover {
+            background-color: var(--vault-darker);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+            transform: translateX(5px);
+        }
+
+        /* ACTIVE PAGE HIGHLIGHT */
+        .nav-link.active {
+            background-color: #2d5016;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 15px var(--vault-gold);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5), inset 0 0 10px rgba(251, 191, 36, 0.2);
+        }
+
+        /* OVERLAY BACKDROP */
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 998;
+            display: none;
+            transition: display 0.3s ease;
+        }
+
+        .nav-overlay.active {
+            display: block;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .side-nav {
+                width: 250px;
+            }
+
+            .hamburger-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .side-nav {
+                width: 200px;
+            }
+
+            .nav-link {
+                padding: 12px 10px;
+                font-size: 11px;
+            }
+        }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // ═══════════════════════════════════════════════════════════
+    // HAMBURGER MENU FUNCTIONALITY
+    // ═══════════════════════════════════════════════════════════
+
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const closeBtn = document.getElementById('closeBtn');
+    const sideNav = document.getElementById('sideNav');
+    const navOverlay = document.getElementById('navOverlay');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    // Determine current page
     function getCurrentPage() {
-        var path = window.location.pathname;
-        var parts = path.split('/').filter(Boolean);
-        return parts.pop() || 'index.html';
-    }
-
-    function getNavType() {
-        return getCurrentPage() === 'overseer.html' ? 'overseer' : 'player';
-    }
-
-    function getActiveId() {
-        var page = getCurrentPage();
-        var hash = window.location.hash;
-
-        if (page === 'overseer.html') {
-            if (hash === '#overseer-characters') return 'players';
-            if (hash === '#overseer-campaign')   return 'items';
-            if (hash === '#overseer-messages')   return 'messages';
-            return 'home';
-        }
-
-        // On stats.html with messages hash → Messages button active
-        if (page === 'stats.html' && hash === '#messages') {
-            return 'messages';
-        }
-
-        return PLAYER_ACTIVE_MAP[page] || null;
-    }
-
-    /* ---- Build HTML ---- */
-
-    function escAttr(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/"/g, '&quot;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-    }
-
-    function buildNavHTML(items, theme, activeId) {
-        var html = '<nav class="pipboy-nav" id="pipboyNav" data-theme="' + escAttr(theme) + '" role="navigation" aria-label="Main navigation">';
-
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var cls = 'pipboy-nav-btn';
-            if (item.isHome)          cls += ' pipboy-nav-home';
-            if (item.id === activeId) cls += ' active';
-
-            var dataId = ' data-id="' + escAttr(item.id) + '"';
-
-            if (item.isSettings) {
-                html += '<button class="' + cls + '"' + dataId + ' id="pipboySettingsBtn" onclick="openPipboySettings()" aria-label="Open Settings">' +
-                    '<span class="pipboy-nav-icon" aria-hidden="true">' + item.icon + '</span>' +
-                    '<span class="pipboy-nav-label">' + item.label + '</span>' +
-                '</button>';
-            } else if (item.isAnchor) {
-                html += '<button class="' + cls + '"' + dataId + ' onclick="pipboyNavToAnchor(' + JSON.stringify(item.href) + ')" aria-label="Navigate to ' + escAttr(item.label) + '">' +
-                    '<span class="pipboy-nav-icon" aria-hidden="true">' + item.icon + '</span>' +
-                    '<span class="pipboy-nav-label">' + item.label + '</span>' +
-                '</button>';
-            } else {
-                html += '<button class="' + cls + '"' + dataId + ' onclick="pipboyNavTo(' + JSON.stringify(item.href) + ')" aria-label="Navigate to ' + escAttr(item.label) + '">' +
-                    '<span class="pipboy-nav-icon" aria-hidden="true">' + item.icon + '</span>' +
-                    '<span class="pipboy-nav-label">' + item.label + '</span>' +
-                '</button>';
-            }
-        }
-
-        html += '</nav>';
-        return html;
-    }
-
-    function buildSettingsHTML(theme) {
-        var t = escAttr(theme);
-        var html = '<div class="pipboy-settings-overlay" id="pipboySettingsOverlay" onclick="handlePipboyOverlayClick(event)">' +
-            '<div class="pipboy-settings-panel" id="pipboySettingsPanel" data-theme="' + t + '">' +
-                '<div class="pipboy-settings-header">' +
-                    '<span class="pipboy-settings-title">SETTINGS</span>' +
-                    '<button class="pipboy-settings-close" onclick="closePipboySettings()">CLOSE</button>' +
-                '</div>' +
-                '<div class="pipboy-settings-body">' +
-                    '<div class="pipboy-settings-section">' +
-                        '<div class="pipboy-settings-section-title">Volume Controls</div>' +
-                        '<div class="pipboy-settings-row">' +
-                            '<span class="pipboy-settings-label">MASTER</span>' +
-                            '<input type="range" class="pipboy-settings-slider" id="settingMasterVol" min="0" max="100" value="80" ' +
-                                'oninput="pipboyUpdateSlider(this,\'masterVolVal\')" aria-label="Master Volume">' +
-                            '<span class="pipboy-settings-slider-value" id="masterVolVal">80%</span>' +
-                        '</div>' +
-                        '<div class="pipboy-settings-row">' +
-                            '<span class="pipboy-settings-label">MUSIC</span>' +
-                            '<input type="range" class="pipboy-settings-slider" id="settingMusicVol" min="0" max="100" value="60" ' +
-                                'oninput="pipboyUpdateSlider(this,\'musicVolVal\')" aria-label="Music Volume">' +
-                            '<span class="pipboy-settings-slider-value" id="musicVolVal">60%</span>' +
-                        '</div>' +
-                        '<div class="pipboy-settings-row">' +
-                            '<span class="pipboy-settings-label">SFX</span>' +
-                            '<input type="range" class="pipboy-settings-slider" id="settingSfxVol" min="0" max="100" value="75" ' +
-                                'oninput="pipboyUpdateSlider(this,\'sfxVolVal\')" aria-label="SFX Volume">' +
-                            '<span class="pipboy-settings-slider-value" id="sfxVolVal">75%</span>' +
-                        '</div>' +
-                        '<div class="pipboy-settings-row">' +
-                            '<span class="pipboy-settings-label">VOICES</span>' +
-                            '<input type="range" class="pipboy-settings-slider" id="settingVoiceVol" min="0" max="100" value="85" ' +
-                                'oninput="pipboyUpdateSlider(this,\'voiceVolVal\')" aria-label="Voice Volume">' +
-                            '<span class="pipboy-settings-slider-value" id="voiceVolVal">85%</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="pipboy-settings-section">' +
-                        '<div class="pipboy-settings-section-title">Display Options</div>' +
-                        '<div class="pipboy-settings-row">' +
-                            '<span class="pipboy-settings-label">BRIGHTNESS</span>' +
-                            '<input type="range" class="pipboy-settings-slider" id="settingBrightness" min="50" max="150" value="100" ' +
-                                'oninput="pipboyUpdateBrightness(this)" aria-label="Brightness">' +
-                            '<span class="pipboy-settings-slider-value" id="brightnessVal">100%</span>' +
-                        '</div>' +
-                        '<div class="pipboy-settings-row">' +
-                            '<span class="pipboy-settings-label">SCANLINES</span>' +
-                            '<button class="pipboy-settings-toggle on" id="settingScanlinesToggle" ' +
-                                'onclick="pipboyToggleScanlines()" aria-pressed="true">ON</button>' +
-                        '</div>' +
-                        '<div class="pipboy-settings-row">' +
-                            '<span class="pipboy-settings-label">COLOR MODE</span>' +
-                            '<select class="pipboy-settings-select" id="settingColorMode" ' +
-                                'onchange="pipboyApplyColorMode(this.value)" aria-label="Color Mode">' +
-                                '<option value="normal">NORMAL</option>' +
-                                '<option value="sepia">SEPIA</option>' +
-                                '<option value="blue">BLUE TINT</option>' +
-                                '<option value="amber">AMBER</option>' +
-                            '</select>' +
-                        '</div>' +
-                        '<div class="pipboy-settings-row">' +
-                            '<span class="pipboy-settings-label">FONT SIZE</span>' +
-                            '<select class="pipboy-settings-select" id="settingFontSize" ' +
-                                'onchange="pipboyApplyFontSize(this.value)" aria-label="Font Size">' +
-                                '<option value="small">SMALL</option>' +
-                                '<option value="medium" selected>MEDIUM</option>' +
-                                '<option value="large">LARGE</option>' +
-                            '</select>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="pipboy-settings-section">' +
-                        '<div class="pipboy-settings-section-title">Account</div>' +
-                        '<div class="pipboy-settings-info" id="settingCharName">CHARACTER: --</div>' +
-                        '<div class="pipboy-settings-info" id="settingCampaignName">CAMPAIGN: --</div>' +
-                        '<br>' +
-                        '<button class="pipboy-settings-btn" onclick="pipboyLogout()">LOGOUT</button>' +
-                        '<button class="pipboy-settings-btn danger" onclick="pipboyConfirmDeleteChar()">DELETE CHARACTER</button>' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-        '</div>';
-        return html;
-    }
-
-    /* ---- Inject stylesheet ---- */
-
-    function injectStylesheet() {
-        if (document.getElementById('pipboyNavCSS')) return;
-        var scripts = document.querySelectorAll('script');
-        var base = '';
-        for (var i = 0; i < scripts.length; i++) {
-            var src = scripts[i].src || '';
-            if (src.indexOf('navigation.js') !== -1) {
-                base = src.replace('navigation.js', '');
-                break;
-            }
-        }
-        var link = document.createElement('link');
-        link.id   = 'pipboyNavCSS';
-        link.rel  = 'stylesheet';
-        link.href = base + 'navigation.css';
-        document.head.appendChild(link);
-    }
-
-    /* ---- Navigation handlers (global) ---- */
-
-    window.pipboyNavTo = function (href) {
-        window.location.href = href;
-    };
-
-    window.pipboyNavToAnchor = function (anchor) {
-        var page = getCurrentPage();
-        if (page === 'overseer.html' || anchor.charAt(0) === '#') {
-            var id = anchor.replace('#', '');
-            var target = document.getElementById(id);
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                window.history.replaceState(window.history.state || {}, '', anchor);
-                updateNavActiveState(anchor.split('#')[1] ? getActiveIdFromAnchor(anchor) : null);
-                return;
-            }
-        }
-        window.location.href = anchor;
-    };
-
-    function getActiveIdFromAnchor(anchor) {
-        var map = {
-            'overseer-characters': 'players',
-            'overseer-campaign':   'items',
-            'overseer-messages':   'messages'
-        };
-        var hash = anchor.replace('#', '');
-        return map[hash] || 'home';
-    }
-
-    function updateNavActiveState(activeId) {
-        var btns = document.querySelectorAll('.pipboy-nav-btn');
-        for (var i = 0; i < btns.length; i++) {
-            btns[i].classList.remove('active');
-        }
-        if (activeId) {
-            var active = document.querySelector('.pipboy-nav-btn[data-id="' + activeId + '"]');
-            if (active) active.classList.add('active');
-        }
-    }
-
-    /* ---- Settings Panel (global) ---- */
-
-    window.openPipboySettings = function () {
-        var overlay = document.getElementById('pipboySettingsOverlay');
-        if (!overlay) return;
-        overlay.classList.add('open');
-        loadSettingsUI();
-    };
-
-    window.closePipboySettings = function () {
-        var overlay = document.getElementById('pipboySettingsOverlay');
-        if (!overlay) return;
-        overlay.classList.remove('open');
-        saveSettings();
-    };
-
-    window.handlePipboyOverlayClick = function (e) {
-        if (e.target && e.target.id === 'pipboySettingsOverlay') {
-            closePipboySettings();
-        }
-    };
-
-    /* ---- Settings controls (global) ---- */
-
-    window.pipboyUpdateSlider = function (slider, valueId) {
-        var el = document.getElementById(valueId);
-        if (el) el.textContent = slider.value + '%';
-        saveSettings();
-    };
-
-    window.pipboyUpdateBrightness = function (slider) {
-        var el = document.getElementById('brightnessVal');
-        if (el) el.textContent = slider.value + '%';
-        applyBrightness(Number(slider.value));
-        saveSettings();
-    };
-
-    window.pipboyToggleScanlines = function () {
-        var btn = document.getElementById('settingScanlinesToggle');
-        if (!btn) return;
-        var on = btn.classList.contains('on');
-        if (on) {
-            btn.classList.remove('on');
-            btn.textContent = 'OFF';
-            btn.setAttribute('aria-pressed', 'false');
-            document.body.classList.add('no-scanlines');
-        } else {
-            btn.classList.add('on');
-            btn.textContent = 'ON';
-            btn.setAttribute('aria-pressed', 'true');
-            document.body.classList.remove('no-scanlines');
-        }
-        saveSettings();
-    };
-
-    window.pipboyApplyColorMode = function (mode) {
-        document.body.classList.remove('color-sepia', 'color-blue', 'color-amber');
-        if (mode !== 'normal') {
-            document.body.classList.add('color-' + mode);
-        }
-        saveSettings();
-    };
-
-    window.pipboyApplyFontSize = function (size) {
-        document.body.classList.remove('font-small', 'font-medium', 'font-large');
-        document.body.classList.add('font-' + size);
-        saveSettings();
-    };
-
-    window.pipboyLogout = function () {
-        if (!confirm('LOG OUT OF VAULT 215?')) return;
-        localStorage.removeItem('currentPlayer');
-        localStorage.removeItem('playerData');
-        var dest = getCurrentPage() === 'overseer.html' ? 'login_hub.html' : 'index.html';
-        window.location.href = dest;
-    };
-
-    window.pipboyConfirmDeleteChar = function () {
-        if (!confirm('DELETE CHARACTER? THIS ACTION CANNOT BE UNDONE.')) return;
-        if (!confirm('FINAL WARNING: ARE YOU ABSOLUTELY SURE?')) return;
-        var keys = ['characterData', 'characterImage', 'characterBackstory', 'pipboyInventory', 'pipboyData'];
-        for (var i = 0; i < keys.length; i++) {
-            localStorage.removeItem(keys[i]);
-        }
-        alert('CHARACTER DATA DELETED. Returning to login terminal.');
-        window.location.href = 'index.html';
-    };
-
-    /* ---- Brightness ---- */
-
-    function applyBrightness(val) {
-        document.documentElement.style.filter = (val === 100) ? '' : 'brightness(' + (val / 100) + ')';
-    }
-
-    /* ---- Settings persistence ---- */
-
-    var SETTINGS_KEY = 'pipboySettings';
-
-    var DEFAULT_SETTINGS = {
-        masterVol:  80,
-        musicVol:   60,
-        sfxVol:     75,
-        voiceVol:   85,
-        brightness: 100,
-        scanlines:  true,
-        colorMode:  'normal',
-        fontSize:   'medium'
-    };
-
-    function loadStoredSettings() {
-        try {
-            var raw = localStorage.getItem(SETTINGS_KEY);
-            if (!raw) return copyDefaults();
-            var parsed = JSON.parse(raw);
-            var s = copyDefaults();
-            for (var k in parsed) {
-                if (Object.prototype.hasOwnProperty.call(parsed, k) &&
-                    Object.prototype.hasOwnProperty.call(s, k)) {
-                    s[k] = parsed[k];
-                }
-            }
-            return s;
-        } catch (e) {
-            return copyDefaults();
-        }
-    }
-
-    function copyDefaults() {
-        var s = {};
-        for (var k in DEFAULT_SETTINGS) {
-            if (Object.prototype.hasOwnProperty.call(DEFAULT_SETTINGS, k)) {
-                s[k] = DEFAULT_SETTINGS[k];
-            }
-        }
-        return s;
-    }
-
-    function saveSettings() {
-        var s = {
-            masterVol:  getSliderVal('settingMasterVol',  DEFAULT_SETTINGS.masterVol),
-            musicVol:   getSliderVal('settingMusicVol',   DEFAULT_SETTINGS.musicVol),
-            sfxVol:     getSliderVal('settingSfxVol',     DEFAULT_SETTINGS.sfxVol),
-            voiceVol:   getSliderVal('settingVoiceVol',   DEFAULT_SETTINGS.voiceVol),
-            brightness: getSliderVal('settingBrightness', DEFAULT_SETTINGS.brightness),
-            scanlines:  !document.body.classList.contains('no-scanlines'),
-            colorMode:  getSelectVal('settingColorMode',  DEFAULT_SETTINGS.colorMode),
-            fontSize:   getSelectVal('settingFontSize',   DEFAULT_SETTINGS.fontSize)
-        };
-        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) {}
-    }
-
-    function applyStoredSettings(s) {
-        applyBrightness(s.brightness);
-        if (!s.scanlines) {
-            document.body.classList.add('no-scanlines');
-        } else {
-            document.body.classList.remove('no-scanlines');
-        }
-        document.body.classList.remove('color-sepia', 'color-blue', 'color-amber');
-        if (s.colorMode !== 'normal') {
-            document.body.classList.add('color-' + s.colorMode);
-        }
-        document.body.classList.remove('font-small', 'font-medium', 'font-large');
-        document.body.classList.add('font-' + s.fontSize);
-    }
-
-    function loadSettingsUI() {
-        var s = loadStoredSettings();
-        setSlider('settingMasterVol', 'masterVolVal', s.masterVol);
-        setSlider('settingMusicVol',  'musicVolVal',  s.musicVol);
-        setSlider('settingSfxVol',    'sfxVolVal',    s.sfxVol);
-        setSlider('settingVoiceVol',  'voiceVolVal',  s.voiceVol);
-        setSlider('settingBrightness','brightnessVal', s.brightness);
-
-        var scanlinesBtn = document.getElementById('settingScanlinesToggle');
-        if (scanlinesBtn) {
-            if (s.scanlines) {
-                scanlinesBtn.classList.add('on');
-                scanlinesBtn.textContent = 'ON';
-                scanlinesBtn.setAttribute('aria-pressed', 'true');
-            } else {
-                scanlinesBtn.classList.remove('on');
-                scanlinesBtn.textContent = 'OFF';
-                scanlinesBtn.setAttribute('aria-pressed', 'false');
-            }
-        }
-
-        var colorSel = document.getElementById('settingColorMode');
-        if (colorSel) colorSel.value = s.colorMode;
-
-        var fontSel = document.getElementById('settingFontSize');
-        if (fontSel) fontSel.value = s.fontSize;
-
-        loadAccountInfo();
-    }
-
-    function loadAccountInfo() {
-        var charEl   = document.getElementById('settingCharName');
-        var campEl   = document.getElementById('settingCampaignName');
-
-        if (charEl) {
-            try {
-                var raw = localStorage.getItem('characterData');
-                if (raw) {
-                    var cd = JSON.parse(raw);
-                    charEl.textContent = 'CHARACTER: ' + (cd.name || 'UNKNOWN DWELLER');
-                }
-            } catch (e) {}
-        }
-
-        if (campEl) {
-            try {
-                var rawC = localStorage.getItem('campaigns');
-                if (rawC) {
-                    var camps = JSON.parse(rawC);
-                    var active = null;
-                    for (var i = 0; i < camps.length; i++) {
-                        if (camps[i].isActive) { active = camps[i]; break; }
-                    }
-                    if (active) campEl.textContent = 'CAMPAIGN: ' + active.name;
-                }
-            } catch (e) {}
-        }
-    }
-
-    /* ---- Helpers ---- */
-
-    function getSliderVal(id, def) {
-        var el = document.getElementById(id);
-        return el ? parseInt(el.value, 10) : def;
-    }
-
-    function getSelectVal(id, def) {
-        var el = document.getElementById(id);
-        return el ? el.value : def;
-    }
-
-    function setSlider(sliderId, valueId, val) {
-        var s = document.getElementById(sliderId);
-        var v = document.getElementById(valueId);
-        if (s) s.value = val;
-        if (v) v.textContent = val + '%';
-    }
-
-    /* ---- Messages hash handler for stats.html ---- */
-
-    function handleMessagesHash() {
-        if (getCurrentPage() !== 'stats.html') return;
-        if (window.location.hash !== '#messages') return;
-        var btn = document.querySelector('.subtab-button[data-tab="messages"]');
-        if (btn) btn.click();
-    }
-
-       /* ---- Main init ---- */
-
-    function init() {
-        var page = getCurrentPage();
-
-        if (SKIP_PAGES.indexOf(page) !== -1) return;
-
-        var type     = getNavType();
-        var theme    = (type === 'overseer') ? 'overseer' : 'player';
-        var navItems = (type === 'overseer') ? OVERSEER_NAV : PLAYER_NAV;
-        var activeId = getActiveId();
-
-        injectStylesheet();
-
-        var navFrag = document.createElement('div');
-        navFrag.innerHTML = buildNavHTML(navItems, theme, activeId);
-        document.body.appendChild(navFrag.firstChild);
-
-        var setFrag = document.createElement('div');
-        setFrag.innerHTML = buildSettingsHTML(theme);
-        document.body.appendChild(setFrag.firstChild);
-
-        document.body.classList.add('has-pipboy-nav');
-
-        var stored = loadStoredSettings();
-        applyStoredSettings(stored);
-
-        handleMessagesHash();
-    }
-
-    // Run after DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-
-})();
+        const path = window.location.pathname;
+        if (path.includes('character')) return 'character';
+        if (path.includes('stats')) return 'stats';
+        if (path.includes('inventory')) return 'inventory';
+        if (path.includes('data')) return 'data';
+        if (path.includes('messages')) return 'messages';
+        return null*`
