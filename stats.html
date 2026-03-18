@@ -306,6 +306,14 @@
             border-top: 1px solid rgba(74, 222, 128, 0.2);
         }
 
+        .xp-source-select {
+            flex: 1 1 120px;
+        }
+
+        .xp-desc-input {
+            flex: 2 1 160px;
+        }
+
         .input-field {
             flex: 1;
             min-width: 120px;
@@ -824,6 +832,10 @@
                         <span class="stat-label">Experience Points:</span>
                         <span class="stat-value" id="xp">0</span>
                     </div>
+                    <div class="stat-item">
+                        <span class="stat-label">XP to Next Level:</span>
+                        <span class="stat-value" id="xpToNext">320</span>
+                    </div>
                     <div class="stat-bar-container">
                         <div class="stat-bar-label">
                             <span>Level Progress</span>
@@ -836,7 +848,17 @@
 
                     <!-- XP INPUT -->
                     <div class="input-form">
-                        <input type="number" id="xpInput" class="input-field" placeholder="Add/Remove XP (e.g., 500 or -200)" min="-999999" max="999999">
+                        <select id="xpSource" class="input-field xp-source-select">
+                            <option value="Quest">Quest</option>
+                            <option value="Combat">Combat</option>
+                            <option value="Exploration">Exploration</option>
+                            <option value="Learning">Learning</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <input type="text" id="xpDescription" class="input-field xp-desc-input" placeholder="Description (optional)" aria-label="XP description">
+                    </div>
+                    <div class="input-form">
+                        <input type="number" id="xpInput" class="input-field" placeholder="XP amount (positive)" min="1" max="999999" aria-label="XP amount">
                         <button class="action-button" onclick="addXP()">ADD XP</button>
                         <button class="action-button danger" onclick="removeXP()">REMOVE XP</button>
                     </div>
@@ -1004,8 +1026,8 @@
         </div>
     </div>
 
+    <script src="xp_system.js"></script>
     <script>
-        const XP_PER_LEVEL = 1000;
         const MAX_HEALTH = 100;
         const MAX_ACTION_POINTS = 20;
         const MAX_TAG_SKILLS = 3;
@@ -1050,7 +1072,9 @@
 
         function savePlayerData() {
             localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
-            localStorage.setItem('pipboyXP', document.getElementById('xp').textContent);
+            // Store raw numeric XP (strip commas from formatted display)
+            const rawXP = parseInt(document.getElementById('xp').textContent.replace(/,/g, '')) || 0;
+            localStorage.setItem('pipboyXP', rawXP);
             localStorage.setItem('pipboyLevel', document.getElementById('level').textContent);
             localStorage.setItem('pipboyHealth', document.getElementById('health').textContent);
             localStorage.setItem('pipboyActionPoints', document.getElementById('actionPoints').textContent);
@@ -1077,9 +1101,11 @@
             
             if (savedXP && savedLevel) {
                 const currentXP = parseInt(savedXP);
-                const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
-                document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
-                document.getElementById('xpBar').style.width = xpProgress + '%';
+                const progress = getLevelProgress(currentXP);
+                document.getElementById('xpPercent').textContent = progress + '%';
+                document.getElementById('xpBar').style.width = progress + '%';
+                document.getElementById('xp').textContent = formatXP(currentXP);
+                document.getElementById('xpToNext').textContent = formatXP(getXPForNextLevel(currentXP));
             }
             
             if (savedHealth) {
@@ -1199,39 +1225,45 @@
             const messageBox = document.getElementById('xpMessage');
             const xpAmount = parseInt(xpInput.value);
 
-            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
-                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount <= 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a positive XP amount!';
                 messageBox.className = 'message error';
                 return;
             }
 
-            if (xpAmount < 0) {
-                messageBox.textContent = '⚠ ERROR: Use REMOVE XP button for negative values!';
-                messageBox.className = 'message error';
-                return;
+            const rawXP = parseInt(document.getElementById('xp').textContent.replace(/,/g, '')) || 0;
+            const oldXP = rawXP;
+            const newXP = oldXP + xpAmount;
+
+            const source = document.getElementById('xpSource').value;
+            const description = document.getElementById('xpDescription').value.trim();
+
+            const levelsGained = checkLevelUp(oldXP, newXP);
+            const newLevel = getLevelFromXP(newXP);
+
+            document.getElementById('xp').textContent = formatXP(newXP);
+            document.getElementById('level').textContent = newLevel;
+            document.getElementById('xpToNext').textContent = formatXP(getXPForNextLevel(newXP));
+
+            const progress = getLevelProgress(newXP);
+            document.getElementById('xpPercent').textContent = progress + '%';
+            document.getElementById('xpBar').style.width = progress + '%';
+
+            if (levelsGained.length > 0) {
+                messageBox.textContent = `🎉 LEVEL UP! You reached Level ${newLevel}! (+${formatXP(xpAmount)} XP)`;
+                messageBox.className = 'message success';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Added ${formatXP(xpAmount)} XP [${source}]! Total XP: ${formatXP(newXP)}`;
+                messageBox.className = 'message success';
             }
 
-            let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
-            let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
-
-            currentXP += xpAmount;
-            currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
-
-            document.getElementById('xp').textContent = currentXP;
-            document.getElementById('level').textContent = currentLevel;
-
-            const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
-            document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
-            document.getElementById('xpBar').style.width = xpProgress + '%';
-
-            messageBox.textContent = `✓ SUCCESS: Added ${xpAmount} XP! Total XP: ${currentXP}`;
-            messageBox.className = 'message success';
-
+            addXPToHistory(xpAmount, source, description, newXP);
             savePlayerData();
             xpInput.value = '';
+            document.getElementById('xpDescription').value = '';
             setTimeout(() => {
                 messageBox.textContent = '';
-            }, 3000);
+            }, 4000);
         }
 
         function removeXP() {
@@ -1239,46 +1271,44 @@
             const messageBox = document.getElementById('xpMessage');
             const xpAmount = parseInt(xpInput.value);
 
-            if (!xpInput.value || isNaN(xpAmount) || xpAmount === 0) {
-                messageBox.textContent = '⚠ ERROR: Please enter a valid XP amount!';
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount <= 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a positive XP amount to remove!';
                 messageBox.className = 'message error';
                 return;
             }
 
-            if (xpAmount > 0) {
-                messageBox.textContent = '⚠ ERROR: Use ADD XP button for positive values!';
-                messageBox.className = 'message error';
-                return;
-            }
+            const rawXP = parseInt(document.getElementById('xp').textContent.replace(/,/g, '')) || 0;
+            let newXP = rawXP - xpAmount;
 
-            let currentXP = parseInt(document.getElementById('xp').textContent) || 0;
-            let currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+            const source = document.getElementById('xpSource').value;
+            const description = document.getElementById('xpDescription').value.trim();
 
-            currentXP += xpAmount;
-
-            if (currentXP < 0) {
-                currentXP = 0;
-                messageBox.textContent = `⚠ XP cannot be below 0!`;
+            if (newXP < 0) {
+                newXP = 0;
+                messageBox.textContent = `⚠ XP cannot be below 0! Reset to 0.`;
                 messageBox.className = 'message error';
             } else {
-                messageBox.textContent = `✓ SUCCESS: Removed ${Math.abs(xpAmount)} XP! Total XP: ${currentXP}`;
+                messageBox.textContent = `✓ SUCCESS: Removed ${formatXP(xpAmount)} XP! Total XP: ${formatXP(newXP)}`;
                 messageBox.className = 'message success';
             }
 
-            currentLevel = Math.floor(currentXP / XP_PER_LEVEL) + 1;
+            const newLevel = getLevelFromXP(newXP);
 
-            document.getElementById('xp').textContent = currentXP;
-            document.getElementById('level').textContent = currentLevel;
+            document.getElementById('xp').textContent = formatXP(newXP);
+            document.getElementById('level').textContent = newLevel;
+            document.getElementById('xpToNext').textContent = formatXP(getXPForNextLevel(newXP));
 
-            const xpProgress = (currentXP % XP_PER_LEVEL) / XP_PER_LEVEL * 100;
-            document.getElementById('xpPercent').textContent = Math.floor(xpProgress) + '%';
-            document.getElementById('xpBar').style.width = xpProgress + '%';
+            const progress = getLevelProgress(newXP);
+            document.getElementById('xpPercent').textContent = progress + '%';
+            document.getElementById('xpBar').style.width = progress + '%';
 
+            addXPToHistory(-xpAmount, source, description || 'XP removed', newXP);
             savePlayerData();
             xpInput.value = '';
+            document.getElementById('xpDescription').value = '';
             setTimeout(() => {
                 messageBox.textContent = '';
-            }, 3000);
+            }, 4000);
         }
 
         function updateHealth() {
