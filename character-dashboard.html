@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Dashboard - Vault 215</title>
+    <style>
+        /* ===========================
+           VAULT 215 CHARACTER DASHBOARD
+           HOME PAGE
+           =========================== */
+
+        :root {
+            --vault-primary: #4ade80;
+            --vault-secondary: #fbbf24;
+            --vault-dark: #0a0a0a;
+            --vault-darker: #1a1a1a;
+            --vault-accent: #c084fc;
+            --vault-success: #4ade80;
+            --vault-error: #ff6b6b;
+            --vault-warning: #fbbf24;
+            --vault-green: #4ade80;
+            --vault-gold: #fbbf24;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--vault-dark);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
+        }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ===== VAULT HEADER ===== */
+        .vault-header {
+            text-align: center;
+            margin-bottom: 28px;
+            padding: 28px 30px;
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.3);
+        }
+
+        .vault-badge {
+            font-size: 10px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .vault-title {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: var(--vault-green);
+            text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.4);
+            animation: vaultGlow 2s ease-in-out infinite;
+            margin-bottom: 6px;
+        }
+
+        @keyframes vaultGlow {
+            0%, 100% { text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.4); }
+            50%       { text-shadow: 0 0 15px var(--vault-green), 0 0 30px rgba(74, 222, 128, 0.6), 0 0 40px rgba(74, 222, 128, 0.3); }
+        }
+
+        .vault-subtitle {
+            font-size: 11px;
+            color: rgba(74, 222, 128, 0.6);
+            letter-spacing: 2px;
+        }
+
+        /* ===== CHARACTER CARD ===== */
+        .character-card {
+            background: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.15);
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .character-portrait {
+            width: 80px;
+            height: 80px;
+            flex-shrink: 0;
+            border: 2px solid var(--vault-green);
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: rgba(74, 222, 128, 0.5);
+            overflow: hidden;
+        }
+
+        .character-portrait img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .character-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .character-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+            letter-spacing: 3px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .character-meta {
+            font-size: 11px;
+            color: rgba(74, 222, 128, 0.65);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .character-meta span {
+            color: var(--vault-gold);
+        }
+
+        /* Level + XP bar */
+        .level-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .level-badge {
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: var(--vault-dark);
+            background: var(--vault-green);
+            padding: 3px 8px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .xp-bar-wrap {
+            flex: 1;
+            background: rgba(74, 222, 128, 0.1);
+            height: 10px;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            overflow: hidden;
+        }
+
+        .xp-bar {
+            height: 100%;
+            background: var(--vault-green);
+            box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+            transition: width 0.4s ease;
+        }
+
+        .xp-label {
+            font-size: 10px;
+            color: rgba(74, 222, 128, 0.6);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* ===== QUICK STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--vault-darker);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            padding: 14px;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--vault-green);
+            box-shadow: 0 0 12px rgba(74, 222, 128, 0.15);
+        }
+
+        .stat-card-icon {
+            font-size: 22px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .stat-card-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 6px rgba(251, 191, 36, 0.5);
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .stat-card-label {
+            font-size: 9px;
+            color: rgba(74, 222, 128, 0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        /* ===== CAMPAIGN CARD ===== */
+        .campaign-card {
+            background: var(--vault-darker);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        .campaign-title {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .campaign-name {
+            font-size: 16px;
+            color: var(--vault-green);
+            letter-spacing: 2px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .campaign-empty {
+            font-size: 12px;
+            color: rgba(74, 222, 128, 0.45);
+            font-style: italic;
+        }
+
+        /* ===== QUICK ACCESS BUTTONS ===== */
+        .quick-access {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quick-btn {
+            background: rgba(74, 222, 128, 0.06);
+            border: 1px solid rgba(74, 222, 128, 0.35);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 16px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .quick-btn:hover {
+            background: rgba(74, 222, 128, 0.14);
+            border-color: var(--vault-green);
+            box-shadow: 0 0 12px rgba(74, 222, 128, 0.2);
+            color: var(--vault-gold);
+        }
+
+        .quick-btn-icon {
+            font-size: 24px;
+        }
+
+        /* ===== FOOTER ===== */
+        .vault-footer {
+            text-align: center;
+            padding: 14px;
+            border-top: 1px solid rgba(74, 222, 128, 0.2);
+            font-size: 10px;
+            color: rgba(74, 222, 128, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .character-card {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .quick-access {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 400px) {
+            .quick-access {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- ===== HEADER ===== -->
+        <header class="vault-header">
+            <div class="vault-badge">◈ PIP-BOY 3000 ◈ VAULT 215 ◈</div>
+            <div class="vault-title">CHARACTER DASHBOARD</div>
+            <div class="vault-subtitle">VAULT DWELLER STATUS OVERVIEW</div>
+        </header>
+
+        <!-- ===== CHARACTER CARD ===== -->
+        <div class="character-card">
+            <div class="character-portrait" id="dashPortrait">👤</div>
+            <div class="character-info">
+                <div class="character-name" id="dashCharName">VAULT DWELLER</div>
+                <div class="character-meta">
+                    <span id="dashRace">—</span> &bull; <span id="dashClass">—</span> &bull;
+                    VAULT <span>215</span>
+                </div>
+
+                <div class="level-row">
+                    <span class="level-badge" id="dashLevelBadge">LVL 1</span>
+                    <div class="xp-bar-wrap">
+                        <div class="xp-bar" id="dashXpBar" style="width: 0%"></div>
+                    </div>
+                    <span class="xp-label" id="dashXpLabel">0 / 320 XP</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== QUICK STATS ===== -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-card-icon">❤️</span>
+                <span class="stat-card-value" id="dashHP">—</span>
+                <span class="stat-card-label">Health</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card-icon">☢️</span>
+                <span class="stat-card-value" id="dashRad">—</span>
+                <span class="stat-card-label">Radiation</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card-icon">⚡</span>
+                <span class="stat-card-value" id="dashAP">—</span>
+                <span class="stat-card-label">Action Pts</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card-icon">🎯</span>
+                <span class="stat-card-value" id="dashLevel">1</span>
+                <span class="stat-card-label">Level</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card-icon">🎒</span>
+                <span class="stat-card-value" id="dashItems">0</span>
+                <span class="stat-card-label">Items</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-card-icon">📋</span>
+                <span class="stat-card-value" id="dashQuests">0</span>
+                <span class="stat-card-label">Quests</span>
+            </div>
+        </div>
+
+        <!-- ===== ACTIVE CAMPAIGN ===== -->
+        <div class="campaign-card">
+            <div class="campaign-title">◈ Active Campaign</div>
+            <div id="dashCampaignName" class="campaign-empty">No active campaign — check with your Overseer.</div>
+        </div>
+
+        <!-- ===== QUICK ACCESS ===== -->
+        <div class="quick-access">
+            <a class="quick-btn" href="stats.html">
+                <span class="quick-btn-icon">📊</span>
+                <span>Stats</span>
+            </a>
+            <a class="quick-btn" href="inventory.html">
+                <span class="quick-btn-icon">🎒</span>
+                <span>Inventory</span>
+            </a>
+            <a class="quick-btn" href="stats.html#messages">
+                <span class="quick-btn-icon">💬</span>
+                <span>Messages</span>
+            </a>
+            <a class="quick-btn" href="character.html">
+                <span class="quick-btn-icon">👤</span>
+                <span>Character</span>
+            </a>
+            <a class="quick-btn" href="data.html">
+                <span class="quick-btn-icon">📋</span>
+                <span>Data</span>
+            </a>
+            <a class="quick-btn" href="terminal.html">
+                <span class="quick-btn-icon">💻</span>
+                <span>Terminal</span>
+            </a>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <footer class="vault-footer">
+            VAULT <span>215</span> RESIDENT &bull; PROPERTY OF VAULT-TEC INDUSTRIES
+        </footer>
+
+    </div>
+
+    <script>
+        // XP table (levels 1-20 for display; full table in xp_system.js)
+        var XP_TABLE = [
+            { level: 1,  start: 0,     needed: 320 },
+            { level: 2,  start: 320,   needed: 720 },
+            { level: 3,  start: 1040,  needed: 1040 },
+            { level: 4,  start: 2080,  needed: 1360 },
+            { level: 5,  start: 3440,  needed: 1680 },
+            { level: 6,  start: 5120,  needed: 2000 },
+            { level: 7,  start: 7120,  needed: 2320 },
+            { level: 8,  start: 9440,  needed: 2640 },
+            { level: 9,  start: 12080, needed: 2960 },
+            { level: 10, start: 15040, needed: 3280 }
+        ];
+
+        function getXpEntry(totalXp) {
+            var entry = XP_TABLE[0];
+            for (var i = XP_TABLE.length - 1; i >= 0; i--) {
+                if (totalXp >= XP_TABLE[i].start) { entry = XP_TABLE[i]; break; }
+            }
+            return entry;
+        }
+
+        function countInventoryItems() {
+            try {
+                var raw = localStorage.getItem('pipboyInventory');
+                if (!raw) return 0;
+                var inv = JSON.parse(raw);
+                var total = 0;
+                var cats = ['weapons', 'apparel', 'misc', 'aid', 'ammo'];
+                for (var i = 0; i < cats.length; i++) {
+                    if (Array.isArray(inv[cats[i]])) total += inv[cats[i]].length;
+                }
+                return total;
+            } catch (e) { return 0; }
+        }
+
+        function countActiveQuests() {
+            try {
+                var raw = localStorage.getItem('pipboyData');
+                if (!raw) return 0;
+                var data = JSON.parse(raw);
+                if (!Array.isArray(data.quests)) return 0;
+                return data.quests.filter(function (q) { return q.status === 'ACTIVE'; }).length;
+            } catch (e) { return 0; }
+        }
+
+        function getActiveCampaign() {
+            try {
+                var raw = localStorage.getItem('campaigns');
+                if (!raw) return null;
+                var camps = JSON.parse(raw);
+                for (var i = 0; i < camps.length; i++) {
+                    if (camps[i].isActive) return camps[i];
+                }
+                return null;
+            } catch (e) { return null; }
+        }
+
+        function loadDashboard() {
+            // Character info
+            try {
+                var raw = localStorage.getItem('characterData');
+                if (raw) {
+                    var cd = JSON.parse(raw);
+                    if (cd.name)      document.getElementById('dashCharName').textContent = cd.name.toUpperCase();
+                    if (cd.race)      document.getElementById('dashRace').textContent = cd.race;
+                    if (cd.class)     document.getElementById('dashClass').textContent = cd.class;
+                }
+            } catch (e) {}
+
+            // Portrait — use DOM APIs to avoid XSS via crafted localStorage data
+            try {
+                var imgData = localStorage.getItem('characterImage');
+                if (imgData) {
+                    var imgEl = document.createElement('img');
+                    imgEl.src = imgData;
+                    imgEl.alt = 'Character Portrait';
+                    var portrait = document.getElementById('dashPortrait');
+                    portrait.textContent = '';
+                    portrait.appendChild(imgEl);
+                }
+            } catch (e) {}
+
+            // Stats / vitals from stats page localStorage key
+            try {
+                var rawS = localStorage.getItem('characterStats');
+                if (rawS) {
+                    var s = JSON.parse(rawS);
+                    if (s.currentHP  !== undefined) document.getElementById('dashHP').textContent  = s.currentHP  + ' / ' + (s.maxHP  || '?');
+                    if (s.radiation  !== undefined) document.getElementById('dashRad').textContent = s.radiation;
+                    if (s.currentAP  !== undefined) document.getElementById('dashAP').textContent  = s.currentAP  + ' / ' + (s.maxAP  || '?');
+                    if (s.totalXP    !== undefined) {
+                        var lvlEntry = getXpEntry(s.totalXP);
+                        var lvl      = lvlEntry.level;
+                        var progress = lvlEntry.needed > 0
+                            ? Math.round(((s.totalXP - lvlEntry.start) / lvlEntry.needed) * 100)
+                            : 100;
+                        document.getElementById('dashLevel').textContent     = lvl;
+                        document.getElementById('dashLevelBadge').textContent = 'LVL ' + lvl;
+                        document.getElementById('dashXpBar').style.width      = Math.min(progress, 100) + '%';
+                        document.getElementById('dashXpLabel').textContent    =
+                            (s.totalXP - lvlEntry.start) + ' / ' + lvlEntry.needed + ' XP';
+                    }
+                }
+            } catch (e) {}
+
+            // Inventory count
+            document.getElementById('dashItems').textContent  = countInventoryItems();
+            document.getElementById('dashQuests').textContent = countActiveQuests();
+
+            // Campaign
+            var camp = getActiveCampaign();
+            var campEl = document.getElementById('dashCampaignName');
+            if (camp) {
+                campEl.className = 'campaign-name';
+                campEl.textContent = camp.name.toUpperCase();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadDashboard);
+        window.addEventListener('focus', loadDashboard);
+    </script>
+
+    <!-- Bottom Navigation (shared) -->
+    <script src="navigation.js"></script>
+</body>
+</html>

@@ -1,0 +1,570 @@
+/* ===========================
+   VAULT 215 NAVIGATION SYSTEM
+   Fallout Pip-Boy Bottom Nav
+   + Settings Panel
+   =========================== */
+
+/* ---- Navigation Bar ---- */
+.pipboy-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 72px;
+    display: flex;
+    align-items: stretch;
+    z-index: 900;
+    font-family: 'Courier New', monospace;
+    background: #0d0d0d;
+    border-top: 2px solid #4ade80;
+    box-shadow: 0 -4px 20px rgba(74, 222, 128, 0.25);
+}
+
+/* Overseer theme override */
+.pipboy-nav[data-theme="overseer"] {
+    border-top-color: #2a5298;
+    box-shadow: 0 -4px 20px rgba(42, 82, 152, 0.4);
+}
+
+/* ---- Nav Buttons ---- */
+.pipboy-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid rgba(74, 222, 128, 0.15);
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    color: rgba(74, 222, 128, 0.6);
+    padding: 6px 4px;
+    transition: background 0.2s, color 0.2s;
+    min-width: 0;
+    position: relative;
+}
+
+.pipboy-nav-btn:last-child {
+    border-right: none;
+}
+
+.pipboy-nav[data-theme="overseer"] .pipboy-nav-btn {
+    color: rgba(160, 196, 255, 0.6);
+    border-right-color: rgba(42, 82, 152, 0.2);
+}
+
+/* Hover */
+.pipboy-nav-btn:hover {
+    background: rgba(74, 222, 128, 0.08);
+    color: #4ade80;
+}
+
+.pipboy-nav[data-theme="overseer"] .pipboy-nav-btn:hover {
+    background: rgba(42, 82, 152, 0.15);
+    color: #a0c4ff;
+}
+
+/* Active state */
+.pipboy-nav-btn.active {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.08);
+}
+
+.pipboy-nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: #fbbf24;
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.8), 0 0 16px rgba(251, 191, 36, 0.4);
+    border-radius: 0 0 2px 2px;
+}
+
+.pipboy-nav[data-theme="overseer"] .pipboy-nav-btn.active {
+    color: #f0c040;
+    background: rgba(240, 192, 64, 0.08);
+}
+
+.pipboy-nav[data-theme="overseer"] .pipboy-nav-btn.active::before {
+    background: #f0c040;
+    box-shadow: 0 0 8px rgba(240, 192, 64, 0.8), 0 0 16px rgba(240, 192, 64, 0.4);
+}
+
+/* ---- HOME Button (center, prominent) ---- */
+.pipboy-nav-btn.pipboy-nav-home {
+    flex: 1.2;
+    background: rgba(74, 222, 128, 0.05);
+    border-left: 1px solid rgba(74, 222, 128, 0.2);
+    border-right: 1px solid rgba(74, 222, 128, 0.2);
+}
+
+.pipboy-nav[data-theme="overseer"] .pipboy-nav-btn.pipboy-nav-home {
+    background: rgba(42, 82, 152, 0.06);
+    border-left-color: rgba(42, 82, 152, 0.25);
+    border-right-color: rgba(42, 82, 152, 0.25);
+}
+
+.pipboy-nav-btn.pipboy-nav-home:hover {
+    background: rgba(74, 222, 128, 0.12);
+}
+
+.pipboy-nav[data-theme="overseer"] .pipboy-nav-btn.pipboy-nav-home:hover {
+    background: rgba(42, 82, 152, 0.18);
+}
+
+.pipboy-nav-btn.pipboy-nav-home .pipboy-nav-icon {
+    font-size: 26px;
+}
+
+/* ---- Icon ---- */
+.pipboy-nav-icon {
+    font-size: 22px;
+    line-height: 1;
+    display: block;
+    transition: transform 0.15s;
+}
+
+.pipboy-nav-btn:hover .pipboy-nav-icon {
+    transform: translateY(-1px);
+}
+
+/* ---- Label ---- */
+.pipboy-nav-label {
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1;
+    white-space: nowrap;
+    display: block;
+}
+
+/* ---- Body padding so content is not hidden behind nav ---- */
+body.has-pipboy-nav {
+    padding-bottom: 90px !important;
+}
+
+/* ===========================
+   SETTINGS PANEL
+   =========================== */
+
+/* Overlay */
+.pipboy-settings-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 1100;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.pipboy-settings-overlay.open {
+    display: flex;
+    animation: pipboyFadeIn 0.2s ease;
+}
+
+@keyframes pipboyFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Panel */
+.pipboy-settings-panel {
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #0a130a;
+    border: 2px solid #4ade80;
+    border-bottom: none;
+    box-shadow: 0 -8px 40px rgba(74, 222, 128, 0.3);
+    font-family: 'Courier New', monospace;
+    animation: pipboySlideUp 0.3s ease;
+    border-radius: 4px 4px 0 0;
+}
+
+@keyframes pipboySlideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+}
+
+/* Overseer panel */
+.pipboy-settings-panel[data-theme="overseer"] {
+    background: #060e1e;
+    border-color: #2a5298;
+    box-shadow: 0 -8px 40px rgba(42, 82, 152, 0.4);
+}
+
+/* Panel Header */
+.pipboy-settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(74, 222, 128, 0.3);
+    background: rgba(74, 222, 128, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-header {
+    border-bottom-color: rgba(42, 82, 152, 0.4);
+    background: rgba(42, 82, 152, 0.08);
+}
+
+.pipboy-settings-title {
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    color: #4ade80;
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.7);
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-title {
+    color: #4a9eff;
+    text-shadow: 0 0 10px rgba(74, 158, 255, 0.7);
+}
+
+.pipboy-settings-close {
+    background: transparent;
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #4ade80;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    padding: 5px 12px;
+    transition: all 0.2s;
+}
+
+.pipboy-settings-close:hover {
+    background: rgba(74, 222, 128, 0.1);
+    border-color: #4ade80;
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-close {
+    border-color: rgba(42, 82, 152, 0.5);
+    color: #4a9eff;
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-close:hover {
+    background: rgba(42, 82, 152, 0.15);
+    border-color: #4a9eff;
+}
+
+/* Panel Body */
+.pipboy-settings-body {
+    padding: 20px;
+}
+
+/* Sections */
+.pipboy-settings-section {
+    margin-bottom: 22px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(74, 222, 128, 0.12);
+}
+
+.pipboy-settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-section {
+    border-bottom-color: rgba(42, 82, 152, 0.2);
+}
+
+.pipboy-settings-section-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #fbbf24;
+    text-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+/* Control Rows */
+.pipboy-settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.pipboy-settings-row:last-child {
+    margin-bottom: 0;
+}
+
+.pipboy-settings-label {
+    font-size: 11px;
+    color: rgba(74, 222, 128, 0.85);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    min-width: 110px;
+    flex-shrink: 0;
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-label {
+    color: rgba(160, 196, 255, 0.85);
+}
+
+/* Sliders */
+.pipboy-settings-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: rgba(74, 222, 128, 0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.pipboy-settings-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #4ade80;
+    border-radius: 2px;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+}
+
+.pipboy-settings-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #4ade80;
+    border-radius: 2px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-slider {
+    background: rgba(42, 82, 152, 0.25);
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-slider::-webkit-slider-thumb {
+    background: #4a9eff;
+    box-shadow: 0 0 6px rgba(74, 158, 255, 0.6);
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-slider::-moz-range-thumb {
+    background: #4a9eff;
+    box-shadow: 0 0 6px rgba(74, 158, 255, 0.6);
+}
+
+.pipboy-settings-slider-value {
+    font-size: 11px;
+    color: #fbbf24;
+    min-width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* Select */
+.pipboy-settings-select {
+    flex: 1;
+    background: #1a1a1a;
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #4ade80;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    cursor: pointer;
+    outline: none;
+}
+
+.pipboy-settings-select:focus {
+    border-color: #4ade80;
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-select {
+    border-color: rgba(42, 82, 152, 0.5);
+    color: #a0c4ff;
+    background: #0a1020;
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-select:focus {
+    border-color: #4a9eff;
+}
+
+/* Toggle button */
+.pipboy-settings-toggle {
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    color: rgba(74, 222, 128, 0.7);
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 52px;
+    text-align: center;
+}
+
+.pipboy-settings-toggle.on {
+    background: rgba(74, 222, 128, 0.2);
+    border-color: #4ade80;
+    color: #4ade80;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.25);
+}
+
+.pipboy-settings-toggle:hover {
+    background: rgba(74, 222, 128, 0.18);
+    border-color: #4ade80;
+    color: #4ade80;
+}
+
+/* Action Buttons */
+.pipboy-settings-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background: rgba(74, 222, 128, 0.08);
+    border: 1px solid rgba(74, 222, 128, 0.45);
+    color: #4ade80;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.pipboy-settings-btn:hover {
+    background: rgba(74, 222, 128, 0.16);
+    border-color: #4ade80;
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+}
+
+.pipboy-settings-btn:last-child {
+    margin-bottom: 0;
+}
+
+.pipboy-settings-btn.danger {
+    background: rgba(255, 107, 107, 0.08);
+    border-color: rgba(255, 107, 107, 0.45);
+    color: #ff6b6b;
+}
+
+.pipboy-settings-btn.danger:hover {
+    background: rgba(255, 107, 107, 0.16);
+    border-color: #ff6b6b;
+    box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-btn {
+    border-color: rgba(42, 82, 152, 0.5);
+    color: #4a9eff;
+    background: rgba(42, 82, 152, 0.08);
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-btn:hover {
+    background: rgba(42, 82, 152, 0.18);
+    border-color: #4a9eff;
+    box-shadow: 0 0 10px rgba(42, 82, 152, 0.3);
+}
+
+.pipboy-settings-panel[data-theme="overseer"] .pipboy-settings-btn.danger {
+    border-color: rgba(255, 107, 107, 0.45);
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.08);
+}
+
+/* Info Display */
+.pipboy-settings-info {
+    font-size: 11px;
+    color: #fbbf24;
+    letter-spacing: 1px;
+    padding: 4px 0;
+}
+
+/* ===========================
+   UTILITY CLASSES
+   (Injected via navigation.js)
+   =========================== */
+
+/* Disable scanlines */
+body.no-scanlines::before {
+    display: none !important;
+}
+
+/* Color modes */
+body.color-sepia {
+    filter: sepia(0.55) !important;
+}
+
+body.color-blue {
+    filter: hue-rotate(180deg) saturate(1.2) !important;
+}
+
+body.color-amber {
+    filter: sepia(1) hue-rotate(-20deg) saturate(1.4) !important;
+}
+
+/* Font size scale */
+body.font-small  { font-size: 12px !important; }
+body.font-medium { font-size: 14px !important; }
+body.font-large  { font-size: 16px !important; }
+
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
+@media (max-width: 480px) {
+    .pipboy-nav {
+        height: 64px;
+    }
+
+    .pipboy-nav-icon {
+        font-size: 18px;
+    }
+
+    .pipboy-nav-btn.pipboy-nav-home .pipboy-nav-icon {
+        font-size: 22px;
+    }
+
+    .pipboy-nav-label {
+        font-size: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    body.has-pipboy-nav {
+        padding-bottom: 82px !important;
+    }
+
+    .pipboy-settings-panel {
+        max-height: 90vh;
+    }
+
+    .pipboy-settings-label {
+        min-width: 90px;
+    }
+}
+
+@media (max-width: 360px) {
+    .pipboy-nav-label {
+        display: none;
+    }
+
+    .pipboy-nav {
+        height: 56px;
+    }
+
+    body.has-pipboy-nav {
+        padding-bottom: 74px !important;
+    }
+}
