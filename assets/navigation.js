@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <li><a href="data.html" class="nav-link" data-page="data">📋 DATA</a></li>
                 <li><a href="messages.html" class="nav-link" data-page="messages">📻 MESSAGES</a></li>
             </ul>
+            <div class="logout-container">
+                <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
+            </div>
         </nav>
 
         <!-- OVERLAY BACKDROP -->
@@ -210,6 +213,47 @@ document.addEventListener('DOMContentLoaded', function() {
             box-shadow: 0 0 20px rgba(251, 191, 36, 0.5), inset 0 0 10px rgba(251, 191, 36, 0.2);
         }
 
+        /* LOGOUT BUTTON */
+        .logout-container {
+            padding: 10px 10px 20px;
+            border-top: 2px solid var(--vault-green);
+            margin-top: 10px;
+        }
+
+        .logout-button {
+            display: block;
+            width: 100%;
+            padding: 15px 15px;
+            background-color: var(--vault-dark);
+            border: 2px solid #ff6b6b;
+            color: #ff6b6b;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff6b6b;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+            text-align: left;
+        }
+
+        .logout-button:hover {
+            background-color: var(--vault-darker);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            transform: translateX(5px);
+        }
+
+        .logout-button:active {
+            transform: scale(0.98);
+        }
+
         /* OVERLAY BACKDROP */
         .nav-overlay {
             position: fixed;
@@ -302,6 +346,19 @@ document.addEventListener('DOMContentLoaded', function() {
     hamburgerBtn.addEventListener('click', openMenu);
     closeBtn.addEventListener('click', closeMenu);
     navOverlay.addEventListener('click', closeMenu);
+
+    // Logout functionality
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    function logout() {
+        closeMenu();
+        localStorage.clear();
+        window.location.href = 'index.html';
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
 
     // Close menu with Escape key
     document.addEventListener('keydown', function(e) {
