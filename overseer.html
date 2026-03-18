@@ -70,179 +70,6 @@
         .hidden { display: none !important; }
 
         /* =====================
-           LOGIN SCREEN
-           ===================== */
-        #loginScreen {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .login-panel {
-            background: var(--overseer-blue-mid);
-            border: 3px solid var(--overseer-gold);
-            box-shadow:
-                0 0 40px var(--overseer-glow-gold),
-                0 0 80px rgba(212, 160, 23, 0.2),
-                inset 0 0 30px rgba(42, 82, 152, 0.15);
-            padding: 50px 60px;
-            max-width: 520px;
-            width: 100%;
-            text-align: center;
-            position: relative;
-        }
-
-        .login-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--overseer-gold), var(--overseer-gold-bright), var(--overseer-gold), transparent);
-        }
-
-        .login-emblem {
-            font-size: 11px;
-            color: var(--overseer-gold-bright);
-            text-shadow: 0 0 8px var(--overseer-glow-gold);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-
-        .login-title {
-            font-size: 26px;
-            font-weight: bold;
-            color: var(--overseer-gold-bright);
-            text-shadow: 0 0 15px var(--overseer-glow-gold), 0 0 30px rgba(212, 160, 23, 0.4);
-            letter-spacing: 4px;
-            margin-bottom: 4px;
-            animation: authority-pulse 3s ease-in-out infinite;
-        }
-
-        .login-subtitle {
-            font-size: 12px;
-            color: var(--overseer-white);
-            opacity: 0.7;
-            letter-spacing: 2px;
-            margin-bottom: 40px;
-        }
-
-        .login-divider {
-            border: none;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--overseer-gold), transparent);
-            margin: 0 0 30px 0;
-            opacity: 0.6;
-        }
-
-        .login-field {
-            margin-bottom: 22px;
-            text-align: left;
-        }
-
-        .login-field label {
-            display: block;
-            font-size: 11px;
-            color: var(--overseer-gold);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-
-        .login-field input,
-        .login-field select {
-            width: 100%;
-            background: var(--overseer-blue);
-            border: 1px solid var(--overseer-blue-light);
-            color: var(--overseer-white);
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            padding: 12px 14px;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        .login-field input:focus,
-        .login-field select:focus {
-            border-color: var(--overseer-gold);
-            box-shadow: 0 0 10px rgba(212, 160, 23, 0.3);
-        }
-
-        .login-field select option {
-            background: var(--overseer-blue);
-        }
-
-        .login-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--overseer-gold-dim), var(--overseer-gold));
-            border: 2px solid var(--overseer-gold-bright);
-            color: var(--overseer-darker);
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            font-weight: bold;
-            letter-spacing: 3px;
-            padding: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            margin-top: 10px;
-        }
-
-        .login-btn:hover {
-            background: linear-gradient(135deg, var(--overseer-gold), var(--overseer-gold-bright));
-            box-shadow: 0 0 20px var(--overseer-glow-gold);
-            transform: translateY(-1px);
-        }
-
-        .login-btn:active {
-            transform: translateY(0);
-        }
-
-        .login-remember {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 16px;
-            font-size: 11px;
-            color: var(--overseer-white);
-            opacity: 0.7;
-            cursor: pointer;
-        }
-
-        .login-remember input[type="checkbox"] {
-            accent-color: var(--overseer-gold);
-            width: 14px;
-            height: 14px;
-            cursor: pointer;
-        }
-
-        .login-error {
-            background: rgba(204, 34, 0, 0.2);
-            border: 1px solid var(--overseer-red-bright);
-            color: var(--overseer-red-bright);
-            padding: 10px 14px;
-            font-size: 12px;
-            margin-top: 14px;
-            display: none;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .login-footer {
-            margin-top: 30px;
-            font-size: 10px;
-            color: var(--overseer-white);
-            opacity: 0.35;
-            letter-spacing: 1px;
-        }
-
-        /* =====================
            DASHBOARD SCREEN
            ===================== */
         #dashboardScreen {
@@ -1230,7 +1057,6 @@
            RESPONSIVE
            ===================== */
         @media (max-width: 600px) {
-            .login-panel { padding: 30px 24px; }
             .command-bar { padding: 12px 16px; }
             .dashboard-content { padding: 16px; }
             .form-row { grid-template-columns: 1fr; }
@@ -1243,45 +1069,8 @@
 </head>
 <body>
 
-<!-- ===================== LOGIN SCREEN ===================== -->
-<div id="loginScreen">
-    <div class="login-panel">
-        <div class="login-emblem">⬡ Vault-Tec Authority — Vault 215 ⬡</div>
-        <div class="login-title">OVERSEER CONSOLE</div>
-        <div class="login-subtitle">COMMAND CENTER ACCESS — RESTRICTED</div>
-        <hr class="login-divider">
-
-        <div class="login-field">
-            <label>Overseer Identification</label>
-            <input type="text" id="loginName" placeholder="Overseer" maxlength="40"
-                   onkeydown="if(event.key==='Enter') attemptLogin()">
-        </div>
-
-        <div class="login-field">
-            <label>Authorization PIN</label>
-            <input type="password" id="loginPin" placeholder="• • • • •" maxlength="20"
-                   onkeydown="if(event.key==='Enter') attemptLogin()">
-        </div>
-
-        <button class="login-btn" onclick="attemptLogin()">◈ AUTHORIZE ACCESS ◈</button>
-
-        <div id="loginError" class="login-error">
-            ⚠ AUTHORIZATION DENIED — Invalid credentials
-        </div>
-
-        <div class="login-footer">
-            VAULT-TEC CORPORATION • ALL SYSTEMS MONITORED<br>
-            UNAUTHORIZED ACCESS WILL BE PROSECUTED
-        </div>
-
-        <div style="margin-top:20px;">
-            <a href="login_hub.html" style="font-family:'Courier New',monospace; font-size:10px; letter-spacing:2px; color:var(--overseer-gold-dim); text-decoration:none; border:1px solid var(--overseer-gold-dim); padding:6px 14px; display:inline-block; transition:all 0.2s;" onmouseover="this.style.color='var(--overseer-gold)';this.style.borderColor='var(--overseer-gold)';this.style.background='rgba(212,160,23,0.08)'" onmouseout="this.style.color='var(--overseer-gold-dim)';this.style.borderColor='var(--overseer-gold-dim)';this.style.background='transparent'">← BACK TO LOGIN HUB</a>
-        </div>
-    </div>
-</div>
-
 <!-- ===================== DASHBOARD SCREEN ===================== -->
-<div id="dashboardScreen" class="hidden">
+<div id="dashboardScreen">
 
     <!-- Command Bar -->
     <div class="command-bar">
@@ -1711,83 +1500,19 @@
     }
 
     // ======================================
-    // OVERSEER ACCOUNTS
+    // OVERSEER DASHBOARD INIT
     // ======================================
-    // NOTE: This is a client-side only application. Credentials stored here
-    // are visible in source. This is intentional for a local TTRPG tool —
-    // do not use for applications requiring real security.
-    // Each account: { pin, displayName }
-    const OVERSEER_ACCOUNTS = {
-        'Overseer': { pin: '0809', displayName: 'Head Overseer' }
-    };
-
-    // ======================================
-    // SESSION MANAGEMENT
-    // ======================================
-    const SESSION_KEY = 'overseerSession';
-
-    function saveSession(name) {
-        const session = { name: name, timestamp: Date.now() };
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    }
-
-    function loadSession() {
-        const raw = localStorage.getItem(SESSION_KEY);
-        if (!raw) return null;
-        try { return JSON.parse(raw); } catch (e) { return null; }
-    }
-
-    function clearSession() {
-        localStorage.removeItem(SESSION_KEY);
-    }
-
-    // ======================================
-    // LOGIN
-    // ======================================
-    function attemptLogin() {
-        const nameEl = document.getElementById('loginName');
-        const pinEl = document.getElementById('loginPin');
-        const errorEl = document.getElementById('loginError');
-
-        const name = nameEl.value.trim();
-        const pin = pinEl.value;
-
-        errorEl.style.display = 'none';
-
-        if (!name) {
-            errorEl.textContent = '⚠ Please enter your Overseer username.';
-            errorEl.style.display = 'block';
-            return;
-        }
-
-        const account = OVERSEER_ACCOUNTS[name];
-        if (!account || account.pin !== pin) {
-            errorEl.textContent = '⚠ AUTHORIZATION DENIED — Invalid credentials';
-            errorEl.style.display = 'block';
-            pinEl.value = '';
-            return;
-        }
-
-        enterDashboard(name);
-    }
-
-    function enterDashboard(name) {
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('dashboardScreen').classList.remove('hidden');
-        document.getElementById('overseerNameDisplay').textContent =
-            (OVERSEER_ACCOUNTS[name] && OVERSEER_ACCOUNTS[name].displayName) ? OVERSEER_ACCOUNTS[name].displayName : name;
-        document.getElementById('tickerTimestamp').textContent =
-            'SESSION START: ' + new Date().toLocaleTimeString();
-        refreshDashboard();
-    }
+    // The PIN pad in login_hub.html is the sole login interface.
+    // overseer.html always opens directly to the dashboard.
+    document.getElementById('overseerNameDisplay').textContent = 'Head Overseer';
+    document.getElementById('tickerTimestamp').textContent =
+        'SESSION START: ' + new Date().toLocaleTimeString();
+    refreshDashboard();
 
     function logoutOverseer() {
         if (!confirm('Terminate Overseer session?')) return;
-        clearSession();
         window.location.href = 'login_hub.html';
     }
-
-    // No auto-login from session (no localStorage storage per security policy)
 
     // ======================================
     // DATA HELPERS
