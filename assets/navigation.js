@@ -271,4 +271,43 @@ document.addEventListener('DOMContentLoaded', function() {
         if (path.includes('inventory')) return 'inventory';
         if (path.includes('data')) return 'data';
         if (path.includes('messages')) return 'messages';
-        return null*`
+        return null;
+    }
+
+    // Highlight the current active page link
+    const currentPage = getCurrentPage();
+    if (currentPage) {
+        navLinks.forEach(link => {
+            if (link.getAttribute('data-page') === currentPage) {
+                link.classList.add('active');
+            }
+        });
+    }
+
+    // Open the navigation menu
+    function openMenu() {
+        sideNav.classList.add('active');
+        navOverlay.classList.add('active');
+        hamburgerBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    // Close the navigation menu
+    function closeMenu() {
+        sideNav.classList.remove('active');
+        navOverlay.classList.remove('active');
+        hamburgerBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    // Event listeners
+    hamburgerBtn.addEventListener('click', openMenu);
+    closeBtn.addEventListener('click', closeMenu);
+    navOverlay.addEventListener('click', closeMenu);
+
+    // Close menu with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && sideNav.classList.contains('active')) {
+            closeMenu();
+        }
+    });
+});
+
