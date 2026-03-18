@@ -12,12 +12,12 @@
     // Pages on which the nav bar should NOT appear
     var SKIP_PAGES = ['index.html', 'login_hub.html', 'terminal.html', ''];
 
-    // Player navigation buttons (left → right)
+        // Player navigation buttons (left → right)
     var PLAYER_NAV = [
         { id: 'stats',     icon: '📊', label: 'STATS',     href: 'stats.html' },
         { id: 'inventory', icon: '🎒', label: 'INVENTORY', href: 'inventory.html' },
         { id: 'home',      icon: '🏠', label: 'HOME',      href: 'character-dashboard.html', isHome: true },
-        { id: 'messages',  icon: '💬', label: 'MESSAGES',  href: 'stats.html#messages' },
+        { id: 'messages',  icon: '💬', label: 'MESSAGES',  href: 'messages.html' },
         { id: 'settings',  icon: '⚙️', label: 'SETTINGS',  isSettings: true }
     ];
 
