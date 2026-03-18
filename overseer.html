@@ -1054,6 +1054,344 @@
         }
 
         /* =====================
+           CAMPAIGN & MESSAGING
+           ===================== */
+
+        /* Campaign management panel */
+        .campaign-panel {
+            background: var(--overseer-blue-mid);
+            border: 1px solid var(--overseer-gold);
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 0 20px rgba(212,160,23,0.15);
+        }
+
+        .campaign-panel-title {
+            color: var(--overseer-gold-bright);
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--overseer-gold-dim);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+            text-shadow: 0 0 6px var(--overseer-glow-gold);
+        }
+
+        .campaign-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .campaign-label {
+            color: var(--overseer-white);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            min-width: 130px;
+        }
+
+        .campaign-select {
+            flex: 1;
+            min-width: 160px;
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright);
+            padding: 8px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .campaign-select:focus {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 8px var(--overseer-glow-gold);
+        }
+
+        .campaign-input {
+            flex: 1;
+            min-width: 160px;
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright);
+            padding: 8px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .campaign-input::placeholder {
+            color: rgba(240,192,64,0.35);
+        }
+
+        .campaign-input:focus {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 8px var(--overseer-glow-gold);
+        }
+
+        .campaign-active-badge {
+            color: var(--overseer-green-bright);
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(0,255,128,0.5);
+        }
+
+        /* Messaging section */
+        .messaging-panel {
+            background: var(--overseer-blue-mid);
+            border: 1px solid var(--overseer-border);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .messaging-panel-title {
+            color: var(--overseer-gold-bright);
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--overseer-gold-dim);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+            text-shadow: 0 0 6px var(--overseer-glow-gold);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .msg-campaign-badge {
+            font-size: 11px;
+            color: var(--overseer-green-bright);
+            text-shadow: 0 0 5px rgba(0,255,128,0.5);
+            font-weight: normal;
+        }
+
+        /* Composer */
+        .msg-composer {
+            display: grid;
+            grid-template-columns: 160px 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .msg-composer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .msg-field-label {
+            color: var(--overseer-white);
+            font-size: 10px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            opacity: 0.7;
+        }
+
+        .msg-select {
+            width: 100%;
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright);
+            padding: 8px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .msg-select:focus {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 8px var(--overseer-glow-gold);
+        }
+
+        .msg-input {
+            width: 100%;
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright);
+            padding: 8px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .msg-input::placeholder {
+            color: rgba(240,192,64,0.35);
+        }
+
+        .msg-input:focus {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 8px var(--overseer-glow-gold);
+        }
+
+        .msg-textarea {
+            width: 100%;
+            min-height: 80px;
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            color: var(--overseer-white);
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            resize: vertical;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        .msg-textarea::placeholder {
+            color: rgba(232,232,232,0.3);
+        }
+
+        .msg-textarea:focus {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 8px var(--overseer-glow-gold);
+        }
+
+        .msg-composer-right {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .msg-btn-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        /* Chat history */
+        .chat-history {
+            background: var(--overseer-darker);
+            border: 1px solid var(--overseer-border);
+            height: 380px;
+            overflow-y: auto;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-history::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-history::-webkit-scrollbar-track {
+            background: var(--overseer-blue);
+        }
+
+        .chat-history::-webkit-scrollbar-thumb {
+            background: var(--overseer-border);
+        }
+
+        .chat-empty {
+            color: rgba(232,232,232,0.3);
+            font-size: 12px;
+            text-align: center;
+            padding: 40px 0;
+            font-style: italic;
+        }
+
+        .chat-msg {
+            padding: 10px 12px;
+            border-radius: 2px;
+            position: relative;
+            border-left: 3px solid;
+        }
+
+        .chat-msg.overseer {
+            background: rgba(0,128,255,0.08);
+            border-left-color: #0080FF;
+        }
+
+        .chat-msg.unknown {
+            background: rgba(255,0,0,0.08);
+            border-left-color: #FF0000;
+        }
+
+        .chat-msg.npc {
+            background: rgba(0,255,0,0.06);
+            border-left-color: #00CC44;
+        }
+
+        .chat-msg.player {
+            background: rgba(255,255,0,0.06);
+            border-left-color: #FFCC00;
+        }
+
+        .chat-msg-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            flex-wrap: wrap;
+        }
+
+        .chat-sender {
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .chat-sender.overseer { color: #4da6ff; text-shadow: 0 0 5px rgba(0,128,255,0.5); }
+        .chat-sender.unknown  { color: #ff4444; text-shadow: 0 0 5px rgba(255,0,0,0.5); }
+        .chat-sender.npc      { color: #00FF00; text-shadow: 0 0 5px rgba(0,255,0,0.4); }
+        .chat-sender.player   { color: #FFFF00; text-shadow: 0 0 5px rgba(255,255,0,0.4); }
+
+        .chat-type-badge {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .chat-type-badge.overseer { background: rgba(0,128,255,0.2); color: #4da6ff; border: 1px solid rgba(0,128,255,0.4); }
+        .chat-type-badge.unknown  { background: rgba(255,0,0,0.2);   color: #ff4444; border: 1px solid rgba(255,0,0,0.4); }
+        .chat-type-badge.npc      { background: rgba(0,255,0,0.1);   color: #00FF00; border: 1px solid rgba(0,255,0,0.3); }
+        .chat-type-badge.player   { background: rgba(255,255,0,0.1); color: #FFFF00; border: 1px solid rgba(255,255,0,0.3); }
+
+        .chat-timestamp {
+            font-size: 10px;
+            color: rgba(232,232,232,0.35);
+            margin-left: auto;
+        }
+
+        .chat-msg-text {
+            font-size: 12px;
+            color: var(--overseer-white);
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .chat-delete-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: none;
+            border: none;
+            color: rgba(232,232,232,0.25);
+            cursor: pointer;
+            font-size: 11px;
+            padding: 2px 4px;
+            transition: color 0.2s;
+            font-family: 'Courier New', monospace;
+        }
+
+        .chat-delete-btn:hover {
+            color: var(--overseer-red-bright);
+        }
+
+        /* =====================
            RESPONSIVE
            ===================== */
         @media (max-width: 600px) {
@@ -1064,6 +1402,7 @@
             .special-grid { grid-template-columns: repeat(4, 1fr); }
             .special-display-grid { grid-template-columns: repeat(4, 1fr); }
             .characters-grid { grid-template-columns: 1fr; }
+            .msg-composer { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -1136,6 +1475,89 @@
                     <span style="color:var(--overseer-gold-bright)">■</span> Caution 30–59% &nbsp;
                     <span style="color:var(--overseer-red-bright)">■</span> Critical &lt;30%</div>
                 <div class="info-item"><strong>Data Sync:</strong> All edits sync with Pip-Boy pages via localStorage</div>
+            </div>
+        </div>
+
+        <!-- ==================== CAMPAIGN MANAGEMENT ==================== -->
+        <div class="section-header" style="margin-top:40px;">
+            <div class="section-title">◈ Campaign Management</div>
+        </div>
+
+        <div class="campaign-panel">
+            <div class="campaign-panel-title">⚑ Active Campaign</div>
+
+            <!-- Switch/select campaign -->
+            <div class="campaign-row">
+                <span class="campaign-label">Active Campaign:</span>
+                <select class="campaign-select" id="campaignSelect" onchange="switchCampaign(this.value)">
+                    <option value="">— No Campaign —</option>
+                </select>
+                <span class="campaign-active-badge" id="activeCampaignBadge"></span>
+            </div>
+
+            <!-- Create new campaign -->
+            <div class="campaign-row">
+                <span class="campaign-label">New Campaign:</span>
+                <input type="text" class="campaign-input" id="newCampaignName" placeholder="e.g. Capital Wasteland" maxlength="60">
+                <button class="cmd-btn" onclick="createCampaign()">+ Create</button>
+            </div>
+
+            <!-- Delete campaign -->
+            <div class="campaign-row">
+                <span class="campaign-label">Delete Campaign:</span>
+                <select class="campaign-select" id="deleteCampaignSelect">
+                    <option value="">— Select to Delete —</option>
+                </select>
+                <button class="cmd-btn danger" onclick="deleteCampaign()">✕ Delete</button>
+            </div>
+        </div>
+
+        <!-- ==================== MESSAGING SYSTEM ==================== -->
+        <div class="section-header" style="margin-top:40px;">
+            <div class="section-title">◈ Campaign Communications</div>
+        </div>
+
+        <div class="messaging-panel">
+            <div class="messaging-panel-title">
+                <span>✉ Message Composer</span>
+                <span class="msg-campaign-badge" id="msgCampaignBadge">No active campaign</span>
+            </div>
+
+            <!-- Composer -->
+            <div class="msg-composer" id="msgComposer">
+                <div class="msg-composer-left">
+                    <div>
+                        <div class="msg-field-label">Sender Type</div>
+                        <select class="msg-select" id="msgSenderType" onchange="toggleNpcField()">
+                            <option value="overseer">Overseer</option>
+                            <option value="unknown">Unknown</option>
+                            <option value="npc">NPC</option>
+                        </select>
+                    </div>
+                    <div id="npcNameField">
+                        <div class="msg-field-label">NPC Name</div>
+                        <input type="text" class="msg-input" id="msgNpcName" placeholder="e.g. Raider Chief" maxlength="50">
+                    </div>
+                </div>
+                <div class="msg-composer-right">
+                    <div>
+                        <div class="msg-field-label">Message</div>
+                        <textarea class="msg-textarea" id="msgText" placeholder="Enter your message…" maxlength="1000"></textarea>
+                    </div>
+                    <div class="msg-btn-row">
+                        <button class="cmd-btn" style="background:var(--overseer-blue-light);" onclick="sendOverseerMessage()">▶ Send</button>
+                        <button class="cmd-btn" onclick="clearComposer()">↺ Clear</button>
+                    </div>
+                    <div id="msgFeedback" style="font-size:11px;color:var(--overseer-green-bright);min-height:16px;"></div>
+                </div>
+            </div>
+
+            <!-- Chat History -->
+            <div style="margin-top:18px;">
+                <div class="msg-field-label" style="margin-bottom:8px;font-size:11px;opacity:1;color:var(--overseer-gold-bright);">▶ Chat History (newest at bottom)</div>
+                <div class="chat-history" id="overseerChatHistory">
+                    <div class="chat-empty" id="chatEmptyNote">No campaign selected or no messages yet.</div>
+                </div>
             </div>
         </div>
 
@@ -1508,10 +1930,265 @@
     document.getElementById('tickerTimestamp').textContent =
         'SESSION START: ' + new Date().toLocaleTimeString();
     refreshDashboard();
+    initCampaigns();
+
+    // Poll for new messages every 3 seconds (real-time feel)
+    setInterval(function() { renderChatHistory(); }, 3000);
 
     function logoutOverseer() {
         if (!confirm('Terminate Overseer session?')) return;
         window.location.href = 'login_hub.html';
+    }
+
+    // ======================================
+    // CAMPAIGN MANAGEMENT
+    // ======================================
+
+    function loadCampaigns() {
+        try {
+            const raw = localStorage.getItem('vault215_campaigns');
+            if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return [];
+    }
+
+    function saveCampaigns(campaigns) {
+        localStorage.setItem('vault215_campaigns', JSON.stringify(campaigns));
+    }
+
+    function getActiveCampaign() {
+        const campaigns = loadCampaigns();
+        return campaigns.find(function(c) { return c.isActive; }) || null;
+    }
+
+    function initCampaigns() {
+        populateCampaignDropdowns();
+        updateCampaignBadges();
+        renderChatHistory();
+        toggleNpcField();
+    }
+
+    function populateCampaignDropdowns() {
+        const campaigns = loadCampaigns();
+        const select = document.getElementById('campaignSelect');
+        const delSelect = document.getElementById('deleteCampaignSelect');
+
+        // Save current values
+        const prevActive = select.value;
+        const prevDel = delSelect.value;
+
+        // Rebuild options
+        select.innerHTML = '<option value="">— No Campaign —</option>';
+        delSelect.innerHTML = '<option value="">— Select to Delete —</option>';
+
+        campaigns.forEach(function(c) {
+            const opt1 = document.createElement('option');
+            opt1.value = c.id;
+            opt1.textContent = c.name + (c.isActive ? ' ★' : '');
+            if (c.isActive) opt1.selected = true;
+            select.appendChild(opt1);
+
+            const opt2 = document.createElement('option');
+            opt2.value = c.id;
+            opt2.textContent = c.name;
+            if (c.id === prevDel) opt2.selected = true;
+            delSelect.appendChild(opt2);
+        });
+    }
+
+    function updateCampaignBadges() {
+        const active = getActiveCampaign();
+        const badge = document.getElementById('activeCampaignBadge');
+        const msgBadge = document.getElementById('msgCampaignBadge');
+        if (active) {
+            badge.textContent = '★ Active: ' + active.name;
+            msgBadge.textContent = '⚑ ' + active.name;
+        } else {
+            badge.textContent = '';
+            msgBadge.textContent = 'No active campaign';
+        }
+    }
+
+    function createCampaign() {
+        const input = document.getElementById('newCampaignName');
+        const name = input.value.trim();
+        if (!name) {
+            showMsgFeedback('Enter a campaign name.', false);
+            return;
+        }
+        const campaigns = loadCampaigns();
+        // Check duplicate name
+        if (campaigns.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
+            showMsgFeedback('A campaign with that name already exists.', false);
+            return;
+        }
+        const isFirst = campaigns.length === 0;
+        const newCampaign = {
+            id: 'camp_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+            name: name,
+            createdAt: Date.now(),
+            isActive: isFirst,
+            chatHistory: []
+        };
+        campaigns.push(newCampaign);
+        saveCampaigns(campaigns);
+        input.value = '';
+        populateCampaignDropdowns();
+        updateCampaignBadges();
+        renderChatHistory();
+        showMsgFeedback('Campaign "' + escHtml(name) + '" created' + (isFirst ? ' and set active.' : '.'), true);
+    }
+
+    function switchCampaign(id) {
+        const campaigns = loadCampaigns();
+        campaigns.forEach(function(c) { c.isActive = (c.id === id); });
+        saveCampaigns(campaigns);
+        populateCampaignDropdowns();
+        updateCampaignBadges();
+        renderChatHistory();
+    }
+
+    function deleteCampaign() {
+        const delSelect = document.getElementById('deleteCampaignSelect');
+        const id = delSelect.value;
+        if (!id) {
+            showMsgFeedback('Select a campaign to delete.', false);
+            return;
+        }
+        let campaigns = loadCampaigns();
+        const camp = campaigns.find(function(c) { return c.id === id; });
+        if (!camp) return;
+        if (!confirm('Delete campaign "' + camp.name + '" and ALL its messages? This cannot be undone.')) return;
+        const wasActive = camp.isActive;
+        campaigns = campaigns.filter(function(c) { return c.id !== id; });
+        if (wasActive && campaigns.length > 0) {
+            campaigns[0].isActive = true;
+        }
+        saveCampaigns(campaigns);
+        populateCampaignDropdowns();
+        updateCampaignBadges();
+        renderChatHistory();
+        showMsgFeedback('Campaign deleted.', true);
+    }
+
+    // ======================================
+    // MESSAGING
+    // ======================================
+
+    function toggleNpcField() {
+        const type = document.getElementById('msgSenderType').value;
+        const field = document.getElementById('npcNameField');
+        field.style.display = (type === 'npc') ? 'block' : 'none';
+    }
+
+    function clearComposer() {
+        document.getElementById('msgText').value = '';
+        document.getElementById('msgNpcName').value = '';
+        document.getElementById('msgSenderType').value = 'overseer';
+        toggleNpcField();
+        document.getElementById('msgFeedback').textContent = '';
+    }
+
+    function showMsgFeedback(text, success) {
+        const el = document.getElementById('msgFeedback');
+        el.textContent = text;
+        el.style.color = success ? 'var(--overseer-green-bright)' : 'var(--overseer-red-bright)';
+        setTimeout(function() { if (el.textContent === text) el.textContent = ''; }, 3500);
+    }
+
+    function sendOverseerMessage() {
+        const active = getActiveCampaign();
+        if (!active) {
+            showMsgFeedback('No active campaign. Create or select one first.', false);
+            return;
+        }
+        const type = document.getElementById('msgSenderType').value;
+        const npcName = document.getElementById('msgNpcName').value.trim();
+        const text = document.getElementById('msgText').value.trim();
+
+        if (!text) {
+            showMsgFeedback('Message cannot be empty.', false);
+            return;
+        }
+        if (type === 'npc' && !npcName) {
+            showMsgFeedback('Enter an NPC name.', false);
+            return;
+        }
+
+        const senderName = type === 'overseer' ? 'Overseer'
+                         : type === 'unknown'  ? 'Unknown'
+                         : npcName;
+
+        const campaigns = loadCampaigns();
+        const camp = campaigns.find(function(c) { return c.id === active.id; });
+        if (!camp) return;
+
+        const msg = {
+            id: 'msg_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
+            senderType: type,
+            senderName: senderName,
+            message: text,
+            timestamp: Date.now(),
+            fromPlayer: false,
+            playerId: null
+        };
+        camp.chatHistory.push(msg);
+        saveCampaigns(campaigns);
+        clearComposer();
+        renderChatHistory();
+        showMsgFeedback('Message sent.', true);
+    }
+
+    function deleteMessage(msgId) {
+        const active = getActiveCampaign();
+        if (!active) return;
+        const campaigns = loadCampaigns();
+        const camp = campaigns.find(function(c) { return c.id === active.id; });
+        if (!camp) return;
+        camp.chatHistory = camp.chatHistory.filter(function(m) { return m.id !== msgId; });
+        saveCampaigns(campaigns);
+        renderChatHistory();
+    }
+
+    function formatTimestamp(ts) {
+        const d = new Date(ts);
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    }
+
+    function renderChatHistory() {
+        const container = document.getElementById('overseerChatHistory');
+        const active = getActiveCampaign();
+
+        if (!active) {
+            container.innerHTML = '<div class="chat-empty">No campaign selected or no messages yet.</div>';
+            return;
+        }
+
+        const history = active.chatHistory || [];
+        if (history.length === 0) {
+            container.innerHTML = '<div class="chat-empty">No messages in "' + escHtml(active.name) + '" yet.</div>';
+            return;
+        }
+
+        const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 60;
+
+        container.innerHTML = history.map(function(msg) {
+            const typeClass = msg.fromPlayer ? 'player' : msg.senderType;
+            const typeLabel = msg.fromPlayer ? 'Player' : (msg.senderType === 'npc' ? 'NPC' : msg.senderType.charAt(0).toUpperCase() + msg.senderType.slice(1));
+            return '<div class="chat-msg ' + typeClass + '">' +
+                '<button class="chat-delete-btn" onclick="deleteMessage(\'' + escHtml(msg.id) + '\')" title="Delete message">✕</button>' +
+                '<div class="chat-msg-header">' +
+                    '<span class="chat-sender ' + typeClass + '">' + escHtml(msg.senderName) + '</span>' +
+                    '<span class="chat-type-badge ' + typeClass + '">' + typeLabel + '</span>' +
+                    '<span class="chat-timestamp">' + formatTimestamp(msg.timestamp) + '</span>' +
+                '</div>' +
+                '<div class="chat-msg-text">' + escHtml(msg.message) + '</div>' +
+            '</div>';
+        }).join('');
+
+        if (wasAtBottom) {
+            container.scrollTop = container.scrollHeight;
+        }
     }
 
     // ======================================
