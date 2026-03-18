@@ -985,11 +985,9 @@
         const MAX_TAG_SKILLS = 3;
         const TAG_SKILL_BONUS = 10;
 
-        // Define page order
         const pages = ['stats', 'skills', 'effects', 'perks'];
         let currentPageIndex = 0;
 
-        // Skills with SPECIAL alignments
         const SKILLS_BY_SPECIAL = {
             strength: ['Melee Weapons', 'Big Guns', 'Unarmed'],
             perception: ['Small Guns', 'Energy Weapons'],
@@ -1000,14 +998,12 @@
             luck: []
         };
 
-        // Flatten skills list
         const SKILLS = [
             'Barter', 'Small Guns', 'Big Guns', 'Melee Weapons',
             'Energy Weapons', 'Explosives', 'Lockpick', 'Medicine',
             'Science', 'Repair', 'Sneak', 'Speech', 'Unarmed', 'Survival'
         ];
 
-        // Player data
         let playerData = {
             skills: {},
             tagSkills: [],
@@ -1019,24 +1015,19 @@
             tempActionPoints: 0
         };
 
-        // Effects data
         let debuffs = [];
         let boosts = [];
 
-        // Initialize skills
         SKILLS.forEach(skill => {
             playerData.skills[skill] = 0;
         });
 
-        // ===== STORAGE FUNCTIONS =====
         function savePlayerData() {
             localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
             localStorage.setItem('pipboyXP', document.getElementById('xp').textContent);
             localStorage.setItem('pipboyLevel', document.getElementById('level').textContent);
             localStorage.setItem('pipboyHealth', document.getElementById('health').textContent);
             localStorage.setItem('pipboyActionPoints', document.getElementById('actionPoints').textContent);
-            localStorage.setItem('pipboyTempHealth', document.getElementById('tempHealth').textContent || '0');
-            localStorage.setItem('pipboyTempActionPoints', document.getElementById('tempActionPoints').textContent || '0');
         }
 
         function loadPlayerData() {
@@ -1049,21 +1040,12 @@
             const savedLevel = localStorage.getItem('pipboyLevel');
             const savedHealth = localStorage.getItem('pipboyHealth');
             const savedActionPoints = localStorage.getItem('pipboyActionPoints');
-            const savedTempHealth = localStorage.getItem('pipboyTempHealth');
-            const savedTempActionPoints = localStorage.getItem('pipboyTempActionPoints');
             
             if (savedXP) document.getElementById('xp').textContent = savedXP;
             if (savedLevel) document.getElementById('level').textContent = savedLevel;
             if (savedHealth) document.getElementById('health').textContent = savedHealth;
             if (savedActionPoints) document.getElementById('actionPoints').textContent = savedActionPoints;
             
-            // Set temp values
-            let tempHP = savedTempHealth ? parseInt(savedTempHealth) : 0;
-            let tempAP = savedTempActionPoints ? parseInt(savedTempActionPoints) : 0;
-            playerData.tempHealth = tempHP;
-            playerData.tempActionPoints = tempAP;
-            
-            // Set max values
             document.getElementById('maxHealth').textContent = MAX_HEALTH;
             document.getElementById('maxActionPoints').textContent = MAX_ACTION_POINTS;
             
@@ -1079,13 +1061,9 @@
                 const healthPercent = (currentHealth / MAX_HEALTH) * 100;
                 document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
                 document.getElementById('healthBar').style.width = healthPercent + '%';
-                updateTempHealthBar();
             }
-            
-            updateTempDisplays();
         }
 
-        // ===== EFFECTS STORAGE FUNCTIONS =====
         function saveEffects() {
             localStorage.setItem('pipboyDebuffs', JSON.stringify(debuffs));
             localStorage.setItem('pipboyBoosts', JSON.stringify(boosts));
@@ -1099,7 +1077,6 @@
             if (savedBoosts) boosts = JSON.parse(savedBoosts);
         }
 
-        // Get SPECIAL for skill
         function getSpecialForSkill(skill) {
             for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
                 if (skills.includes(skill)) {
@@ -1109,18 +1086,15 @@
             return 'Unknown';
         }
 
-        // Calculate skill bonus
         function calculateSkillBonus(skillValue, isTagged = false) {
             let adjustedValue = skillValue;
             if (isTagged) {
                 adjustedValue = skillValue + TAG_SKILL_BONUS;
             }
-
             const difference = adjustedValue - 50;
             return Math.floor(difference / 10);
         }
 
-        // Format bonus display
         function formatBonus(bonus) {
             if (bonus < 0) {
                 return bonus.toString();
@@ -1131,40 +1105,6 @@
             }
         }
 
-        // ===== UPDATE TEMP DISPLAYS =====
-        function updateTempDisplays() {
-            const tempHP = playerData.tempHealth || 0;
-            const tempAP = playerData.tempActionPoints || 0;
-            
-            const tempHealthDisplay = document.getElementById('tempHealthDisplay');
-            const tempAPDisplay = document.getElementById('tempActionPointsDisplay');
-            
-            if (tempHP > 0) {
-                tempHealthDisplay.textContent = `(+${tempHP})`;
-            } else {
-                tempHealthDisplay.textContent = '';
-            }
-            
-            if (tempAP > 0) {
-                tempAPDisplay.textContent = `(+${tempAP})`;
-            } else {
-                tempAPDisplay.textContent = '';
-            }
-        }
-
-        // ===== UPDATE TEMP HEALTH BAR =====
-        function updateTempHealthBar() {
-            const currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
-            const tempHealth = playerData.tempHealth || 0;
-            const healthPercent = (currentHealth / MAX_HEALTH) * 100;
-            const tempHealthPercent = (tempHealth / MAX_HEALTH) * 100;
-            
-            document.getElementById('healthBar').style.width = healthPercent + '%';
-            document.getElementById('healthBarTemp').style.width = tempHealthPercent + '%';
-            document.getElementById('healthBarTemp').style.left = healthPercent + '%';
-        }
-
-        // ===== SWITCH TABS =====
         function switchTab(tabName) {
             document.getElementById('stats').classList.remove('active');
             document.getElementById('skills').classList.remove('active');
@@ -1180,7 +1120,6 @@
             currentPageIndex = pages.indexOf(tabName);
         }
 
-        // ===== NAVIGATION FUNCTIONS =====
         function nextPage() {
             currentPageIndex = (currentPageIndex + 1) % pages.length;
             switchTab(pages[currentPageIndex]);
@@ -1199,7 +1138,6 @@
             window.location.href = 'inventory.html';
         }
 
-        // ===== UPDATE SKILL =====
         function updateSkill(skillName, amount) {
             playerData.skills[skillName] = (playerData.skills[skillName] || 0) + amount;
             
@@ -1213,7 +1151,6 @@
             updateDisplay();
         }
 
-        // ===== TOGGLE TAG SKILL =====
         function toggleTagSkill(skill) {
             const index = playerData.tagSkills.indexOf(skill);
             
@@ -1231,7 +1168,6 @@
             updateDisplay();
         }
 
-        // ===== ADD XP =====
         function addXP() {
             const xpInput = document.getElementById('xpInput');
             const messageBox = document.getElementById('xpMessage');
@@ -1272,7 +1208,6 @@
             }, 3000);
         }
 
-        // ===== REMOVE XP =====
         function removeXP() {
             const xpInput = document.getElementById('xpInput');
             const messageBox = document.getElementById('xpMessage');
@@ -1320,7 +1255,6 @@
             }, 3000);
         }
 
-        // ===== UPDATE HEALTH =====
         function updateHealth() {
             const healthInput = document.getElementById('healthInput');
             const messageBox = document.getElementById('healthMessage');
@@ -1349,10 +1283,9 @@
             }
 
             document.getElementById('health').textContent = currentHealth;
-            document.getElementById('maxHealth').textContent = MAX_HEALTH;
             const healthPercent = (currentHealth / MAX_HEALTH) * 100;
             document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
-            updateTempHealthBar();
+            document.getElementById('healthBar').style.width = healthPercent + '%';
 
             savePlayerData();
             healthInput.value = '';
@@ -1361,7 +1294,6 @@
             }, 3000);
         }
 
-        // ===== ADD TEMP HEALTH =====
         function addTempHealth() {
             const tempHealthInput = prompt('Enter temporary health amount:');
             if (tempHealthInput === null || tempHealthInput === '') return;
@@ -1373,12 +1305,10 @@
             }
 
             playerData.tempHealth = (playerData.tempHealth || 0) + tempAmount;
-            updateTempHealthBar();
             updateTempDisplays();
             savePlayerData();
         }
 
-        // ===== REMOVE TEMP HEALTH =====
         function removeTempHealth() {
             const tempHealthInput = prompt('Enter temporary health amount to remove:');
             if (tempHealthInput === null || tempHealthInput === '') return;
@@ -1395,12 +1325,10 @@
                 playerData.tempHealth = 0;
             }
             
-            updateTempHealthBar();
             updateTempDisplays();
             savePlayerData();
         }
 
-        // ===== UPDATE ACTION POINTS =====
         function updateActionPoints() {
             const apInput = document.getElementById('apInput');
             const messageBox = document.getElementById('apMessage');
@@ -1429,7 +1357,6 @@
             }
 
             document.getElementById('actionPoints').textContent = currentAP;
-            document.getElementById('maxActionPoints').textContent = MAX_ACTION_POINTS;
 
             savePlayerData();
             apInput.value = '';
@@ -1438,7 +1365,6 @@
             }, 3000);
         }
 
-        // ===== ADD TEMP ACTION POINTS =====
         function addTempAP() {
             const tempAPInput = prompt('Enter temporary action points amount:');
             if (tempAPInput === null || tempAPInput === '') return;
@@ -1449,4 +1375,186 @@
                 return;
             }
 
-            playerData.tempActionPoints = (playerData.tempActionPoints ||*
+            playerData.tempActionPoints = (playerData.tempActionPoints || 0) + tempAmount;
+            updateTempDisplays();
+            savePlayerData();
+        }
+
+        function removeTempAP() {
+            const tempAPInput = prompt('Enter temporary action points amount to remove:');
+            if (tempAPInput === null || tempAPInput === '') return;
+            
+            const tempAmount = parseInt(tempAPInput);
+            if (isNaN(tempAmount) || tempAmount <= 0) {
+                alert('Please enter a valid positive number!');
+                return;
+            }
+
+            playerData.tempActionPoints = (playerData.tempActionPoints || 0) - tempAmount;
+            
+            if (playerData.tempActionPoints < 0) {
+                playerData.tempActionPoints = 0;
+            }
+            
+            updateTempDisplays();
+            savePlayerData();
+        }
+
+        function updateTempDisplays() {
+            const tempHP = playerData.tempHealth || 0;
+            const tempAP = playerData.tempActionPoints || 0;
+            
+            const tempHealthDisplay = document.getElementById('tempHealthDisplay');
+            const tempAPDisplay = document.getElementById('tempActionPointsDisplay');
+            
+            if (tempHP > 0) {
+                tempHealthDisplay.textContent = `(+${tempHP})`;
+            } else {
+                tempHealthDisplay.textContent = '';
+            }
+            
+            if (tempAP > 0) {
+                tempAPDisplay.textContent = `(+${tempAP})`;
+            } else {
+                tempAPDisplay.textContent = '';
+            }
+        }
+
+        function addDebuff() {
+            const nameInput = document.getElementById('debuffInput');
+            const durationInput = document.getElementById('debuffDurationInput');
+            
+            const name = nameInput.value.trim();
+            const duration = parseInt(durationInput.value);
+            
+            if (!name || !duration || isNaN(duration)) {
+                alert('Please enter a debuff name and duration!');
+                return;
+            }
+            
+            debuffs.push({
+                name: name,
+                duration: duration,
+                id: Date.now()
+            });
+            
+            nameInput.value = '';
+            durationInput.value = '';
+            
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function addBoost() {
+            const nameInput = document.getElementById('boostInput');
+            const durationInput = document.getElementById('boostDurationInput');
+            
+            const name = nameInput.value.trim();
+            const duration = parseInt(durationInput.value);
+            
+            if (!name || !duration || isNaN(duration)) {
+                alert('Please enter a boost name and duration!');
+                return;
+            }
+            
+            boosts.push({
+                name: name,
+                duration: duration,
+                id: Date.now()
+            });
+            
+            nameInput.value = '';
+            durationInput.value = '';
+            
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function removeDebuff(id) {
+            debuffs = debuffs.filter(d => d.id !== id);
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function removeBoost(id) {
+            boosts = boosts.filter(b => b.id !== id);
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function decreaseDuration(type, id) {
+            if (type === 'debuff') {
+                const debuff = debuffs.find(d => d.id === id);
+                if (debuff) {
+                    debuff.duration--;
+                    if (debuff.duration <= 0) {
+                        removeDebuff(id);
+                        return;
+                    }
+                }
+            } else if (type === 'boost') {
+                const boost = boosts.find(b => b.id === id);
+                if (boost) {
+                    boost.duration--;
+                    if (boost.duration <= 0) {
+                        removeBoost(id);
+                        return;
+                    }
+                }
+            }
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function updateEffectsDisplay() {
+            const debuffsList = document.getElementById('debuffsList');
+            if (debuffs.length === 0) {
+                debuffsList.innerHTML = '<div class="empty-message">No active debuffs</div>';
+            } else {
+                debuffsList.innerHTML = debuffs.map(debuff => `
+                    <div class="effect-item">
+                        <div class="effect-info">
+                            <div class="effect-name">${debuff.name}</div>
+                            <div class="effect-duration">Duration: ${debuff.duration} turn(s)</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="effect-remove-btn" onclick="decreaseDuration('debuff', ${debuff.id})">Turn</button>
+                            <button class="effect-remove-btn" onclick="removeDebuff(${debuff.id})">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            const boostsList = document.getElementById('boostsList');
+            if (boosts.length === 0) {
+                boostsList.innerHTML = '<div class="empty-message">No active boosts</div>';
+            } else {
+                boostsList.innerHTML = boosts.map(boost => `
+                    <div class="effect-item">
+                        <div class="effect-info">
+                            <div class="effect-name">${boost.name}</div>
+                            <div class="effect-duration">Duration: ${boost.duration} turn(s)</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="effect-remove-btn" onclick="decreaseDuration('boost', ${boost.id})">Turn</button>
+                            <button class="effect-remove-btn" onclick="removeBoost(${boost.id})">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateDisplay() {
+            const skillsGrid = document.getElementById('skillsGrid');
+            skillsGrid.innerHTML = '';
+            
+            SKILLS.forEach(skill => {
+                const special = getSpecialForSkill(skill);
+                const skillValue = playerData.skills[skill] || 0;
+                const isTagged = playerData.tagSkills.includes(skill);
+                const bonus = calculateSkillBonus(skillValue, isTagged);
+                
+                const skillDiv = document.createElement('div');
+                skillDiv.className = 'skill-item';
+                skillDiv.innerHTML = `
+                    <div class="skill-left">
