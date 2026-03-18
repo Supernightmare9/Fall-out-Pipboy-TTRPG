@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Campaign Management</title>
+    <script>
+        // Campaign management functionality
+        class CampaignManager {
+            constructor() {
+                this.campaigns = JSON.parse(localStorage.getItem('campaigns')) || {};
+            }
+
+            createCampaign(name) {
+                this.campaigns[name] = { players: [], overseer: '', members: [] };
+                localStorage.setItem('campaigns', JSON.stringify(this.campaigns));
+            }
+
+            addPlayer(campaignName, player) {
+                if (this.campaigns[campaignName]) {
+                    this.campaigns[campaignName].players.push(player);
+                    localStorage.setItem('campaigns', JSON.stringify(this.campaigns));
+                }
+            }
+
+            linkOverseer(campaignName, overseer) {
+                if (this.campaigns[campaignName]) {
+                    this.campaigns[campaignName].overseer = overseer;
+                    localStorage.setItem('campaigns', JSON.stringify(this.campaigns));
+                }
+            }
+
+            manageMembers(campaignName, member, action) {
+                if (this.campaigns[campaignName]) {
+                    if (action === 'add') {
+                        this.campaigns[campaignName].members.push(member);
+                    } else if (action === 'remove') {
+                        this.campaigns[campaignName].members = this.campaigns[campaignName].members.filter(m => m !== member);
+                    }
+                    localStorage.setItem('campaigns', JSON.stringify(this.campaigns));
+                }
+            }
+
+            getCampaign(campaignName) {
+                return this.campaigns[campaignName];
+            }
+        }
+
+        // Usage example:
+        const campaignManager = new CampaignManager();
+        campaignManager.createCampaign('My First Campaign');
+        campaignManager.addPlayer('My First Campaign', 'Player1');
+        campaignManager.linkOverseer('My First Campaign', 'Overseer1');
+        campaignManager.manageMembers('My First Campaign', 'Member1', 'add');
+
+    </script>
+</head>
+<body>
+    <h1>Campaign Management System</h1>
+    <p>Manage your campaigns effectively!</p>
+</body>
+</html>
