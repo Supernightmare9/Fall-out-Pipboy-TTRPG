@@ -605,6 +605,32 @@
             margin-top: 15px;
         }
 
+        .perks-empty {
+            grid-column: 1 / -1;
+            color: var(--vault-info);
+            text-align: center;
+            padding: 15px;
+            font-size: 11px;
+            font-style: italic;
+            text-shadow: 0 0 2px var(--vault-info);
+        }
+
+        .perk-title {
+            font-size: 12px;
+        }
+
+        .perk-description {
+            font-size: 11px;
+            color: var(--vault-green);
+            margin-top: 8px;
+        }
+
+        .perk-rank {
+            font-size: 10px;
+            color: var(--vault-accent);
+            margin-top: 5px;
+        }
+
         /* ===== EFFECTS TAB STYLES ===== */
         .effects-subtitle {
             color: var(--vault-error);
@@ -1545,16 +1571,109 @@
         }
 
         function updateDisplay() {
+            // Update tag badge
+            const tagCount = playerData.tagSkills ? playerData.tagSkills.length : 0;
+            document.getElementById('tagBadge').textContent = `${tagCount}/${MAX_TAG_SKILLS}`;
+
+            // Update skills grid
             const skillsGrid = document.getElementById('skillsGrid');
             skillsGrid.innerHTML = '';
-            
+
             SKILLS.forEach(skill => {
                 const special = getSpecialForSkill(skill);
                 const skillValue = playerData.skills[skill] || 0;
                 const isTagged = playerData.tagSkills.includes(skill);
                 const bonus = calculateSkillBonus(skillValue, isTagged);
-                
+
                 const skillDiv = document.createElement('div');
                 skillDiv.className = 'skill-item';
                 skillDiv.innerHTML = `
                     <div class="skill-left">
+                        <input type="checkbox" class="skill-checkbox"
+                            ${isTagged ? 'checked' : ''}
+                            onchange="toggleTagSkill('${skill}')"
+                            title="Tag ${skill} (${MAX_TAG_SKILLS} max)">
+                        <div class="skill-info">
+                            <div class="skill-name">${skill}</div>
+                            <div class="skill-special">${special}</div>
+                            <div class="skill-bonus">Bonus: ${formatBonus(bonus)}</div>
+                        </div>
+                    </div>
+                    <div class="skill-controls">
+                        <button class="skill-btn" onclick="updateSkill('${skill}', -1)">-</button>
+                        <span class="skill-value">${skillValue}</span>
+                        <button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button>
+                    </div>
+                `;
+                skillsGrid.appendChild(skillDiv);
+            });
+
+            // Update S.P.E.C.I.A.L associated skills display
+            for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
+                const skillsEl = document.getElementById(`skills-${special}`);
+                if (skillsEl) {
+                    skillsEl.textContent = skills.length > 0 ? skills.join('\n') : '\u2014';
+                }
+            }
+        }
+
+        function updatePerksDisplay() {
+            const perksGrid = document.getElementById('perksGrid');
+            const savedPerks = localStorage.getItem('pipboyPerks');
+            let perks = [];
+            try {
+                perks = savedPerks ? JSON.parse(savedPerks) : [];
+            } catch (e) {
+                perks = [];
+            }
+
+            if (perks.length === 0) {
+                perksGrid.innerHTML = '<div class="perks-empty">No perks earned yet. Keep adventuring, Vault 215 Resident!</div>';
+                return;
+            }
+
+            perksGrid.innerHTML = perks.map(perk => `
+                <div class="stat-box">
+                    <div class="stat-title perk-title">${perk.name || 'Unknown Perk'}</div>
+                    <div class="perk-description">${perk.description || 'No description available.'}</div>
+                    ${perk.rank ? `<div class="perk-rank">Rank: ${perk.rank}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function loadCharacterName() {
+            try {
+                const characterData = localStorage.getItem('characterData');
+                if (characterData) {
+                    const data = JSON.parse(characterData);
+                    if (data.name) {
+                        document.getElementById('characterName').textContent = `${data.name} \u2022 Vault 215 Resident`;
+                    }
+                }
+            } catch (e) {
+                // Gracefully handle missing or malformed characterData in localStorage
+            }
+        }
+
+        function init() {
+            loadPlayerData();
+            loadEffects();
+            loadCharacterName();
+            updateDisplay();
+            updateEffectsDisplay();
+            updateTempDisplays();
+            updatePerksDisplay();
+        }
+
+        // Tab switching via button clicks
+        document.querySelectorAll('.subtab-button').forEach(function(button) {
+            button.addEventListener('click', function() {
+                switchTab(this.getAttribute('data-tab'));
+            });
+        });
+
+        // Initialize page on load
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
