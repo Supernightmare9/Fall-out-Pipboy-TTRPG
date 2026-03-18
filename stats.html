@@ -895,43 +895,43 @@
                 <div class="special-grid">
                     <div class="special-stat">
                         <div class="special-letter">S</div>
-                        <div class="special-value">5</div>
+                        <div class="special-value" id="special-strength">5</div>
                         <div class="special-name">Strength</div>
                         <div class="special-skills" id="skills-strength"></div>
                     </div>
                     <div class="special-stat">
                         <div class="special-letter">P</div>
-                        <div class="special-value">6</div>
+                        <div class="special-value" id="special-perception">6</div>
                         <div class="special-name">Perception</div>
                         <div class="special-skills" id="skills-perception"></div>
                     </div>
                     <div class="special-stat">
                         <div class="special-letter">E</div>
-                        <div class="special-value">7</div>
+                        <div class="special-value" id="special-endurance">7</div>
                         <div class="special-name">Endurance</div>
                         <div class="special-skills" id="skills-endurance"></div>
                     </div>
                     <div class="special-stat">
                         <div class="special-letter">C</div>
-                        <div class="special-value">4</div>
+                        <div class="special-value" id="special-charisma">4</div>
                         <div class="special-name">Charisma</div>
                         <div class="special-skills" id="skills-charisma"></div>
                     </div>
                     <div class="special-stat">
                         <div class="special-letter">I</div>
-                        <div class="special-value">5</div>
+                        <div class="special-value" id="special-intelligence">5</div>
                         <div class="special-name">Intelligence</div>
                         <div class="special-skills" id="skills-intelligence"></div>
                     </div>
                     <div class="special-stat">
                         <div class="special-letter">A</div>
-                        <div class="special-value">5</div>
+                        <div class="special-value" id="special-agility">5</div>
                         <div class="special-name">Agility</div>
                         <div class="special-skills" id="skills-agility"></div>
                     </div>
                     <div class="special-stat">
                         <div class="special-letter">L</div>
-                        <div class="special-value">3</div>
+                        <div class="special-value" id="special-luck">3</div>
                         <div class="special-name">Luck</div>
                         <div class="special-skills" id="skills-luck"></div>
                     </div>
@@ -1088,6 +1088,39 @@
                 document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
                 document.getElementById('healthBar').style.width = healthPercent + '%';
             }
+        }
+
+        function saveSpecialStats() {
+            const specialStats = {
+                strength: parseInt(document.getElementById('special-strength').textContent) || 5,
+                perception: parseInt(document.getElementById('special-perception').textContent) || 5,
+                endurance: parseInt(document.getElementById('special-endurance').textContent) || 5,
+                charisma: parseInt(document.getElementById('special-charisma').textContent) || 5,
+                intelligence: parseInt(document.getElementById('special-intelligence').textContent) || 5,
+                agility: parseInt(document.getElementById('special-agility').textContent) || 5,
+                luck: parseInt(document.getElementById('special-luck').textContent) || 5
+            };
+            localStorage.setItem('pipboySpecial', JSON.stringify(specialStats));
+        }
+
+        function loadSpecialStats() {
+            const saved = localStorage.getItem('pipboySpecial');
+            if (saved) {
+                try {
+                    const specialStats = JSON.parse(saved);
+                    if (specialStats.strength !== undefined) document.getElementById('special-strength').textContent = specialStats.strength;
+                    if (specialStats.perception !== undefined) document.getElementById('special-perception').textContent = specialStats.perception;
+                    if (specialStats.endurance !== undefined) document.getElementById('special-endurance').textContent = specialStats.endurance;
+                    if (specialStats.charisma !== undefined) document.getElementById('special-charisma').textContent = specialStats.charisma;
+                    if (specialStats.intelligence !== undefined) document.getElementById('special-intelligence').textContent = specialStats.intelligence;
+                    if (specialStats.agility !== undefined) document.getElementById('special-agility').textContent = specialStats.agility;
+                    if (specialStats.luck !== undefined) document.getElementById('special-luck').textContent = specialStats.luck;
+                } catch (e) {
+                    // Keep default values if parse fails
+                }
+            }
+            // Always save current values so terminal.html can read them
+            saveSpecialStats();
         }
 
         function saveEffects() {
@@ -1657,6 +1690,7 @@
 
         function init() {
             loadPlayerData();
+            loadSpecialStats();
             loadEffects();
             loadCharacterName();
             updateDisplay();
