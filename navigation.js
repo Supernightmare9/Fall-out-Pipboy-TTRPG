@@ -12,7 +12,7 @@
     // Pages on which the nav bar should NOT appear
     var SKIP_PAGES = ['index.html', 'login_hub.html', 'terminal.html', ''];
 
-        // Player navigation buttons (left → right)
+    // Player navigation buttons (left → right)
     var PLAYER_NAV = [
         { id: 'stats',     icon: '📊', label: 'STATS',     href: 'stats.html' },
         { id: 'inventory', icon: '🎒', label: 'INVENTORY', href: 'inventory.html' },
@@ -89,7 +89,6 @@
             if (item.isHome)          cls += ' pipboy-nav-home';
             if (item.id === activeId) cls += ' active';
 
-            // data-id is embedded in the HTML so updateNavActiveState can find buttons immediately
             var dataId = ' data-id="' + escAttr(item.id) + '"';
 
             if (item.isSettings) {
@@ -114,110 +113,93 @@
         return html;
     }
 
-        function buildSettingsHTML(theme) {
+    function buildSettingsHTML(theme) {
         var t = escAttr(theme);
-        return (
-            '<div class="pipboy-settings-overlay" id="pipboySettingsOverlay" onclick="handlePipboyOverlayClick(event)">' +
-                '<div class="pipboy-settings-panel" id="pipboySettingsPanel" data-theme="' + t + '">' +
-                    '<div class="pipboy-settings-header">' +
-                        '<span class="pipboy-settings-title">SETTINGS</span>' +
-                        '<button class="pipboy-settings-close" onclick="closePipboySettings()">CLOSE</button>' +
+        var html = '<div class="pipboy-settings-overlay" id="pipboySettingsOverlay" onclick="handlePipboyOverlayClick(event)">' +
+            '<div class="pipboy-settings-panel" id="pipboySettingsPanel" data-theme="' + t + '">' +
+                '<div class="pipboy-settings-header">' +
+                    '<span class="pipboy-settings-title">SETTINGS</span>' +
+                    '<button class="pipboy-settings-close" onclick="closePipboySettings()">CLOSE</button>' +
+                '</div>' +
+                '<div class="pipboy-settings-body">' +
+                    '<div class="pipboy-settings-section">' +
+                        '<div class="pipboy-settings-section-title">Volume Controls</div>' +
+                        '<div class="pipboy-settings-row">' +
+                            '<span class="pipboy-settings-label">MASTER</span>' +
+                            '<input type="range" class="pipboy-settings-slider" id="settingMasterVol" min="0" max="100" value="80" ' +
+                                'oninput="pipboyUpdateSlider(this,\'masterVolVal\')" aria-label="Master Volume">' +
+                            '<span class="pipboy-settings-slider-value" id="masterVolVal">80%</span>' +
+                        '</div>' +
+                        '<div class="pipboy-settings-row">' +
+                            '<span class="pipboy-settings-label">MUSIC</span>' +
+                            '<input type="range" class="pipboy-settings-slider" id="settingMusicVol" min="0" max="100" value="60" ' +
+                                'oninput="pipboyUpdateSlider(this,\'musicVolVal\')" aria-label="Music Volume">' +
+                            '<span class="pipboy-settings-slider-value" id="musicVolVal">60%</span>' +
+                        '</div>' +
+                        '<div class="pipboy-settings-row">' +
+                            '<span class="pipboy-settings-label">SFX</span>' +
+                            '<input type="range" class="pipboy-settings-slider" id="settingSfxVol" min="0" max="100" value="75" ' +
+                                'oninput="pipboyUpdateSlider(this,\'sfxVolVal\')" aria-label="SFX Volume">' +
+                            '<span class="pipboy-settings-slider-value" id="sfxVolVal">75%</span>' +
+                        '</div>' +
+                        '<div class="pipboy-settings-row">' +
+                            '<span class="pipboy-settings-label">VOICES</span>' +
+                            '<input type="range" class="pipboy-settings-slider" id="settingVoiceVol" min="0" max="100" value="85" ' +
+                                'oninput="pipboyUpdateSlider(this,\'voiceVolVal\')" aria-label="Voice Volume">' +
+                            '<span class="pipboy-settings-slider-value" id="voiceVolVal">85%</span>' +
+                        '</div>' +
                     '</div>' +
-                    '<div class="pipboy-settings-body">' +
-
-                        /* ---- Volume Controls ---- */
-                        '<div class="pipboy-settings-section">' +
-                            '<div class="pipboy-settings-section-title">Volume Controls</div>' +
-
-                            '<div class="pipboy-settings-row">' +
-                                '<span class="pipboy-settings-label">MASTER</span>' +
-                                '<input type="range" class="pipboy-settings-slider" id="settingMasterVol" min="0" max="100" value="80" ' +
-                                    'oninput="pipboyUpdateSlider(this,\'masterVolVal\')" aria-label="Master Volume">' +
-                                '<span class="pipboy-settings-slider-value" id="masterVolVal">80%</span>' +
-                            '</div>' +
-
-                            '<div class="pipboy-settings-row">' +
-                                '<span class="pipboy-settings-label">MUSIC</span>' +
-                                '<input type="range" class="pipboy-settings-slider" id="settingMusicVol" min="0" max="100" value="60" ' +
-                                    'oninput="pipboyUpdateSlider(this,\'musicVolVal\')" aria-label="Music Volume">' +
-                                '<span class="pipboy-settings-slider-value" id="musicVolVal">60%</span>' +
-                            '</div>' +
-
-                            '<div class="pipboy-settings-row">' +
-                                '<span class="pipboy-settings-label">SFX</span>' +
-                                '<input type="range" class="pipboy-settings-slider" id="settingSfxVol" min="0" max="100" value="75" ' +
-                                    'oninput="pipboyUpdateSlider(this,\'sfxVolVal\')" aria-label="SFX Volume">' +
-                                '<span class="pipboy-settings-slider-value" id="sfxVolVal">75%</span>' +
-                            '</div>' +
-
-                            '<div class="pipboy-settings-row">' +
-                                '<span class="pipboy-settings-label">VOICES</span>' +
-                                '<input type="range" class="pipboy-settings-slider" id="settingVoiceVol" min="0" max="100" value="85" ' +
-                                    'oninput="pipboyUpdateSlider(this,\'voiceVolVal\')" aria-label="Voice Volume">' +
-                                '<span class="pipboy-settings-slider-value" id="voiceVolVal">85%</span>' +
-                            '</div>' +
+                    '<div class="pipboy-settings-section">' +
+                        '<div class="pipboy-settings-section-title">Display Options</div>' +
+                        '<div class="pipboy-settings-row">' +
+                            '<span class="pipboy-settings-label">BRIGHTNESS</span>' +
+                            '<input type="range" class="pipboy-settings-slider" id="settingBrightness" min="50" max="150" value="100" ' +
+                                'oninput="pipboyUpdateBrightness(this)" aria-label="Brightness">' +
+                            '<span class="pipboy-settings-slider-value" id="brightnessVal">100%</span>' +
                         '</div>' +
-
-                        /* ---- Display Options ---- */
-                        '<div class="pipboy-settings-section">' +
-                            '<div class="pipboy-settings-section-title">Display Options</div>' +
-
-                            '<div class="pipboy-settings-row">' +
-                                '<span class="pipboy-settings-label">BRIGHTNESS</span>' +
-                                '<input type="range" class="pipboy-settings-slider" id="settingBrightness" min="50" max="150" value="100" ' +
-                                    'oninput="pipboyUpdateBrightness(this)" aria-label="Brightness">' +
-                                '<span class="pipboy-settings-slider-value" id="brightnessVal">100%</span>' +
-                            '</div>' +
-
-                            '<div class="pipboy-settings-row">' +
-                                '<span class="pipboy-settings-label">SCANLINES</span>' +
-                                '<button class="pipboy-settings-toggle on" id="settingScanlinesToggle" ' +
-                                    'onclick="pipboyToggleScanlines()" aria-pressed="true">ON</button>' +
-                            '</div>' +
-
-                            '<div class="pipboy-settings-row">' +
-                                '<span class="pipboy-settings-label">COLOR MODE</span>' +
-                                '<select class="pipboy-settings-select" id="settingColorMode" ' +
-                                    'onchange="pipboyApplyColorMode(this.value)" aria-label="Color Mode">' +
-                                    '<option value="normal">NORMAL</option>' +
-                                    '<option value="sepia">SEPIA</option>' +
-                                    '<option value="blue">BLUE TINT</option>' +
-                                    '<option value="amber">AMBER</option>' +
-                                '</select>' +
-                            '</div>' +
-
-                            '<div class="pipboy-settings-row">' +
-                                '<span class="pipboy-settings-label">FONT SIZE</span>' +
-                                '<select class="pipboy-settings-select" id="settingFontSize" ' +
-                                    'onchange="pipboyApplyFontSize(this.value)" aria-label="Font Size">' +
-                                    '<option value="small">SMALL</option>' +
-                                    '<option value="medium" selected>MEDIUM</option>' +
-                                    '<option value="large">LARGE</option>' +
-                                '</select>' +
-                            '</div>' +
+                        '<div class="pipboy-settings-row">' +
+                            '<span class="pipboy-settings-label">SCANLINES</span>' +
+                            '<button class="pipboy-settings-toggle on" id="settingScanlinesToggle" ' +
+                                'onclick="pipboyToggleScanlines()" aria-pressed="true">ON</button>' +
                         '</div>' +
-
-                        /* ---- Account ---- */
-                        '<div class="pipboy-settings-section">' +
-                            '<div class="pipboy-settings-section-title">Account</div>' +
-                            '<div class="pipboy-settings-info" id="settingCharName">CHARACTER: —</div>' +
-                            '<div class="pipboy-settings-info" id="settingCampaignName">CAMPAIGN: —</div>' +
-                            '<br>' +
-                            '<button class="pipboy-settings-btn" onclick="pipboyLogout()">LOGOUT</button>' +
-                            '<button class="pipboy-settings-btn danger" onclick="pipboyConfirmDeleteChar()">DELETE CHARACTER</button>' +
+                        '<div class="pipboy-settings-row">' +
+                            '<span class="pipboy-settings-label">COLOR MODE</span>' +
+                            '<select class="pipboy-settings-select" id="settingColorMode" ' +
+                                'onchange="pipboyApplyColorMode(this.value)" aria-label="Color Mode">' +
+                                '<option value="normal">NORMAL</option>' +
+                                '<option value="sepia">SEPIA</option>' +
+                                '<option value="blue">BLUE TINT</option>' +
+                                '<option value="amber">AMBER</option>' +
+                            '</select>' +
                         '</div>' +
-
+                        '<div class="pipboy-settings-row">' +
+                            '<span class="pipboy-settings-label">FONT SIZE</span>' +
+                            '<select class="pipboy-settings-select" id="settingFontSize" ' +
+                                'onchange="pipboyApplyFontSize(this.value)" aria-label="Font Size">' +
+                                '<option value="small">SMALL</option>' +
+                                '<option value="medium" selected>MEDIUM</option>' +
+                                '<option value="large">LARGE</option>' +
+                            '</select>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="pipboy-settings-section">' +
+                        '<div class="pipboy-settings-section-title">Account</div>' +
+                        '<div class="pipboy-settings-info" id="settingCharName">CHARACTER: --</div>' +
+                        '<div class="pipboy-settings-info" id="settingCampaignName">CAMPAIGN: --</div>' +
+                        '<br>' +
+                        '<button class="pipboy-settings-btn" onclick="pipboyLogout()">LOGOUT</button>' +
+                        '<button class="pipboy-settings-btn danger" onclick="pipboyConfirmDeleteChar()">DELETE CHARACTER</button>' +
                     '</div>' +
                 '</div>' +
-            '</div>'
-        );
+            '</div>' +
+        '</div>';
+        return html;
     }
 
     /* ---- Inject stylesheet ---- */
 
     function injectStylesheet() {
         if (document.getElementById('pipboyNavCSS')) return;
-        // Resolve the path relative to this script's location
         var scripts = document.querySelectorAll('script');
         var base = '';
         for (var i = 0; i < scripts.length; i++) {
@@ -241,7 +223,6 @@
     };
 
     window.pipboyNavToAnchor = function (anchor) {
-        // If anchor target is on the current page, smooth-scroll
         var page = getCurrentPage();
         if (page === 'overseer.html' || anchor.charAt(0) === '#') {
             var id = anchor.replace('#', '');
@@ -391,7 +372,6 @@
             var raw = localStorage.getItem(SETTINGS_KEY);
             if (!raw) return copyDefaults();
             var parsed = JSON.parse(raw);
-            // Merge with defaults to handle any missing keys
             var s = copyDefaults();
             for (var k in parsed) {
                 if (Object.prototype.hasOwnProperty.call(parsed, k) &&
@@ -430,30 +410,22 @@
     }
 
     function applyStoredSettings(s) {
-        // Brightness
         applyBrightness(s.brightness);
-
-        // Scanlines
         if (!s.scanlines) {
             document.body.classList.add('no-scanlines');
         } else {
             document.body.classList.remove('no-scanlines');
         }
-
-        // Color mode
         document.body.classList.remove('color-sepia', 'color-blue', 'color-amber');
         if (s.colorMode !== 'normal') {
             document.body.classList.add('color-' + s.colorMode);
         }
-
-        // Font size
         document.body.classList.remove('font-small', 'font-medium', 'font-large');
         document.body.classList.add('font-' + s.fontSize);
     }
 
     function loadSettingsUI() {
         var s = loadStoredSettings();
-
         setSlider('settingMasterVol', 'masterVolVal', s.masterVol);
         setSlider('settingMusicVol',  'musicVolVal',  s.musicVol);
         setSlider('settingSfxVol',    'sfxVolVal',    s.sfxVol);
@@ -535,7 +507,6 @@
     function handleMessagesHash() {
         if (getCurrentPage() !== 'stats.html') return;
         if (window.location.hash !== '#messages') return;
-        // Attempt to click the messages subtab button
         var btn = document.querySelector('.subtab-button[data-tab="messages"]');
         if (btn) btn.click();
     }
@@ -545,7 +516,6 @@
     function init() {
         var page = getCurrentPage();
 
-        // Do not inject on login / terminal pages
         if (SKIP_PAGES.indexOf(page) !== -1) return;
 
         var type     = getNavType();
@@ -553,35 +523,19 @@
         var navItems = (type === 'overseer') ? OVERSEER_NAV : PLAYER_NAV;
         var activeId = getActiveId();
 
-        // Inject stylesheet
         injectStylesheet();
 
-        // Build + inject nav bar (data-id is embedded in the HTML by buildNavHTML)
         var navFrag = document.createElement('div');
         navFrag.innerHTML = buildNavHTML(navItems, theme, activeId);
         document.body.appendChild(navFrag.firstChild);
 
-        // Build + inject settings panel
         var setFrag = document.createElement('div');
         setFrag.innerHTML = buildSettingsHTML(theme);
         document.body.appendChild(setFrag.firstChild);
 
-        // Apply bottom padding
         document.body.classList.add('has-pipboy-nav');
 
-        // Apply stored settings on load
         var stored = loadStoredSettings();
         applyStoredSettings(stored);
 
-        // Auto-switch to messages tab if hash present
-        handleMessagesHash();
-    }
-
-    // Run after DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-
-})();
+        handleMessagesHash();*
