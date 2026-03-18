@@ -725,6 +725,54 @@
                 font-size: 20px;
             }
         }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-button {
+            flex: 1;
+            min-width: 150px;
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 12px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            border-radius: 2px;
+        }
+
+        .nav-button:hover {
+            background-color: var(--vault-blue-light);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .nav-button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -920,6 +968,12 @@
                 <div class="stat-title">⭐ Character Perks</div>
                 <div class="perks-grid" id="perksGrid"></div>
             </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="nav-button" onclick="goToCharacter()">← CHARACTER</button>
+            <button class="nav-button" onclick="goToInventory()">INVENTORY</button>
+            <button class="nav-button" onclick="goToData()">DATA →</button>
         </div>
 
         <div class="vault-footer">
@@ -1262,4 +1316,111 @@
             perksGrid.innerHTML = perks.length === 0 ? '<div class="perks-empty">No perks earned yet. Keep adventuring!</div>' : perks.map(p => `<div class="perk-box"><div class="perk-title">${p.name || 'Unknown'}</div><div class="perk-description">${p.description || 'No description'}</div>${p.rank ? `<div class="perk-rank">Rank: ${p.rank}</div>` : ''}</div>`).join('');
         }
 
-        function loadCharacterName*
+        function loadCharacterName() {
+            const characterData = localStorage.getItem('characterData');
+            if (characterData) {
+                try {
+                    const character = JSON.parse(characterData);
+                    if (character.name) {
+                        document.getElementById('characterName').textContent = character.name + ' • Stats Module';
+                    }
+                } catch (e) {
+                    console.error('Error parsing characterData:', e);
+                }
+            }
+        }
+
+        function updateXPDisplay(totalXP) {
+            const level = getLevelFromXP(totalXP);
+            const xpNeeded = getXPForNextLevel(totalXP);
+            const progress = getLevelProgress(totalXP);
+
+            document.getElementById('xp').textContent = formatXP(totalXP);
+            document.getElementById('level').textContent = level;
+            document.getElementById('xpToNext').textContent = level >= 100 ? 'MAX' : formatXP(xpNeeded);
+            document.getElementById('xpPercent').textContent = progress + '%';
+            document.getElementById('xpBar').style.width = progress + '%';
+
+            localStorage.setItem('pipboyXP', totalXP);
+            localStorage.setItem('pipboyLevel', level);
+        }
+
+        function addXP() {
+            const xpInput = document.getElementById('xpInput');
+            const messageBox = document.getElementById('xpMessage');
+            const source = document.getElementById('xpSource').value;
+            const description = document.getElementById('xpDescription').value.trim();
+            const xpAmount = parseInt(xpInput.value);
+
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount <= 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid positive XP amount!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            const currentXP = parseInt(localStorage.getItem('pipboyXP') || '0');
+            const newXP = currentXP + xpAmount;
+
+            addXPToHistory(xpAmount, source, description, newXP);
+            const levelsGained = checkLevelUp(currentXP, newXP);
+            updateXPDisplay(newXP);
+
+            if (levelsGained.length > 0) {
+                messageBox.textContent = `✓ LEVEL UP! You are now Level ${getLevelFromXP(newXP)}! (+${xpAmount} XP)`;
+            } else {
+                messageBox.textContent = `✓ Added ${xpAmount} XP. Total: ${formatXP(newXP)}`;
+            }
+            messageBox.className = 'message success';
+
+            xpInput.value = '';
+            document.getElementById('xpDescription').value = '';
+            setTimeout(() => messageBox.textContent = '', 3000);
+        }
+
+        function removeXP() {
+            const xpInput = document.getElementById('xpInput');
+            const messageBox = document.getElementById('xpMessage');
+            const source = document.getElementById('xpSource').value;
+            const description = document.getElementById('xpDescription').value.trim();
+            const xpAmount = parseInt(xpInput.value);
+
+            if (!xpInput.value || isNaN(xpAmount) || xpAmount <= 0) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid positive XP amount!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            const currentXP = parseInt(localStorage.getItem('pipboyXP') || '0');
+            const newXP = Math.max(0, currentXP - xpAmount);
+
+            addXPToHistory(-xpAmount, source, description, newXP);
+            updateXPDisplay(newXP);
+
+            messageBox.textContent = `✓ Removed ${xpAmount} XP. Total: ${formatXP(newXP)}`;
+            messageBox.className = 'message success';
+
+            xpInput.value = '';
+            document.getElementById('xpDescription').value = '';
+            setTimeout(() => messageBox.textContent = '', 3000);
+        }
+
+        function goToCharacter() { window.location.href = 'character.html'; }
+        function goToInventory() { window.location.href = 'inventory.html'; }
+        function goToData() { window.location.href = 'data.html'; }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            loadPlayerData();
+            loadSpecialStats();
+            loadEffects();
+            loadCharacterName();
+            updateDisplay();
+            updatePerksDisplay();
+            updateEffectsDisplay();
+            updateTempDisplays();
+
+            const savedXP = parseInt(localStorage.getItem('pipboyXP') || '0');
+            updateXPDisplay(savedXP);
+        });
+    </script>
+</body>
+</html>
