@@ -16,7 +16,7 @@
     var PLAYER_NAV = [
         { id: 'stats',     icon: '📊', label: 'STATS',     href: 'stats.html' },
         { id: 'inventory', icon: '🎒', label: 'INVENTORY', href: 'inventory.html' },
-        { id: 'home',      icon: '🏠', label: 'HOME',      href: 'character-dashboard.html', isHome: true },
+        { id: 'home',      icon: '🏠', label: 'HOME',      href: 'character.html', isHome: true },
         { id: 'messages',  icon: '💬', label: 'MESSAGES',  href: 'messages.html' },
         { id: 'settings',  icon: '⚙️', label: 'SETTINGS',  isSettings: true }
     ];
