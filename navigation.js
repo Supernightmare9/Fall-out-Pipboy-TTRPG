@@ -114,20 +114,20 @@
         return html;
     }
 
-    function buildSettingsHTML(theme) {
+        function buildSettingsHTML(theme) {
         var t = escAttr(theme);
         return (
             '<div class="pipboy-settings-overlay" id="pipboySettingsOverlay" onclick="handlePipboyOverlayClick(event)">' +
                 '<div class="pipboy-settings-panel" id="pipboySettingsPanel" data-theme="' + t + '">' +
                     '<div class="pipboy-settings-header">' +
-                        '<span class="pipboy-settings-title">⚙ SETTINGS</span>' +
-                        '<button class="pipboy-settings-close" onclick="closePipboySettings()">✕ CLOSE</button>' +
+                        '<span class="pipboy-settings-title">SETTINGS</span>' +
+                        '<button class="pipboy-settings-close" onclick="closePipboySettings()">CLOSE</button>' +
                     '</div>' +
                     '<div class="pipboy-settings-body">' +
 
                         /* ---- Volume Controls ---- */
                         '<div class="pipboy-settings-section">' +
-                            '<div class="pipboy-settings-section-title">◈ Volume Controls</div>' +
+                            '<div class="pipboy-settings-section-title">Volume Controls</div>' +
 
                             '<div class="pipboy-settings-row">' +
                                 '<span class="pipboy-settings-label">MASTER</span>' +
@@ -160,7 +160,7 @@
 
                         /* ---- Display Options ---- */
                         '<div class="pipboy-settings-section">' +
-                            '<div class="pipboy-settings-section-title">◈ Display Options</div>' +
+                            '<div class="pipboy-settings-section-title">Display Options</div>' +
 
                             '<div class="pipboy-settings-row">' +
                                 '<span class="pipboy-settings-label">BRIGHTNESS</span>' +
@@ -199,12 +199,12 @@
 
                         /* ---- Account ---- */
                         '<div class="pipboy-settings-section">' +
-                            '<div class="pipboy-settings-section-title">◈ Account</div>' +
+                            '<div class="pipboy-settings-section-title">Account</div>' +
                             '<div class="pipboy-settings-info" id="settingCharName">CHARACTER: —</div>' +
                             '<div class="pipboy-settings-info" id="settingCampaignName">CAMPAIGN: —</div>' +
                             '<br>' +
-                            '<button class="pipboy-settings-btn" onclick="pipboyLogout()">⬡ LOGOUT</button>' +
-                            '<button class="pipboy-settings-btn danger" onclick="pipboyConfirmDeleteChar()">⚠ DELETE CHARACTER</button>' +
+                            '<button class="pipboy-settings-btn" onclick="pipboyLogout()">LOGOUT</button>' +
+                            '<button class="pipboy-settings-btn danger" onclick="pipboyConfirmDeleteChar()">DELETE CHARACTER</button>' +
                         '</div>' +
 
                     '</div>' +
