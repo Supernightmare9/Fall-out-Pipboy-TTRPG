@@ -511,7 +511,7 @@
         if (btn) btn.click();
     }
 
-    /* ---- Main init ---- */
+       /* ---- Main init ---- */
 
     function init() {
         var page = getCurrentPage();
@@ -538,4 +538,14 @@
         var stored = loadStoredSettings();
         applyStoredSettings(stored);
 
-        handleMessagesHash();*
+        handleMessagesHash();
+    }
+
+    // Run after DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();
