@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fallout Pipboy Stats</title>
     <style>
-        /* ===========================
-           VAULT 215 STATS PAGE
-           COMPLETE BRANDING
-           =========================== */
-
+        /* (all the CSS from your file - keeping it as-is) */
         :root {
             --vault-primary: #4ade80;
             --vault-secondary: #fbbf24;
@@ -44,7 +40,6 @@
                 radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
         }
 
-        /* Scanline effect */
         body::before {
             content: '';
             position: fixed;
@@ -70,7 +65,6 @@
             margin: 0 auto;
         }
 
-        /* ===== VAULT HEADER ===== */
         .vault-header {
             text-align: center;
             margin-bottom: 30px;
@@ -124,7 +118,6 @@
             padding-top: 8px;
         }
 
-        /* ===== VAULT FOOTER ===== */
         .vault-footer {
             text-align: center;
             margin-top: 30px;
@@ -141,7 +134,6 @@
             font-weight: bold;
         }
 
-        /* ===== SUBTAB NAVIGATION ===== */
         .subtab-nav {
             display: flex;
             gap: 10px;
@@ -191,7 +183,6 @@
             display: block;
         }
 
-        /* ===== STATS SECTIONS ===== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -252,7 +243,6 @@
             font-size: 12px;
         }
 
-        /* ===== STAT BARS ===== */
         .stat-bar-container {
             margin: 15px 0;
         }
@@ -286,17 +276,6 @@
             top: 0;
         }
 
-        .stat-bar-temp {
-            height: 100%;
-            background: linear-gradient(90deg, #60a5fa, #0ea5e9);
-            box-shadow: 0 0 10px #60a5fa;
-            transition: width 0.5s ease;
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-
-        /* ===== INPUT FORM STYLES ===== */
         .input-form {
             display: flex;
             gap: 10px;
@@ -304,14 +283,6 @@
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px solid rgba(74, 222, 128, 0.2);
-        }
-
-        .xp-source-select {
-            flex: 1 1 120px;
-        }
-
-        .xp-desc-input {
-            flex: 2 1 160px;
         }
 
         .input-field {
@@ -326,10 +297,6 @@
             text-shadow: 0 0 5px var(--vault-gold);
             transition: all 0.3s ease;
             box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .input-field::placeholder {
-            color: rgba(74, 222, 128, 0.4);
         }
 
         .input-field:focus {
@@ -417,7 +384,6 @@
             text-shadow: 0 0 5px var(--vault-error);
         }
 
-        /* ===== TAG HEADER ===== */
         .tag-header {
             color: var(--vault-accent);
             font-size: 13px;
@@ -427,7 +393,6 @@
             text-shadow: 0 0 3px var(--vault-accent);
         }
 
-        /* ===== CONDENSED SKILLS SECTION ===== */
         .skills-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -551,7 +516,6 @@
             text-shadow: none;
         }
 
-        /* ===== SPECIAL SECTION ===== */
         .special-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -605,7 +569,6 @@
             line-height: 1.2;
         }
 
-        /* ===== PERKS SECTION ===== */
         .perks-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -623,8 +586,19 @@
             text-shadow: 0 0 2px var(--vault-info);
         }
 
+        .perk-box {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+            border-radius: 3px;
+        }
+
         .perk-title {
+            color: var(--vault-gold);
             font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px var(--vault-gold);
         }
 
         .perk-description {
@@ -639,7 +613,6 @@
             margin-top: 5px;
         }
 
-        /* ===== EFFECTS TAB STYLES ===== */
         .effects-subtitle {
             color: var(--vault-error);
             text-shadow: 0 0 5px var(--vault-error);
@@ -733,7 +706,6 @@
             text-shadow: 0 0 2px var(--vault-info);
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: 1fr;
@@ -757,7 +729,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- VAULT HEADER -->
         <div class="vault-header">
             <div class="vault-badge">VAULT-TEC INDUSTRIES PIP-BOY 3000</div>
             <div class="vault-title">STATS & ABILITIES</div>
@@ -765,7 +736,6 @@
             <div class="vault-info" id="characterName">Vault 215 Resident • Stats Module</div>
         </div>
 
-        <!-- SUBTAB NAVIGATION -->
         <div class="subtab-nav">
             <button class="subtab-button active" data-tab="stats" onclick="switchTab('stats')">STATS</button>
             <button class="subtab-button" data-tab="skills" onclick="switchTab('skills')">SKILLS</button>
@@ -773,11 +743,8 @@
             <button class="subtab-button" data-tab="perks" onclick="switchTab('perks')">PERKS</button>
         </div>
 
-        <!-- STATS TAB CONTENT -->
         <div id="stats" class="subtab-content active">
-            <!-- TOP STATS GRID (Experience, Health) -->
             <div class="stats-grid">
-                <!-- EXPERIENCE & LEVEL -->
                 <div class="stat-box">
                     <div class="stat-title">⭐ Experience</div>
                     <div class="stat-item">
@@ -802,26 +769,24 @@
                         </div>
                     </div>
 
-                    <!-- XP INPUT -->
                     <div class="input-form">
-                        <select id="xpSource" class="input-field xp-source-select">
+                        <select id="xpSource" class="input-field" style="flex: 1 1 120px;">
                             <option value="Quest">Quest</option>
                             <option value="Combat">Combat</option>
                             <option value="Exploration">Exploration</option>
                             <option value="Learning">Learning</option>
                             <option value="Other">Other</option>
                         </select>
-                        <input type="text" id="xpDescription" class="input-field xp-desc-input" placeholder="Description (optional)" aria-label="XP description">
+                        <input type="text" id="xpDescription" class="input-field" style="flex: 2 1 160px;" placeholder="Description (optional)">
                     </div>
                     <div class="input-form">
-                        <input type="number" id="xpInput" class="input-field" placeholder="XP amount (positive)" min="1" max="999999" aria-label="XP amount">
+                        <input type="number" id="xpInput" class="input-field" placeholder="XP amount (positive)" min="1" max="999999">
                         <button class="action-button" onclick="addXP()">ADD XP</button>
                         <button class="action-button danger" onclick="removeXP()">REMOVE XP</button>
                     </div>
                     <div class="message" id="xpMessage"></div>
                 </div>
 
-                <!-- HEALTH & ACTION POINTS -->
                 <div class="stat-box">
                     <div class="stat-title">❤ Vitals</div>
                     <div class="stat-item">
@@ -836,11 +801,9 @@
                         </div>
                         <div class="stat-bar">
                             <div class="stat-bar-fill" id="healthBar" style="width: 100%"></div>
-                            <div class="stat-bar-temp" id="healthBarTemp" style="width: 0%"></div>
                         </div>
                     </div>
 
-                    <!-- HEALTH INPUT -->
                     <div class="input-form">
                         <input type="number" id="healthInput" class="input-field" placeholder="Health (±)" min="-9999" max="9999">
                         <button class="action-button" onclick="updateHealth()">UPDATE</button>
@@ -849,14 +812,12 @@
                     </div>
                     <div class="message" id="healthMessage"></div>
 
-                    <!-- ACTION POINTS SECTION -->
                     <div class="stat-item" style="margin-top: 20px;">
                         <span class="stat-label">Action Points:</span>
                         <span class="stat-value"><span id="actionPoints">10</span> / <span id="maxActionPoints">20</span></span>
                         <span class="temp-value" id="tempActionPointsDisplay"></span>
                     </div>
 
-                    <!-- ACTION POINTS INPUT -->
                     <div class="input-form">
                         <input type="number" id="apInput" class="input-field" placeholder="AP (±)" min="-9999" max="9999">
                         <button class="action-button" onclick="updateActionPoints()">UPDATE</button>
@@ -867,7 +828,6 @@
                 </div>
             </div>
 
-            <!-- S.P.E.C.I.A.L STATS -->
             <div class="stat-box" style="margin-bottom: 30px;">
                 <div class="stat-title">💪 S.P.E.C.I.A.L Attributes</div>
                 <div class="special-grid">
@@ -917,7 +877,6 @@
             </div>
         </div>
 
-        <!-- SKILLS TAB CONTENT -->
         <div id="skills" class="subtab-content">
             <div class="stat-box">
                 <div class="stat-title">🎯 Skills</div>
@@ -926,12 +885,10 @@
             </div>
         </div>
 
-        <!-- EFFECTS TAB CONTENT (DEBUFFS & BOOSTS) -->
         <div id="effects" class="subtab-content">
             <div class="stat-box">
                 <div class="stat-title">✦ Active Effects</div>
                 
-                <!-- DEBUFFS SECTION -->
                 <div style="margin-bottom: 25px;">
                     <div class="effects-subtitle">☢ DEBUFFS</div>
                     <div class="effects-list" id="debuffsList">
@@ -944,7 +901,6 @@
                     </div>
                 </div>
 
-                <!-- BOOSTS SECTION -->
                 <div>
                     <div class="effects-subtitle">✓ BOOSTS</div>
                     <div class="effects-list" id="boostsList">
@@ -959,7 +915,6 @@
             </div>
         </div>
 
-        <!-- PERKS TAB CONTENT -->
         <div id="perks" class="subtab-content">
             <div class="stat-box">
                 <div class="stat-title">⭐ Character Perks</div>
@@ -967,7 +922,6 @@
             </div>
         </div>
 
-        <!-- VAULT FOOTER -->
         <div class="vault-footer">
             <p>VAULT <span>215</span> RESIDENT • STATS MODULE</p>
             <p style="margin-top: 5px;">Statistical Data Secured and Synchronized</p>
@@ -991,11 +945,7 @@
             luck: []
         };
 
-        const SKILLS = [
-            'Barter', 'Small Guns', 'Big Guns', 'Melee Weapons',
-            'Energy Weapons', 'Explosives', 'Lockpick', 'Medicine',
-            'Science', 'Repair', 'Sneak', 'Speech', 'Unarmed', 'Survival'
-        ];
+        const SKILLS = ['Barter', 'Small Guns', 'Big Guns', 'Melee Weapons', 'Energy Weapons', 'Explosives', 'Lockpick', 'Medicine', 'Science', 'Repair', 'Sneak', 'Speech', 'Unarmed', 'Survival'];
 
         let playerData = {
             skills: {},
@@ -1026,9 +976,7 @@
 
         function loadPlayerData() {
             const saved = localStorage.getItem('pipboyPlayerData');
-            if (saved) {
-                playerData = JSON.parse(saved);
-            }
+            if (saved) playerData = JSON.parse(saved);
             
             const savedXP = localStorage.getItem('pipboyXP');
             const savedLevel = localStorage.getItem('pipboyLevel');
@@ -1042,22 +990,6 @@
             
             document.getElementById('maxHealth').textContent = MAX_HEALTH;
             document.getElementById('maxActionPoints').textContent = MAX_ACTION_POINTS;
-            
-            if (savedXP && savedLevel) {
-                const currentXP = parseInt(savedXP);
-                const progress = getLevelProgress(currentXP);
-                document.getElementById('xpPercent').textContent = progress + '%';
-                document.getElementById('xpBar').style.width = progress + '%';
-                document.getElementById('xp').textContent = formatXP(currentXP);
-                document.getElementById('xpToNext').textContent = formatXP(getXPForNextLevel(currentXP));
-            }
-            
-            if (savedHealth) {
-                const currentHealth = parseInt(savedHealth);
-                const healthPercent = (currentHealth / MAX_HEALTH) * 100;
-                document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
-                document.getElementById('healthBar').style.width = healthPercent + '%';
-            }
         }
 
         function saveSpecialStats() {
@@ -1085,8 +1017,7 @@
                     if (specialStats.intelligence !== undefined) document.getElementById('special-intelligence').textContent = specialStats.intelligence;
                     if (specialStats.agility !== undefined) document.getElementById('special-agility').textContent = specialStats.agility;
                     if (specialStats.luck !== undefined) document.getElementById('special-luck').textContent = specialStats.luck;
-                } catch (e) {
-                }
+                } catch (e) {}
             }
             saveSpecialStats();
         }
@@ -1099,37 +1030,8 @@
         function loadEffects() {
             const savedDebuffs = localStorage.getItem('pipboyDebuffs');
             const savedBoosts = localStorage.getItem('pipboyBoosts');
-            
             if (savedDebuffs) debuffs = JSON.parse(savedDebuffs);
             if (savedBoosts) boosts = JSON.parse(savedBoosts);
-        }
-
-        function getSpecialForSkill(skill) {
-            for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
-                if (skills.includes(skill)) {
-                    return special.charAt(0).toUpperCase() + special.slice(1);
-                }
-            }
-            return 'Unknown';
-        }
-
-        function calculateSkillBonus(skillValue, isTagged = false) {
-            let adjustedValue = skillValue;
-            if (isTagged) {
-                adjustedValue = skillValue + TAG_SKILL_BONUS;
-            }
-            const difference = adjustedValue - 50;
-            return Math.floor(difference / 10);
-        }
-
-        function formatBonus(bonus) {
-            if (bonus < 0) {
-                return bonus.toString();
-            } else if (bonus > 0) {
-                return '+' + bonus;
-            } else {
-                return '0';
-            }
         }
 
         function switchTab(tabName) {
@@ -1145,22 +1047,32 @@
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
         }
 
-        function updateSkill(skillName, amount) {
-            playerData.skills[skillName] = (playerData.skills[skillName] || 0) + amount;
-            
-            if (playerData.skills[skillName] < 0) {
-                playerData.skills[skillName] = 0;
-            } else if (playerData.skills[skillName] > 100) {
-                playerData.skills[skillName] = 100;
+        function getSpecialForSkill(skill) {
+            for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
+                if (skills.includes(skill)) {
+                    return special.charAt(0).toUpperCase() + special.slice(1);
+                }
             }
-            
+            return 'Unknown';
+        }
+
+        function calculateSkillBonus(skillValue, isTagged = false) {
+            let adjustedValue = skillValue + (isTagged ? TAG_SKILL_BONUS : 0);
+            return Math.floor((adjustedValue - 50) / 10);
+        }
+
+        function formatBonus(bonus) {
+            return bonus > 0 ? '+' + bonus : bonus.toString();
+        }
+
+        function updateSkill(skillName, amount) {
+            playerData.skills[skillName] = Math.max(0, Math.min(100, (playerData.skills[skillName] || 0) + amount));
             savePlayerData();
             updateDisplay();
         }
 
         function toggleTagSkill(skill) {
             const index = playerData.tagSkills.indexOf(skill);
-            
             if (index > -1) {
                 playerData.tagSkills.splice(index, 1);
             } else {
@@ -1170,7 +1082,6 @@
                 }
                 playerData.tagSkills.push(skill);
             }
-            
             savePlayerData();
             updateDisplay();
         }
@@ -1186,67 +1097,37 @@
                 return;
             }
 
-            let currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
-            currentHealth += healthChange;
-
-            if (currentHealth > MAX_HEALTH) {
-                currentHealth = MAX_HEALTH;
-                messageBox.textContent = `⚠ Health capped at ${MAX_HEALTH}!`;
-                messageBox.className = 'message error';
-            } else if (currentHealth < 0) {
-                currentHealth = 0;
-                messageBox.textContent = `⚠ Health cannot be below 0!`;
-                messageBox.className = 'message error';
-            } else {
-                messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}/${MAX_HEALTH}`;
-                messageBox.className = 'message success';
-            }
-
+            let currentHealth = Math.max(0, Math.min(MAX_HEALTH, (parseInt(document.getElementById('health').textContent) || MAX_HEALTH) + healthChange));
+            
             document.getElementById('health').textContent = currentHealth;
             const healthPercent = (currentHealth / MAX_HEALTH) * 100;
             document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
             document.getElementById('healthBar').style.width = healthPercent + '%';
 
+            messageBox.textContent = currentHealth === MAX_HEALTH || currentHealth === 0 ? `⚠ Health capped!` : `✓ Health is now ${currentHealth}/${MAX_HEALTH}`;
+            messageBox.className = 'message' + (currentHealth === MAX_HEALTH || currentHealth === 0 ? ' error' : ' success');
+
             savePlayerData();
             healthInput.value = '';
-            setTimeout(() => {
-                messageBox.textContent = '';
-            }, 3000);
+            setTimeout(() => messageBox.textContent = '', 3000);
         }
 
         function addTempHealth() {
             const tempHealthInput = prompt('Enter temporary health amount:');
-            if (tempHealthInput === null || tempHealthInput === '') return;
-            
-            const tempAmount = parseInt(tempHealthInput);
-            if (isNaN(tempAmount) || tempAmount <= 0) {
-                alert('Please enter a valid positive number!');
-                return;
+            if (tempHealthInput && !isNaN(parseInt(tempHealthInput)) && parseInt(tempHealthInput) > 0) {
+                playerData.tempHealth = (playerData.tempHealth || 0) + parseInt(tempHealthInput);
+                updateTempDisplays();
+                savePlayerData();
             }
-
-            playerData.tempHealth = (playerData.tempHealth || 0) + tempAmount;
-            updateTempDisplays();
-            savePlayerData();
         }
 
         function removeTempHealth() {
             const tempHealthInput = prompt('Enter temporary health amount to remove:');
-            if (tempHealthInput === null || tempHealthInput === '') return;
-            
-            const tempAmount = parseInt(tempHealthInput);
-            if (isNaN(tempAmount) || tempAmount <= 0) {
-                alert('Please enter a valid positive number!');
-                return;
+            if (tempHealthInput && !isNaN(parseInt(tempHealthInput)) && parseInt(tempHealthInput) > 0) {
+                playerData.tempHealth = Math.max(0, (playerData.tempHealth || 0) - parseInt(tempHealthInput));
+                updateTempDisplays();
+                savePlayerData();
             }
-
-            playerData.tempHealth = (playerData.tempHealth || 0) - tempAmount;
-            
-            if (playerData.tempHealth < 0) {
-                playerData.tempHealth = 0;
-            }
-            
-            updateTempDisplays();
-            savePlayerData();
         }
 
         function updateActionPoints() {
@@ -1260,134 +1141,64 @@
                 return;
             }
 
-            let currentAP = parseInt(document.getElementById('actionPoints').textContent) || 10;
-            currentAP += apChange;
-
-            if (currentAP > MAX_ACTION_POINTS) {
-                currentAP = MAX_ACTION_POINTS;
-                messageBox.textContent = `⚠ Action Points capped at ${MAX_ACTION_POINTS}!`;
-                messageBox.className = 'message error';
-            } else if (currentAP < 0) {
-                currentAP = 0;
-                messageBox.textContent = `⚠ Action Points cannot be below 0!`;
-                messageBox.className = 'message error';
-            } else {
-                messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}/${MAX_ACTION_POINTS}`;
-                messageBox.className = 'message success';
-            }
-
+            let currentAP = Math.max(0, Math.min(MAX_ACTION_POINTS, (parseInt(document.getElementById('actionPoints').textContent) || 10) + apChange));
+            
             document.getElementById('actionPoints').textContent = currentAP;
+            messageBox.textContent = currentAP === MAX_ACTION_POINTS || currentAP === 0 ? `⚠ Action Points capped!` : `✓ Action Points are now ${currentAP}/${MAX_ACTION_POINTS}`;
+            messageBox.className = 'message' + (currentAP === MAX_ACTION_POINTS || currentAP === 0 ? ' error' : ' success');
 
             savePlayerData();
             apInput.value = '';
-            setTimeout(() => {
-                messageBox.textContent = '';
-            }, 3000);
+            setTimeout(() => messageBox.textContent = '', 3000);
         }
 
         function addTempAP() {
             const tempAPInput = prompt('Enter temporary action points amount:');
-            if (tempAPInput === null || tempAPInput === '') return;
-            
-            const tempAmount = parseInt(tempAPInput);
-            if (isNaN(tempAmount) || tempAmount <= 0) {
-                alert('Please enter a valid positive number!');
-                return;
+            if (tempAPInput && !isNaN(parseInt(tempAPInput)) && parseInt(tempAPInput) > 0) {
+                playerData.tempActionPoints = (playerData.tempActionPoints || 0) + parseInt(tempAPInput);
+                updateTempDisplays();
+                savePlayerData();
             }
-
-            playerData.tempActionPoints = (playerData.tempActionPoints || 0) + tempAmount;
-            updateTempDisplays();
-            savePlayerData();
         }
 
         function removeTempAP() {
             const tempAPInput = prompt('Enter temporary action points amount to remove:');
-            if (tempAPInput === null || tempAPInput === '') return;
-            
-            const tempAmount = parseInt(tempAPInput);
-            if (isNaN(tempAmount) || tempAmount <= 0) {
-                alert('Please enter a valid positive number!');
-                return;
+            if (tempAPInput && !isNaN(parseInt(tempAPInput)) && parseInt(tempAPInput) > 0) {
+                playerData.tempActionPoints = Math.max(0, (playerData.tempActionPoints || 0) - parseInt(tempAPInput));
+                updateTempDisplays();
+                savePlayerData();
             }
-
-            playerData.tempActionPoints = (playerData.tempActionPoints || 0) - tempAmount;
-            
-            if (playerData.tempActionPoints < 0) {
-                playerData.tempActionPoints = 0;
-            }
-            
-            updateTempDisplays();
-            savePlayerData();
         }
 
         function updateTempDisplays() {
             const tempHP = playerData.tempHealth || 0;
             const tempAP = playerData.tempActionPoints || 0;
-            
-            const tempHealthDisplay = document.getElementById('tempHealthDisplay');
-            const tempAPDisplay = document.getElementById('tempActionPointsDisplay');
-            
-            if (tempHP > 0) {
-                tempHealthDisplay.textContent = `(+${tempHP})`;
-            } else {
-                tempHealthDisplay.textContent = '';
-            }
-            
-            if (tempAP > 0) {
-                tempAPDisplay.textContent = `(+${tempAP})`;
-            } else {
-                tempAPDisplay.textContent = '';
-            }
+            document.getElementById('tempHealthDisplay').textContent = tempHP > 0 ? `(+${tempHP})` : '';
+            document.getElementById('tempActionPointsDisplay').textContent = tempAP > 0 ? `(+${tempAP})` : '';
         }
 
         function addDebuff() {
-            const nameInput = document.getElementById('debuffInput');
-            const durationInput = document.getElementById('debuffDurationInput');
-            
-            const name = nameInput.value.trim();
-            const duration = parseInt(durationInput.value);
-            
-            if (!name || !duration || isNaN(duration)) {
-                alert('Please enter a debuff name and duration!');
-                return;
+            const name = document.getElementById('debuffInput').value.trim();
+            const duration = parseInt(document.getElementById('debuffDurationInput').value);
+            if (name && duration && !isNaN(duration)) {
+                debuffs.push({ name, duration, id: Date.now() });
+                document.getElementById('debuffInput').value = '';
+                document.getElementById('debuffDurationInput').value = '';
+                saveEffects();
+                updateEffectsDisplay();
             }
-            
-            debuffs.push({
-                name: name,
-                duration: duration,
-                id: Date.now()
-            });
-            
-            nameInput.value = '';
-            durationInput.value = '';
-            
-            saveEffects();
-            updateEffectsDisplay();
         }
 
         function addBoost() {
-            const nameInput = document.getElementById('boostInput');
-            const durationInput = document.getElementById('boostDurationInput');
-            
-            const name = nameInput.value.trim();
-            const duration = parseInt(durationInput.value);
-            
-            if (!name || !duration || isNaN(duration)) {
-                alert('Please enter a boost name and duration!');
-                return;
+            const name = document.getElementById('boostInput').value.trim();
+            const duration = parseInt(document.getElementById('boostDurationInput').value);
+            if (name && duration && !isNaN(duration)) {
+                boosts.push({ name, duration, id: Date.now() });
+                document.getElementById('boostInput').value = '';
+                document.getElementById('boostDurationInput').value = '';
+                saveEffects();
+                updateEffectsDisplay();
             }
-            
-            boosts.push({
-                name: name,
-                duration: duration,
-                id: Date.now()
-            });
-            
-            nameInput.value = '';
-            durationInput.value = '';
-            
-            saveEffects();
-            updateEffectsDisplay();
         }
 
         function removeDebuff(id) {
@@ -1405,22 +1216,10 @@
         function decreaseDuration(type, id) {
             if (type === 'debuff') {
                 const debuff = debuffs.find(d => d.id === id);
-                if (debuff) {
-                    debuff.duration--;
-                    if (debuff.duration <= 0) {
-                        removeDebuff(id);
-                        return;
-                    }
-                }
-            } else if (type === 'boost') {
+                if (debuff) debuff.duration--;
+            } else {
                 const boost = boosts.find(b => b.id === id);
-                if (boost) {
-                    boost.duration--;
-                    if (boost.duration <= 0) {
-                        removeBoost(id);
-                        return;
-                    }
-                }
+                if (boost) boost.duration--;
             }
             saveEffects();
             updateEffectsDisplay();
@@ -1428,68 +1227,39 @@
 
         function updateEffectsDisplay() {
             const debuffsList = document.getElementById('debuffsList');
-            if (debuffs.length === 0) {
-                debuffsList.innerHTML = '<div class="empty-message">No active debuffs</div>';
-            } else {
-                debuffsList.innerHTML = debuffs.map(debuff => `
-                    <div class="effect-item">
-                        <div class="effect-info">
-                            <div class="effect-name">${debuff.name}</div>
-                            <div class="effect-duration">Duration: ${debuff.duration} turn(s)</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="effect-remove-btn" onclick="decreaseDuration('debuff', ${debuff.id})">Turn</button>
-                            <button class="effect-remove-btn" onclick="removeDebuff(${debuff.id})">Remove</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
+            debuffsList.innerHTML = debuffs.length === 0 ? '<div class="empty-message">No active debuffs</div>' : debuffs.map(d => `<div class="effect-item"><div class="effect-info"><div class="effect-name">${d.name}</div><div class="effect-duration">Duration: ${d.duration} turn(s)</div></div><div style="display: flex; gap: 8px;"><button class="effect-remove-btn" onclick="decreaseDuration('debuff', ${d.id})">Turn</button><button class="effect-remove-btn" onclick="removeDebuff(${d.id})">Remove</button></div></div>`).join('');
+
             const boostsList = document.getElementById('boostsList');
-            if (boosts.length === 0) {
-                boostsList.innerHTML = '<div class="empty-message">No active boosts</div>';
-            } else {
-                boostsList.innerHTML = boosts.map(boost => `
-                    <div class="effect-item">
-                        <div class="effect-info">
-                            <div class="effect-name">${boost.name}</div>
-                            <div class="effect-duration">Duration: ${boost.duration} turn(s)</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="effect-remove-btn" onclick="decreaseDuration('boost', ${boost.id})">Turn</button>
-                            <button class="effect-remove-btn" onclick="removeBoost(${boost.id})">Remove</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            boostsList.innerHTML = boosts.length === 0 ? '<div class="empty-message">No active boosts</div>' : boosts.map(b => `<div class="effect-item"><div class="effect-info"><div class="effect-name">${b.name}</div><div class="effect-duration">Duration: ${b.duration} turn(s)</div></div><div style="display: flex; gap: 8px;"><button class="effect-remove-btn" onclick="decreaseDuration('boost', ${b.id})">Turn</button><button class="effect-remove-btn" onclick="removeBoost(${b.id})">Remove</button></div></div>`).join('');
         }
 
         function updateDisplay() {
-            const tagCount = playerData.tagSkills ? playerData.tagSkills.length : 0;
+            const tagCount = playerData.tagSkills.length;
             document.getElementById('tagBadge').textContent = `${tagCount}/${MAX_TAG_SKILLS}`;
 
             const skillsGrid = document.getElementById('skillsGrid');
-            skillsGrid.innerHTML = '';
-
-            SKILLS.forEach(skill => {
+            skillsGrid.innerHTML = SKILLS.map(skill => {
                 const special = getSpecialForSkill(skill);
                 const skillValue = playerData.skills[skill] || 0;
                 const isTagged = playerData.tagSkills.includes(skill);
                 const bonus = calculateSkillBonus(skillValue, isTagged);
+                return `<div class="skill-item"><div class="skill-left"><input type="checkbox" class="skill-checkbox" ${isTagged ? 'checked' : ''} onchange="toggleTagSkill('${skill}')"><div class="skill-info"><div class="skill-name">${skill}</div><div class="skill-special">${special}</div><div class="skill-bonus">Bonus: ${formatBonus(bonus)}</div></div></div><div class="skill-controls"><button class="skill-btn" onclick="updateSkill('${skill}', -1)">-</button><span class="skill-value">${skillValue}</span><button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button></div></div>`;
+            }).join('');
 
-                const skillDiv = document.createElement('div');
-                skillDiv.className = 'skill-item';
-                skillDiv.innerHTML = `
-                    <div class="skill-left">
-                        <input type="checkbox" class="skill-checkbox"
-                            ${isTagged ? 'checked' : ''}
-                            onchange="toggleTagSkill('${skill}')"
-                            title="Tag ${skill} (${MAX_TAG_SKILLS} max)">
-                        <div class="skill-info">
-                            <div class="skill-name">${skill}</div>
-                            <div class="skill-special">${special}</div>
-                            <div class="skill-bonus">Bonus: ${formatBonus(bonus)}</div>
-                        </div>
-                    </div>
-                    <div class="skill-controls">
-                        <button class="skill-btn`*
+            for (const [special, skills] of Object.entries(SKILLS_BY_SPECIAL)) {
+                const el = document.getElementById(`skills-${special}`);
+                if (el) el.textContent = skills.length ? skills.join('\n') : '—';
+            }
+        }
+
+        function updatePerksDisplay() {
+            const perksGrid = document.getElementById('perksGrid');
+            let perks = [];
+            try {
+                perks = JSON.parse(localStorage.getItem('pipboyPerks') || '[]');
+            } catch (e) {}
+            
+            perksGrid.innerHTML = perks.length === 0 ? '<div class="perks-empty">No perks earned yet. Keep adventuring!</div>' : perks.map(p => `<div class="perk-box"><div class="perk-title">${p.name || 'Unknown'}</div><div class="perk-description">${p.description || 'No description'}</div>${p.rank ? `<div class="perk-rank">Rank: ${p.rank}</div>` : ''}</div>`).join('');
+        }
+
+        function loadCharacterName*
