@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pip-Boy Messages - Vault 215</title>
+    <style>
+        /* ===========================
+           VAULT 215 MESSAGES PAGE
+           =========================== */
+
+        :root {
+            --vault-primary: #4ade80;
+            --vault-secondary: #fbbf24;
+            --vault-dark: #0a0a0a;
+            --vault-darker: #1a1a1a;
+            --vault-accent: #c084fc;
+            --vault-success: #4ade80;
+            --vault-error: #ff6b6b;
+            --vault-warning: #fbbf24;
+            --vault-info: #9333ea;
+            --vault-green: #4ade80;
+            --vault-gold: #fbbf24;
+            --vault-blue-dark: #2d5016;
+            --vault-blue-light: #3d6b1f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--vault-dark);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
+        }
+
+        body {
+            padding: 20px;
+        }
+
+        /* Scanline effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* ===== VAULT HEADER ===== */
+        .vault-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid var(--vault-green);
+            border-radius: 8px;
+            background-color: var(--vault-darker);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+        }
+
+        .vault-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 15px var(--vault-gold);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        .vault-subtitle {
+            font-size: 12px;
+            color: var(--vault-green);
+            text-shadow: 0 0 8px var(--vault-green);
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+        /* ===== SECTION PANELS ===== */
+        .section-panel {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 8px var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--vault-green);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* ===== MESSAGE LIST ===== */
+        .message-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .message-item {
+            border: 1px solid var(--vault-green);
+            border-radius: 4px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: var(--vault-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .message-item:hover {
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+        }
+
+        .message-item.unread {
+            border-left: 4px solid var(--vault-gold);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .message-sender {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .message-date {
+            font-size: 10px;
+            color: var(--vault-green);
+            opacity: 0.7;
+        }
+
+        .message-subject {
+            font-size: 12px;
+            color: var(--vault-green);
+            text-shadow: 0 0 4px var(--vault-green);
+            margin-bottom: 4px;
+            font-weight: bold;
+        }
+
+        .message-preview {
+            font-size: 11px;
+            color: var(--vault-green);
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ===== MESSAGE DETAIL ===== */
+        .message-detail {
+            display: none;
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+
+        .message-detail.active {
+            display: block;
+        }
+
+        .message-body {
+            font-size: 12px;
+            color: var(--vault-green);
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        /* ===== COMPOSE AREA ===== */
+        .compose-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .compose-input {
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            border-radius: 4px;
+            padding: 10px 12px;
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .compose-input:focus {
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+        }
+
+        .compose-input::placeholder {
+            color: rgba(74, 222, 128, 0.4);
+        }
+
+        textarea.compose-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .vault-btn {
+            padding: 10px 20px;
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            border-radius: 4px;
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            align-self: flex-end;
+        }
+
+        .vault-btn:hover {
+            background-color: var(--vault-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 8px var(--vault-gold);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+        }
+
+        /* ===== STATUS BAR ===== */
+        .status-bar {
+            text-align: center;
+            font-size: 11px;
+            color: var(--vault-green);
+            opacity: 0.6;
+            margin-top: 5px;
+        }
+
+        /* ===== FOOTER ===== */
+        .vault-footer {
+            text-align: center;
+            padding: 15px;
+            border-top: 1px solid var(--vault-green);
+            font-size: 10px;
+            color: var(--vault-green);
+            opacity: 0.5;
+            margin-top: 30px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .vault-footer span {
+            color: var(--vault-gold);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--vault-green);
+            opacity: 0.5;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="vault-header">
+            <div class="vault-title">📻 MESSAGES</div>
+            <div class="vault-subtitle" id="charName">VAULT 215 COMMUNICATION SYSTEM</div>
+        </div>
+
+        <!-- INBOX -->
+        <div class="section-panel">
+            <div class="section-title">📬 INBOX</div>
+            <ul class="message-list" id="messageList">
+                <li class="empty-state">[ NO MESSAGES RECEIVED ]</li>
+            </ul>
+        </div>
+
+        <!-- COMPOSE -->
+        <div class="section-panel">
+            <div class="section-title">✏ COMPOSE MESSAGE</div>
+            <div class="compose-area">
+                <input class="compose-input" id="msgTo" type="text" placeholder="TO: Recipient name..." />
+                <input class="compose-input" id="msgSubject" type="text" placeholder="SUBJECT: ..." />
+                <textarea class="compose-input" id="msgBody" placeholder="MESSAGE BODY..."></textarea>
+                <button class="vault-btn" onclick="sendMessage()">📤 SEND TRANSMISSION</button>
+            </div>
+            <div class="status-bar" id="sendStatus"></div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="vault-footer">
+            <p>VAULT <span>215</span> RESIDENT • PROPERTY OF VAULT-TEC INDUSTRIES</p>
+            <p style="margin-top: 5px;">Communications Secured and Encrypted</p>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // MESSAGES PAGE - VAULT 215
+        // ═══════════════════════════════════════════════════════════
+
+        function loadMessages() {
+            const messages = JSON.parse(localStorage.getItem('pipboyMessages') || '[]');
+            const list = document.getElementById('messageList');
+            if (messages.length === 0) {
+                list.innerHTML = '<li class="empty-state">[ NO MESSAGES RECEIVED ]</li>';
+                return;
+            }
+            list.innerHTML = '';
+            messages.forEach((msg, index) => {
+                const item = document.createElement('li');
+                item.className = 'message-item' + (msg.unread ? ' unread' : '');
+                item.innerHTML = `
+                    <div class="message-header">
+                        <span class="message-sender">${escapeHtml(msg.from)}</span>
+                        <span class="message-date">${escapeHtml(msg.date)}</span>
+                    </div>
+                    <div class="message-subject">${escapeHtml(msg.subject)}</div>
+                    <div class="message-preview">${escapeHtml(msg.body)}</div>
+                    <div class="message-detail" id="detail-${index}">
+                        <div class="message-body">${escapeHtml(msg.body)}</div>
+                    </div>
+                `;
+                item.addEventListener('click', function() {
+                    const detail = document.getElementById(`detail-${index}`);
+                    detail.classList.toggle('active');
+                    if (msg.unread) {
+                        msg.unread = false;
+                        item.classList.remove('unread');
+                        localStorage.setItem('pipboyMessages', JSON.stringify(messages));
+                    }
+                });
+                list.appendChild(item);
+            });
+        }
+
+        function sendMessage() {
+            const to = document.getElementById('msgTo').value.trim();
+            const subject = document.getElementById('msgSubject').value.trim();
+            const body = document.getElementById('msgBody').value.trim();
+            const status = document.getElementById('sendStatus');
+
+            if (!to || !subject || !body) {
+                status.textContent = '[ ERROR: ALL FIELDS REQUIRED ]';
+                status.style.color = 'var(--vault-error)';
+                return;
+            }
+
+            const sent = JSON.parse(localStorage.getItem('pipboySentMessages') || '[]');
+            sent.push({
+                to: to,
+                subject: subject,
+                body: body,
+                date: new Date().toLocaleDateString()
+            });
+            localStorage.setItem('pipboySentMessages', JSON.stringify(sent));
+
+            document.getElementById('msgTo').value = '';
+            document.getElementById('msgSubject').value = '';
+            document.getElementById('msgBody').value = '';
+            status.textContent = '[ TRANSMISSION SENT SUCCESSFULLY ]';
+            status.style.color = 'var(--vault-success)';
+            setTimeout(() => { status.textContent = ''; }, 3000);
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function loadCharacterName() {
+            const name = localStorage.getItem('characterName') || localStorage.getItem('pipboyCharacterName');
+            if (name) {
+                const safeName = String(name).replace(/[^a-zA-Z0-9 '\-]/g, '').trim().toUpperCase();
+                if (safeName) {
+                    document.getElementById('charName').textContent = `${safeName} • VAULT 215 COMMUNICATION SYSTEM`;
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCharacterName();
+            loadMessages();
+        });
+    </script>
+    <script src="navigation.js"></script>
+</body>
+</html>
