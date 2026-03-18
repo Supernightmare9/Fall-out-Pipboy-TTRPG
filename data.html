@@ -1122,4 +1122,21 @@
             if (savedNPCs) {
                 customNPCs = JSON.parse(savedNPCs);
             }
-            render
+            renderNPCs();
+
+            const savedFactions = localStorage.getItem('customFactions');
+            if (savedFactions) {
+                customFactions = JSON.parse(savedFactions);
+            }
+            renderFactions();
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCharacterData();
+        });
+    </script>
+
+    <!-- Bottom Navigation (shared) -->
+    <script src="navigation.js"></script>
+</body>
+</html>
