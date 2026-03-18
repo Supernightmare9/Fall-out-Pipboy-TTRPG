@@ -568,22 +568,6 @@
             text-shadow: 0 0 2px var(--vault-info);
         }
 
-        /* ===== NAVIGATION ===== */
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-            position: relative;
-            z-index: 1;
-        }
-
-        .nav-button {
-            flex: 1;
-            min-width: 150px;
-        }
-
         /* ===== MODAL ===== */
         .vault-modal {
             display: none;
@@ -678,14 +662,6 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
-            }
-
-            .nav-buttons {
-                flex-direction: column;
-            }
-
-            .nav-button {
-                width: 100%;
             }
 
             .vault-modal-content {
@@ -903,35 +879,6 @@
             <ul class="item-list" id="ammoList"></ul>
         </div>
 
-        <!-- NAVIGATION -->
-        <div class="nav-buttons">
-            <button class="nav-button vault-btn" onclick="window.location.href='character.html'">← CHARACTER</button>
-            <button class="nav-button vault-btn" onclick="window.location.href='stats.html'">STATS</button>
-            <button class="nav-button vault-btn" onclick="window.location.href='data.html'">DATA →</button>
-        </div>
-
         <!-- FOOTER -->
         <div class="vault-footer">
-            <p>VAULT <span>215</span> RESIDENT • PROPERTY OF VAULT-TEC INDUSTRIES</p>
-            <p style="margin-top: 5px;">Inventory Data Secured and Synchronized</p>
-        </div>
-    </div>
-
-    <!-- EDIT MODAL -->
-    <div id="editModal" class="vault-modal">
-        <div class="vault-modal-content">
-            <div class="vault-modal-title">EDIT ITEM - VAULT 215</div>
-            <div class="form-grid" id="editFormFields"></div>
-            <div class="vault-modal-buttons">
-                <button class="vault-btn vault-btn-danger" onclick="closeEditModal()">CANCEL</button>
-                <button class="vault-btn" onclick="saveEditItem()">SAVE CHANGES</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="inventory.js"></script>
-
-    <!-- Bottom Navigation (shared) -->
-    <script src="navigation.js"></script>
-</body>
-</html>
+            <p>*
