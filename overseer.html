@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault 215 — Overseer Console</title>
+    <style>
+        /* =============================================
+           VAULT 215 OVERSEER CONSOLE
+           Authority Command Center — Blue & Gold Theme
+           ============================================= */
+
+        :root {
+            --overseer-blue: #0a1628;
+            --overseer-blue-mid: #0d2045;
+            --overseer-blue-bright: #1a3a6e;
+            --overseer-blue-light: #2a5298;
+            --overseer-gold: #d4a017;
+            --overseer-gold-bright: #f0c040;
+            --overseer-gold-dim: #8b6914;
+            --overseer-white: #e8e8e8;
+            --overseer-red: #cc2200;
+            --overseer-red-bright: #ff3300;
+            --overseer-green: #00cc66;
+            --overseer-green-bright: #00ff80;
+            --overseer-dark: #04080f;
+            --overseer-darker: #020408;
+            --overseer-border: #2a5298;
+            --overseer-glow-gold: rgba(212, 160, 23, 0.6);
+            --overseer-glow-blue: rgba(42, 82, 152, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--overseer-dark);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            background-image:
+                radial-gradient(circle at 15% 30%, rgba(42, 82, 152, 0.12) 0%, transparent 55%),
+                radial-gradient(circle at 85% 70%, rgba(212, 160, 23, 0.08) 0%, transparent 55%);
+        }
+
+        /* ===== SCANLINE EFFECT ===== */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.18),
+                rgba(0, 0, 0, 0.18) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ===== HIDDEN UTIL ===== */
+        .hidden { display: none !important; }
+
+        /* =====================
+           LOGIN SCREEN
+           ===================== */
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-panel {
+            background: var(--overseer-blue-mid);
+            border: 3px solid var(--overseer-gold);
+            box-shadow:
+                0 0 40px var(--overseer-glow-gold),
+                0 0 80px rgba(212, 160, 23, 0.2),
+                inset 0 0 30px rgba(42, 82, 152, 0.15);
+            padding: 50px 60px;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .login-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--overseer-gold), var(--overseer-gold-bright), var(--overseer-gold), transparent);
+        }
+
+        .login-emblem {
+            font-size: 11px;
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 8px var(--overseer-glow-gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .login-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 15px var(--overseer-glow-gold), 0 0 30px rgba(212, 160, 23, 0.4);
+            letter-spacing: 4px;
+            margin-bottom: 4px;
+            animation: authority-pulse 3s ease-in-out infinite;
+        }
+
+        .login-subtitle {
+            font-size: 12px;
+            color: var(--overseer-white);
+            opacity: 0.7;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+        }
+
+        .login-divider {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--overseer-gold), transparent);
+            margin: 0 0 30px 0;
+            opacity: 0.6;
+        }
+
+        .login-field {
+            margin-bottom: 22px;
+            text-align: left;
+        }
+
+        .login-field label {
+            display: block;
+            font-size: 11px;
+            color: var(--overseer-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .login-field input,
+        .login-field select {
+            width: 100%;
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-blue-light);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 12px 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .login-field input:focus,
+        .login-field select:focus {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 10px rgba(212, 160, 23, 0.3);
+        }
+
+        .login-field select option {
+            background: var(--overseer-blue);
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--overseer-gold-dim), var(--overseer-gold));
+            border: 2px solid var(--overseer-gold-bright);
+            color: var(--overseer-darker);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, var(--overseer-gold), var(--overseer-gold-bright));
+            box-shadow: 0 0 20px var(--overseer-glow-gold);
+            transform: translateY(-1px);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-remember {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 16px;
+            font-size: 11px;
+            color: var(--overseer-white);
+            opacity: 0.7;
+            cursor: pointer;
+        }
+
+        .login-remember input[type="checkbox"] {
+            accent-color: var(--overseer-gold);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        .login-error {
+            background: rgba(204, 34, 0, 0.2);
+            border: 1px solid var(--overseer-red-bright);
+            color: var(--overseer-red-bright);
+            padding: 10px 14px;
+            font-size: 12px;
+            margin-top: 14px;
+            display: none;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .login-footer {
+            margin-top: 30px;
+            font-size: 10px;
+            color: var(--overseer-white);
+            opacity: 0.35;
+            letter-spacing: 1px;
+        }
+
+        /* =====================
+           DASHBOARD SCREEN
+           ===================== */
+        #dashboardScreen {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== TOP COMMAND BAR ===== */
+        .command-bar {
+            background: var(--overseer-blue-mid);
+            border-bottom: 2px solid var(--overseer-gold);
+            box-shadow: 0 2px 20px var(--overseer-glow-gold);
+            padding: 14px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .command-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .overseer-badge {
+            font-size: 9px;
+            color: var(--overseer-gold-bright);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 6px var(--overseer-glow-gold);
+        }
+
+        .overseer-title-bar {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--overseer-gold-bright);
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--overseer-glow-gold);
+        }
+
+        .overseer-id-display {
+            font-size: 11px;
+            color: var(--overseer-white);
+            opacity: 0.75;
+            letter-spacing: 1px;
+        }
+
+        .overseer-id-display span {
+            color: var(--overseer-gold-bright);
+            font-weight: bold;
+        }
+
+        .command-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cmd-btn {
+            background: transparent;
+            border: 1px solid var(--overseer-gold);
+            color: var(--overseer-gold);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .cmd-btn:hover {
+            background: rgba(212, 160, 23, 0.15);
+            box-shadow: 0 0 10px rgba(212, 160, 23, 0.3);
+        }
+
+        .cmd-btn.danger {
+            border-color: var(--overseer-red-bright);
+            color: var(--overseer-red-bright);
+        }
+
+        .cmd-btn.danger:hover {
+            background: rgba(255, 51, 0, 0.15);
+            box-shadow: 0 0 10px rgba(255, 51, 0, 0.3);
+        }
+
+        .cmd-btn.primary {
+            background: linear-gradient(135deg, var(--overseer-gold-dim), var(--overseer-gold));
+            border-color: var(--overseer-gold-bright);
+            color: var(--overseer-darker);
+            font-weight: bold;
+        }
+
+        .cmd-btn.primary:hover {
+            background: linear-gradient(135deg, var(--overseer-gold), var(--overseer-gold-bright));
+            box-shadow: 0 0 15px var(--overseer-glow-gold);
+        }
+
+        /* ===== STATUS TICKER ===== */
+        .status-ticker {
+            background: var(--overseer-blue);
+            border-bottom: 1px solid rgba(212, 160, 23, 0.3);
+            padding: 6px 30px;
+            font-size: 10px;
+            color: var(--overseer-gold);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            overflow-x: auto;
+        }
+
+        .ticker-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .ticker-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--overseer-green-bright);
+            box-shadow: 0 0 6px var(--overseer-green-bright);
+            animation: blink-dot 2s ease-in-out infinite;
+        }
+
+        .ticker-dot.alert {
+            background: var(--overseer-red-bright);
+            box-shadow: 0 0 6px var(--overseer-red-bright);
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .dashboard-content {
+            flex: 1;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.4);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            color: var(--overseer-gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 6px var(--overseer-glow-gold);
+        }
+
+        .section-count {
+            font-size: 11px;
+            color: var(--overseer-white);
+            opacity: 0.6;
+            letter-spacing: 1px;
+        }
+
+        /* ===== CHARACTER GRID ===== */
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .character-card {
+            background: var(--overseer-blue-mid);
+            border: 1px solid var(--overseer-border);
+            box-shadow: 0 0 15px rgba(42, 82, 152, 0.3);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .character-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--overseer-blue-light), transparent);
+        }
+
+        .character-card:hover {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 25px var(--overseer-glow-gold);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: var(--overseer-blue);
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .card-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--overseer-gold-bright);
+            letter-spacing: 1px;
+            text-shadow: 0 0 6px var(--overseer-glow-gold);
+            word-break: break-word;
+        }
+
+        .card-identity {
+            font-size: 10px;
+            color: var(--overseer-white);
+            opacity: 0.65;
+            letter-spacing: 1px;
+            margin-top: 3px;
+        }
+
+        .card-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            font-size: 9px;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            border: 1px solid;
+            text-transform: uppercase;
+        }
+
+        .status-badge.healthy {
+            border-color: var(--overseer-green-bright);
+            color: var(--overseer-green-bright);
+            box-shadow: 0 0 5px rgba(0, 255, 128, 0.3);
+        }
+
+        .status-badge.critical {
+            border-color: var(--overseer-red-bright);
+            color: var(--overseer-red-bright);
+            box-shadow: 0 0 5px rgba(255, 51, 0, 0.3);
+            animation: blink-dot 1.2s ease-in-out infinite;
+        }
+
+        .status-badge.caution {
+            border-color: var(--overseer-gold-bright);
+            color: var(--overseer-gold-bright);
+            box-shadow: 0 0 5px var(--overseer-glow-gold);
+        }
+
+        .card-stats {
+            padding: 14px 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .card-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .card-stat-label {
+            font-size: 9px;
+            color: var(--overseer-gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .card-stat-value {
+            font-size: 14px;
+            color: var(--overseer-white);
+            font-weight: bold;
+        }
+
+        .card-stat-value.hp-value.healthy { color: var(--overseer-green-bright); }
+        .card-stat-value.hp-value.critical { color: var(--overseer-red-bright); }
+        .card-stat-value.hp-value.caution { color: var(--overseer-gold-bright); }
+
+        /* Health Bar in card */
+        .mini-bar-wrap {
+            grid-column: 1 / -1;
+        }
+
+        .mini-bar-label {
+            font-size: 9px;
+            color: var(--overseer-gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .mini-bar-bg {
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            height: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mini-bar-fill {
+            height: 100%;
+            transition: width 0.4s;
+            background: var(--overseer-green-bright);
+            box-shadow: 0 0 6px var(--overseer-green-bright);
+        }
+
+        .mini-bar-fill.critical {
+            background: var(--overseer-red-bright);
+            box-shadow: 0 0 6px var(--overseer-red-bright);
+        }
+
+        .mini-bar-fill.caution {
+            background: var(--overseer-gold-bright);
+            box-shadow: 0 0 6px var(--overseer-gold-bright);
+        }
+
+        /* Card Actions */
+        .card-actions {
+            padding: 12px 16px;
+            border-top: 1px solid rgba(212, 160, 23, 0.15);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .card-btn {
+            background: transparent;
+            border: 1px solid var(--overseer-blue-light);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            letter-spacing: 1px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .card-btn:hover {
+            border-color: var(--overseer-gold);
+            color: var(--overseer-gold);
+            background: rgba(212, 160, 23, 0.1);
+        }
+
+        .card-btn.edit-btn:hover {
+            border-color: var(--overseer-gold-bright);
+            color: var(--overseer-gold-bright);
+        }
+
+        .card-btn.delete-btn {
+            border-color: rgba(204, 34, 0, 0.5);
+            color: rgba(255, 51, 0, 0.7);
+        }
+
+        .card-btn.delete-btn:hover {
+            border-color: var(--overseer-red-bright);
+            color: var(--overseer-red-bright);
+            background: rgba(255, 51, 0, 0.1);
+        }
+
+        /* Empty state */
+        .empty-vault {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--overseer-blue-mid);
+            border: 1px dashed var(--overseer-border);
+        }
+
+        .empty-vault-title {
+            font-size: 16px;
+            color: var(--overseer-gold);
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+        }
+
+        .empty-vault-text {
+            font-size: 12px;
+            color: var(--overseer-white);
+            opacity: 0.5;
+            line-height: 1.8;
+        }
+
+        /* =====================
+           INFO PANEL
+           ===================== */
+        .info-panel {
+            background: var(--overseer-blue-mid);
+            border: 1px solid rgba(212, 160, 23, 0.3);
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .info-panel-title {
+            font-size: 11px;
+            color: var(--overseer-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+        }
+
+        .info-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 8px;
+        }
+
+        .info-item {
+            font-size: 11px;
+            color: var(--overseer-white);
+            opacity: 0.7;
+            padding: 6px 10px;
+            border-left: 2px solid var(--overseer-gold-dim);
+            letter-spacing: 0.5px;
+        }
+
+        .info-item strong {
+            color: var(--overseer-gold-bright);
+        }
+
+        /* =====================
+           MODAL — CHARACTER EDIT
+           ===================== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 8, 15, 0.88);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .modal-panel {
+            background: var(--overseer-blue-mid);
+            border: 2px solid var(--overseer-gold);
+            box-shadow:
+                0 0 50px var(--overseer-glow-gold),
+                0 0 100px rgba(212, 160, 23, 0.15);
+            width: 100%;
+            max-width: 720px;
+            position: relative;
+            margin: auto;
+        }
+
+        .modal-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--overseer-gold-bright), transparent);
+        }
+
+        .modal-header {
+            background: var(--overseer-blue);
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--overseer-gold-bright);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px var(--overseer-glow-gold);
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: 1px solid var(--overseer-red-bright);
+            color: var(--overseer-red-bright);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 5px 12px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255, 51, 0, 0.15);
+            box-shadow: 0 0 8px rgba(255, 51, 0, 0.3);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-track { background: var(--overseer-blue); }
+        .modal-body::-webkit-scrollbar-thumb { background: var(--overseer-gold-dim); }
+
+        .modal-section-title {
+            font-size: 10px;
+            color: var(--overseer-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 20px 0 12px 0;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.25);
+        }
+
+        .modal-section-title:first-of-type {
+            margin-top: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .form-row.single {
+            grid-template-columns: 1fr;
+        }
+
+        .form-row.triple {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 10px;
+            color: var(--overseer-gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-blue-light);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 9px 12px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 8px rgba(212, 160, 23, 0.25);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .form-group select option {
+            background: var(--overseer-blue);
+        }
+
+        /* SPECIAL grid in modal */
+        .special-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .special-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .special-input-group label {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 6px var(--overseer-glow-gold);
+            letter-spacing: 0;
+        }
+
+        .special-input-group input {
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-blue-light);
+            color: var(--overseer-gold-bright);
+            font-family: 'Courier New', monospace;
+            padding: 8px 4px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .special-input-group input:focus {
+            border-color: var(--overseer-gold);
+            box-shadow: 0 0 6px rgba(212, 160, 23, 0.25);
+        }
+
+        .special-input-group span {
+            font-size: 8px;
+            color: var(--overseer-white);
+            opacity: 0.55;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+
+        /* Modal footer */
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(212, 160, 23, 0.2);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .modal-btn {
+            background: transparent;
+            border: 1px solid var(--overseer-blue-light);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            padding: 9px 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .modal-btn.save-btn {
+            background: linear-gradient(135deg, var(--overseer-gold-dim), var(--overseer-gold));
+            border-color: var(--overseer-gold-bright);
+            color: var(--overseer-darker);
+            font-weight: bold;
+        }
+
+        .modal-btn.save-btn:hover {
+            background: linear-gradient(135deg, var(--overseer-gold), var(--overseer-gold-bright));
+            box-shadow: 0 0 15px var(--overseer-glow-gold);
+        }
+
+        .modal-btn:hover {
+            border-color: var(--overseer-gold);
+            color: var(--overseer-gold);
+        }
+
+        .modal-message {
+            padding: 8px 14px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .modal-message.success {
+            background: rgba(0, 204, 102, 0.1);
+            border: 1px solid var(--overseer-green-bright);
+            color: var(--overseer-green-bright);
+            display: block;
+        }
+
+        .modal-message.error {
+            background: rgba(204, 34, 0, 0.1);
+            border: 1px solid var(--overseer-red-bright);
+            color: var(--overseer-red-bright);
+            display: block;
+        }
+
+        /* =====================
+           VIEW MODAL
+           ===================== */
+        .view-section {
+            margin-bottom: 18px;
+        }
+
+        .view-section-title {
+            font-size: 10px;
+            color: var(--overseer-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(212, 160, 23, 0.2);
+        }
+
+        .view-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+        }
+
+        .view-stat {
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            padding: 10px 12px;
+        }
+
+        .view-stat-label {
+            font-size: 9px;
+            color: var(--overseer-gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .view-stat-value {
+            font-size: 14px;
+            color: var(--overseer-white);
+            font-weight: bold;
+        }
+
+        .view-backstory {
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            padding: 14px;
+            font-size: 12px;
+            color: var(--overseer-white);
+            opacity: 0.8;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* SPECIAL display in view */
+        .special-display-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .special-display-item {
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            padding: 10px 6px;
+            text-align: center;
+        }
+
+        .special-display-letter {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 6px var(--overseer-glow-gold);
+        }
+
+        .special-display-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--overseer-white);
+            margin: 4px 0;
+        }
+
+        .special-display-name {
+            font-size: 7px;
+            color: var(--overseer-white);
+            opacity: 0.5;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* =====================
+           INVENTORY MODAL
+           ===================== */
+        .inventory-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .inv-tab {
+            background: transparent;
+            border: 1px solid var(--overseer-blue-light);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            letter-spacing: 1px;
+            padding: 6px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            opacity: 0.7;
+        }
+
+        .inv-tab.active,
+        .inv-tab:hover {
+            border-color: var(--overseer-gold);
+            color: var(--overseer-gold);
+            background: rgba(212, 160, 23, 0.1);
+            opacity: 1;
+        }
+
+        .inv-content { display: none; }
+        .inv-content.active { display: block; }
+
+        .inv-item-list {
+            max-height: 220px;
+            overflow-y: auto;
+            margin-bottom: 14px;
+        }
+
+        .inv-item-list::-webkit-scrollbar { width: 4px; }
+        .inv-item-list::-webkit-scrollbar-track { background: var(--overseer-blue); }
+        .inv-item-list::-webkit-scrollbar-thumb { background: var(--overseer-gold-dim); }
+
+        .inv-item-row {
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+            border-bottom: none;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 11px;
+        }
+
+        .inv-item-row:last-child { border-bottom: 1px solid var(--overseer-border); }
+
+        .inv-item-name {
+            color: var(--overseer-white);
+            flex: 1;
+        }
+
+        .inv-item-detail {
+            color: var(--overseer-gold);
+            opacity: 0.75;
+            font-size: 10px;
+        }
+
+        .inv-item-del {
+            background: transparent;
+            border: none;
+            color: var(--overseer-red-bright);
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.6;
+            padding: 2px 6px;
+            transition: opacity 0.2s;
+        }
+
+        .inv-item-del:hover { opacity: 1; }
+
+        .inv-empty {
+            text-align: center;
+            padding: 24px;
+            font-size: 11px;
+            color: var(--overseer-white);
+            opacity: 0.4;
+            letter-spacing: 1px;
+            background: var(--overseer-blue);
+            border: 1px solid var(--overseer-border);
+        }
+
+        /* Add item form */
+        .inv-add-form {
+            background: var(--overseer-blue);
+            border: 1px solid rgba(212, 160, 23, 0.2);
+            padding: 14px;
+        }
+
+        .inv-add-title {
+            font-size: 10px;
+            color: var(--overseer-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .inv-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .inv-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .inv-form-group label {
+            font-size: 9px;
+            color: var(--overseer-gold);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .inv-form-group input,
+        .inv-form-group select {
+            background: var(--overseer-blue-mid);
+            border: 1px solid var(--overseer-border);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 7px 10px;
+            outline: none;
+            transition: border-color 0.2s;
+            width: 100%;
+        }
+
+        .inv-form-group input:focus,
+        .inv-form-group select:focus {
+            border-color: var(--overseer-gold);
+        }
+
+        .inv-add-btn {
+            background: linear-gradient(135deg, var(--overseer-gold-dim), var(--overseer-gold));
+            border: 1px solid var(--overseer-gold-bright);
+            color: var(--overseer-darker);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            padding: 8px 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .inv-add-btn:hover {
+            background: linear-gradient(135deg, var(--overseer-gold), var(--overseer-gold-bright));
+            box-shadow: 0 0 10px var(--overseer-glow-gold);
+        }
+
+        /* =====================
+           ANIMATIONS
+           ===================== */
+        @keyframes authority-pulse {
+            0%, 100% { text-shadow: 0 0 10px var(--overseer-glow-gold), 0 0 20px rgba(212, 160, 23, 0.4); }
+            50% { text-shadow: 0 0 20px var(--overseer-glow-gold), 0 0 40px rgba(212, 160, 23, 0.6); }
+        }
+
+        @keyframes blink-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* =====================
+           RESPONSIVE
+           ===================== */
+        @media (max-width: 600px) {
+            .login-panel { padding: 30px 24px; }
+            .command-bar { padding: 12px 16px; }
+            .dashboard-content { padding: 16px; }
+            .form-row { grid-template-columns: 1fr; }
+            .form-row.triple { grid-template-columns: 1fr 1fr; }
+            .special-grid { grid-template-columns: repeat(4, 1fr); }
+            .special-display-grid { grid-template-columns: repeat(4, 1fr); }
+            .characters-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===================== LOGIN SCREEN ===================== -->
+<div id="loginScreen">
+    <div class="login-panel">
+        <div class="login-emblem">⬡ Vault-Tec Authority — Vault 215 ⬡</div>
+        <div class="login-title">OVERSEER CONSOLE</div>
+        <div class="login-subtitle">COMMAND CENTER ACCESS — RESTRICTED</div>
+        <hr class="login-divider">
+
+        <div class="login-field">
+            <label>Overseer Identification</label>
+            <select id="loginName">
+                <option value="">— Select Overseer —</option>
+                <option value="Overseer">Overseer</option>
+            </select>
+        </div>
+
+        <div class="login-field">
+            <label>Authorization PIN</label>
+            <input type="password" id="loginPin" placeholder="• • • • •" maxlength="20"
+                   onkeydown="if(event.key==='Enter') attemptLogin()">
+        </div>
+
+        <button class="login-btn" onclick="attemptLogin()">◈ AUTHORIZE ACCESS ◈</button>
+
+        <label class="login-remember">
+            <input type="checkbox" id="rememberSession"> Remember this session
+        </label>
+
+        <div id="loginError" class="login-error">
+            ⚠ AUTHORIZATION DENIED — Invalid credentials
+        </div>
+
+        <div class="login-footer">
+            VAULT-TEC CORPORATION • ALL SYSTEMS MONITORED<br>
+            UNAUTHORIZED ACCESS WILL BE PROSECUTED
+        </div>
+    </div>
+</div>
+
+<!-- ===================== DASHBOARD SCREEN ===================== -->
+<div id="dashboardScreen" class="hidden">
+
+    <!-- Command Bar -->
+    <div class="command-bar">
+        <div class="command-bar-left">
+            <div>
+                <div class="overseer-badge">⬡ Vault-Tec Authority</div>
+                <div class="overseer-title-bar">OVERSEER CONSOLE</div>
+            </div>
+            <div class="overseer-id-display">
+                Overseer: <span id="overseerNameDisplay">—</span>
+            </div>
+        </div>
+        <div class="command-bar-right">
+            <button class="cmd-btn" onclick="refreshDashboard()">↻ Refresh</button>
+            <a href="index.html" class="cmd-btn" style="text-decoration:none; display:inline-block; line-height:normal;">⌂ Main Menu</a>
+            <button class="cmd-btn danger" onclick="logoutOverseer()">⏻ Logout</button>
+        </div>
+    </div>
+
+    <!-- Status Ticker -->
+    <div class="status-ticker">
+        <div class="ticker-item">
+            <span class="ticker-dot"></span>
+            <span>VAULT 215 SYSTEMS ONLINE</span>
+        </div>
+        <div class="ticker-item">
+            <span class="ticker-dot"></span>
+            <span>RESIDENT DATABASE: ACTIVE</span>
+        </div>
+        <div class="ticker-item" id="tickerCharCount">
+            <span class="ticker-dot"></span>
+            <span>CHARACTERS ON RECORD: 0</span>
+        </div>
+        <div class="ticker-item">
+            <span class="ticker-dot"></span>
+            <span id="tickerTimestamp">SESSION START: —</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+
+        <!-- Characters Section -->
+        <div class="section-header">
+            <div class="section-title">◈ Resident Dossiers</div>
+            <div class="section-count" id="charCountLabel">0 characters on record</div>
+        </div>
+
+        <div class="characters-grid" id="charactersGrid">
+            <!-- populated by JS -->
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel" style="margin-top:30px;">
+            <div class="info-panel-title">▶ Overseer Information — Console Help</div>
+            <div class="info-list">
+                <div class="info-item"><strong>View Full:</strong> See complete character dossier</div>
+                <div class="info-item"><strong>Edit Stats:</strong> Modify any character stat or attribute</div>
+                <div class="info-item"><strong>Inventory:</strong> Add or remove items from a character's inventory</div>
+                <div class="info-item"><strong>Delete:</strong> Permanently remove a character record</div>
+                <div class="info-item"><strong>Health:</strong> <span style="color:var(--overseer-green-bright)">■</span> Healthy ≥60% &nbsp;
+                    <span style="color:var(--overseer-gold-bright)">■</span> Caution 30–59% &nbsp;
+                    <span style="color:var(--overseer-red-bright)">■</span> Critical &lt;30%</div>
+                <div class="info-item"><strong>Data Sync:</strong> All edits sync with Pip-Boy pages via localStorage</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===================== CHARACTER VIEW MODAL ===================== -->
+<div id="viewModal" class="modal-overlay hidden">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <div class="modal-title" id="viewModalTitle">CHARACTER DOSSIER</div>
+            <button class="modal-close-btn" onclick="closeViewModal()">✕ CLOSE</button>
+        </div>
+        <div class="modal-body" id="viewModalBody">
+            <!-- populated by JS -->
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn save-btn" onclick="openEditFromView()">✎ Edit Character</button>
+            <button class="modal-btn" onclick="closeViewModal()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== CHARACTER EDIT MODAL ===================== -->
+<div id="editModal" class="modal-overlay hidden">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <div class="modal-title">✎ EDIT CHARACTER DATA</div>
+            <button class="modal-close-btn" onclick="closeEditModal()">✕ CLOSE</button>
+        </div>
+        <div class="modal-body">
+
+            <div class="modal-section-title">Identity</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Character Name</label>
+                    <input type="text" id="editName" placeholder="Vault Dweller">
+                </div>
+                <div class="form-group">
+                    <label>Race</label>
+                    <input type="text" id="editRace" placeholder="Human">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Class</label>
+                    <input type="text" id="editClass" placeholder="Wanderer">
+                </div>
+                <div class="form-group">
+                    <label>Alignment</label>
+                    <select id="editAlignment">
+                        <option value="">— Select —</option>
+                        <option value="Lawful Good">Lawful Good</option>
+                        <option value="Neutral Good">Neutral Good</option>
+                        <option value="Chaotic Good">Chaotic Good</option>
+                        <option value="Lawful Neutral">Lawful Neutral</option>
+                        <option value="True Neutral">True Neutral</option>
+                        <option value="Chaotic Neutral">Chaotic Neutral</option>
+                        <option value="Lawful Evil">Lawful Evil</option>
+                        <option value="Neutral Evil">Neutral Evil</option>
+                        <option value="Chaotic Evil">Chaotic Evil</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-section-title">Progression</div>
+            <div class="form-row triple">
+                <div class="form-group">
+                    <label>Level</label>
+                    <input type="number" id="editLevel" min="1" max="100" placeholder="1" oninput="syncXPFromLevel()">
+                </div>
+                <div class="form-group">
+                    <label>Total XP</label>
+                    <input type="number" id="editXP" min="0" placeholder="0" oninput="syncLevelFromXP()">
+                </div>
+                <div class="form-group">
+                    <label>XP to Next Lv.</label>
+                    <input type="text" id="editXPNext" readonly style="opacity:0.55;cursor:default;">
+                </div>
+            </div>
+
+            <div class="modal-section-title">Vitals</div>
+            <div class="form-row triple">
+                <div class="form-group">
+                    <label>Current Health</label>
+                    <input type="number" id="editHealth" min="0" placeholder="100">
+                </div>
+                <div class="form-group">
+                    <label>Max Health</label>
+                    <input type="number" id="editMaxHealth" min="0" placeholder="100">
+                </div>
+                <div class="form-group">
+                    <label>Action Points</label>
+                    <input type="number" id="editAP" min="0" placeholder="10">
+                </div>
+            </div>
+
+            <div class="modal-section-title">S.P.E.C.I.A.L. Attributes</div>
+            <div class="special-grid">
+                <div class="special-input-group">
+                    <label>S</label>
+                    <input type="number" id="editS" min="1" max="10" value="5">
+                    <span>Strength</span>
+                </div>
+                <div class="special-input-group">
+                    <label>P</label>
+                    <input type="number" id="editP" min="1" max="10" value="5">
+                    <span>Perception</span>
+                </div>
+                <div class="special-input-group">
+                    <label>E</label>
+                    <input type="number" id="editE" min="1" max="10" value="5">
+                    <span>Endurance</span>
+                </div>
+                <div class="special-input-group">
+                    <label>C</label>
+                    <input type="number" id="editC" min="1" max="10" value="5">
+                    <span>Charisma</span>
+                </div>
+                <div class="special-input-group">
+                    <label>I</label>
+                    <input type="number" id="editI" min="1" max="10" value="5">
+                    <span>Intelligence</span>
+                </div>
+                <div class="special-input-group">
+                    <label>A</label>
+                    <input type="number" id="editA" min="1" max="10" value="5">
+                    <span>Agility</span>
+                </div>
+                <div class="special-input-group">
+                    <label>L</label>
+                    <input type="number" id="editL" min="1" max="10" value="5">
+                    <span>Luck</span>
+                </div>
+            </div>
+
+            <div class="modal-section-title">Backstory</div>
+            <div class="form-row single">
+                <div class="form-group">
+                    <label>Character Backstory</label>
+                    <textarea id="editBackstory" placeholder="Enter character backstory…" rows="5"></textarea>
+                </div>
+            </div>
+
+            <div id="editMessage" class="modal-message"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn save-btn" onclick="saveCharacterEdits()">◈ Save Changes</button>
+            <button class="modal-btn" onclick="closeEditModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===================== INVENTORY MODAL ===================== -->
+<div id="inventoryModal" class="modal-overlay hidden">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <div class="modal-title" id="invModalTitle">INVENTORY MANAGEMENT</div>
+            <button class="modal-close-btn" onclick="closeInventoryModal()">✕ CLOSE</button>
+        </div>
+        <div class="modal-body">
+
+            <div class="inventory-tabs">
+                <button class="inv-tab active" onclick="switchInvTab('weapons', this)">⚔ Weapons</button>
+                <button class="inv-tab" onclick="switchInvTab('apparel', this)">🧥 Apparel</button>
+                <button class="inv-tab" onclick="switchInvTab('aid', this)">💊 Aid</button>
+                <button class="inv-tab" onclick="switchInvTab('ammo', this)">🔫 Ammo</button>
+                <button class="inv-tab" onclick="switchInvTab('misc', this)">📦 Misc</button>
+            </div>
+
+            <!-- Weapons -->
+            <div id="inv-weapons" class="inv-content active">
+                <div class="inv-item-list" id="weaponsList"></div>
+                <div class="inv-add-form">
+                    <div class="inv-add-title">+ Add Weapon</div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Name</label>
+                            <input type="text" id="addWeaponName" placeholder="10mm Pistol">
+                        </div>
+                        <div class="inv-form-group">
+                            <label>Damage</label>
+                            <input type="text" id="addWeaponDamage" placeholder="2d6">
+                        </div>
+                    </div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Damage Type</label>
+                            <input type="text" id="addWeaponType" placeholder="Ballistic">
+                        </div>
+                        <div class="inv-form-group">
+                            <label>Condition</label>
+                            <select id="addWeaponCondition">
+                                <option value="Excellent">Excellent</option>
+                                <option value="Good" selected>Good</option>
+                                <option value="Fair">Fair</option>
+                                <option value="Poor">Poor</option>
+                                <option value="Broken">Broken</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="inv-add-btn" onclick="addInvItem('weapons')">+ Add Weapon</button>
+                </div>
+            </div>
+
+            <!-- Apparel -->
+            <div id="inv-apparel" class="inv-content">
+                <div class="inv-item-list" id="apparelList"></div>
+                <div class="inv-add-form">
+                    <div class="inv-add-title">+ Add Apparel</div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Name</label>
+                            <input type="text" id="addApparelName" placeholder="Vault 215 Suit">
+                        </div>
+                        <div class="inv-form-group">
+                            <label>DR (Damage Resistance)</label>
+                            <input type="text" id="addApparelDR" placeholder="5">
+                        </div>
+                    </div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Condition</label>
+                            <select id="addApparelCondition">
+                                <option value="Excellent">Excellent</option>
+                                <option value="Good" selected>Good</option>
+                                <option value="Fair">Fair</option>
+                                <option value="Poor">Poor</option>
+                                <option value="Broken">Broken</option>
+                            </select>
+                        </div>
+                        <div class="inv-form-group">
+                            <label>Weight</label>
+                            <input type="text" id="addApparelWeight" placeholder="5">
+                        </div>
+                    </div>
+                    <button class="inv-add-btn" onclick="addInvItem('apparel')">+ Add Apparel</button>
+                </div>
+            </div>
+
+            <!-- Aid -->
+            <div id="inv-aid" class="inv-content">
+                <div class="inv-item-list" id="aidList"></div>
+                <div class="inv-add-form">
+                    <div class="inv-add-title">+ Add Aid Item</div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Name</label>
+                            <input type="text" id="addAidName" placeholder="Stimpak">
+                        </div>
+                        <div class="inv-form-group">
+                            <label>Effect</label>
+                            <input type="text" id="addAidEffect" placeholder="Restores 30 HP">
+                        </div>
+                    </div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="addAidQty" min="1" value="1" placeholder="1">
+                        </div>
+                        <div class="inv-form-group">
+                            <label>Weight</label>
+                            <input type="text" id="addAidWeight" placeholder="0.5">
+                        </div>
+                    </div>
+                    <button class="inv-add-btn" onclick="addInvItem('aid')">+ Add Aid Item</button>
+                </div>
+            </div>
+
+            <!-- Ammo -->
+            <div id="inv-ammo" class="inv-content">
+                <div class="inv-item-list" id="ammoList"></div>
+                <div class="inv-add-form">
+                    <div class="inv-add-title">+ Add Ammo</div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Type</label>
+                            <input type="text" id="addAmmoType" placeholder="10mm">
+                        </div>
+                        <div class="inv-form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="addAmmoQty" min="1" value="1" placeholder="50">
+                        </div>
+                    </div>
+                    <button class="inv-add-btn" onclick="addInvItem('ammo')">+ Add Ammo</button>
+                </div>
+            </div>
+
+            <!-- Misc -->
+            <div id="inv-misc" class="inv-content">
+                <div class="inv-item-list" id="miscList"></div>
+                <div class="inv-add-form">
+                    <div class="inv-add-title">+ Add Misc Item</div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Name</label>
+                            <input type="text" id="addMiscName" placeholder="Nuka-Cola Cap">
+                        </div>
+                        <div class="inv-form-group">
+                            <label>Value (Caps)</label>
+                            <input type="text" id="addMiscValue" placeholder="1">
+                        </div>
+                    </div>
+                    <div class="inv-form-row">
+                        <div class="inv-form-group">
+                            <label>Weight</label>
+                            <input type="text" id="addMiscWeight" placeholder="0">
+                        </div>
+                        <div class="inv-form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="addMiscQty" min="1" value="1" placeholder="1">
+                        </div>
+                    </div>
+                    <button class="inv-add-btn" onclick="addInvItem('misc')">+ Add Item</button>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn save-btn" onclick="saveInventoryEdits()">◈ Save Inventory</button>
+            <button class="modal-btn" onclick="closeInventoryModal()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================================
+     JAVASCRIPT — OVERSEER CONSOLE LOGIC
+     =================================================================== -->
+<script src="xp_system.js"></script>
+<script>
+    // ======================================
+    // XP TABLE FALLBACK
+    // (used if xp_system.js is not loaded)
+    // ======================================
+    if (typeof XP_TABLE === 'undefined') {
+        var XP_TABLE = (function() {
+            var table = [];
+            var start = 0;
+            for (var lvl = 1; lvl <= 100; lvl++) {
+                var needed = Math.round(320 * lvl * lvl / (lvl < 50 ? 1 : 0.9));
+                table.push({ level: lvl, start: start, needed: start + needed });
+                start += needed;
+            }
+            return table;
+        })();
+    }
+    if (typeof getLevelFromXP === 'undefined') {
+        function getLevelFromXP(xp) {
+            for (var i = XP_TABLE.length - 1; i >= 0; i--) {
+                if (xp >= XP_TABLE[i].start) return XP_TABLE[i].level;
+            }
+            return 1;
+        }
+    }
+    if (typeof getXPForNextLevel === 'undefined') {
+        function getXPForNextLevel(xp) {
+            var lvl = getLevelFromXP(xp);
+            var entry = XP_TABLE.find(function(e) { return e.level === lvl; });
+            if (!entry) return 0;
+            return entry.needed - (xp - entry.start);
+        }
+    }
+
+    // ======================================
+    // OVERSEER ACCOUNTS
+    // ======================================
+    // NOTE: This is a client-side only application. Credentials stored here
+    // are visible in source. This is intentional for a local TTRPG tool —
+    // do not use for applications requiring real security.
+    // Each account: { pin, displayName }
+    const OVERSEER_ACCOUNTS = {
+        'Overseer': { pin: 'vault101', displayName: 'Head Overseer' }
+    };
+
+    // ======================================
+    // SESSION MANAGEMENT
+    // ======================================
+    const SESSION_KEY = 'overseerSession';
+
+    function saveSession(name) {
+        const session = { name: name, timestamp: Date.now() };
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+
+    function loadSession() {
+        const raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return null;
+        try { return JSON.parse(raw); } catch (e) { return null; }
+    }
+
+    function clearSession() {
+        localStorage.removeItem(SESSION_KEY);
+    }
+
+    // ======================================
+    // LOGIN
+    // ======================================
+    function attemptLogin() {
+        const nameEl = document.getElementById('loginName');
+        const pinEl = document.getElementById('loginPin');
+        const rememberEl = document.getElementById('rememberSession');
+        const errorEl = document.getElementById('loginError');
+
+        const name = nameEl.value.trim();
+        const pin = pinEl.value;
+
+        errorEl.style.display = 'none';
+
+        if (!name) {
+            errorEl.textContent = '⚠ Please select an Overseer identity.';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        const account = OVERSEER_ACCOUNTS[name];
+        if (!account || account.pin !== pin) {
+            errorEl.textContent = '⚠ AUTHORIZATION DENIED — Invalid credentials';
+            errorEl.style.display = 'block';
+            pinEl.value = '';
+            return;
+        }
+
+        if (rememberEl.checked) {
+            saveSession(name);
+        }
+
+        enterDashboard(name);
+    }
+
+    function enterDashboard(name) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboardScreen').classList.remove('hidden');
+        document.getElementById('overseerNameDisplay').textContent =
+            (OVERSEER_ACCOUNTS[name] && OVERSEER_ACCOUNTS[name].displayName) ? OVERSEER_ACCOUNTS[name].displayName : name;
+        document.getElementById('tickerTimestamp').textContent =
+            'SESSION START: ' + new Date().toLocaleTimeString();
+        refreshDashboard();
+    }
+
+    function logoutOverseer() {
+        if (!confirm('Terminate Overseer session?')) return;
+        clearSession();
+        document.getElementById('dashboardScreen').classList.add('hidden');
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('loginPin').value = '';
+        document.getElementById('loginError').style.display = 'none';
+    }
+
+    // Auto-login if session saved
+    window.addEventListener('DOMContentLoaded', function() {
+        const session = loadSession();
+        if (session && OVERSEER_ACCOUNTS[session.name]) {
+            enterDashboard(session.name);
+        }
+    });
+
+    // ======================================
+    // DATA HELPERS
+    // ======================================
+
+    /** Gather all character data from the various localStorage keys */
+    function gatherCharacterData() {
+        // characterData from data.html
+        let charData = {};
+        try {
+            const raw = localStorage.getItem('characterData');
+            if (raw) charData = JSON.parse(raw);
+        } catch (e) {}
+
+        // pipboyPlayerData from stats.html
+        let statsData = {};
+        try {
+            const raw = localStorage.getItem('pipboyPlayerData');
+            if (raw) statsData = JSON.parse(raw);
+        } catch (e) {}
+
+        // currentPlayer from index.html
+        let currentPlayer = {};
+        try {
+            const raw = localStorage.getItem('currentPlayer');
+            if (raw) currentPlayer = JSON.parse(raw);
+        } catch (e) {}
+
+        const xp = parseInt(localStorage.getItem('pipboyXP')) ||
+                   statsData.xp || currentPlayer.xp || 0;
+        const level = parseInt(localStorage.getItem('pipboyLevel')) ||
+                      statsData.level || currentPlayer.level || getLevelFromXP(xp);
+        const health = parseInt(localStorage.getItem('pipboyHealth')) ||
+                       statsData.health || currentPlayer.health || 100;
+        const ap = parseInt(localStorage.getItem('pipboyActionPoints')) ||
+                   statsData.actionPoints || 10;
+        const maxHealth = statsData.maxHealth ||
+                          parseInt(localStorage.getItem('pipboyMaxHealth')) || 100;
+
+        // SPECIAL — stored inside pipboyPlayerData as nested numbers
+        // The stats.html doesn't explicitly track SPECIAL in playerData,
+        // so we read from overseer-managed storage or default to 5
+        let special = {};
+        try {
+            const raw = localStorage.getItem('overseerSpecial');
+            if (raw) special = JSON.parse(raw);
+        } catch (e) {}
+
+        return {
+            // identity
+            name: charData.name || currentPlayer.characterName || 'Vault Dweller',
+            race: charData.race || '',
+            class: charData.class || '',
+            alignment: charData.alignment || '',
+            backstory: localStorage.getItem('characterBackstory') || '',
+            // stats
+            level: level,
+            xp: xp,
+            health: health,
+            maxHealth: maxHealth,
+            actionPoints: ap,
+            // SPECIAL
+            special: {
+                strength:     special.strength     || 5,
+                perception:   special.perception   || 5,
+                endurance:    special.endurance    || 5,
+                charisma:     special.charisma     || 5,
+                intelligence: special.intelligence || 5,
+                agility:      special.agility      || 5,
+                luck:         special.luck         || 5
+            },
+            skills: statsData.skills || {}
+        };
+    }
+
+    /** Save overseer edits back to localStorage (syncs with all Pip-Boy pages) */
+    function persistCharacterEdits(data) {
+        // characterData (data.html)
+        const charData = {
+            name: data.name,
+            race: data.race,
+            class: data.class,
+            alignment: data.alignment
+        };
+        localStorage.setItem('characterData', JSON.stringify(charData));
+
+        // backstory
+        localStorage.setItem('characterBackstory', data.backstory || '');
+
+        // stats (stats.html)
+        const existing = JSON.parse(localStorage.getItem('pipboyPlayerData') || '{}');
+        existing.xp = data.xp;
+        existing.level = data.level;
+        existing.health = data.health;
+        existing.maxHealth = data.maxHealth;
+        existing.actionPoints = data.actionPoints;
+        localStorage.setItem('pipboyPlayerData', JSON.stringify(existing));
+
+        // individual keys used by stats.html
+        localStorage.setItem('pipboyXP', String(data.xp));
+        localStorage.setItem('pipboyLevel', String(data.level));
+        localStorage.setItem('pipboyHealth', String(data.health));
+        localStorage.setItem('pipboyMaxHealth', String(data.maxHealth));
+        localStorage.setItem('pipboyActionPoints', String(data.actionPoints));
+
+        // SPECIAL (overseer-managed)
+        localStorage.setItem('overseerSpecial', JSON.stringify(data.special));
+
+        // currentPlayer (index.html)
+        const player = JSON.parse(localStorage.getItem('currentPlayer') || '{}');
+        player.characterName = data.name;
+        player.level = data.level;
+        player.health = data.health;
+        player.xp = data.xp;
+        localStorage.setItem('currentPlayer', JSON.stringify(player));
+    }
+
+    // Inventory
+    function loadInventoryData() {
+        try {
+            const raw = localStorage.getItem('pipboyInventory');
+            return raw ? JSON.parse(raw) : { weapons: [], apparel: [], aid: [], ammo: [], misc: [] };
+        } catch (e) {
+            return { weapons: [], apparel: [], aid: [], ammo: [], misc: [] };
+        }
+    }
+
+    function saveInventoryData(inv) {
+        localStorage.setItem('pipboyInventory', JSON.stringify(inv));
+    }
+
+    // ======================================
+    // DASHBOARD
+    // ======================================
+    function refreshDashboard() {
+        const charData = gatherCharacterData();
+        const grid = document.getElementById('charactersGrid');
+        grid.innerHTML = '';
+
+        // We display the single active character (this game is single-character per browser)
+        // The Overseer can see and manage it.
+        const hasChar = charData.name && charData.name !== '';
+
+        if (!hasChar) {
+            grid.innerHTML = `
+                <div class="empty-vault">
+                    <div class="empty-vault-title">NO RESIDENTS ON RECORD</div>
+                    <div class="empty-vault-text">
+                        No character data found in the Vault database.<br>
+                        Have players log in and create their characters first,<br>
+                        then return here to manage them.
+                    </div>
+                </div>`;
+            document.getElementById('charCountLabel').textContent = '0 characters on record';
+            document.getElementById('tickerCharCount').querySelector('span:last-child').textContent = 'CHARACTERS ON RECORD: 0';
+            return;
+        }
+
+        document.getElementById('charCountLabel').textContent = '1 character on record';
+        document.getElementById('tickerCharCount').querySelector('span:last-child').textContent = 'CHARACTERS ON RECORD: 1';
+
+        grid.appendChild(buildCharacterCard(charData));
+    }
+
+    function getHealthStatus(health, maxHealth) {
+        const pct = maxHealth > 0 ? (health / maxHealth) * 100 : 0;
+        if (pct >= 60) return 'healthy';
+        if (pct >= 30) return 'caution';
+        return 'critical';
+    }
+
+    function buildCharacterCard(ch) {
+        const card = document.createElement('div');
+        card.className = 'character-card';
+        const status = getHealthStatus(ch.health, ch.maxHealth);
+        const statusLabels = { healthy: 'ACTIVE', caution: 'CAUTION', critical: 'CRITICAL' };
+        const hpPct = ch.maxHealth > 0 ? Math.min(100, Math.round((ch.health / ch.maxHealth) * 100)) : 0;
+        const xpNext = getXPForNextLevel(ch.xp);
+
+        card.innerHTML = `
+            <div class="card-header">
+                <div>
+                    <div class="card-name">${escHtml(ch.name)}</div>
+                    <div class="card-identity">${escHtml(ch.race || '—')} · ${escHtml(ch.class || '—')}</div>
+                </div>
+                <div class="card-status">
+                    <div class="status-badge ${status}">${statusLabels[status]}</div>
+                </div>
+            </div>
+            <div class="card-stats">
+                <div class="card-stat">
+                    <div class="card-stat-label">Level</div>
+                    <div class="card-stat-value">${ch.level}</div>
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-label">Total XP</div>
+                    <div class="card-stat-value">${ch.xp.toLocaleString()}</div>
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-label">Health</div>
+                    <div class="card-stat-value hp-value ${status}">${ch.health} / ${ch.maxHealth}</div>
+                </div>
+                <div class="card-stat">
+                    <div class="card-stat-label">Next Level</div>
+                    <div class="card-stat-value">${xpNext.toLocaleString()} XP</div>
+                </div>
+                <div class="mini-bar-wrap">
+                    <div class="mini-bar-label">Health ${hpPct}%</div>
+                    <div class="mini-bar-bg">
+                        <div class="mini-bar-fill ${status}" style="width:${hpPct}%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-actions">
+                <button class="card-btn" onclick="openViewModal()">◎ View Full</button>
+                <button class="card-btn edit-btn" onclick="openEditModal()">✎ Edit Stats</button>
+                <button class="card-btn" onclick="openInventoryModal()">⊞ Inventory</button>
+                <button class="card-btn delete-btn" onclick="deleteCharacter()">✕ Delete</button>
+            </div>
+        `;
+        return card;
+    }
+
+    // ======================================
+    // VIEW MODAL
+    // ======================================
+    function openViewModal() {
+        const ch = gatherCharacterData();
+        document.getElementById('viewModalTitle').textContent = ch.name.toUpperCase() + ' — DOSSIER';
+
+        const sp = ch.special;
+        const spLabels = ['Strength','Perception','Endurance','Charisma','Intelligence','Agility','Luck'];
+        const spKeys   = ['strength','perception','endurance','charisma','intelligence','agility','luck'];
+        const spLetters = ['S','P','E','C','I','A','L'];
+
+        const specialHtml = spLetters.map((ltr, i) => `
+            <div class="special-display-item">
+                <div class="special-display-letter">${ltr}</div>
+                <div class="special-display-value">${sp[spKeys[i]] || 5}</div>
+                <div class="special-display-name">${spLabels[i]}</div>
+            </div>`).join('');
+
+        const status = getHealthStatus(ch.health, ch.maxHealth);
+        const hpPct = ch.maxHealth > 0 ? Math.min(100, Math.round((ch.health / ch.maxHealth) * 100)) : 0;
+
+        document.getElementById('viewModalBody').innerHTML = `
+            <div class="view-section">
+                <div class="view-section-title">Identity</div>
+                <div class="view-grid">
+                    <div class="view-stat"><div class="view-stat-label">Name</div><div class="view-stat-value">${escHtml(ch.name)}</div></div>
+                    <div class="view-stat"><div class="view-stat-label">Race</div><div class="view-stat-value">${escHtml(ch.race || '—')}</div></div>
+                    <div class="view-stat"><div class="view-stat-label">Class</div><div class="view-stat-value">${escHtml(ch.class || '—')}</div></div>
+                    <div class="view-stat"><div class="view-stat-label">Alignment</div><div class="view-stat-value">${escHtml(ch.alignment || '—')}</div></div>
+                </div>
+            </div>
+            <div class="view-section">
+                <div class="view-section-title">Progression & Vitals</div>
+                <div class="view-grid">
+                    <div class="view-stat"><div class="view-stat-label">Level</div><div class="view-stat-value">${ch.level}</div></div>
+                    <div class="view-stat"><div class="view-stat-label">Total XP</div><div class="view-stat-value">${ch.xp.toLocaleString()}</div></div>
+                    <div class="view-stat"><div class="view-stat-label">XP to Next</div><div class="view-stat-value">${getXPForNextLevel(ch.xp).toLocaleString()}</div></div>
+                    <div class="view-stat">
+                        <div class="view-stat-label">Health</div>
+                        <div class="view-stat-value" style="color:var(--overseer-${status === 'healthy' ? 'green-bright' : status === 'caution' ? 'gold-bright' : 'red-bright'})">${ch.health} / ${ch.maxHealth} (${hpPct}%)</div>
+                    </div>
+                    <div class="view-stat"><div class="view-stat-label">Action Points</div><div class="view-stat-value">${ch.actionPoints}</div></div>
+                </div>
+            </div>
+            <div class="view-section">
+                <div class="view-section-title">S.P.E.C.I.A.L.</div>
+                <div class="special-display-grid">${specialHtml}</div>
+            </div>
+            <div class="view-section">
+                <div class="view-section-title">Backstory</div>
+                <div class="view-backstory">${escHtml(ch.backstory || 'No backstory recorded.')}</div>
+            </div>
+        `;
+
+        document.getElementById('viewModal').classList.remove('hidden');
+    }
+
+    function closeViewModal() {
+        document.getElementById('viewModal').classList.add('hidden');
+    }
+
+    function openEditFromView() {
+        closeViewModal();
+        openEditModal();
+    }
+
+    // ======================================
+    // EDIT MODAL
+    // ======================================
+    function openEditModal() {
+        const ch = gatherCharacterData();
+
+        document.getElementById('editName').value = ch.name || '';
+        document.getElementById('editRace').value = ch.race || '';
+        document.getElementById('editClass').value = ch.class || '';
+        document.getElementById('editAlignment').value = ch.alignment || '';
+        document.getElementById('editLevel').value = ch.level || 1;
+        document.getElementById('editXP').value = ch.xp || 0;
+        document.getElementById('editHealth').value = ch.health || 100;
+        document.getElementById('editMaxHealth').value = ch.maxHealth || 100;
+        document.getElementById('editAP').value = ch.actionPoints || 10;
+        document.getElementById('editBackstory').value = ch.backstory || '';
+
+        document.getElementById('editS').value = ch.special.strength;
+        document.getElementById('editP').value = ch.special.perception;
+        document.getElementById('editE').value = ch.special.endurance;
+        document.getElementById('editC').value = ch.special.charisma;
+        document.getElementById('editI').value = ch.special.intelligence;
+        document.getElementById('editA').value = ch.special.agility;
+        document.getElementById('editL').value = ch.special.luck;
+
+        updateXPNextDisplay();
+        clearEditMessage();
+        document.getElementById('editModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+    }
+
+    function syncXPFromLevel() {
+        const level = parseInt(document.getElementById('editLevel').value) || 1;
+        const clamped = Math.max(1, Math.min(100, level));
+        const entry = XP_TABLE.find(function(e) { return e.level === clamped; });
+        if (entry) {
+            document.getElementById('editXP').value = entry.start;
+        }
+        updateXPNextDisplay();
+    }
+
+    function syncLevelFromXP() {
+        const xp = parseInt(document.getElementById('editXP').value) || 0;
+        const level = getLevelFromXP(xp);
+        document.getElementById('editLevel').value = level;
+        updateXPNextDisplay();
+    }
+
+    function updateXPNextDisplay() {
+        const xp = parseInt(document.getElementById('editXP').value) || 0;
+        const next = getXPForNextLevel(xp);
+        document.getElementById('editXPNext').value = next.toLocaleString() + ' XP';
+    }
+
+    function saveCharacterEdits() {
+        const name = document.getElementById('editName').value.trim();
+        if (!name) {
+            showEditMessage('⚠ Character name cannot be empty.', 'error');
+            return;
+        }
+
+        const level = Math.max(1, Math.min(100, parseInt(document.getElementById('editLevel').value) || 1));
+        const xp = Math.max(0, parseInt(document.getElementById('editXP').value) || 0);
+        const health = Math.max(0, parseInt(document.getElementById('editHealth').value) || 0);
+        const maxHealth = Math.max(1, parseInt(document.getElementById('editMaxHealth').value) || 100);
+        const ap = Math.max(0, parseInt(document.getElementById('editAP').value) || 0);
+
+        const special = {
+            strength:     clampSpecial(document.getElementById('editS').value),
+            perception:   clampSpecial(document.getElementById('editP').value),
+            endurance:    clampSpecial(document.getElementById('editE').value),
+            charisma:     clampSpecial(document.getElementById('editC').value),
+            intelligence: clampSpecial(document.getElementById('editI').value),
+            agility:      clampSpecial(document.getElementById('editA').value),
+            luck:         clampSpecial(document.getElementById('editL').value)
+        };
+
+        const data = {
+            name: name,
+            race: document.getElementById('editRace').value.trim(),
+            class: document.getElementById('editClass').value.trim(),
+            alignment: document.getElementById('editAlignment').value,
+            level: level,
+            xp: xp,
+            health: health,
+            maxHealth: maxHealth,
+            actionPoints: ap,
+            special: special,
+            backstory: document.getElementById('editBackstory').value
+        };
+
+        persistCharacterEdits(data);
+        showEditMessage('✓ Character data saved and synced to Pip-Boy.', 'success');
+        setTimeout(function() {
+            closeEditModal();
+            refreshDashboard();
+        }, 1200);
+    }
+
+    function clampSpecial(val) {
+        return Math.max(1, Math.min(10, parseInt(val) || 5));
+    }
+
+    function showEditMessage(msg, type) {
+        const el = document.getElementById('editMessage');
+        el.textContent = msg;
+        el.className = 'modal-message ' + type;
+    }
+
+    function clearEditMessage() {
+        const el = document.getElementById('editMessage');
+        el.textContent = '';
+        el.className = 'modal-message';
+    }
+
+    // ======================================
+    // DELETE CHARACTER
+    // ======================================
+    function deleteCharacter() {
+        const ch = gatherCharacterData();
+        const safeName = ch.name.replace(/[^\w\s\-']/g, '').substring(0, 40);
+        if (!confirm('WARNING: Permanently delete character "' + safeName + '"?\n\nThis will erase all Pip-Boy data for this resident. This cannot be undone.')) {
+            return;
+        }
+        // Clear all character-related localStorage keys
+        const keysToRemove = [
+            'characterData', 'characterImage', 'characterBackstory',
+            'pipboyPlayerData', 'pipboyXP', 'pipboyLevel',
+            'pipboyHealth', 'pipboyActionPoints',
+            'pipboyDebuffs', 'pipboyBoosts', 'pipboyPerks',
+            'pipboyInventory', 'currentPlayer', 'overseerSpecial',
+            'xpHistory', 'customNPCs', 'customFactions'
+        ];
+        keysToRemove.forEach(function(key) { localStorage.removeItem(key); });
+        refreshDashboard();
+    }
+
+    // ======================================
+    // INVENTORY MODAL
+    // ======================================
+    let currentInventory = null;
+    let currentInvTab = 'weapons';
+
+    function openInventoryModal() {
+        const ch = gatherCharacterData();
+        document.getElementById('invModalTitle').textContent = ch.name.toUpperCase() + ' — INVENTORY';
+        currentInventory = loadInventoryData();
+        currentInvTab = 'weapons';
+        renderAllInvTabs();
+        document.getElementById('inventoryModal').classList.remove('hidden');
+    }
+
+    function closeInventoryModal() {
+        document.getElementById('inventoryModal').classList.add('hidden');
+        currentInventory = null;
+    }
+
+    // Event delegation for inventory delete buttons
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('inv-item-del')) {
+            const tab = e.target.getAttribute('data-tab');
+            const idx = parseInt(e.target.getAttribute('data-idx'), 10);
+            const VALID_TABS = ['weapons', 'apparel', 'aid', 'ammo', 'misc'];
+            if (VALID_TABS.indexOf(tab) !== -1 && !isNaN(idx)) {
+                removeInvItem(tab, idx);
+            }
+        }
+    });
+
+    function switchInvTab(tab, el) {
+        currentInvTab = tab;
+        document.querySelectorAll('.inv-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.inv-content').forEach(function(c) { c.classList.remove('active'); });
+        el.classList.add('active');
+        document.getElementById('inv-' + tab).classList.add('active');
+        renderInvTab(tab);
+    }
+
+    function renderAllInvTabs() {
+        ['weapons', 'apparel', 'aid', 'ammo', 'misc'].forEach(renderInvTab);
+    }
+
+    function renderInvTab(tab) {
+        const listEl = document.getElementById(tab + 'List');
+        if (!listEl) return;
+        const items = (currentInventory && currentInventory[tab]) ? currentInventory[tab] : [];
+        if (items.length === 0) {
+            listEl.innerHTML = '<div class="inv-empty">No ' + tab + ' items.</div>';
+            return;
+        }
+        listEl.innerHTML = items.map(function(item, idx) {
+            return buildInvItemRow(item, tab, idx);
+        }).join('');
+    }
+
+    function buildInvItemRow(item, tab, idx) {
+        let detail = '';
+        if (tab === 'weapons') detail = (item.damage || '') + (item.damageType ? ' · ' + item.damageType : '') + (item.condition ? ' · ' + item.condition : '');
+        else if (tab === 'apparel') detail = (item.dr ? 'DR:' + item.dr : '') + (item.condition ? ' · ' + item.condition : '');
+        else if (tab === 'aid') detail = (item.effect || '') + (item.quantity ? ' ×' + item.quantity : '');
+        else if (tab === 'ammo') detail = item.quantity ? '×' + item.quantity : '';
+        else if (tab === 'misc') detail = (item.value ? item.value + ' caps' : '') + (item.quantity ? ' ×' + item.quantity : '');
+
+        return `<div class="inv-item-row">
+            <div class="inv-item-name">${escHtml(item.name || item.type || 'Unknown')}</div>
+            <div class="inv-item-detail">${escHtml(detail)}</div>
+            <button class="inv-item-del" title="Remove item" data-tab="${escHtml(tab)}" data-idx="${idx}">✕</button>
+        </div>`;
+    }
+
+    function addInvItem(tab) {
+        if (!currentInventory) currentInventory = loadInventoryData();
+        let item = {};
+        if (tab === 'weapons') {
+            const name = document.getElementById('addWeaponName').value.trim();
+            if (!name) { alert('Please enter a weapon name.'); return; }
+            item = {
+                id: 'item-' + Date.now(),
+                name: name,
+                damage: document.getElementById('addWeaponDamage').value.trim() || 'N/A',
+                damageType: document.getElementById('addWeaponType').value.trim() || 'Unknown',
+                condition: document.getElementById('addWeaponCondition').value
+            };
+            document.getElementById('addWeaponName').value = '';
+            document.getElementById('addWeaponDamage').value = '';
+            document.getElementById('addWeaponType').value = '';
+        } else if (tab === 'apparel') {
+            const name = document.getElementById('addApparelName').value.trim();
+            if (!name) { alert('Please enter an apparel name.'); return; }
+            item = {
+                id: 'item-' + Date.now(),
+                name: name,
+                dr: document.getElementById('addApparelDR').value.trim() || '0',
+                condition: document.getElementById('addApparelCondition').value,
+                weight: document.getElementById('addApparelWeight').value.trim() || '0'
+            };
+            document.getElementById('addApparelName').value = '';
+            document.getElementById('addApparelDR').value = '';
+            document.getElementById('addApparelWeight').value = '';
+        } else if (tab === 'aid') {
+            const name = document.getElementById('addAidName').value.trim();
+            if (!name) { alert('Please enter an aid item name.'); return; }
+            item = {
+                id: 'item-' + Date.now(),
+                name: name,
+                effect: document.getElementById('addAidEffect').value.trim() || '',
+                quantity: parseInt(document.getElementById('addAidQty').value) || 1,
+                weight: document.getElementById('addAidWeight').value.trim() || '0'
+            };
+            document.getElementById('addAidName').value = '';
+            document.getElementById('addAidEffect').value = '';
+            document.getElementById('addAidQty').value = '1';
+        } else if (tab === 'ammo') {
+            const type = document.getElementById('addAmmoType').value.trim();
+            if (!type) { alert('Please enter an ammo type.'); return; }
+            item = {
+                id: 'item-' + Date.now(),
+                name: type,
+                type: type,
+                quantity: parseInt(document.getElementById('addAmmoQty').value) || 1
+            };
+            document.getElementById('addAmmoType').value = '';
+            document.getElementById('addAmmoQty').value = '1';
+        } else if (tab === 'misc') {
+            const name = document.getElementById('addMiscName').value.trim();
+            if (!name) { alert('Please enter an item name.'); return; }
+            item = {
+                id: 'item-' + Date.now(),
+                name: name,
+                value: document.getElementById('addMiscValue').value.trim() || '0',
+                weight: document.getElementById('addMiscWeight').value.trim() || '0',
+                quantity: parseInt(document.getElementById('addMiscQty').value) || 1
+            };
+            document.getElementById('addMiscName').value = '';
+            document.getElementById('addMiscValue').value = '';
+            document.getElementById('addMiscWeight').value = '';
+            document.getElementById('addMiscQty').value = '1';
+        }
+
+        if (!currentInventory[tab]) currentInventory[tab] = [];
+        currentInventory[tab].push(item);
+        renderInvTab(tab);
+    }
+
+    function removeInvItem(tab, idx) {
+        if (!currentInventory || !currentInventory[tab]) return;
+        currentInventory[tab].splice(idx, 1);
+        renderInvTab(tab);
+    }
+
+    function saveInventoryEdits() {
+        saveInventoryData(currentInventory);
+        closeInventoryModal();
+        // Brief confirmation
+        const ticker = document.getElementById('tickerTimestamp');
+        const prev = ticker.textContent;
+        ticker.textContent = '✓ INVENTORY SAVED — ' + new Date().toLocaleTimeString();
+        setTimeout(function() { ticker.textContent = prev; }, 3000);
+    }
+
+    // ======================================
+    // UTILITIES
+    // ======================================
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+</script>
+</body>
+</html>
