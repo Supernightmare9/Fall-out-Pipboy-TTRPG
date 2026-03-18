@@ -4,11 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fallout Pipboy Stats</title>
-    <link rel="stylesheet" href="css/branding.css">
     <style>
         /* ===========================
-           FALLOUT PIPBOY STATS STYLE
+           VAULT 215 STATS PAGE
+           COMPLETE BRANDING
            =========================== */
+
+        :root {
+            --vault-primary: #4ade80;
+            --vault-secondary: #fbbf24;
+            --vault-dark: #0a0a0a;
+            --vault-darker: #1a1a1a;
+            --vault-accent: #c084fc;
+            --vault-success: #4ade80;
+            --vault-error: #ff6b6b;
+            --vault-warning: #fbbf24;
+            --vault-info: #9333ea;
+            --vault-green: #4ade80;
+            --vault-gold: #fbbf24;
+            --vault-blue-dark: #2d5016;
+            --vault-blue-light: #3d6b1f;
+        }
 
         * {
             margin: 0;
@@ -19,8 +35,8 @@
         body {
             width: 100%;
             min-height: 100vh;
-            background-color: #0a0a0a;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            color: var(--vault-green);
             font-family: 'Courier New', monospace;
             padding: 20px;
             background-image: 
@@ -54,40 +70,75 @@
             margin: 0 auto;
         }
 
-        /* ===== HEADER ===== */
-        .header {
+        /* ===== VAULT HEADER ===== */
+        .vault-header {
             text-align: center;
             margin-bottom: 30px;
             padding: 30px;
-            background-color: #1a1a1a;
-            border: 3px solid #4ade80;
+            background-color: var(--vault-darker);
+            border: 3px solid var(--vault-green);
             box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
         }
 
-        .pip-title {
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            color: #4ade80;
-            text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
-            animation: glow 2s ease-in-out infinite;
+        .vault-badge {
+            font-size: 10px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
             margin-bottom: 10px;
         }
 
-        .character-name {
-            font-size: 16px;
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
+        .vault-title {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: var(--vault-green);
+            text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
+            animation: vault-glow 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes vault-glow {
+            0%, 100% {
+                text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 15px var(--vault-green), 0 0 30px rgba(74, 222, 128, 0.8);
+            }
+        }
+
+        .vault-subtitle {
+            font-size: 12px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
             letter-spacing: 2px;
         }
 
-        @keyframes glow {
-            0%, 100% {
-                text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
-            }
-            50% {
-                text-shadow: 0 0 15px #4ade80, 0 0 30px rgba(74, 222, 128, 0.8);
-            }
+        .vault-info {
+            font-size: 11px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+            margin-top: 8px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            padding-top: 8px;
+        }
+
+        /* ===== VAULT FOOTER ===== */
+        .vault-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            font-size: 10px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+        }
+
+        .vault-footer span {
+            color: var(--vault-gold);
+            text-shadow: 0 0 3px var(--vault-gold);
+            font-weight: bold;
         }
 
         /* ===== SUBTAB NAVIGATION ===== */
@@ -95,21 +146,21 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #4ade80;
+            border-bottom: 2px solid var(--vault-green);
             padding-bottom: 10px;
             flex-wrap: wrap;
         }
 
         .subtab-button {
-            background-color: #0a0a0a;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 10px 16px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s ease;
@@ -117,19 +168,19 @@
         }
 
         .subtab-button:hover {
-            background-color: #1a1a1a;
+            background-color: var(--vault-darker);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
         .subtab-button.active {
-            background-color: #2d5016;
-            border-color: #fbbf24;
-            color: #fbbf24;
+            background-color: var(--vault-blue-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            text-shadow: 0 0 10px #fbbf24;
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
         .subtab-content {
@@ -149,26 +200,27 @@
         }
 
         .stat-box {
-            background-color: #1a1a1a;
-            border: 2px solid #4ade80;
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
             padding: 20px;
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
             transition: all 0.3s ease;
+            border-radius: 3px;
         }
 
         .stat-box:hover {
             box-shadow: 0 0 30px rgba(74, 222, 128, 0.6);
-            border-color: #fbbf24;
+            border-color: var(--vault-gold);
         }
 
         .stat-title {
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
             font-size: 14px;
             font-weight: bold;
             letter-spacing: 2px;
             margin-bottom: 15px;
-            border-bottom: 1px solid #4ade80;
+            border-bottom: 1px solid var(--vault-green);
             padding-bottom: 10px;
             text-transform: uppercase;
         }
@@ -182,13 +234,13 @@
         }
 
         .stat-label {
-            color: #4ade80;
-            text-shadow: 0 0 3px #4ade80;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
         }
 
         .stat-value {
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
             font-weight: bold;
             font-size: 14px;
         }
@@ -206,18 +258,19 @@
         }
 
         .stat-bar-label {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 12px;
             margin-bottom: 5px;
             display: flex;
             justify-content: space-between;
+            text-shadow: 0 0 2px var(--vault-green);
         }
 
         .stat-bar {
             width: 100%;
             height: 15px;
-            background-color: #0a0a0a;
-            border: 1px solid #4ade80;
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
             overflow: hidden;
             box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.2);
             position: relative;
@@ -225,8 +278,8 @@
 
         .stat-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4ade80, #fbbf24);
-            box-shadow: 0 0 10px #4ade80;
+            background: linear-gradient(90deg, var(--vault-green), var(--vault-gold));
+            box-shadow: 0 0 10px var(--vault-green);
             transition: width 0.5s ease;
             position: absolute;
             left: 0;
@@ -256,68 +309,69 @@
         .input-field {
             flex: 1;
             min-width: 120px;
-            background-color: #0a0a0a;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-gold);
             padding: 10px 12px;
             font-family: 'Courier New', monospace;
             font-size: 12px;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-gold);
             transition: all 0.3s ease;
             box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
         }
 
         .input-field::placeholder {
-            color: #4ade8066;
+            color: rgba(74, 222, 128, 0.4);
         }
 
         .input-field:focus {
             outline: none;
-            border-color: #fbbf24;
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
-            color: #fbbf24;
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: var(--vault-gold);
         }
 
         .action-button {
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 10px 16px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
             white-space: nowrap;
+            border-radius: 2px;
         }
 
         .action-button:hover {
-            background-color: #3d6b1f;
+            background-color: var(--vault-blue-light);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
             transform: translateY(-2px);
         }
 
         .action-button.danger {
             background-color: #8b3a3a;
-            border: 2px solid #ff6b6b;
-            color: #ff6b6b;
-            text-shadow: 0 0 5px #ff6b6b;
+            border: 2px solid var(--vault-error);
+            color: var(--vault-error);
+            text-shadow: 0 0 5px var(--vault-error);
             box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
         }
 
         .action-button.danger:hover {
             background-color: #a84a4a;
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
         .action-button.temp {
@@ -331,37 +385,38 @@
         .action-button.temp:hover {
             background-color: #1e40af;
             box-shadow: 0 0 20px rgba(96, 165, 250, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
         .message {
             margin-top: 10px;
             font-size: 11px;
-            color: #4ade80;
-            text-shadow: 0 0 3px #4ade80;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
             min-height: 20px;
             width: 100%;
         }
 
         .message.success {
-            color: #4ade80;
-            text-shadow: 0 0 5px #4ade80;
+            color: var(--vault-green);
+            text-shadow: 0 0 5px var(--vault-green);
         }
 
         .message.error {
-            color: #ff6b6b;
-            text-shadow: 0 0 5px #ff6b6b;
+            color: var(--vault-error);
+            text-shadow: 0 0 5px var(--vault-error);
         }
 
         /* ===== TAG HEADER ===== */
         .tag-header {
-            color: #c084fc;
+            color: var(--vault-accent);
             font-size: 13px;
             margin-bottom: 10px;
             text-align: right;
             letter-spacing: 1px;
+            text-shadow: 0 0 3px var(--vault-accent);
         }
 
         /* ===== CONDENSED SKILLS SECTION ===== */
@@ -377,9 +432,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px;
-            background-color: #0a0a0a;
+            background-color: var(--vault-dark);
             border: 1px solid rgba(74, 222, 128, 0.2);
             border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .skill-item:hover {
+            border-color: var(--vault-green);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
         }
 
         .skill-left {
@@ -394,7 +455,7 @@
             width: 16px;
             height: 16px;
             cursor: pointer;
-            accent-color: #c084fc;
+            accent-color: var(--vault-accent);
             flex-shrink: 0;
         }
 
@@ -407,9 +468,9 @@
         }
 
         .skill-name {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 13px;
-            text-shadow: 0 0 3px #4ade80;
+            text-shadow: 0 0 3px var(--vault-green);
             font-weight: bold;
             white-space: nowrap;
             overflow: hidden;
@@ -417,16 +478,16 @@
         }
 
         .skill-special {
-            color: #9333ea;
+            color: var(--vault-accent);
             font-size: 11px;
-            text-shadow: 0 0 2px #9333ea;
+            text-shadow: 0 0 2px var(--vault-accent);
             font-style: italic;
         }
 
         .skill-bonus {
-            color: #fbbf24;
+            color: var(--vault-gold);
             font-size: 11px;
-            text-shadow: 0 0 2px #fbbf24;
+            text-shadow: 0 0 2px var(--vault-gold);
         }
 
         .skill-controls {
@@ -437,41 +498,44 @@
         }
 
         .skill-value {
-            color: #fbbf24;
+            color: var(--vault-gold);
             font-weight: bold;
             font-size: 13px;
             min-width: 24px;
             text-align: center;
+            text-shadow: 0 0 3px var(--vault-gold);
         }
 
         .skill-btn {
-            background-color: #2d5016;
-            border: 1px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-blue-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 4px 6px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 3px #4ade80;
+            text-shadow: 0 0 3px var(--vault-green);
             transition: all 0.2s ease;
             width: 24px;
             height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 2px;
         }
 
         .skill-btn:hover {
-            background-color: #3d6b1f;
+            background-color: var(--vault-blue-light);
             box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
-            border-color: #fbbf24;
-            color: #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
         }
 
         .tag-count-badge {
-            background-color: #c084fc;
-            color: #0a0a0a;
+            background-color: var(--vault-accent);
+            color: var(--vault-dark);
             padding: 2px 6px;
             border-radius: 2px;
             font-size: 11px;
@@ -487,39 +551,47 @@
         }
 
         .special-stat {
-            background-color: #0a0a0a;
-            border: 2px solid #4ade80;
+            background-color: var(--vault-dark);
+            border: 2px solid var(--vault-green);
             padding: 15px;
             text-align: center;
             box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+            border-radius: 3px;
+            transition: all 0.2s ease;
+        }
+
+        .special-stat:hover {
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
         }
 
         .special-letter {
-            color: #fbbf24;
+            color: var(--vault-gold);
             font-size: 12px;
             font-weight: bold;
-            text-shadow: 0 0 3px #fbbf24;
+            text-shadow: 0 0 3px var(--vault-gold);
             margin-bottom: 8px;
         }
 
         .special-value {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 20px;
             font-weight: bold;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
         }
 
         .special-name {
             font-size: 10px;
-            color: #4ade80;
+            color: var(--vault-green);
             margin-top: 5px;
+            text-shadow: 0 0 2px var(--vault-green);
         }
 
         .special-skills {
             font-size: 9px;
-            color: #9333ea;
+            color: var(--vault-accent);
             margin-top: 5px;
-            text-shadow: 0 0 2px #9333ea;
+            text-shadow: 0 0 2px var(--vault-accent);
             max-height: 40px;
             overflow-y: auto;
             line-height: 1.2;
@@ -535,8 +607,8 @@
 
         /* ===== EFFECTS TAB STYLES ===== */
         .effects-subtitle {
-            color: #ff6b6b;
-            text-shadow: 0 0 5px #ff6b6b;
+            color: var(--vault-error);
+            text-shadow: 0 0 5px var(--vault-error);
             font-size: 13px;
             font-weight: bold;
             letter-spacing: 2px;
@@ -547,8 +619,8 @@
         }
 
         .effects-list {
-            background-color: #0a0a0a;
-            border: 1px solid rgba(255, 107, 107, 0.2);
+            background-color: var(--vault-dark);
+            border: 1px solid rgba(74, 222, 128, 0.2);
             padding: 12px;
             border-radius: 3px;
             margin-bottom: 15px;
@@ -560,10 +632,16 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px;
-            background-color: #1a1a1a;
-            border: 1px solid rgba(255, 107, 107, 0.3);
+            background-color: var(--vault-darker);
+            border: 1px solid rgba(74, 222, 128, 0.3);
             border-radius: 3px;
             margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .effect-item:hover {
+            border-color: var(--vault-green);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
         }
 
         .effect-item:last-child {
@@ -578,28 +656,28 @@
         }
 
         .effect-name {
-            color: #fbbf24;
+            color: var(--vault-gold);
             font-size: 12px;
             font-weight: bold;
-            text-shadow: 0 0 3px #fbbf24;
+            text-shadow: 0 0 3px var(--vault-gold);
         }
 
         .effect-duration {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 10px;
-            text-shadow: 0 0 2px #4ade80;
+            text-shadow: 0 0 2px var(--vault-green);
         }
 
         .effect-remove-btn {
             background-color: #8b3a3a;
-            border: 1px solid #ff6b6b;
-            color: #ff6b6b;
+            border: 1px solid var(--vault-error);
+            color: var(--vault-error);
             padding: 4px 10px;
             font-family: 'Courier New', monospace;
             font-size: 9px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 3px #ff6b6b;
+            text-shadow: 0 0 3px var(--vault-error);
             transition: all 0.2s ease;
             border-radius: 2px;
         }
@@ -607,17 +685,18 @@
         .effect-remove-btn:hover {
             background-color: #a84a4a;
             box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
-            border-color: #fbbf24;
-            color: #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
         }
 
         .empty-message {
-            color: #9333ea;
+            color: var(--vault-info);
             text-align: center;
             padding: 15px;
             font-size: 11px;
             font-style: italic;
-            text-shadow: 0 0 2px #9333ea;
+            text-shadow: 0 0 2px var(--vault-info);
         }
 
         /* ===== NAVIGATION BUTTONS ===== */
@@ -626,31 +705,35 @@
             justify-content: space-between;
             gap: 10px;
             margin-top: 30px;
+            flex-wrap: wrap;
         }
 
         .nav-button {
             flex: 1;
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            min-width: 150px;
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 12px 20px;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            border-radius: 2px;
         }
 
         .nav-button:hover {
-            background-color: #3d6b1f;
+            background-color: var(--vault-blue-light);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+            transform: translateY(-2px);
         }
 
         .nav-button:active {
@@ -671,15 +754,25 @@
             .nav-buttons {
                 flex-direction: column;
             }
+
+            .vault-header {
+                padding: 20px;
+            }
+
+            .vault-title {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <div class="pip-title">PIP-BOY 3000</div>
-            <div class="character-name" id="characterName">VAULT DWELLER</div>
+        <!-- VAULT HEADER -->
+        <div class="vault-header">
+            <div class="vault-badge">VAULT-TEC INDUSTRIES PIP-BOY 3000</div>
+            <div class="vault-title">STATS & ABILITIES</div>
+            <div class="vault-subtitle">STATISTICAL ANALYSIS SYSTEM</div>
+            <div class="vault-info" id="characterName">Vault 215 Resident • Stats Module</div>
         </div>
 
         <!-- SUBTAB NAVIGATION -->
@@ -696,7 +789,7 @@
             <div class="stats-grid">
                 <!-- EXPERIENCE & LEVEL -->
                 <div class="stat-box">
-                    <div class="stat-title">Experience</div>
+                    <div class="stat-title">⭐ Experience</div>
                     <div class="stat-item">
                         <span class="stat-label">Current Level:</span>
                         <span class="stat-value" id="level">1</span>
@@ -726,7 +819,7 @@
 
                 <!-- HEALTH & ACTION POINTS -->
                 <div class="stat-box">
-                    <div class="stat-title">Vitals</div>
+                    <div class="stat-title">❤ Vitals</div>
                     <div class="stat-item">
                         <span class="stat-label">Health:</span>
                         <span class="stat-value"><span id="health">100</span> / <span id="maxHealth">100</span></span>
@@ -772,7 +865,7 @@
 
             <!-- S.P.E.C.I.A.L STATS -->
             <div class="stat-box" style="margin-bottom: 30px;">
-                <div class="stat-title">S.P.E.C.I.A.L Attributes</div>
+                <div class="stat-title">💪 S.P.E.C.I.A.L Attributes</div>
                 <div class="special-grid">
                     <div class="special-stat">
                         <div class="special-letter">S</div>
@@ -823,7 +916,7 @@
         <!-- SKILLS TAB CONTENT -->
         <div id="skills" class="subtab-content">
             <div class="stat-box">
-                <div class="stat-title">Skills</div>
+                <div class="stat-title">🎯 Skills</div>
                 <div class="tag-header">Tag <span class="tag-count-badge" id="tagBadge">0/3</span></div>
                 <div class="skills-grid" id="skillsGrid"></div>
             </div>
@@ -832,7 +925,7 @@
         <!-- EFFECTS TAB CONTENT (DEBUFFS & BOOSTS) -->
         <div id="effects" class="subtab-content">
             <div class="stat-box">
-                <div class="stat-title">Active Effects</div>
+                <div class="stat-title">✦ Active Effects</div>
                 
                 <!-- DEBUFFS SECTION -->
                 <div style="margin-bottom: 25px;">
@@ -849,7 +942,7 @@
 
                 <!-- BOOSTS SECTION -->
                 <div>
-                    <div class="effects-subtitle">✦ BOOSTS</div>
+                    <div class="effects-subtitle">✓ BOOSTS</div>
                     <div class="effects-list" id="boostsList">
                         <div class="empty-message">No active boosts</div>
                     </div>
@@ -865,7 +958,7 @@
         <!-- PERKS TAB CONTENT -->
         <div id="perks" class="subtab-content">
             <div class="stat-box">
-                <div class="stat-title">Character Perks</div>
+                <div class="stat-title">⭐ Character Perks</div>
                 <div class="perks-grid" id="perksGrid"></div>
             </div>
         </div>
@@ -876,6 +969,12 @@
             <button class="nav-button" onclick="previousPage()">← PREVIOUS</button>
             <button class="nav-button" onclick="nextPage()">NEXT →</button>
             <button class="nav-button" onclick="goToInventory()">INVENTORY →</button>
+        </div>
+
+        <!-- VAULT FOOTER -->
+        <div class="vault-footer">
+            <p>VAULT <span>215</span> RESIDENT • STATS MODULE</p>
+            <p style="margin-top: 5px;">Statistical Data Secured and Synchronized</p>
         </div>
     </div>
 
@@ -1350,221 +1449,4 @@
                 return;
             }
 
-            playerData.tempActionPoints = (playerData.tempActionPoints || 0) + tempAmount;
-            updateTempDisplays();
-            savePlayerData();
-        }
-
-        // ===== REMOVE TEMP ACTION POINTS =====
-        function removeTempAP() {
-            const tempAPInput = prompt('Enter temporary action points amount to remove:');
-            if (tempAPInput === null || tempAPInput === '') return;
-            
-            const tempAmount = parseInt(tempAPInput);
-            if (isNaN(tempAmount) || tempAmount <= 0) {
-                alert('Please enter a valid positive number!');
-                return;
-            }
-
-            playerData.tempActionPoints = (playerData.tempActionPoints || 0) - tempAmount;
-            
-            if (playerData.tempActionPoints < 0) {
-                playerData.tempActionPoints = 0;
-            }
-            
-            updateTempDisplays();
-            savePlayerData();
-        }
-
-        // ===== ADD DEBUFF =====
-        function addDebuff() {
-            const nameInput = document.getElementById('debuffInput');
-            const durationInput = document.getElementById('debuffDurationInput');
-            
-            const name = nameInput.value.trim();
-            const duration = parseInt(durationInput.value);
-            
-            if (!name || !duration || isNaN(duration)) {
-                alert('Please enter a debuff name and duration!');
-                return;
-            }
-            
-            debuffs.push({
-                name: name,
-                duration: duration,
-                id: Date.now()
-            });
-            
-            nameInput.value = '';
-            durationInput.value = '';
-            
-            saveEffects();
-            updateEffectsDisplay();
-        }
-
-        // ===== ADD BOOST =====
-        function addBoost() {
-            const nameInput = document.getElementById('boostInput');
-            const durationInput = document.getElementById('boostDurationInput');
-            
-            const name = nameInput.value.trim();
-            const duration = parseInt(durationInput.value);
-            
-            if (!name || !duration || isNaN(duration)) {
-                alert('Please enter a boost name and duration!');
-                return;
-            }
-            
-            boosts.push({
-                name: name,
-                duration: duration,
-                id: Date.now()
-            });
-            
-            nameInput.value = '';
-            durationInput.value = '';
-            
-            saveEffects();
-            updateEffectsDisplay();
-        }
-
-        // ===== REMOVE DEBUFF =====
-        function removeDebuff(id) {
-            debuffs = debuffs.filter(d => d.id !== id);
-            saveEffects();
-            updateEffectsDisplay();
-        }
-
-        // ===== REMOVE BOOST =====
-        function removeBoost(id) {
-            boosts = boosts.filter(b => b.id !== id);
-            saveEffects();
-            updateEffectsDisplay();
-        }
-
-        // ===== DECREASE DURATION =====
-        function decreaseDuration(type, id) {
-            if (type === 'debuff') {
-                const debuff = debuffs.find(d => d.id === id);
-                if (debuff) {
-                    debuff.duration--;
-                    if (debuff.duration <= 0) {
-                        removeDebuff(id);
-                        return;
-                    }
-                }
-            } else if (type === 'boost') {
-                const boost = boosts.find(b => b.id === id);
-                if (boost) {
-                    boost.duration--;
-                    if (boost.duration <= 0) {
-                        removeBoost(id);
-                        return;
-                    }
-                }
-            }
-            saveEffects();
-            updateEffectsDisplay();
-        }
-
-        // ===== UPDATE EFFECTS DISPLAY =====
-        function updateEffectsDisplay() {
-            // Update debuffs
-            const debuffsList = document.getElementById('debuffsList');
-            if (debuffs.length === 0) {
-                debuffsList.innerHTML = '<div class="empty-message">No active debuffs</div>';
-            } else {
-                debuffsList.innerHTML = debuffs.map(debuff => `
-                    <div class="effect-item">
-                        <div class="effect-info">
-                            <div class="effect-name">${debuff.name}</div>
-                            <div class="effect-duration">Duration: ${debuff.duration} turn(s)</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="effect-remove-btn" onclick="decreaseDuration('debuff', ${debuff.id})">Turn</button>
-                            <button class="effect-remove-btn" onclick="removeDebuff(${debuff.id})">Remove</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            // Update boosts
-            const boostsList = document.getElementById('boostsList');
-            if (boosts.length === 0) {
-                boostsList.innerHTML = '<div class="empty-message">No active boosts</div>';
-            } else {
-                boostsList.innerHTML = boosts.map(boost => `
-                    <div class="effect-item">
-                        <div class="effect-info">
-                            <div class="effect-name">${boost.name}</div>
-                            <div class="effect-duration">Duration: ${boost.duration} turn(s)</div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="effect-remove-btn" onclick="decreaseDuration('boost', ${boost.id})">Turn</button>
-                            <button class="effect-remove-btn" onclick="removeBoost(${boost.id})">Remove</button>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        // ===== UPDATE DISPLAY =====
-        function updateDisplay() {
-            // Update skills grid
-            const skillsGrid = document.getElementById('skillsGrid');
-            skillsGrid.innerHTML = '';
-            
-            SKILLS.forEach(skill => {
-                const special = getSpecialForSkill(skill);
-                const skillValue = playerData.skills[skill] || 0;
-                const isTagged = playerData.tagSkills.includes(skill);
-                const bonus = calculateSkillBonus(skillValue, isTagged);
-                
-                const skillDiv = document.createElement('div');
-                skillDiv.className = 'skill-item';
-                skillDiv.innerHTML = `
-                    <div class="skill-left">
-                        <input type="checkbox" class="skill-checkbox" ${isTagged ? 'checked' : ''} onchange="toggleTagSkill('${skill}')">
-                        <div class="skill-info">
-                            <div class="skill-name">${skill}</div>
-                            <div class="skill-special">${special}</div>
-                            <div class="skill-bonus">${formatBonus(bonus)}</div>
-                        </div>
-                    </div>
-                    <div class="skill-controls">
-                        <button class="skill-btn" onclick="updateSkill('${skill}', -1)">−</button>
-                        <div class="skill-value">${skillValue}</div>
-                        <button class="skill-btn" onclick="updateSkill('${skill}', 1)">+</button>
-                    </div>
-                `;
-                skillsGrid.appendChild(skillDiv);
-            });
-
-            // Update tag badge
-            document.getElementById('tagBadge').textContent = `${playerData.tagSkills.length}/3`;
-
-            // Update SPECIAL skills lists
-            for (const [special, skillsList] of Object.entries(SKILLS_BY_SPECIAL)) {
-                const skillsElement = document.getElementById(`skills-${special}`);
-                skillsElement.innerHTML = skillsList.map(s => `<div>${s}</div>`).join('');
-            }
-        }
-
-        // ===== ADD EVENT LISTENERS TO TAB BUTTONS =====
-        document.querySelectorAll('.subtab-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const tabName = this.getAttribute('data-tab');
-                switchTab(tabName);
-            });
-        });
-
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', function() {
-            loadPlayerData();
-            loadEffects();
-            updateDisplay();
-            updateEffectsDisplay();
-        });
-    </script>
-</body>
-</html>
+            playerData.tempActionPoints = (playerData.tempActionPoints ||*
