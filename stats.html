@@ -733,186 +733,6 @@
             text-shadow: 0 0 2px var(--vault-info);
         }
 
-        /* ===== MESSAGES TAB STYLES ===== */
-        .msg-campaign-info {
-            background-color: var(--vault-darker);
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            padding: 10px 14px;
-            margin-bottom: 16px;
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .msg-campaign-label {
-            color: var(--vault-gold);
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 0 3px var(--vault-gold);
-        }
-
-        .msg-campaign-name {
-            color: var(--vault-green);
-            font-size: 12px;
-            font-weight: bold;
-            text-shadow: 0 0 3px var(--vault-green);
-        }
-
-        .pipboy-chat-history {
-            background-color: var(--vault-darker);
-            border: 2px solid var(--vault-green);
-            min-height: 300px;
-            max-height: 420px;
-            overflow-y: auto;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            scroll-behavior: smooth;
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
-            margin-bottom: 16px;
-        }
-
-        .pipboy-chat-history::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .pipboy-chat-history::-webkit-scrollbar-track {
-            background: var(--vault-dark);
-        }
-
-        .pipboy-chat-history::-webkit-scrollbar-thumb {
-            background: var(--vault-green);
-            opacity: 0.5;
-        }
-
-        .pipboy-msg {
-            padding: 10px 12px;
-            border-radius: 2px;
-            position: relative;
-            border-left: 3px solid;
-        }
-
-        .pipboy-msg.overseer {
-            background: rgba(0, 128, 255, 0.08);
-            border-left-color: #0080FF;
-        }
-
-        .pipboy-msg.unknown {
-            background: rgba(255, 0, 0, 0.10);
-            border-left-color: #FF0000;
-        }
-
-        .pipboy-msg.npc {
-            background: rgba(0, 255, 0, 0.06);
-            border-left-color: #00CC44;
-        }
-
-        .pipboy-msg.player {
-            background: rgba(255, 255, 0, 0.06);
-            border-left-color: #FFCC00;
-        }
-
-        .pipboy-msg-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 5px;
-            flex-wrap: wrap;
-        }
-
-        .pipboy-sender {
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .pipboy-sender.overseer { color: #4da6ff; text-shadow: 0 0 5px rgba(0,128,255,0.5); }
-        .pipboy-sender.unknown  { color: #ff4444; text-shadow: 0 0 5px rgba(255,0,0,0.5); }
-        .pipboy-sender.npc      { color: #00FF00; text-shadow: 0 0 5px rgba(0,255,0,0.4); }
-        .pipboy-sender.player   { color: #FFFF00; text-shadow: 0 0 5px rgba(255,255,0,0.4); }
-
-        .pipboy-type-badge {
-            font-size: 9px;
-            padding: 1px 5px;
-            border-radius: 2px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-
-        .pipboy-type-badge.overseer { background: rgba(0,128,255,0.2);   color: #4da6ff; border: 1px solid rgba(0,128,255,0.4); }
-        .pipboy-type-badge.unknown  { background: rgba(255,0,0,0.2);     color: #ff4444; border: 1px solid rgba(255,0,0,0.4); }
-        .pipboy-type-badge.npc      { background: rgba(0,255,0,0.1);     color: #00FF00; border: 1px solid rgba(0,255,0,0.3); }
-        .pipboy-type-badge.player   { background: rgba(255,255,0,0.1);   color: #FFFF00; border: 1px solid rgba(255,255,0,0.3); }
-
-        .pipboy-timestamp {
-            font-size: 10px;
-            color: rgba(74, 222, 128, 0.35);
-            margin-left: auto;
-        }
-
-        .pipboy-msg-text {
-            font-size: 12px;
-            color: var(--vault-green);
-            line-height: 1.5;
-            word-break: break-word;
-        }
-
-        .pipboy-chat-empty {
-            color: rgba(74, 222, 128, 0.4);
-            font-size: 12px;
-            text-align: center;
-            padding: 40px 0;
-            font-style: italic;
-        }
-
-        /* Reply area */
-        .msg-reply-area {
-            display: flex;
-            gap: 8px;
-            align-items: stretch;
-            flex-wrap: wrap;
-        }
-
-        .msg-reply-input {
-            flex: 1;
-            min-width: 200px;
-            background-color: var(--vault-dark);
-            border: 2px solid var(--vault-green);
-            color: var(--vault-gold);
-            padding: 10px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            text-shadow: 0 0 3px var(--vault-gold);
-            outline: none;
-            resize: vertical;
-            min-height: 60px;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .msg-reply-input::placeholder {
-            color: rgba(74, 222, 128, 0.35);
-        }
-
-        .msg-reply-input:focus {
-            border-color: var(--vault-gold);
-            box-shadow: 0 0 15px rgba(251, 191, 36, 0.4), inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .msg-reply-feedback {
-            margin-top: 8px;
-            font-size: 11px;
-            color: var(--vault-green);
-            text-shadow: 0 0 3px var(--vault-green);
-            min-height: 18px;
-        }
-
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             .stats-grid {
@@ -947,11 +767,10 @@
 
         <!-- SUBTAB NAVIGATION -->
         <div class="subtab-nav">
-            <button class="subtab-button active" data-tab="stats">Stats</button>
-            <button class="subtab-button" data-tab="skills">Skills</button>
-            <button class="subtab-button" data-tab="effects">Effects</button>
-            <button class="subtab-button" data-tab="perks">Perks</button>
-            <button class="subtab-button" data-tab="messages">📻 Messages</button>
+            <button class="subtab-button active" data-tab="stats" onclick="switchTab('stats')">STATS</button>
+            <button class="subtab-button" data-tab="skills" onclick="switchTab('skills')">SKILLS</button>
+            <button class="subtab-button" data-tab="effects" onclick="switchTab('effects')">EFFECTS</button>
+            <button class="subtab-button" data-tab="perks" onclick="switchTab('perks')">PERKS</button>
         </div>
 
         <!-- STATS TAB CONTENT -->
@@ -1148,32 +967,6 @@
             </div>
         </div>
 
-        <!-- MESSAGES TAB CONTENT -->
-        <div id="messages" class="subtab-content">
-            <div class="stat-box">
-                <div class="stat-title">📻 Campaign Messages</div>
-
-                <!-- Active campaign info -->
-                <div class="msg-campaign-info">
-                    <span class="msg-campaign-label">Campaign:</span>
-                    <span class="msg-campaign-name" id="pipboyCampaignName">No active campaign</span>
-                </div>
-
-                <!-- Message feed -->
-                <div class="pipboy-chat-history" id="pipboyChatHistory">
-                    <div class="pipboy-chat-empty" id="pipboyChatEmpty">No campaign active or no messages yet.<br>Check back after the Overseer sets up a campaign.</div>
-                </div>
-
-                <!-- Reply section -->
-                <div class="stat-title" style="margin-top:18px;margin-bottom:10px;font-size:12px;">✉ Send Reply</div>
-                <div class="msg-reply-area">
-                    <textarea class="msg-reply-input" id="pipboyReplyText" placeholder="Type your reply…" maxlength="1000"></textarea>
-                    <button class="action-button" onclick="sendPlayerReply()" style="align-self:flex-end;">▶ SEND</button>
-                </div>
-                <div class="msg-reply-feedback" id="pipboyReplyFeedback"></div>
-            </div>
-        </div>
-
         <!-- VAULT FOOTER -->
         <div class="vault-footer">
             <p>VAULT <span>215</span> RESIDENT • STATS MODULE</p>
@@ -1187,9 +980,6 @@
         const MAX_ACTION_POINTS = 20;
         const MAX_TAG_SKILLS = 3;
         const TAG_SKILL_BONUS = 10;
-
-        const pages = ['stats', 'skills', 'effects', 'perks', 'messages'];
-        let currentPageIndex = 0;
 
         const SKILLS_BY_SPECIAL = {
             strength: ['Melee Weapons', 'Big Guns', 'Unarmed'],
@@ -1347,15 +1137,12 @@
             document.getElementById('skills').classList.remove('active');
             document.getElementById('effects').classList.remove('active');
             document.getElementById('perks').classList.remove('active');
-            document.getElementById('messages').classList.remove('active');
             
             const buttons = document.querySelectorAll('.subtab-button');
             buttons.forEach(btn => btn.classList.remove('active'));
             
             document.getElementById(tabName).classList.add('active');
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-
-            currentPageIndex = pages.indexOf(tabName);
         }
 
         function updateSkill(skillName, amount) {
@@ -1388,97 +1175,6 @@
             updateDisplay();
         }
 
-        function addXP() {
-            const xpInput = document.getElementById('xpInput');
-            const messageBox = document.getElementById('xpMessage');
-            const xpAmount = parseInt(xpInput.value);
-
-            if (!xpInput.value || isNaN(xpAmount) || xpAmount <= 0) {
-                messageBox.textContent = '⚠ ERROR: Please enter a positive XP amount!';
-                messageBox.className = 'message error';
-                return;
-            }
-
-            const rawXP = parseInt(document.getElementById('xp').textContent.replace(/,/g, '')) || 0;
-            const oldXP = rawXP;
-            const newXP = oldXP + xpAmount;
-
-            const source = document.getElementById('xpSource').value;
-            const description = document.getElementById('xpDescription').value.trim();
-
-            const levelsGained = checkLevelUp(oldXP, newXP);
-            const newLevel = getLevelFromXP(newXP);
-
-            document.getElementById('xp').textContent = formatXP(newXP);
-            document.getElementById('level').textContent = newLevel;
-            document.getElementById('xpToNext').textContent = formatXP(getXPForNextLevel(newXP));
-
-            const progress = getLevelProgress(newXP);
-            document.getElementById('xpPercent').textContent = progress + '%';
-            document.getElementById('xpBar').style.width = progress + '%';
-
-            if (levelsGained.length > 0) {
-                messageBox.textContent = `🎉 LEVEL UP! You reached Level ${newLevel}! (+${formatXP(xpAmount)} XP)`;
-                messageBox.className = 'message success';
-            } else {
-                messageBox.textContent = `✓ SUCCESS: Added ${formatXP(xpAmount)} XP [${source}]! Total XP: ${formatXP(newXP)}`;
-                messageBox.className = 'message success';
-            }
-
-            addXPToHistory(xpAmount, source, description, newXP);
-            savePlayerData();
-            xpInput.value = '';
-            document.getElementById('xpDescription').value = '';
-            setTimeout(() => {
-                messageBox.textContent = '';
-            }, 4000);
-        }
-
-        function removeXP() {
-            const xpInput = document.getElementById('xpInput');
-            const messageBox = document.getElementById('xpMessage');
-            const xpAmount = parseInt(xpInput.value);
-
-            if (!xpInput.value || isNaN(xpAmount) || xpAmount <= 0) {
-                messageBox.textContent = '⚠ ERROR: Please enter a positive XP amount to remove!';
-                messageBox.className = 'message error';
-                return;
-            }
-
-            const rawXP = parseInt(document.getElementById('xp').textContent.replace(/,/g, '')) || 0;
-            let newXP = rawXP - xpAmount;
-
-            const source = document.getElementById('xpSource').value;
-            const description = document.getElementById('xpDescription').value.trim();
-
-            if (newXP < 0) {
-                newXP = 0;
-                messageBox.textContent = `⚠ XP cannot be below 0! Reset to 0.`;
-                messageBox.className = 'message error';
-            } else {
-                messageBox.textContent = `✓ SUCCESS: Removed ${formatXP(xpAmount)} XP! Total XP: ${formatXP(newXP)}`;
-                messageBox.className = 'message success';
-            }
-
-            const newLevel = getLevelFromXP(newXP);
-
-            document.getElementById('xp').textContent = formatXP(newXP);
-            document.getElementById('level').textContent = newLevel;
-            document.getElementById('xpToNext').textContent = formatXP(getXPForNextLevel(newXP));
-
-            const progress = getLevelProgress(newXP);
-            document.getElementById('xpPercent').textContent = progress + '%';
-            document.getElementById('xpBar').style.width = progress + '%';
-
-            addXPToHistory(-xpAmount, source, description || 'XP removed', newXP);
-            savePlayerData();
-            xpInput.value = '';
-            document.getElementById('xpDescription').value = '';
-            setTimeout(() => {
-                messageBox.textContent = '';
-            }, 4000);
-        }
-
         function updateHealth() {
             const healthInput = document.getElementById('healthInput');
             const messageBox = document.getElementById('healthMessage');
@@ -1489,3 +1185,311 @@
                 messageBox.className = 'message error';
                 return;
             }
+
+            let currentHealth = parseInt(document.getElementById('health').textContent) || MAX_HEALTH;
+            currentHealth += healthChange;
+
+            if (currentHealth > MAX_HEALTH) {
+                currentHealth = MAX_HEALTH;
+                messageBox.textContent = `⚠ Health capped at ${MAX_HEALTH}!`;
+                messageBox.className = 'message error';
+            } else if (currentHealth < 0) {
+                currentHealth = 0;
+                messageBox.textContent = `⚠ Health cannot be below 0!`;
+                messageBox.className = 'message error';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Health is now ${currentHealth}/${MAX_HEALTH}`;
+                messageBox.className = 'message success';
+            }
+
+            document.getElementById('health').textContent = currentHealth;
+            const healthPercent = (currentHealth / MAX_HEALTH) * 100;
+            document.getElementById('healthPercent').textContent = Math.floor(healthPercent) + '%';
+            document.getElementById('healthBar').style.width = healthPercent + '%';
+
+            savePlayerData();
+            healthInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        function addTempHealth() {
+            const tempHealthInput = prompt('Enter temporary health amount:');
+            if (tempHealthInput === null || tempHealthInput === '') return;
+            
+            const tempAmount = parseInt(tempHealthInput);
+            if (isNaN(tempAmount) || tempAmount <= 0) {
+                alert('Please enter a valid positive number!');
+                return;
+            }
+
+            playerData.tempHealth = (playerData.tempHealth || 0) + tempAmount;
+            updateTempDisplays();
+            savePlayerData();
+        }
+
+        function removeTempHealth() {
+            const tempHealthInput = prompt('Enter temporary health amount to remove:');
+            if (tempHealthInput === null || tempHealthInput === '') return;
+            
+            const tempAmount = parseInt(tempHealthInput);
+            if (isNaN(tempAmount) || tempAmount <= 0) {
+                alert('Please enter a valid positive number!');
+                return;
+            }
+
+            playerData.tempHealth = (playerData.tempHealth || 0) - tempAmount;
+            
+            if (playerData.tempHealth < 0) {
+                playerData.tempHealth = 0;
+            }
+            
+            updateTempDisplays();
+            savePlayerData();
+        }
+
+        function updateActionPoints() {
+            const apInput = document.getElementById('apInput');
+            const messageBox = document.getElementById('apMessage');
+            const apChange = parseInt(apInput.value);
+
+            if (!apInput.value || isNaN(apChange)) {
+                messageBox.textContent = '⚠ ERROR: Please enter a valid number!';
+                messageBox.className = 'message error';
+                return;
+            }
+
+            let currentAP = parseInt(document.getElementById('actionPoints').textContent) || 10;
+            currentAP += apChange;
+
+            if (currentAP > MAX_ACTION_POINTS) {
+                currentAP = MAX_ACTION_POINTS;
+                messageBox.textContent = `⚠ Action Points capped at ${MAX_ACTION_POINTS}!`;
+                messageBox.className = 'message error';
+            } else if (currentAP < 0) {
+                currentAP = 0;
+                messageBox.textContent = `⚠ Action Points cannot be below 0!`;
+                messageBox.className = 'message error';
+            } else {
+                messageBox.textContent = `✓ SUCCESS: Action Points are now ${currentAP}/${MAX_ACTION_POINTS}`;
+                messageBox.className = 'message success';
+            }
+
+            document.getElementById('actionPoints').textContent = currentAP;
+
+            savePlayerData();
+            apInput.value = '';
+            setTimeout(() => {
+                messageBox.textContent = '';
+            }, 3000);
+        }
+
+        function addTempAP() {
+            const tempAPInput = prompt('Enter temporary action points amount:');
+            if (tempAPInput === null || tempAPInput === '') return;
+            
+            const tempAmount = parseInt(tempAPInput);
+            if (isNaN(tempAmount) || tempAmount <= 0) {
+                alert('Please enter a valid positive number!');
+                return;
+            }
+
+            playerData.tempActionPoints = (playerData.tempActionPoints || 0) + tempAmount;
+            updateTempDisplays();
+            savePlayerData();
+        }
+
+        function removeTempAP() {
+            const tempAPInput = prompt('Enter temporary action points amount to remove:');
+            if (tempAPInput === null || tempAPInput === '') return;
+            
+            const tempAmount = parseInt(tempAPInput);
+            if (isNaN(tempAmount) || tempAmount <= 0) {
+                alert('Please enter a valid positive number!');
+                return;
+            }
+
+            playerData.tempActionPoints = (playerData.tempActionPoints || 0) - tempAmount;
+            
+            if (playerData.tempActionPoints < 0) {
+                playerData.tempActionPoints = 0;
+            }
+            
+            updateTempDisplays();
+            savePlayerData();
+        }
+
+        function updateTempDisplays() {
+            const tempHP = playerData.tempHealth || 0;
+            const tempAP = playerData.tempActionPoints || 0;
+            
+            const tempHealthDisplay = document.getElementById('tempHealthDisplay');
+            const tempAPDisplay = document.getElementById('tempActionPointsDisplay');
+            
+            if (tempHP > 0) {
+                tempHealthDisplay.textContent = `(+${tempHP})`;
+            } else {
+                tempHealthDisplay.textContent = '';
+            }
+            
+            if (tempAP > 0) {
+                tempAPDisplay.textContent = `(+${tempAP})`;
+            } else {
+                tempAPDisplay.textContent = '';
+            }
+        }
+
+        function addDebuff() {
+            const nameInput = document.getElementById('debuffInput');
+            const durationInput = document.getElementById('debuffDurationInput');
+            
+            const name = nameInput.value.trim();
+            const duration = parseInt(durationInput.value);
+            
+            if (!name || !duration || isNaN(duration)) {
+                alert('Please enter a debuff name and duration!');
+                return;
+            }
+            
+            debuffs.push({
+                name: name,
+                duration: duration,
+                id: Date.now()
+            });
+            
+            nameInput.value = '';
+            durationInput.value = '';
+            
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function addBoost() {
+            const nameInput = document.getElementById('boostInput');
+            const durationInput = document.getElementById('boostDurationInput');
+            
+            const name = nameInput.value.trim();
+            const duration = parseInt(durationInput.value);
+            
+            if (!name || !duration || isNaN(duration)) {
+                alert('Please enter a boost name and duration!');
+                return;
+            }
+            
+            boosts.push({
+                name: name,
+                duration: duration,
+                id: Date.now()
+            });
+            
+            nameInput.value = '';
+            durationInput.value = '';
+            
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function removeDebuff(id) {
+            debuffs = debuffs.filter(d => d.id !== id);
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function removeBoost(id) {
+            boosts = boosts.filter(b => b.id !== id);
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function decreaseDuration(type, id) {
+            if (type === 'debuff') {
+                const debuff = debuffs.find(d => d.id === id);
+                if (debuff) {
+                    debuff.duration--;
+                    if (debuff.duration <= 0) {
+                        removeDebuff(id);
+                        return;
+                    }
+                }
+            } else if (type === 'boost') {
+                const boost = boosts.find(b => b.id === id);
+                if (boost) {
+                    boost.duration--;
+                    if (boost.duration <= 0) {
+                        removeBoost(id);
+                        return;
+                    }
+                }
+            }
+            saveEffects();
+            updateEffectsDisplay();
+        }
+
+        function updateEffectsDisplay() {
+            const debuffsList = document.getElementById('debuffsList');
+            if (debuffs.length === 0) {
+                debuffsList.innerHTML = '<div class="empty-message">No active debuffs</div>';
+            } else {
+                debuffsList.innerHTML = debuffs.map(debuff => `
+                    <div class="effect-item">
+                        <div class="effect-info">
+                            <div class="effect-name">${debuff.name}</div>
+                            <div class="effect-duration">Duration: ${debuff.duration} turn(s)</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="effect-remove-btn" onclick="decreaseDuration('debuff', ${debuff.id})">Turn</button>
+                            <button class="effect-remove-btn" onclick="removeDebuff(${debuff.id})">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            const boostsList = document.getElementById('boostsList');
+            if (boosts.length === 0) {
+                boostsList.innerHTML = '<div class="empty-message">No active boosts</div>';
+            } else {
+                boostsList.innerHTML = boosts.map(boost => `
+                    <div class="effect-item">
+                        <div class="effect-info">
+                            <div class="effect-name">${boost.name}</div>
+                            <div class="effect-duration">Duration: ${boost.duration} turn(s)</div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="effect-remove-btn" onclick="decreaseDuration('boost', ${boost.id})">Turn</button>
+                            <button class="effect-remove-btn" onclick="removeBoost(${boost.id})">Remove</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function updateDisplay() {
+            const tagCount = playerData.tagSkills ? playerData.tagSkills.length : 0;
+            document.getElementById('tagBadge').textContent = `${tagCount}/${MAX_TAG_SKILLS}`;
+
+            const skillsGrid = document.getElementById('skillsGrid');
+            skillsGrid.innerHTML = '';
+
+            SKILLS.forEach(skill => {
+                const special = getSpecialForSkill(skill);
+                const skillValue = playerData.skills[skill] || 0;
+                const isTagged = playerData.tagSkills.includes(skill);
+                const bonus = calculateSkillBonus(skillValue, isTagged);
+
+                const skillDiv = document.createElement('div');
+                skillDiv.className = 'skill-item';
+                skillDiv.innerHTML = `
+                    <div class="skill-left">
+                        <input type="checkbox" class="skill-checkbox"
+                            ${isTagged ? 'checked' : ''}
+                            onchange="toggleTagSkill('${skill}')"
+                            title="Tag ${skill} (${MAX_TAG_SKILLS} max)">
+                        <div class="skill-info">
+                            <div class="skill-name">${skill}</div>
+                            <div class="skill-special">${special}</div>
+                            <div class="skill-bonus">Bonus: ${formatBonus(bonus)}</div>
+                        </div>
+                    </div>
+                    <div class="skill-controls">
+                        <button class="skill-btn`*
