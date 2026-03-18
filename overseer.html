@@ -1253,10 +1253,8 @@
 
         <div class="login-field">
             <label>Overseer Identification</label>
-            <select id="loginName">
-                <option value="">— Select Overseer —</option>
-                <option value="Overseer">Overseer</option>
-            </select>
+            <input type="text" id="loginName" placeholder="Overseer" maxlength="40"
+                   onkeydown="if(event.key==='Enter') attemptLogin()">
         </div>
 
         <div class="login-field">
@@ -1267,10 +1265,6 @@
 
         <button class="login-btn" onclick="attemptLogin()">◈ AUTHORIZE ACCESS ◈</button>
 
-        <label class="login-remember">
-            <input type="checkbox" id="rememberSession"> Remember this session
-        </label>
-
         <div id="loginError" class="login-error">
             ⚠ AUTHORIZATION DENIED — Invalid credentials
         </div>
@@ -1278,6 +1272,10 @@
         <div class="login-footer">
             VAULT-TEC CORPORATION • ALL SYSTEMS MONITORED<br>
             UNAUTHORIZED ACCESS WILL BE PROSECUTED
+        </div>
+
+        <div style="margin-top:20px;">
+            <a href="login_hub.html" style="font-family:'Courier New',monospace; font-size:10px; letter-spacing:2px; color:var(--overseer-gold-dim); text-decoration:none; border:1px solid var(--overseer-gold-dim); padding:6px 14px; display:inline-block; transition:all 0.2s;" onmouseover="this.style.color='var(--overseer-gold)';this.style.borderColor='var(--overseer-gold)';this.style.background='rgba(212,160,23,0.08)'" onmouseout="this.style.color='var(--overseer-gold-dim)';this.style.borderColor='var(--overseer-gold-dim)';this.style.background='transparent'">← BACK TO LOGIN HUB</a>
         </div>
     </div>
 </div>
@@ -1298,6 +1296,7 @@
         </div>
         <div class="command-bar-right">
             <button class="cmd-btn" onclick="refreshDashboard()">↻ Refresh</button>
+            <a href="login_hub.html" class="cmd-btn" style="text-decoration:none; display:inline-block; line-height:normal;">⬡ Login Hub</a>
             <a href="index.html" class="cmd-btn" style="text-decoration:none; display:inline-block; line-height:normal;">⌂ Main Menu</a>
             <button class="cmd-btn danger" onclick="logoutOverseer()">⏻ Logout</button>
         </div>
@@ -1719,7 +1718,7 @@
     // do not use for applications requiring real security.
     // Each account: { pin, displayName }
     const OVERSEER_ACCOUNTS = {
-        'Overseer': { pin: 'vault101', displayName: 'Head Overseer' }
+        'Overseer': { pin: '0809', displayName: 'Head Overseer' }
     };
 
     // ======================================
@@ -1748,7 +1747,6 @@
     function attemptLogin() {
         const nameEl = document.getElementById('loginName');
         const pinEl = document.getElementById('loginPin');
-        const rememberEl = document.getElementById('rememberSession');
         const errorEl = document.getElementById('loginError');
 
         const name = nameEl.value.trim();
@@ -1757,7 +1755,7 @@
         errorEl.style.display = 'none';
 
         if (!name) {
-            errorEl.textContent = '⚠ Please select an Overseer identity.';
+            errorEl.textContent = '⚠ Please enter your Overseer username.';
             errorEl.style.display = 'block';
             return;
         }
@@ -1768,10 +1766,6 @@
             errorEl.style.display = 'block';
             pinEl.value = '';
             return;
-        }
-
-        if (rememberEl.checked) {
-            saveSession(name);
         }
 
         enterDashboard(name);
@@ -1790,19 +1784,10 @@
     function logoutOverseer() {
         if (!confirm('Terminate Overseer session?')) return;
         clearSession();
-        document.getElementById('dashboardScreen').classList.add('hidden');
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('loginPin').value = '';
-        document.getElementById('loginError').style.display = 'none';
+        window.location.href = 'login_hub.html';
     }
 
-    // Auto-login if session saved
-    window.addEventListener('DOMContentLoaded', function() {
-        const session = loadSession();
-        if (session && OVERSEER_ACCOUNTS[session.name]) {
-            enterDashboard(session.name);
-        }
-    });
+    // No auto-login from session (no localStorage storage per security policy)
 
     // ======================================
     // DATA HELPERS
