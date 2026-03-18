@@ -262,6 +262,244 @@
             background: rgba(212, 160, 23, 0.08);
         }
 
+        /* ===== PIN PAD SCREEN ===== */
+        .pin-screen {
+            display: none;
+        }
+
+        .pin-screen.active {
+            display: block;
+        }
+
+        .hub-options-screen {
+            display: block;
+        }
+
+        .hub-options-screen.hidden {
+            display: none;
+        }
+
+        .pin-title {
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 12px var(--overseer-glow-gold);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .pin-subtitle {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--overseer-white);
+            opacity: 0.45;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        /* ===== PIN DISPLAY FIELD ===== */
+        .pin-display-wrap {
+            margin-bottom: 20px;
+        }
+
+        .pin-display-label {
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: var(--overseer-gold-dim);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .pin-display {
+            background: var(--overseer-darker);
+            border: 2px solid var(--overseer-gold-dim);
+            color: var(--overseer-gold-bright);
+            font-family: 'Courier New', monospace;
+            font-size: 26px;
+            letter-spacing: 10px;
+            text-align: center;
+            padding: 12px 20px;
+            width: 100%;
+            min-height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7), 0 0 8px rgba(212, 160, 23, 0.15);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .pin-display.error-flash {
+            border-color: var(--overseer-red);
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7), 0 0 15px rgba(204, 34, 0, 0.5);
+        }
+
+        .pin-display.success {
+            color: var(--overseer-green);
+            border-color: var(--overseer-green);
+            box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 204, 102, 0.5);
+        }
+
+        /* ===== PIN ERROR MESSAGE ===== */
+        .pin-error {
+            display: none;
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--overseer-red);
+            text-transform: uppercase;
+            margin-top: 8px;
+            margin-bottom: 4px;
+            min-height: 16px;
+            text-shadow: 0 0 6px rgba(204, 34, 0, 0.6);
+        }
+
+        .pin-attempts {
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: var(--overseer-white);
+            opacity: 0.35;
+            margin-top: 4px;
+            margin-bottom: 16px;
+            min-height: 14px;
+        }
+
+        /* ===== PIN PAD GRID ===== */
+        .pin-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .pin-btn {
+            background: var(--overseer-blue);
+            border: 2px solid var(--overseer-blue-light);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 18px 10px;
+            cursor: pointer;
+            transition: all 0.12s ease;
+            text-align: center;
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pin-btn:hover {
+            background: var(--overseer-blue-bright);
+            border-color: var(--overseer-gold);
+            color: var(--overseer-gold-bright);
+            box-shadow: 0 0 12px rgba(212, 160, 23, 0.3), inset 0 0 8px rgba(42, 82, 152, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .pin-btn:active {
+            background: var(--overseer-blue-mid);
+            border-color: var(--overseer-gold-bright);
+            box-shadow: 0 0 6px rgba(212, 160, 23, 0.5), inset 0 0 10px rgba(212, 160, 23, 0.1);
+            transform: translateY(1px);
+        }
+
+        /* Zero key row */
+        .pin-zero-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .pin-btn.zero {
+            grid-column: 2;
+        }
+
+        /* Action buttons row */
+        .pin-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .pin-btn.back {
+            background: var(--overseer-blue);
+            border-color: rgba(212, 160, 23, 0.3);
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: var(--overseer-gold-dim);
+        }
+
+        .pin-btn.back:hover {
+            background: var(--overseer-blue-bright);
+            border-color: var(--overseer-gold);
+            color: var(--overseer-gold);
+            box-shadow: 0 0 10px rgba(212, 160, 23, 0.2);
+        }
+
+        .pin-btn.submit {
+            background: rgba(42, 82, 152, 0.3);
+            border-color: var(--overseer-blue-light);
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: var(--overseer-gold-dim);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pin-btn.submit.ready {
+            background: rgba(42, 82, 152, 0.5);
+            border-color: var(--overseer-gold);
+            color: var(--overseer-gold-bright);
+            cursor: pointer;
+            opacity: 1;
+            text-shadow: 0 0 8px rgba(212, 160, 23, 0.5);
+        }
+
+        .pin-btn.submit.ready:hover {
+            background: var(--overseer-blue-bright);
+            box-shadow: 0 0 16px rgba(212, 160, 23, 0.4), inset 0 0 10px rgba(42, 82, 152, 0.3);
+        }
+
+        /* Cancel button */
+        .pin-cancel-row {
+            margin-top: 4px;
+        }
+
+        .pin-btn.cancel {
+            width: 100%;
+            background: transparent;
+            border: 1px solid rgba(204, 34, 0, 0.3);
+            color: rgba(204, 34, 0, 0.55);
+            font-size: 11px;
+            letter-spacing: 3px;
+            padding: 10px;
+            min-height: 38px;
+        }
+
+        .pin-btn.cancel:hover {
+            background: rgba(204, 34, 0, 0.08);
+            border-color: var(--overseer-red);
+            color: var(--overseer-red);
+            box-shadow: 0 0 10px rgba(204, 34, 0, 0.2);
+        }
+
+        /* Lockout state */
+        .pin-lockout {
+            display: none;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--overseer-red);
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(204, 34, 0, 0.7);
+            margin: 12px 0;
+            line-height: 1.6;
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 500px) {
             .hub-panel {
@@ -275,6 +513,11 @@
             .login-options {
                 grid-template-columns: 1fr;
             }
+            .pin-btn {
+                padding: 14px 8px;
+                font-size: 18px;
+                min-height: 52px;
+            }
         }
     </style>
 </head>
@@ -283,32 +526,255 @@
 <div class="hub-panel">
     <div class="hub-emblem">⬡ Vault-Tec Authority — Vault 215 ⬡</div>
     <div class="hub-title">VAULT 215</div>
-    <div class="hub-subtitle">LOGIN TERMINAL — SELECT ACCESS MODE</div>
-    <hr class="hub-divider">
 
-    <div class="hub-prompt">Identify Access Mode</div>
+    <!-- ===== HUB SELECTION SCREEN ===== -->
+    <div id="hubScreen" class="hub-options-screen">
+        <div class="hub-subtitle">LOGIN TERMINAL — SELECT ACCESS MODE</div>
+        <hr class="hub-divider">
 
-    <div class="login-options">
-        <!-- Overseer Console Option -->
-        <a href="overseer.html" class="login-option overseer">
-            <div class="login-option-icon">🛡️</div>
-            <div class="login-option-label">Overseer Console</div>
-            <div class="login-option-desc">Command Center<br>Restricted Access</div>
-        </a>
+        <div class="hub-prompt">Identify Access Mode</div>
 
-        <!-- Player Login Option -->
-        <a href="index.html" class="login-option player">
-            <div class="login-option-icon">👤</div>
-            <div class="login-option-label">Player Login</div>
-            <div class="login-option-desc">Vault Dweller<br>Character Access</div>
-        </a>
+        <div class="login-options">
+            <!-- Overseer Console Option — triggers PIN pad -->
+            <button class="login-option overseer" type="button">
+                <div class="login-option-icon">🛡️</div>
+                <div class="login-option-label">Overseer Console</div>
+                <div class="login-option-desc">Command Center<br>Restricted Access</div>
+            </button>
+
+            <!-- Player Login Option -->
+            <a href="index.html" class="login-option player">
+                <div class="login-option-icon">👤</div>
+                <div class="login-option-label">Player Login</div>
+                <div class="login-option-desc">Vault Dweller<br>Character Access</div>
+            </a>
+        </div>
+
+        <div class="hub-footer">
+            Vault-Tec Corporation • All Systems Monitored<br>
+            Unauthorized Access Will Be Prosecuted
+        </div>
     </div>
 
-    <div class="hub-footer">
-        Vault-Tec Corporation • All Systems Monitored<br>
-        Unauthorized Access Will Be Prosecuted
+    <!-- ===== PIN PAD SCREEN ===== -->
+    <div id="pinScreen" class="pin-screen">
+        <div class="hub-subtitle">LOGIN TERMINAL — OVERSEER ACCESS</div>
+        <hr class="hub-divider">
+
+        <div class="pin-title">OVERSEER SECURITY PROTOCOL</div>
+        <div class="pin-subtitle">Enter access PIN to continue</div>
+
+        <!-- PIN display -->
+        <div class="pin-display-wrap">
+            <div class="pin-display-label">PIN Entry</div>
+            <div id="pinDisplay" class="pin-display">——</div>
+            <div id="pinError" class="pin-error"></div>
+            <div id="pinAttempts" class="pin-attempts"></div>
+        </div>
+
+        <!-- Lockout message (shown after 3 failed attempts) -->
+        <div id="pinLockout" class="pin-lockout">
+            ⚠ ACCESS DENIED — TERMINAL LOCKED<br>
+            Too many incorrect attempts.<br>
+            Contact System Administrator.
+        </div>
+
+        <!-- Number pad: 1-9 (generated by JS) -->
+        <div class="pin-pad" id="pinPad"></div>
+
+        <!-- Zero row -->
+        <div class="pin-zero-row" id="pinZeroRow">
+            <div></div>
+            <button class="pin-btn zero" type="button">0</button>
+            <div></div>
+        </div>
+
+        <!-- Back + Submit -->
+        <div class="pin-actions" id="pinActions">
+            <button class="pin-btn back" type="button">⌫ BACK</button>
+            <button id="pinSubmit" class="pin-btn submit" type="button" disabled>ENTER ▶</button>
+        </div>
+
+        <!-- Cancel -->
+        <div class="pin-cancel-row">
+            <button class="pin-btn cancel" type="button">✕ CANCEL</button>
+        </div>
     </div>
 </div>
+
+<script>
+    // ===================================================
+    // OVERSEER PIN PAD LOGIC
+    // ===================================================
+    const CORRECT_PIN = '080919';
+    const MAX_ATTEMPTS = 3;
+    const PIN_LENGTH = 6;
+
+    let currentPin = '';
+    let attemptsLeft = MAX_ATTEMPTS;
+    let locked = false;
+
+    // Build the 1-9 number buttons dynamically
+    (function buildPad() {
+        const pad = document.getElementById('pinPad');
+        for (let i = 1; i <= 9; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'pin-btn';
+            btn.type = 'button';
+            btn.textContent = String(i);
+            btn.addEventListener('click', () => pinDigit(String(i)));
+            pad.appendChild(btn);
+        }
+    })();
+
+    // Wire remaining buttons via addEventListener
+    document.getElementById('pinZeroRow').querySelector('.zero')
+        .addEventListener('click', () => pinDigit('0'));
+    document.querySelector('.pin-btn.back')
+        .addEventListener('click', pinBack);
+    document.getElementById('pinSubmit')
+        .addEventListener('click', pinSubmit);
+    document.querySelector('.pin-btn.cancel')
+        .addEventListener('click', cancelPin);
+    document.querySelector('.login-option.overseer')
+        .addEventListener('click', showPinPad);
+
+    function showPinPad() {
+        document.getElementById('hubScreen').classList.add('hidden');
+        document.getElementById('pinScreen').classList.add('active');
+        resetPinState();
+    }
+
+    function cancelPin() {
+        document.getElementById('pinScreen').classList.remove('active');
+        document.getElementById('hubScreen').classList.remove('hidden');
+        resetPinState();
+    }
+
+    function resetPinState() {
+        currentPin = '';
+        locked = false;
+        attemptsLeft = MAX_ATTEMPTS;
+        updateDisplay();
+        clearError();
+        updateAttemptsLabel();
+        setInputEnabled(true);
+        document.getElementById('pinLockout').style.display = 'none';
+    }
+
+    function pinDigit(digit) {
+        if (locked || currentPin.length >= PIN_LENGTH) return;
+        currentPin += digit;
+        updateDisplay();
+        clearError();
+        if (currentPin.length === PIN_LENGTH) {
+            enableSubmit(true);
+        }
+    }
+
+    function pinBack() {
+        if (locked || currentPin.length === 0) return;
+        currentPin = currentPin.slice(0, -1);
+        updateDisplay();
+        clearError();
+        enableSubmit(false);
+    }
+
+    function pinSubmit() {
+        if (locked || currentPin.length !== PIN_LENGTH) return;
+
+        if (currentPin === CORRECT_PIN) {
+            // Success — navigate to Overseer dashboard
+            setDisplayState('success');
+            setInputEnabled(false);
+            setTimeout(() => { window.location.href = 'overseer.html'; }, 600);
+        } else {
+            // Failure
+            attemptsLeft--;
+            currentPin = '';
+            flashError();
+            enableSubmit(false);
+
+            if (attemptsLeft <= 0) {
+                locked = true;
+                setInputEnabled(false);
+                document.getElementById('pinLockout').style.display = 'block';
+                document.getElementById('pinError').style.display = 'none';
+                document.getElementById('pinAttempts').textContent = '';
+                updateDisplay();
+            } else {
+                showError('⚠ INVALID PIN — ACCESS DENIED');
+                updateAttemptsLabel();
+                updateDisplay();
+            }
+        }
+    }
+
+    function updateDisplay() {
+        const el = document.getElementById('pinDisplay');
+        el.classList.remove('success');
+        if (currentPin.length === 0) {
+            el.textContent = '——';
+        } else {
+            el.textContent = '●'.repeat(currentPin.length);
+        }
+    }
+
+    function setDisplayState(state) {
+        const el = document.getElementById('pinDisplay');
+        if (state === 'success') {
+            el.textContent = '● ● ● ● ● ●';
+            el.classList.add('success');
+        }
+    }
+
+    function enableSubmit(enabled) {
+        const btn = document.getElementById('pinSubmit');
+        btn.classList.toggle('ready', enabled);
+        btn.disabled = !enabled;
+    }
+
+    function setInputEnabled(enabled) {
+        const pad = document.getElementById('pinPad');
+        const zeroRow = document.getElementById('pinZeroRow');
+        const actions = document.getElementById('pinActions');
+        const opacity = enabled ? '1' : '0.3';
+        const pe = enabled ? 'auto' : 'none';
+        [pad, zeroRow, actions].forEach(el => {
+            el.style.opacity = opacity;
+            el.style.pointerEvents = pe;
+        });
+    }
+
+    function clearError() {
+        const el = document.getElementById('pinError');
+        el.style.display = 'none';
+        el.textContent = '';
+        document.getElementById('pinDisplay').classList.remove('error-flash');
+    }
+
+    function showError(msg) {
+        const el = document.getElementById('pinError');
+        el.textContent = msg;
+        el.style.display = 'block';
+        flashError();
+    }
+
+    function flashError() {
+        const display = document.getElementById('pinDisplay');
+        display.classList.add('error-flash');
+        setTimeout(() => { display.classList.remove('error-flash'); }, 700);
+    }
+
+    function updateAttemptsLabel() {
+        const el = document.getElementById('pinAttempts');
+        if (attemptsLeft < MAX_ATTEMPTS) {
+            el.textContent = `Attempts remaining: ${attemptsLeft} / ${MAX_ATTEMPTS}`;
+        } else {
+            el.textContent = '';
+        }
+    }
+</script>
 
 </body>
 </html>
