@@ -3,12 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fallout Pipboy Character</title>
-    <link rel="stylesheet" href="css/branding.css">
+    <title>Fallout Pipboy Data - Vault 215</title>
     <style>
         /* ===========================
-           FALLOUT PIPBOY CHARACTER SHEET
+           VAULT 215 DATA PAGE
+           COMPLETE BRANDING
            =========================== */
+
+        :root {
+            --vault-primary: #4ade80;
+            --vault-secondary: #fbbf24;
+            --vault-dark: #0a0a0a;
+            --vault-darker: #1a1a1a;
+            --vault-accent: #c084fc;
+            --vault-success: #4ade80;
+            --vault-error: #ff6b6b;
+            --vault-warning: #fbbf24;
+            --vault-info: #9333ea;
+            --vault-green: #4ade80;
+            --vault-gold: #fbbf24;
+            --vault-blue-dark: #2d5016;
+            --vault-blue-light: #3d6b1f;
+        }
 
         * {
             margin: 0;
@@ -19,8 +35,8 @@
         body {
             width: 100%;
             min-height: 100vh;
-            background-color: #0a0a0a;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            color: var(--vault-green);
             font-family: 'Courier New', monospace;
             padding: 20px;
             background-image: 
@@ -28,7 +44,6 @@
                 radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
         }
 
-        /* Scanline effect */
         body::before {
             content: '';
             position: fixed;
@@ -54,40 +69,75 @@
             margin: 0 auto;
         }
 
-        /* ===== HEADER ===== */
-        .header {
+        /* ===== VAULT HEADER ===== */
+        .vault-header {
             text-align: center;
             margin-bottom: 30px;
             padding: 30px;
-            background-color: #1a1a1a;
-            border: 3px solid #4ade80;
+            background-color: var(--vault-darker);
+            border: 3px solid var(--vault-green);
             box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
         }
 
-        .pip-title {
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            color: #4ade80;
-            text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
-            animation: glow 2s ease-in-out infinite;
+        .vault-badge {
+            font-size: 10px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
             margin-bottom: 10px;
         }
 
-        .character-name {
-            font-size: 16px;
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
+        .vault-title {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: var(--vault-green);
+            text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
+            animation: vault-glow 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes vault-glow {
+            0%, 100% {
+                text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 15px var(--vault-green), 0 0 30px rgba(74, 222, 128, 0.8);
+            }
+        }
+
+        .vault-subtitle {
+            font-size: 12px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
             letter-spacing: 2px;
         }
 
-        @keyframes glow {
-            0%, 100% {
-                text-shadow: 0 0 10px #4ade80, 0 0 20px rgba(74, 222, 128, 0.5);
-            }
-            50% {
-                text-shadow: 0 0 15px #4ade80, 0 0 30px rgba(74, 222, 128, 0.8);
-            }
+        .vault-info {
+            font-size: 11px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+            margin-top: 8px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            padding-top: 8px;
+        }
+
+        /* ===== VAULT FOOTER ===== */
+        .vault-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            font-size: 10px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+        }
+
+        .vault-footer span {
+            color: var(--vault-gold);
+            text-shadow: 0 0 3px var(--vault-gold);
+            font-weight: bold;
         }
 
         /* ===== MAIN TAB NAVIGATION ===== */
@@ -95,21 +145,21 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #4ade80;
+            border-bottom: 2px solid var(--vault-green);
             padding-bottom: 10px;
             flex-wrap: wrap;
         }
 
         .main-tab-button {
-            background-color: #0a0a0a;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 10px 16px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s ease;
@@ -117,41 +167,41 @@
         }
 
         .main-tab-button:hover {
-            background-color: #1a1a1a;
+            background-color: var(--vault-darker);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
         .main-tab-button.active {
-            background-color: #2d5016;
-            border-color: #fbbf24;
-            color: #fbbf24;
+            background-color: var(--vault-blue-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            text-shadow: 0 0 10px #fbbf24;
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
-        /* ===== SUBTAB NAVIGATION (for character tab) ===== */
+        /* ===== SUBTAB NAVIGATION ===== */
         .subtab-nav {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 2px solid #4ade80;
+            border-bottom: 2px solid var(--vault-green);
             padding-bottom: 10px;
             flex-wrap: wrap;
         }
 
         .subtab-button {
-            background-color: #0a0a0a;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 10px 16px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s ease;
@@ -159,19 +209,19 @@
         }
 
         .subtab-button:hover {
-            background-color: #1a1a1a;
+            background-color: var(--vault-darker);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
         .subtab-button.active {
-            background-color: #2d5016;
-            border-color: #fbbf24;
-            color: #fbbf24;
+            background-color: var(--vault-blue-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            text-shadow: 0 0 10px #fbbf24;
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
         .main-tab-content {
@@ -198,18 +248,28 @@
             margin-bottom: 30px;
         }
 
+        .data-section {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            border-radius: 3px;
+        }
+
         .character-image-box {
-            background-color: #1a1a1a;
-            border: 2px solid #4ade80;
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
             padding: 20px;
             text-align: center;
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            border-radius: 3px;
         }
 
         .character-image {
             width: 100%;
             height: 300px;
-            background-color: #0a0a0a;
+            background-color: var(--vault-dark);
             border: 1px solid rgba(74, 222, 128, 0.3);
             display: flex;
             align-items: center;
@@ -226,41 +286,55 @@
         }
 
         .character-image-placeholder {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 12px;
             opacity: 0.6;
         }
 
         .image-upload-btn {
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 10px 16px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
             width: 100%;
+            border-radius: 2px;
         }
 
         .image-upload-btn:hover {
-            background-color: #3d6b1f;
+            background-color: var(--vault-blue-light);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
         }
 
         .character-info-box {
-            background-color: #1a1a1a;
-            border: 2px solid #4ade80;
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
             padding: 20px;
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            border-radius: 3px;
+        }
+
+        .section-title {
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--vault-green);
+            padding-bottom: 10px;
+            text-transform: uppercase;
         }
 
         .info-item {
@@ -276,29 +350,29 @@
         }
 
         .info-label {
-            color: #fbbf24;
+            color: var(--vault-gold);
             font-size: 11px;
             font-weight: bold;
-            text-shadow: 0 0 3px #fbbf24;
+            text-shadow: 0 0 3px var(--vault-gold);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 8px;
         }
 
         .info-value {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 13px;
-            text-shadow: 0 0 3px #4ade80;
+            text-shadow: 0 0 3px var(--vault-green);
         }
 
         .info-input {
-            background-color: #0a0a0a;
-            border: 1px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-gold);
             padding: 8px 12px;
             font-family: 'Courier New', monospace;
             font-size: 12px;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-gold);
             width: 100%;
             transition: all 0.3s ease;
             box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
@@ -306,19 +380,19 @@
 
         .info-input:focus {
             outline: none;
-            border-color: #fbbf24;
+            border-color: var(--vault-gold);
             box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
-            color: #fbbf24;
+            color: var(--vault-gold);
         }
 
         .info-textarea {
-            background-color: #0a0a0a;
-            border: 1px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-gold);
             padding: 12px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-gold);
             width: 100%;
             height: 150px;
             transition: all 0.3s ease;
@@ -328,30 +402,9 @@
 
         .info-textarea:focus {
             outline: none;
-            border-color: #fbbf24;
+            border-color: var(--vault-gold);
             box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
-            color: #fbbf24;
-        }
-
-        /* ===== DATA SECTION ===== */
-        .data-section {
-            background-color: #1a1a1a;
-            border: 2px solid #4ade80;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
-        }
-
-        .section-title {
-            color: #fbbf24;
-            text-shadow: 0 0 5px #fbbf24;
-            font-size: 14px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #4ade80;
-            padding-bottom: 10px;
-            text-transform: uppercase;
+            color: var(--vault-gold);
         }
 
         .data-list {
@@ -360,7 +413,7 @@
 
         .data-item {
             padding: 15px;
-            background-color: #0a0a0a;
+            background-color: var(--vault-dark);
             border: 1px solid rgba(74, 222, 128, 0.2);
             border-radius: 3px;
             margin-bottom: 15px;
@@ -374,24 +427,26 @@
         }
 
         .item-title {
-            color: #fbbf24;
-            text-shadow: 0 0 3px #fbbf24;
+            color: var(--vault-gold);
+            text-shadow: 0 0 3px var(--vault-gold);
             font-weight: bold;
             font-size: 13px;
             margin-bottom: 5px;
         }
 
         .item-description {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 11px;
             line-height: 1.6;
             margin-bottom: 5px;
+            text-shadow: 0 0 2px var(--vault-green);
         }
 
         .item-status {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 10px;
             opacity: 0.8;
+            text-shadow: 0 0 2px var(--vault-green);
         }
 
         .item-delete-btn {
@@ -399,14 +454,14 @@
             top: 10px;
             right: 10px;
             background-color: #8b3a3a;
-            border: 1px solid #ff6b6b;
-            color: #ff6b6b;
+            border: 1px solid var(--vault-error);
+            color: var(--vault-error);
             padding: 4px 8px;
             font-family: 'Courier New', monospace;
             font-size: 9px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 3px #ff6b6b;
+            text-shadow: 0 0 3px var(--vault-error);
             transition: all 0.2s ease;
             border-radius: 2px;
         }
@@ -414,20 +469,22 @@
         .item-delete-btn:hover {
             background-color: #a84a4a;
             box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
         }
 
         .empty-message {
-            color: #9333ea;
+            color: var(--vault-accent);
             text-align: center;
             padding: 30px;
             font-size: 12px;
             font-style: italic;
-            text-shadow: 0 0 2px #9333ea;
+            text-shadow: 0 0 2px var(--vault-accent);
         }
 
         /* ===== ADD FORM SECTION ===== */
         .add-form {
-            background-color: #0a0a0a;
+            background-color: var(--vault-dark);
             border: 1px solid rgba(74, 222, 128, 0.3);
             padding: 20px;
             border-radius: 3px;
@@ -435,10 +492,10 @@
         }
 
         .form-title {
-            color: #c084fc;
+            color: var(--vault-accent);
             font-size: 12px;
             font-weight: bold;
-            text-shadow: 0 0 3px #c084fc;
+            text-shadow: 0 0 3px var(--vault-accent);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 15px;
@@ -453,9 +510,9 @@
         }
 
         .form-label {
-            color: #4ade80;
+            color: var(--vault-green);
             font-size: 10px;
-            text-shadow: 0 0 3px #4ade80;
+            text-shadow: 0 0 3px var(--vault-green);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 5px;
@@ -463,13 +520,13 @@
         }
 
         .form-input {
-            background-color: #1a1a1a;
-            border: 1px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-darker);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-gold);
             padding: 8px 12px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-gold);
             width: 100%;
             transition: all 0.3s ease;
             box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
@@ -477,9 +534,9 @@
 
         .form-input:focus {
             outline: none;
-            border-color: #fbbf24;
+            border-color: var(--vault-gold);
             box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
-            color: #fbbf24;
+            color: var(--vault-gold);
         }
 
         .form-buttons {
@@ -499,27 +556,28 @@
         .action-button {
             flex: 1;
             min-width: 120px;
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 12px 16px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            border-radius: 2px;
         }
 
         .action-button:hover {
-            background-color: #3d6b1f;
+            background-color: var(--vault-blue-light);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
             transform: translateY(-2px);
         }
 
@@ -542,56 +600,57 @@
         .nav-button {
             flex: 1;
             min-width: 150px;
-            background-color: #2d5016;
-            border: 2px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 12px 20px;
             font-family: 'Courier New', monospace;
             font-size: 11px;
             font-weight: bold;
             cursor: pointer;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            border-radius: 2px;
         }
 
         .nav-button:hover {
-            background-color: #3d6b1f;
+            background-color: var(--vault-blue-light);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: #fbbf24;
-            color: #fbbf24;
-            text-shadow: 0 0 10px #fbbf24;
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
             transform: translateY(-2px);
         }
 
         .message {
             margin-top: 15px;
             font-size: 12px;
-            color: #4ade80;
-            text-shadow: 0 0 3px #4ade80;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
             min-height: 20px;
         }
 
         .message.success {
-            color: #4ade80;
-            text-shadow: 0 0 5px #4ade80;
+            color: var(--vault-green);
+            text-shadow: 0 0 5px var(--vault-green);
         }
 
         .message.error {
-            color: #ff6b6b;
-            text-shadow: 0 0 5px #ff6b6b;
+            color: var(--vault-error);
+            text-shadow: 0 0 5px var(--vault-error);
         }
 
         .static-value {
-            background-color: #0a0a0a;
-            border: 1px solid #4ade80;
-            color: #4ade80;
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
             padding: 8px 12px;
             font-family: 'Courier New', monospace;
             font-size: 12px;
-            text-shadow: 0 0 5px #4ade80;
+            text-shadow: 0 0 5px var(--vault-green);
             width: 100%;
             border-radius: 3px;
         }
@@ -602,12 +661,12 @@
                 grid-template-columns: 1fr;
             }
 
-            .header {
+            .vault-header {
                 padding: 20px;
             }
 
-            .pip-title {
-                font-size: 24px;
+            .vault-title {
+                font-size: 20px;
             }
 
             .nav-buttons {
@@ -630,10 +689,12 @@
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <div class="pip-title">CHARACTER SHEET</div>
-            <div class="character-name" id="characterNameDisplay">VAULT DWELLER</div>
+        <!-- VAULT HEADER -->
+        <div class="vault-header">
+            <div class="vault-badge">VAULT-TEC INDUSTRIES PIP-BOY 3000</div>
+            <div class="vault-title">CHARACTER DATA</div>
+            <div class="vault-subtitle">PERSONAL INFORMATION PROCESSOR</div>
+            <div class="vault-info" id="characterNameDisplay">Vault 215 Resident • Data Module</div>
         </div>
 
         <!-- MAIN TAB NAVIGATION -->
@@ -734,7 +795,7 @@
             <div id="quests" class="subtab-content active">
                 <!-- ACTIVE QUESTS -->
                 <div class="data-section">
-                    <div class="section-title">Active Quests</div>
+                    <div class="section-title">📋 Active Quests</div>
                     <ul class="data-list" id="activeQuestsList">
                         <li class="data-item">
                             <div class="item-title">War Never Changes</div>
@@ -751,7 +812,7 @@
 
                 <!-- COMPLETED QUESTS -->
                 <div class="data-section">
-                    <div class="section-title">Completed Quests</div>
+                    <div class="section-title">✓ Completed Quests</div>
                     <ul class="data-list" id="completedQuestsList">
                         <li class="data-item">
                             <div class="item-title">Out of the Shadows</div>
@@ -765,7 +826,7 @@
             <!-- NPCs SUB-TAB -->
             <div id="npcs" class="subtab-content">
                 <div class="data-section">
-                    <div class="section-title">Notable NPCs</div>
+                    <div class="section-title">👥 Notable NPCs</div>
                     <ul class="data-list" id="npcsList">
                     </ul>
 
@@ -790,7 +851,7 @@
                         </div>
                         <div class="form-buttons">
                             <button class="action-button small" onclick="addNPC()">ADD NPC</button>
-                            <button class="action-button small" onclick="clearNPCForm()" style="background-color: #8b3a3a; border-color: #ff6b6b; color: #ff6b6b; text-shadow: 0 0 5px #ff6b6b;">CLEAR</button>
+                            <button class="action-button small" onclick="clearNPCForm()" style="background-color: #8b3a3a; border-color: var(--vault-error); color: var(--vault-error); text-shadow: 0 0 5px var(--vault-error);">CLEAR</button>
                         </div>
                         <div class="message" id="npcMessage"></div>
                     </div>
@@ -800,7 +861,7 @@
             <!-- FACTIONS SUB-TAB -->
             <div id="factions" class="subtab-content">
                 <div class="data-section">
-                    <div class="section-title">Factions</div>
+                    <div class="section-title">⚔ Factions</div>
                     <ul class="data-list" id="factionsList">
                     </ul>
 
@@ -831,7 +892,7 @@
                         </div>
                         <div class="form-buttons">
                             <button class="action-button small" onclick="addFaction()">ADD FACTION</button>
-                            <button class="action-button small" onclick="clearFactionForm()" style="background-color: #8b3a3a; border-color: #ff6b6b; color: #ff6b6b; text-shadow: 0 0 5px #ff6b6b;">CLEAR</button>
+                            <button class="action-button small" onclick="clearFactionForm()" style="background-color: #8b3a3a; border-color: var(--vault-error); color: var(--vault-error); text-shadow: 0 0 5px var(--vault-error);">CLEAR</button>
                         </div>
                         <div class="message" id="factionMessage"></div>
                     </div>
@@ -841,19 +902,23 @@
 
         <!-- NAVIGATION -->
         <div class="nav-buttons">
-            <button class="nav-button" onclick="window.location.href='stats.html'">← STATS</button>
+            <button class="nav-button" onclick="window.location.href='character.html'">← CHARACTER</button>
+            <button class="nav-button" onclick="window.location.href='stats.html'">STATS</button>
             <button class="nav-button" onclick="window.location.href='inventory.html'">INVENTORY</button>
-            <button class="nav-button" onclick="window.location.href='data.html'">DATA</button>
             <button class="nav-button" onclick="window.location.href='index.html'">LOGOUT →</button>
+        </div>
+
+        <!-- VAULT FOOTER -->
+        <div class="vault-footer">
+            <p>VAULT <span>215</span> RESIDENT • DATA MODULE</p>
+            <p style="margin-top: 5px;">Personal Information Secured and Synchronized</p>
         </div>
     </div>
 
     <script>
-        // ===== DATA ARRAYS =====
         let customNPCs = [];
         let customFactions = [];
 
-        // ===== MAIN TAB SWITCHING =====
         function switchMainTab(tabName) {
             document.getElementById('profile').classList.remove('active');
             document.getElementById('backstory').classList.remove('active');
@@ -866,7 +931,6 @@
             document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
         }
 
-        // ===== SUB-TAB SWITCHING (within DATA tab) =====
         function switchSubTab(subtabName) {
             document.getElementById('quests').classList.remove('active');
             document.getElementById('npcs').classList.remove('active');
@@ -879,7 +943,6 @@
             document.querySelector(`[data-subtab="${subtabName}"]`).classList.add('active');
         }
 
-        // ===== IMAGE UPLOAD =====
         document.getElementById('imageUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -893,7 +956,6 @@
             }
         });
 
-        // ===== SAVE CHARACTER DATA =====
         function saveCharacterData() {
             const charName = document.getElementById('charName').value;
             const charRace = document.getElementById('charRace').value;
@@ -913,12 +975,9 @@
             const message = document.getElementById('saveMessage');
             message.textContent = '✓ Character data saved successfully!';
             message.className = 'message success';
-            setTimeout(() => {
-                message.textContent = '';
-            }, 3000);
+            setTimeout(() => { message.textContent = ''; }, 3000);
         }
 
-        // ===== SAVE BACKSTORY =====
         function saveBackstory() {
             const backstory = document.getElementById('characterBackstory').value;
             localStorage.setItem('characterBackstory', backstory);
@@ -926,12 +985,9 @@
             const message = document.getElementById('backstoryMessage');
             message.textContent = '✓ Backstory saved successfully!';
             message.className = 'message success';
-            setTimeout(() => {
-                message.textContent = '';
-            }, 3000);
+            setTimeout(() => { message.textContent = ''; }, 3000);
         }
 
-        // ===== ADD NPC =====
         function addNPC() {
             const name = document.getElementById('npcName').value.trim();
             const description = document.getElementById('npcDescription').value.trim();
@@ -960,19 +1016,15 @@
             const message = document.getElementById('npcMessage');
             message.textContent = `✓ ${name} added successfully!`;
             message.className = 'message success';
-            setTimeout(() => {
-                message.textContent = '';
-            }, 3000);
+            setTimeout(() => { message.textContent = ''; }, 3000);
         }
 
-        // ===== DELETE NPC =====
         function deleteNPC(id) {
             customNPCs = customNPCs.filter(npc => npc.id !== id);
             localStorage.setItem('customNPCs', JSON.stringify(customNPCs));
             renderNPCs();
         }
 
-        // ===== CLEAR NPC FORM =====
         function clearNPCForm() {
             document.getElementById('npcName').value = '';
             document.getElementById('npcDescription').value = '';
@@ -980,7 +1032,6 @@
             document.getElementById('npcNotes').value = '';
         }
 
-        // ===== RENDER NPCs =====
         function renderNPCs() {
             const list = document.getElementById('npcsList');
             let html = '';
@@ -1003,7 +1054,6 @@
             list.innerHTML = html;
         }
 
-        // ===== ADD FACTION =====
         function addFaction() {
             const name = document.getElementById('factionName').value.trim();
             const description = document.getElementById('factionDescription').value.trim();
@@ -1032,19 +1082,15 @@
             const message = document.getElementById('factionMessage');
             message.textContent = `✓ ${name} added successfully!`;
             message.className = 'message success';
-            setTimeout(() => {
-                message.textContent = '';
-            }, 3000);
+            setTimeout(() => { message.textContent = ''; }, 3000);
         }
 
-        // ===== DELETE FACTION =====
         function deleteFaction(id) {
             customFactions = customFactions.filter(faction => faction.id !== id);
             localStorage.setItem('customFactions', JSON.stringify(customFactions));
             renderFactions();
         }
 
-        // ===== CLEAR FACTION FORM =====
         function clearFactionForm() {
             document.getElementById('factionName').value = '';
             document.getElementById('factionDescription').value = '';
@@ -1052,7 +1098,6 @@
             document.getElementById('factionNotes').value = '';
         }
 
-        // ===== RENDER FACTIONS =====
         function renderFactions() {
             const list = document.getElementById('factionsList');
             let html = '';
@@ -1075,7 +1120,6 @@
             list.innerHTML = html;
         }
 
-        // ===== CLEAR CHARACTER DATA =====
         function clearCharacterData() {
             if (confirm('Are you sure you want to clear all character data?')) {
                 document.getElementById('charName').value = 'Vault Dweller';
@@ -1090,13 +1134,10 @@
                 const message = document.getElementById('saveMessage');
                 message.textContent = '✓ Character data cleared!';
                 message.className = 'message success';
-                setTimeout(() => {
-                    message.textContent = '';
-                }, 3000);
+                setTimeout(() => { message.textContent = ''; }, 3000);
             }
         }
 
-        // ===== CLEAR BACKSTORY =====
         function clearBackstory() {
             if (confirm('Are you sure you want to clear the backstory?')) {
                 document.getElementById('characterBackstory').value = '';
@@ -1105,13 +1146,10 @@
                 const message = document.getElementById('backstoryMessage');
                 message.textContent = '✓ Backstory cleared!';
                 message.className = 'message success';
-                setTimeout(() => {
-                    message.textContent = '';
-                }, 3000);
+                setTimeout(() => { message.textContent = ''; }, 3000);
             }
         }
 
-        // ===== LOAD CHARACTER DATA =====
         function loadCharacterData() {
             const savedData = localStorage.getItem('characterData');
             if (savedData) {
@@ -1133,7 +1171,6 @@
                 document.getElementById('characterBackstory').value = savedBackstory;
             }
 
-            // Load custom NPCs and Factions
             const savedNPCs = localStorage.getItem('customNPCs');
             if (savedNPCs) {
                 customNPCs = JSON.parse(savedNPCs);
@@ -1147,7 +1184,6 @@
             renderFactions();
         }
 
-        // ===== ADD EVENT LISTENERS =====
         document.querySelectorAll('.main-tab-button').forEach(button => {
             button.addEventListener('click', function() {
                 const tabName = this.getAttribute('data-tab');
@@ -1162,7 +1198,6 @@
             });
         });
 
-        // Load data on page load
         window.addEventListener('DOMContentLoaded', function() {
             loadCharacterData();
         });
