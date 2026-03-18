@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Access - Hacking Minigame</title>
+    <style>
+        /* ===========================
+           FALLOUT TERMINAL HACKING
+           PURE TERMINAL AESTHETIC
+           =========================== */
+
+        :root {
+            --terminal-green: #00FF41;
+            --terminal-dim: #00BB30;
+            --terminal-bright: #39FF14;
+            --terminal-dark: #000000;
+            --terminal-bg: #050F05;
+            --terminal-border: #00AA22;
+            --terminal-glow: rgba(0, 255, 65, 0.6);
+            --terminal-glow-dim: rgba(0, 255, 65, 0.15);
+            --terminal-red: #FF3300;
+            --terminal-amber: #FFAA00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--terminal-dark);
+            color: var(--terminal-green);
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        /* CRT screen effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 60%,
+                rgba(0, 0, 0, 0.7) 100%
+            );
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Scanline overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 3px,
+                rgba(0, 0, 0, 0.12) 3px,
+                rgba(0, 0, 0, 0.12) 4px
+            );
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        .terminal-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── HEADER ───────────────────────── */
+        .terminal-header {
+            border: 1px solid var(--terminal-border);
+            border-bottom: none;
+            padding: 12px 20px;
+            background: rgba(0, 255, 65, 0.04);
+            text-align: center;
+        }
+
+        .terminal-header h1 {
+            font-size: 1.4rem;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px var(--terminal-glow);
+            color: var(--terminal-bright);
+            animation: textFlicker 8s infinite;
+        }
+
+        .terminal-subheader {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--terminal-dim);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .terminal-subheader span {
+            letter-spacing: 2px;
+        }
+
+        .difficulty-badge {
+            padding: 2px 10px;
+            border: 1px solid var(--terminal-border);
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .difficulty-badge.easy  { color: #39FF14; border-color: #39FF14; }
+        .difficulty-badge.medium { color: var(--terminal-amber); border-color: var(--terminal-amber); }
+        .difficulty-badge.hard  { color: var(--terminal-red); border-color: var(--terminal-red); }
+
+        /* ── MAIN TERMINAL BODY ───────────── */
+        .terminal-body {
+            border: 1px solid var(--terminal-border);
+            padding: 20px;
+            background: var(--terminal-bg);
+            box-shadow:
+                0 0 20px rgba(0, 255, 65, 0.2),
+                inset 0 0 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ── ATTEMPTS BAR ────────────────── */
+        .attempts-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+        }
+
+        .attempts-label {
+            color: var(--terminal-dim);
+            white-space: nowrap;
+        }
+
+        .attempt-blocks {
+            display: flex;
+            gap: 6px;
+        }
+
+        .attempt-block {
+            width: 18px;
+            height: 18px;
+            background: var(--terminal-green);
+            box-shadow: 0 0 6px var(--terminal-glow);
+            transition: all 0.3s;
+        }
+
+        .attempt-block.used {
+            background: transparent;
+            border: 1px solid var(--terminal-dim);
+            box-shadow: none;
+        }
+
+        .attempts-count {
+            color: var(--terminal-green);
+            text-shadow: 0 0 8px var(--terminal-glow);
+        }
+
+        /* ── CHARACTER GRID ──────────────── */
+        .grid-section {
+            margin-bottom: 20px;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: var(--terminal-dim);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            font-size: 1.3rem;
+            letter-spacing: 6px;
+            line-height: 1.8;
+            color: var(--terminal-dim);
+            padding: 10px;
+            border: 1px solid rgba(0, 170, 34, 0.3);
+            background: rgba(0, 0, 0, 0.4);
+            font-weight: bold;
+        }
+
+        .grid-row {
+            display: contents;
+        }
+
+        .grid-cell {
+            text-align: center;
+            padding: 4px 2px;
+            animation: cellFlicker 0.1s step-end infinite;
+            animation-delay: var(--delay, 0s);
+        }
+
+        /* ── WORD LIST ───────────────────── */
+        .words-section {
+            margin-bottom: 20px;
+        }
+
+        .word-prompt {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: var(--terminal-dim);
+            margin-bottom: 12px;
+        }
+
+        .word-prompt::before {
+            content: '> ';
+            color: var(--terminal-green);
+        }
+
+        .words-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+        }
+
+        .word-btn {
+            background: transparent;
+            border: 1px solid var(--terminal-border);
+            color: var(--terminal-green);
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            letter-spacing: 3px;
+            padding: 8px 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.15s;
+            text-align: left;
+        }
+
+        .word-btn::before {
+            content: '> ';
+            color: var(--terminal-dim);
+        }
+
+        .word-btn:hover:not(:disabled) {
+            background: rgba(0, 255, 65, 0.12);
+            border-color: var(--terminal-bright);
+            color: var(--terminal-bright);
+            text-shadow: 0 0 8px var(--terminal-glow);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        .word-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .word-btn.guessed {
+            opacity: 0.4;
+            text-decoration: line-through;
+            cursor: not-allowed;
+            border-color: rgba(0, 170, 34, 0.3);
+        }
+
+        .word-btn.correct {
+            background: rgba(0, 255, 65, 0.2);
+            border-color: var(--terminal-bright);
+            color: var(--terminal-bright);
+            text-shadow: 0 0 12px var(--terminal-glow);
+        }
+
+        /* ── FEEDBACK CONSOLE ────────────── */
+        .feedback-section {
+            border: 1px solid rgba(0, 170, 34, 0.4);
+            padding: 12px 16px;
+            min-height: 80px;
+            background: rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        .feedback-line {
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            line-height: 1.7;
+            color: var(--terminal-dim);
+        }
+
+        .feedback-line.new {
+            color: var(--terminal-green);
+            text-shadow: 0 0 6px var(--terminal-glow);
+        }
+
+        .feedback-line::before {
+            content: '> ';
+        }
+
+        .cursor-blink {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: var(--terminal-green);
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+        }
+
+        /* ── ACTION BUTTONS ──────────────── */
+        .actions-section {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 1px solid var(--terminal-border);
+            color: var(--terminal-green);
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            padding: 8px 18px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.15s;
+        }
+
+        .action-btn:hover {
+            background: rgba(0, 255, 65, 0.1);
+            border-color: var(--terminal-bright);
+            color: var(--terminal-bright);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        .action-btn.danger {
+            border-color: var(--terminal-red);
+            color: var(--terminal-red);
+        }
+
+        .action-btn.danger:hover {
+            background: rgba(255, 51, 0, 0.1);
+            box-shadow: 0 0 10px rgba(255, 51, 0, 0.3);
+        }
+
+        /* ── OVERLAY SCREENS ─────────────── */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay.active {
+            display: flex;
+        }
+
+        .overlay-box {
+            border: 2px solid var(--terminal-border);
+            padding: 40px 50px;
+            max-width: 520px;
+            width: 90%;
+            text-align: center;
+            background: var(--terminal-bg);
+            box-shadow:
+                0 0 40px var(--terminal-glow),
+                inset 0 0 30px rgba(0, 0, 0, 0.6);
+            animation: overlayAppear 0.4s ease-out;
+        }
+
+        .overlay-box.defeat {
+            border-color: var(--terminal-red);
+            box-shadow:
+                0 0 40px rgba(255, 51, 0, 0.5),
+                inset 0 0 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .overlay-title {
+            font-size: 1.8rem;
+            letter-spacing: 6px;
+            margin-bottom: 16px;
+            text-shadow: 0 0 16px var(--terminal-glow);
+            color: var(--terminal-bright);
+            animation: textFlicker 4s infinite;
+        }
+
+        .overlay-box.defeat .overlay-title {
+            color: var(--terminal-red);
+            text-shadow: 0 0 16px rgba(255, 51, 0, 0.8);
+        }
+
+        .overlay-text {
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            line-height: 2;
+            color: var(--terminal-dim);
+            margin-bottom: 24px;
+        }
+
+        .overlay-xp {
+            font-size: 1.1rem;
+            letter-spacing: 3px;
+            color: var(--terminal-bright);
+            text-shadow: 0 0 10px var(--terminal-glow);
+            margin-bottom: 24px;
+            padding: 10px;
+            border: 1px solid var(--terminal-border);
+        }
+
+        .overlay-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ── ANIMATIONS ───────────────────── */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0; }
+        }
+
+        @keyframes textFlicker {
+            0%, 98%, 100% { opacity: 1; }
+            99%            { opacity: 0.85; }
+        }
+
+        @keyframes cellFlicker {
+            0%, 96%, 100% { opacity: 1; }
+            98%            { opacity: 0.6; }
+        }
+
+        @keyframes overlayAppear {
+            from { transform: scale(0.95); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+
+        /* ── DIVIDER ─────────────────────── */
+        .terminal-divider {
+            border: none;
+            border-top: 1px solid rgba(0, 170, 34, 0.3);
+            margin: 16px 0;
+        }
+
+        /* ── RESPONSIVE ─────────────────── */
+        @media (max-width: 600px) {
+            .terminal-subheader { flex-direction: column; align-items: flex-start; }
+            .char-grid { font-size: 1rem; letter-spacing: 3px; }
+            .words-grid { grid-template-columns: repeat(2, 1fr); }
+            .overlay-box { padding: 24px 20px; }
+            .overlay-title { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- VICTORY OVERLAY -->
+<div class="overlay" id="victoryOverlay">
+    <div class="overlay-box">
+        <div class="overlay-title">ACCESS GRANTED</div>
+        <div class="overlay-text">
+            TERMINAL SECURITY BYPASSED<br>
+            VAULT DWELLER <span id="victoryName"></span> HAS SUCCESSFULLY<br>
+            INFILTRATED THE SYSTEM.
+        </div>
+        <div class="overlay-xp" id="victoryXP">+ 0 XP AWARDED</div>
+        <div class="overlay-btns">
+            <button class="action-btn" onclick="startNewGame()">NEW TERMINAL</button>
+            <button class="action-btn" onclick="goToMenu()">MAIN MENU</button>
+            <button class="action-btn danger" onclick="logout()">LOGOUT</button>
+        </div>
+    </div>
+</div>
+
+<!-- DEFEAT OVERLAY -->
+<div class="overlay" id="defeatOverlay">
+    <div class="overlay-box defeat">
+        <div class="overlay-title">LOCKED OUT</div>
+        <div class="overlay-text">
+            TOO MANY FAILED ATTEMPTS.<br>
+            TERMINAL HAS BEEN LOCKED.<br>
+            PASSWORD WAS: <strong id="defeatPassword" style="color:#FF3300;letter-spacing:3px;"></strong>
+        </div>
+        <div class="overlay-btns">
+            <button class="action-btn" onclick="startNewGame()">TRY AGAIN</button>
+            <button class="action-btn" onclick="goToMenu()">MAIN MENU</button>
+            <button class="action-btn danger" onclick="logout()">LOGOUT</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!--              TERMINAL UI               -->
+<!-- ═══════════════════════════════════════ -->
+<div class="terminal-wrapper">
+
+    <!-- HEADER -->
+    <div class="terminal-header">
+        <h1>TERMINAL ACCESS PROTOCOL</h1>
+        <div class="terminal-subheader">
+            <span>ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL</span>
+            <span class="difficulty-badge" id="difficultyBadge">MEDIUM</span>
+            <span>OPERATOR: <strong id="playerNameDisplay">UNKNOWN</strong></span>
+        </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="terminal-body">
+
+        <!-- ATTEMPTS -->
+        <div class="attempts-section">
+            <span class="attempts-label">ATTEMPTS REMAINING:</span>
+            <div class="attempt-blocks" id="attemptBlocks"></div>
+            <span class="attempts-count" id="attemptsCount">4/4</span>
+        </div>
+
+        <hr class="terminal-divider">
+
+        <!-- CHARACTER MATRIX GRID -->
+        <div class="grid-section">
+            <div class="section-label">CHARACTER MATRIX</div>
+            <div class="char-grid" id="charGrid"></div>
+        </div>
+
+        <hr class="terminal-divider">
+
+        <!-- WORD SELECTION -->
+        <div class="words-section">
+            <div class="word-prompt">SELECT WORD TO ATTEMPT TERMINAL ACCESS</div>
+            <div class="words-grid" id="wordsGrid"></div>
+        </div>
+
+        <hr class="terminal-divider">
+
+        <!-- FEEDBACK -->
+        <div class="feedback-section" id="feedbackSection">
+            <div class="feedback-line new">SYSTEM READY. AWAITING INPUT.<span class="cursor-blink"></span></div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions-section">
+            <button class="action-btn" onclick="startNewGame()">NEW GAME</button>
+            <button class="action-btn" onclick="goToMenu()">MAIN MENU</button>
+            <button class="action-btn danger" onclick="logout()">LOGOUT</button>
+        </div>
+
+    </div><!-- /terminal-body -->
+</div><!-- /terminal-wrapper -->
+
+<script>
+// ════════════════════════════════════════════════
+//  FALLOUT TERMINAL HACKING MINIGAME
+//  Reads player Intelligence from localStorage
+//  Awards XP on success
+// ════════════════════════════════════════════════
+
+// ── WORD POOLS ────────────────────────────────
+
+const WORD_POOLS = {
+    easy: [
+        'VAULT',  'FUSION',  'COMBAT',  'SUPPLY',  'SECURE',
+        'ESCAPE', 'BUNKER',  'LOCKUP',  'DEFEND',  'SHIELD',
+        'BEACON', 'REFUGE',  'DANGER',  'HAZARD',  'LOCKED',
+        'OPENED', 'BREACH',  'PATROL',  'SENTRY',  'RADIUM',
+        'PLASMA', 'BARTER',  'MUTANT',  'SETTLER', 'VERMIN'
+    ],
+    medium: [
+        'TERMINAL', 'PASSWORD', 'SECURITY', 'FACILITY', 'DATABASE',
+        'ENTRANCE', 'OVERRIDE', 'SHUTDOWN', 'PROTOCOL', 'ACTIVATE',
+        'LOCKDOWN', 'RESOURCE', 'SURVIVOR', 'WASTEFUL', 'RADIATED',
+        'CHEMICAL', 'DETECTED', 'INITIATE', 'REPAIRED', 'ATTACKED',
+        'DEFENSES', 'LAUNCHED', 'PATCHING', 'SCANNING', 'DISABLED'
+    ],
+    hard: [
+        'PROTECTION',    'EXPERIMENTAL', 'UNDERGROUND',  'TRANSMISSION',
+        'INSTALLATION',  'CRYPTOGRAPHY', 'SURVEILLANCE', 'COMMUNICATION',
+        'VULNERABILITY', 'AUTHORIZATION', 'VERIFICATION', 'DECRYPTION',
+        'ENCRYPTION',    'INFILTRATION', 'QUARANTINE',   'CONTAINMENT',
+        'DEVASTATION',   'CONTAMINATED', 'RADIOACTIVE',  'EXTERMINATE',
+        'FORTIFICATION', 'ELIMINATION',  'REACTIVATION', 'NEUTRALIZING'
+    ]
+};
+
+// ── DIFFICULTY CONFIG ─────────────────────────
+
+const DIFFICULTY_CONFIG = {
+    easy:   { label: 'EASY',   xp: 50,  wordCount: 8  },
+    medium: { label: 'MEDIUM', xp: 100, wordCount: 8  },
+    hard:   { label: 'HARD',   xp: 150, wordCount: 8  }
+};
+
+const XP_PER_LEVEL = 1000;
+const MAX_ATTEMPTS = 4;
+
+// ── GAME STATE ────────────────────────────────
+
+let gameState = {
+    difficulty: 'medium',
+    password: '',
+    wordList: [],
+    attemptsLeft: MAX_ATTEMPTS,
+    guessedWords: [],
+    gameOver: false,
+    playerName: 'UNKNOWN',
+    intelligence: 5
+};
+
+// ── INITIALISE ────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', function () {
+    loadPlayerInfo();
+    startNewGame();
+});
+
+function loadPlayerInfo() {
+    // Load player name
+    try {
+        const charData = localStorage.getItem('characterData');
+        if (charData) {
+            const parsed = JSON.parse(charData);
+            if (parsed.name) gameState.playerName = parsed.name.toUpperCase();
+        }
+        if (gameState.playerName === 'UNKNOWN') {
+            const currentPlayer = localStorage.getItem('currentPlayer');
+            if (currentPlayer) {
+                const parsed = JSON.parse(currentPlayer);
+                if (parsed.characterName) gameState.playerName = parsed.characterName.toUpperCase();
+            }
+        }
+    } catch (e) { /* keep default */ }
+
+    // Load intelligence from SPECIAL stats
+    try {
+        const special = localStorage.getItem('pipboySpecial');
+        if (special) {
+            const parsed = JSON.parse(special);
+            gameState.intelligence = parseInt(parsed.intelligence) || 5;
+        }
+    } catch (e) { /* keep default 5 */ }
+
+    document.getElementById('playerNameDisplay').textContent = gameState.playerName;
+}
+
+// ── DIFFICULTY DETERMINATION ──────────────────
+
+function getDifficulty(intelligence) {
+    if (intelligence >= 7) return 'easy';
+    if (intelligence >= 4) return 'medium';
+    return 'hard';
+}
+
+// ── RANDOM HELPERS ────────────────────────────
+
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = randomInt(0, i);
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+function randomChar() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-+=[]{}|;:,.<>?';
+    return chars[randomInt(0, chars.length - 1)];
+}
+
+// ── GAME SETUP ────────────────────────────────
+
+function startNewGame() {
+    // Close overlays
+    document.getElementById('victoryOverlay').classList.remove('active');
+    document.getElementById('defeatOverlay').classList.remove('active');
+
+    // Reload player info in case localStorage changed
+    loadPlayerInfo();
+
+    const diff = getDifficulty(gameState.intelligence);
+    gameState.difficulty = diff;
+
+    const pool = WORD_POOLS[diff];
+    const config = DIFFICULTY_CONFIG[diff];
+
+    // Pick random words from pool (no duplicates)
+    const shuffled = shuffle(pool);
+    gameState.wordList = shuffled.slice(0, config.wordCount);
+
+    // Ensure password is in word list
+    gameState.password = gameState.wordList[randomInt(0, gameState.wordList.length - 1)];
+
+    gameState.attemptsLeft = MAX_ATTEMPTS;
+    gameState.guessedWords = [];
+    gameState.gameOver = false;
+
+    renderUI();
+}
+
+// ── RENDER ────────────────────────────────────
+
+function renderUI() {
+    const diff = gameState.difficulty;
+    const config = DIFFICULTY_CONFIG[diff];
+
+    // Difficulty badge
+    const badge = document.getElementById('difficultyBadge');
+    badge.textContent = config.label;
+    badge.className = 'difficulty-badge ' + diff;
+
+    // Player name
+    document.getElementById('playerNameDisplay').textContent = gameState.playerName;
+
+    // Attempts
+    renderAttempts();
+
+    // Character grid
+    renderCharGrid();
+
+    // Word list
+    renderWordList();
+
+    // Feedback
+    renderFeedback([
+        { text: 'SYSTEM READY. AWAITING INPUT.', isNew: true }
+    ]);
+}
+
+function renderAttempts() {
+    const blocksEl = document.getElementById('attemptBlocks');
+    const countEl  = document.getElementById('attemptsCount');
+
+    blocksEl.innerHTML = '';
+    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+        const block = document.createElement('div');
+        block.className = 'attempt-block' + (i >= gameState.attemptsLeft ? ' used' : '');
+        blocksEl.appendChild(block);
+    }
+    countEl.textContent = gameState.attemptsLeft + '/' + MAX_ATTEMPTS;
+}
+
+function renderCharGrid() {
+    const grid = document.getElementById('charGrid');
+    grid.innerHTML = '';
+    // 4 columns × 5 rows = 20 cells
+    for (let i = 0; i < 20; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        cell.style.setProperty('--delay', (Math.random() * 10).toFixed(2) + 's');
+        // Build a cluster of 4 random chars per cell
+        let chars = '';
+        for (let j = 0; j < 4; j++) chars += randomChar();
+        cell.textContent = chars;
+        grid.appendChild(cell);
+    }
+}
+
+function renderWordList() {
+    const wordsGrid = document.getElementById('wordsGrid');
+    wordsGrid.innerHTML = '';
+
+    gameState.wordList.forEach(function (word) {
+        const btn = document.createElement('button');
+        btn.className = 'word-btn';
+        btn.textContent = word;
+        btn.dataset.word = word;
+
+        if (gameState.gameOver) {
+            btn.disabled = true;
+        } else if (gameState.guessedWords.includes(word)) {
+            btn.classList.add('guessed');
+            btn.disabled = true;
+        } else {
+            btn.addEventListener('click', function () { guessWord(word); });
+        }
+
+        wordsGrid.appendChild(btn);
+    });
+}
+
+function renderFeedback(lines) {
+    const section = document.getElementById('feedbackSection');
+    section.innerHTML = '';
+    lines.forEach(function (line, idx) {
+        const div = document.createElement('div');
+        div.className = 'feedback-line' + (line.isNew ? ' new' : '');
+        div.innerHTML = line.text;
+        if (idx === lines.length - 1 && line.isNew) {
+            div.innerHTML += '<span class="cursor-blink"></span>';
+        }
+        section.appendChild(div);
+    });
+}
+
+// ── LIKENESS ALGORITHM ────────────────────────
+// Count characters matching in same position
+
+function calcLikeness(guess, password) {
+    const len = Math.min(guess.length, password.length);
+    let matches = 0;
+    for (let i = 0; i < len; i++) {
+        if (guess[i] === password[i]) matches++;
+    }
+    return matches;
+}
+
+// ── GUESS HANDLER ─────────────────────────────
+
+function guessWord(word) {
+    if (gameState.gameOver) return;
+
+    gameState.guessedWords.push(word);
+    gameState.attemptsLeft--;
+
+    const feedbackLines = [];
+
+    if (word === gameState.password) {
+        // ── WIN ──
+        gameState.gameOver = true;
+
+        feedbackLines.push({ text: 'WORD ENTERED: ' + word,              isNew: false });
+        feedbackLines.push({ text: 'ACCESS GRANTED. WELCOME.',            isNew: true  });
+        renderFeedback(feedbackLines);
+
+        // Mark correct button
+        const btns = document.querySelectorAll('.word-btn');
+        btns.forEach(function (btn) {
+            btn.disabled = true;
+            if (btn.dataset.word === word) btn.classList.add('correct');
+        });
+
+        renderAttempts();
+        awardXP();
+
+    } else if (gameState.attemptsLeft <= 0) {
+        // ── LOSE ──
+        gameState.gameOver = true;
+
+        feedbackLines.push({ text: 'WORD ENTERED: ' + word,              isNew: false });
+        feedbackLines.push({ text: 'LIKENESS: ' + calcLikeness(word, gameState.password) + '/' + gameState.password.length, isNew: false });
+        feedbackLines.push({ text: 'TERMINAL LOCKED. ACCESS DENIED.',    isNew: true  });
+        renderFeedback(feedbackLines);
+
+        renderAttempts();
+        renderWordList(); // disable all buttons
+
+        setTimeout(function () { showDefeat(); }, 1200);
+
+    } else {
+        // ── WRONG GUESS ──
+        const likeness = calcLikeness(word, gameState.password);
+        feedbackLines.push({ text: 'WORD ENTERED: ' + word,              isNew: false });
+        feedbackLines.push({ text: 'LIKENESS: ' + likeness + '/' + gameState.password.length, isNew: true  });
+        renderFeedback(feedbackLines);
+
+        renderAttempts();
+        renderWordList();
+    }
+}
+
+// ── XP AWARD ─────────────────────────────────
+
+function awardXP() {
+    const xpReward = DIFFICULTY_CONFIG[gameState.difficulty].xp;
+
+    // Update pipboyPlayerData
+    try {
+        const saved = localStorage.getItem('pipboyPlayerData');
+        let playerData = saved ? JSON.parse(saved) : { xp: 0, level: 1 };
+        playerData.xp = (playerData.xp || 0) + xpReward;
+        playerData.level = Math.floor(playerData.xp / XP_PER_LEVEL) + 1;
+        localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
+        localStorage.setItem('pipboyXP', String(playerData.xp));
+        localStorage.setItem('pipboyLevel', String(playerData.level));
+    } catch (e) { /* fail silently */ }
+
+    // Update currentPlayer (IndexedDB sync key)
+    try {
+        const saved = localStorage.getItem('currentPlayer');
+        if (saved) {
+            const player = JSON.parse(saved);
+            player.xp = (player.xp || 0) + xpReward;
+            player.level = Math.floor(player.xp / XP_PER_LEVEL) + 1;
+            localStorage.setItem('currentPlayer', JSON.stringify(player));
+        }
+    } catch (e) { /* fail silently */ }
+
+    setTimeout(function () { showVictory(xpReward); }, 800);
+}
+
+// ── OVERLAYS ──────────────────────────────────
+
+function showVictory(xp) {
+    document.getElementById('victoryName').textContent = gameState.playerName;
+    document.getElementById('victoryXP').textContent = '+ ' + xp + ' XP AWARDED';
+    document.getElementById('victoryOverlay').classList.add('active');
+}
+
+function showDefeat() {
+    document.getElementById('defeatPassword').textContent = gameState.password;
+    document.getElementById('defeatOverlay').classList.add('active');
+}
+
+// ── NAVIGATION ───────────────────────────────
+
+function goToMenu() {
+    window.location.href = 'character.html';
+}
+
+function logout() {
+    window.location.href = 'index.html';
+}
+</script>
+</body>
+</html>
