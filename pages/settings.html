@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pip-Boy Settings - Vault 215</title>
+    <!-- Google Fonts for additional font choices -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===================================================
+           VAULT 215 SETTINGS PAGE
+           Retro CRT / Pip-Boy aesthetic
+           =================================================== */
+
+        :root {
+            --vault-green:   #4ade80;
+            --vault-gold:    #fbbf24;
+            --vault-accent:  #c084fc;
+            --vault-dark:    #0a0a0a;
+            --vault-darker:  #1a1a1a;
+            --vault-panel:   #111111;
+            --vault-border:  #2d5016;
+            --vault-error:   #ff6b6b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--vault-dark);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(58,102,20,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58,102,20,0.1) 0%, transparent 50%);
+        }
+
+        body { padding: 20px 20px 60px; }
+
+        /* CRT scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px,
+                transparent 1px, transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .vault-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            border: 2px solid var(--vault-green);
+            background-color: var(--vault-darker);
+            box-shadow: 0 0 30px rgba(74,222,128,0.3), inset 0 0 15px rgba(74,222,128,0.05);
+        }
+
+        .vault-title {
+            font-size: clamp(24px, 5vw, 36px);
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 15px var(--vault-gold), 0 0 30px rgba(251,191,36,0.4);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .vault-subtitle {
+            font-size: 12px;
+            color: var(--vault-green);
+            text-shadow: 0 0 8px var(--vault-green);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* ===== SECTION CARDS ===== */
+        .settings-section {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            box-shadow: 0 0 15px rgba(74,222,128,0.15);
+            margin-bottom: 24px;
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 8px var(--vault-gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--vault-border);
+        }
+
+        .section-title .section-icon { margin-right: 8px; }
+
+        /* ===== FORM ROWS ===== */
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .form-label {
+            min-width: 200px;
+            font-size: 12px;
+            color: var(--vault-green);
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        .form-control {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        /* ===== INPUTS & SELECTS ===== */
+        input[type="text"],
+        input[type="number"],
+        select {
+            background-color: var(--vault-panel);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            padding: 8px 12px;
+            width: 100%;
+            outline: none;
+            box-shadow: 0 0 8px rgba(74,222,128,0.2);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 12px rgba(251,191,36,0.4);
+            color: var(--vault-gold);
+        }
+
+        select option { background-color: var(--vault-darker); color: var(--vault-green); }
+
+        /* ===== RANGE SLIDERS ===== */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            background: var(--vault-border);
+            outline: none;
+            border-radius: 3px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--vault-green);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--vault-green);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--vault-green);
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--vault-green);
+            border: none;
+        }
+
+        /* ===== TOGGLE SWITCHES ===== */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 56px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background-color: var(--vault-border);
+            cursor: pointer;
+            border: 2px solid var(--vault-green);
+            border-radius: 2px;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: var(--vault-green);
+            box-shadow: 0 0 8px var(--vault-green);
+            transition: transform 0.3s;
+        }
+
+        .toggle-switch input:checked + .toggle-slider { background-color: #1f4d1a; }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translate(26px, -50%);
+        }
+
+        .toggle-label {
+            font-size: 12px;
+            color: var(--vault-green);
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* ===== COLOR PICKER ROWS ===== */
+        .color-group {
+            background-color: var(--vault-panel);
+            border: 1px solid var(--vault-border);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .color-group-title {
+            font-size: 11px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .color-controls {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .color-swatch-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--vault-green);
+            cursor: pointer;
+            padding: 0;
+            background: none;
+            flex-shrink: 0;
+        }
+
+        /* Hide native color input, show swatch */
+        input[type="color"] {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .hex-input {
+            width: 110px !important;
+            min-width: unset !important;
+            flex: unset !important;
+            font-size: 12px !important;
+            text-transform: uppercase;
+        }
+
+        .rgb-block { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+
+        .rgb-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rgb-label {
+            width: 14px;
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 4px var(--vault-gold);
+            flex-shrink: 0;
+        }
+
+        .rgb-value {
+            width: 40px;
+            font-size: 11px;
+            padding: 4px 6px !important;
+            text-align: center;
+        }
+
+        /* ===== COLOR PREVIEW DOT ===== */
+        .color-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--vault-green);
+            box-shadow: 0 0 10px currentColor;
+            flex-shrink: 0;
+        }
+
+        /* ===== LIVE PREVIEW PANEL ===== */
+        .preview-panel {
+            background-color: var(--vault-panel);
+            border: 2px solid var(--vault-green);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .preview-title {
+            font-size: 11px;
+            color: var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .preview-content {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .preview-swatch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preview-swatch-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .preview-swatch-label {
+            font-size: 9px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--vault-green);
+        }
+
+        .preview-bar {
+            flex: 1;
+            min-width: 200px;
+            background-color: var(--vault-darker);
+            border: 1px solid var(--vault-border);
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .preview-primary   { color: #4ade80; }
+        .preview-secondary { color: #fbbf24; }
+        .preview-accent    { color: #c084fc; }
+
+        /* ===== FONT PREVIEW ===== */
+        .font-preview-box {
+            background-color: var(--vault-panel);
+            border: 1px solid var(--vault-border);
+            padding: 14px;
+            margin-top: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ===== CHARACTER COLOR CARDS ===== */
+        .character-card {
+            background-color: var(--vault-panel);
+            border: 1px solid var(--vault-border);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .char-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .char-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--vault-green);
+            flex-shrink: 0;
+        }
+
+        .char-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 6px var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .char-campaign {
+            font-size: 10px;
+            color: var(--vault-green);
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 12px 28px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: 2px solid;
+            transition: all 0.25s ease;
+        }
+
+        .btn-save {
+            background-color: #1f4d1a;
+            border-color: var(--vault-green);
+            color: var(--vault-green);
+            text-shadow: 0 0 8px var(--vault-green);
+            box-shadow: 0 0 12px rgba(74,222,128,0.3);
+        }
+
+        .btn-save:hover {
+            background-color: #2d6b22;
+            box-shadow: 0 0 24px rgba(74,222,128,0.6);
+            transform: translateY(-1px);
+        }
+
+        .btn-reset {
+            background-color: var(--vault-panel);
+            border-color: var(--vault-error);
+            color: var(--vault-error);
+            text-shadow: 0 0 8px var(--vault-error);
+        }
+
+        .btn-reset:hover {
+            background-color: #3a0f0f;
+            box-shadow: 0 0 20px rgba(255,107,107,0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-actions {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        /* ===== STATUS MESSAGE ===== */
+        #statusMsg {
+            display: none;
+            padding: 14px 20px;
+            border: 2px solid var(--vault-green);
+            background-color: #1f4d1a;
+            color: var(--vault-green);
+            text-shadow: 0 0 8px var(--vault-green);
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(74,222,128,0.4);
+            animation: fadeIn 0.3s ease;
+        }
+
+        #statusMsg.error {
+            border-color: var(--vault-error);
+            background-color: #3a0f0f;
+            color: var(--vault-error);
+            text-shadow: 0 0 8px var(--vault-error);
+            box-shadow: 0 0 15px rgba(255,107,107,0.4);
+        }
+
+        @keyframes fadeIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
+
+        /* ===== OVERSEER-ONLY BADGE ===== */
+        .overseer-badge {
+            display: inline-block;
+            font-size: 9px;
+            padding: 2px 8px;
+            border: 1px solid var(--vault-accent);
+            color: var(--vault-accent);
+            text-shadow: 0 0 5px var(--vault-accent);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        /* ===== OVERSEER SECTION ===== */
+        .overseer-section {
+            border-color: var(--vault-accent);
+            box-shadow: 0 0 15px rgba(192,132,252,0.15);
+        }
+
+        .overseer-section .section-title { color: var(--vault-accent); text-shadow: 0 0 8px var(--vault-accent); }
+
+        /* Range value display */
+        .range-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .range-row input[type="range"] { flex: 1; }
+
+        .range-display {
+            min-width: 42px;
+            text-align: right;
+            font-size: 13px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .form-row { flex-direction: column; align-items: flex-start; }
+            .form-label { min-width: unset; }
+            .color-controls { grid-template-columns: auto 1fr; }
+            .color-controls .hex-input { grid-column: 1 / -1; width: 100% !important; }
+            .btn-actions { flex-direction: column; }
+            .btn { width: 100%; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 10px 10px 40px; }
+            .settings-section { padding: 16px; }
+            .vault-title { font-size: 20px; letter-spacing: 2px; }
+        }
+
+        /* ===== TOP-LEFT PADDING for hamburger ===== */
+        .vault-header { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <!-- Navigation (hamburger injected by navigation.js) -->
+    <script src="../assets/accounts.js"></script>
+    <script src="../assets/settings.js"></script>
+    <script src="../assets/navigation.js"></script>
+
+    <div class="container">
+        <!-- PAGE HEADER -->
+        <header class="vault-header" style="margin-top:70px;">
+            <div class="vault-title">⚙ SYSTEM SETTINGS</div>
+            <div class="vault-subtitle">VAULT 215 CONFIGURATION TERMINAL</div>
+        </header>
+
+        <!-- STATUS MESSAGE -->
+        <div id="statusMsg"></div>
+
+        <!-- ══════════════════════════════════════
+             SECTION 1 — ACCOUNT PREFERENCES
+             ══════════════════════════════════════ -->
+        <section class="settings-section">
+            <h2 class="section-title"><span class="section-icon">👤</span>Account Preferences</h2>
+
+            <!-- Theme Toggle -->
+            <div class="form-row">
+                <span class="form-label">Interface Theme</span>
+                <div class="form-control">
+                    <div class="toggle-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="themeToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label" id="themeLabel">DARK MODE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Font Size -->
+            <div class="form-row">
+                <span class="form-label">Font Size</span>
+                <div class="form-control">
+                    <select id="fontSize">
+                        <option value="small">Small</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Font Family -->
+            <div class="form-row">
+                <span class="form-label">Font Family</span>
+                <div class="form-control">
+                    <select id="fontFamily">
+                        <option value="courier-new">Courier New (Classic)</option>
+                        <option value="courier">Courier (Monospace Alt)</option>
+                        <option value="roboto-mono">Roboto Mono (Modern)</option>
+                        <option value="ibm-plex-mono">IBM Plex Mono (Technical)</option>
+                        <option value="jetbrains-mono">JetBrains Mono (Clean)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Font preview -->
+            <div class="font-preview-box" id="fontPreviewBox">
+                THE WASTELAND AWAITS — Vault 215 | "It's dangerous out there."
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             SECTION 2 — UI COLOR CUSTOMIZATION
+             ══════════════════════════════════════ -->
+        <section class="settings-section">
+            <h2 class="section-title"><span class="section-icon">🎨</span>UI Color Customization</h2>
+
+            <!-- PRIMARY COLOR -->
+            <div class="color-group">
+                <div class="color-group-title">Primary Color</div>
+                <div class="color-controls">
+                    <button class="color-swatch-btn" id="primarySwatchBtn" title="Open color picker" style="background-color:#4ade80;">
+                        <input type="color" id="primaryColorPicker" value="#4ade80">
+                    </button>
+                    <div class="rgb-block" id="primaryRgbBlock">
+                        <div class="rgb-row">
+                            <span class="rgb-label">R</span>
+                            <input type="range" class="rgb-slider" id="primaryR" min="0" max="255" value="74">
+                            <input type="number" class="rgb-value" id="primaryRVal" min="0" max="255" value="74">
+                        </div>
+                        <div class="rgb-row">
+                            <span class="rgb-label">G</span>
+                            <input type="range" class="rgb-slider" id="primaryG" min="0" max="255" value="222">
+                            <input type="number" class="rgb-value" id="primaryGVal" min="0" max="255" value="222">
+                        </div>
+                        <div class="rgb-row">
+                            <span class="rgb-label">B</span>
+                            <input type="range" class="rgb-slider" id="primaryB" min="0" max="255" value="128">
+                            <input type="number" class="rgb-value" id="primaryBVal" min="0" max="255" value="128">
+                        </div>
+                    </div>
+                    <input type="text" class="hex-input" id="primaryHex" value="#4ADE80" maxlength="7">
+                    <div class="color-dot" id="primaryDot" style="background-color:#4ade80; color:#4ade80;"></div>
+                </div>
+            </div>
+
+            <!-- SECONDARY COLOR -->
+            <div class="color-group">
+                <div class="color-group-title">Secondary Color</div>
+                <div class="color-controls">
+                    <button class="color-swatch-btn" id="secondarySwatchBtn" title="Open color picker" style="background-color:#fbbf24;">
+                        <input type="color" id="secondaryColorPicker" value="#fbbf24">
+                    </button>
+                    <div class="rgb-block" id="secondaryRgbBlock">
+                        <div class="rgb-row">
+                            <span class="rgb-label">R</span>
+                            <input type="range" class="rgb-slider" id="secondaryR" min="0" max="255" value="251">
+                            <input type="number" class="rgb-value" id="secondaryRVal" min="0" max="255" value="251">
+                        </div>
+                        <div class="rgb-row">
+                            <span class="rgb-label">G</span>
+                            <input type="range" class="rgb-slider" id="secondaryG" min="0" max="255" value="191">
+                            <input type="number" class="rgb-value" id="secondaryGVal" min="0" max="255" value="191">
+                        </div>
+                        <div class="rgb-row">
+                            <span class="rgb-label">B</span>
+                            <input type="range" class="rgb-slider" id="secondaryB" min="0" max="255" value="36">
+                            <input type="number" class="rgb-value" id="secondaryBVal" min="0" max="255" value="36">
+                        </div>
+                    </div>
+                    <input type="text" class="hex-input" id="secondaryHex" value="#FBBF24" maxlength="7">
+                    <div class="color-dot" id="secondaryDot" style="background-color:#fbbf24; color:#fbbf24;"></div>
+                </div>
+            </div>
+
+            <!-- ACCENT COLOR -->
+            <div class="color-group">
+                <div class="color-group-title">Accent Color</div>
+                <div class="color-controls">
+                    <button class="color-swatch-btn" id="accentSwatchBtn" title="Open color picker" style="background-color:#c084fc;">
+                        <input type="color" id="accentColorPicker" value="#c084fc">
+                    </button>
+                    <div class="rgb-block" id="accentRgbBlock">
+                        <div class="rgb-row">
+                            <span class="rgb-label">R</span>
+                            <input type="range" class="rgb-slider" id="accentR" min="0" max="255" value="192">
+                            <input type="number" class="rgb-value" id="accentRVal" min="0" max="255" value="192">
+                        </div>
+                        <div class="rgb-row">
+                            <span class="rgb-label">G</span>
+                            <input type="range" class="rgb-slider" id="accentG" min="0" max="255" value="132">
+                            <input type="number" class="rgb-value" id="accentGVal" min="0" max="255" value="132">
+                        </div>
+                        <div class="rgb-row">
+                            <span class="rgb-label">B</span>
+                            <input type="range" class="rgb-slider" id="accentB" min="0" max="255" value="252">
+                            <input type="number" class="rgb-value" id="accentBVal" min="0" max="255" value="252">
+                        </div>
+                    </div>
+                    <input type="text" class="hex-input" id="accentHex" value="#C084FC" maxlength="7">
+                    <div class="color-dot" id="accentDot" style="background-color:#c084fc; color:#c084fc;"></div>
+                </div>
+            </div>
+
+            <!-- LIVE PREVIEW -->
+            <div class="preview-panel">
+                <div class="preview-title">◈ Live Color Preview</div>
+                <div class="preview-content">
+                    <div class="preview-swatch">
+                        <div class="preview-swatch-circle" id="previewPrimary" style="background-color:#4ade80;"></div>
+                        <span class="preview-swatch-label">Primary</span>
+                    </div>
+                    <div class="preview-swatch">
+                        <div class="preview-swatch-circle" id="previewSecondary" style="background-color:#fbbf24;"></div>
+                        <span class="preview-swatch-label">Secondary</span>
+                    </div>
+                    <div class="preview-swatch">
+                        <div class="preview-swatch-circle" id="previewAccent" style="background-color:#c084fc;"></div>
+                        <span class="preview-swatch-label">Accent</span>
+                    </div>
+                    <div class="preview-bar">
+                        <span class="preview-primary" id="previewPrimaryText" style="color:#4ade80;">◉ PRIMARY TEXT SAMPLE</span><br>
+                        <span class="preview-secondary" id="previewSecondaryText" style="color:#fbbf24;">◈ SECONDARY TEXT SAMPLE</span><br>
+                        <span class="preview-accent" id="previewAccentText" style="color:#c084fc;">✦ ACCENT TEXT SAMPLE</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RESET COLORS button -->
+            <div style="margin-top:16px;">
+                <button class="btn btn-reset" onclick="resetColors()">↺ Reset Colors to Default</button>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             SECTION 3 — CHARACTER DISPLAY COLORS
+             ══════════════════════════════════════ -->
+        <section class="settings-section" id="characterColorsSection">
+            <h2 class="section-title"><span class="section-icon">⚔</span>Character Display Colors</h2>
+            <p style="font-size:11px; color:var(--vault-green); margin-bottom:16px; letter-spacing:1px; opacity:0.8;">
+                These colors appear next to your character's name on the Overseer Hub.
+            </p>
+            <div id="characterColorList">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             SECTION 4 — NOTIFICATIONS & AUDIO
+             ══════════════════════════════════════ -->
+        <section class="settings-section">
+            <h2 class="section-title"><span class="section-icon">🔊</span>Notifications &amp; Audio</h2>
+
+            <!-- Notifications Toggle -->
+            <div class="form-row">
+                <span class="form-label">Notifications</span>
+                <div class="form-control">
+                    <div class="toggle-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="notificationsToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label" id="notifLabel">ENABLED</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sound Toggle -->
+            <div class="form-row">
+                <span class="form-label">Sound Effects</span>
+                <div class="form-control">
+                    <div class="toggle-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="soundToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label" id="soundLabel">ENABLED</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volume Slider -->
+            <div class="form-row">
+                <span class="form-label">Volume Level</span>
+                <div class="form-control">
+                    <div class="range-row">
+                        <input type="range" id="volumeSlider" min="0" max="100" value="70">
+                        <span class="range-display" id="volumeDisplay">70%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             SECTION 5 — GAME MECHANICS (OVERSEER)
+             ══════════════════════════════════════ -->
+        <section class="settings-section overseer-section" id="gameMechanicsSection" style="display:none;">
+            <h2 class="section-title">
+                <span class="section-icon">🎲</span>Game Mechanics
+                <span class="overseer-badge">Overseer Only</span>
+            </h2>
+
+            <!-- Difficulty -->
+            <div class="form-row">
+                <span class="form-label">Difficulty Level</span>
+                <div class="form-control">
+                    <select id="difficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                        <option value="hardcore">Hardcore</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Turn Timer -->
+            <div class="form-row">
+                <span class="form-label">Turn Timer (seconds)</span>
+                <div class="form-control">
+                    <div class="range-row">
+                        <input type="range" id="turnTimer" min="10" max="300" step="5" value="60">
+                        <span class="range-display" id="turnTimerDisplay">60s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Critical Hit Chance -->
+            <div class="form-row">
+                <span class="form-label">Critical Hit Chance (%)</span>
+                <div class="form-control">
+                    <div class="range-row">
+                        <input type="range" id="critChance" min="1" max="50" value="5">
+                        <span class="range-display" id="critChanceDisplay">5%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- XP Scaling -->
+            <div class="form-row">
+                <span class="form-label">XP Scaling Multiplier</span>
+                <div class="form-control">
+                    <div class="range-row">
+                        <input type="range" id="xpScaling" min="0.5" max="3.0" step="0.1" value="1.0">
+                        <span class="range-display" id="xpScalingDisplay">1.0×</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Minimum Damage -->
+            <div class="form-row">
+                <span class="form-label">Minimum Damage</span>
+                <div class="form-control">
+                    <input type="number" id="minDamage" min="0" max="99" value="1" style="max-width:120px;">
+                </div>
+            </div>
+
+            <!-- Maximum Level -->
+            <div class="form-row">
+                <span class="form-label">Maximum Level Cap</span>
+                <div class="form-control">
+                    <input type="number" id="maxLevel" min="1" max="999" value="50" style="max-width:120px;">
+                </div>
+            </div>
+
+            <!-- Auto-Save Toggle -->
+            <div class="form-row">
+                <span class="form-label">Auto-Save</span>
+                <div class="form-control">
+                    <div class="toggle-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoSave" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label" id="autoSaveLabel">ENABLED</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- House Rules Toggle -->
+            <div class="form-row">
+                <span class="form-label">House Rules</span>
+                <div class="form-control">
+                    <div class="toggle-wrapper">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="houseRules">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label" id="houseRulesLabel">DISABLED</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             SECTION 6 — SAVE / RESET BUTTONS
+             ══════════════════════════════════════ -->
+        <section class="settings-section">
+            <h2 class="section-title"><span class="section-icon">💾</span>Save Settings</h2>
+            <div class="btn-actions">
+                <button class="btn btn-save" onclick="saveSettings()">💾 SAVE SETTINGS</button>
+                <button class="btn btn-reset" onclick="confirmReset()">↺ RESET TO DEFAULTS</button>
+            </div>
+        </section>
+    </div><!-- /.container -->
+
+    <script>
+    // ═══════════════════════════════════════════════════════════════
+    // SETTINGS PAGE — JavaScript
+    // ═══════════════════════════════════════════════════════════════
+
+    // ─── Default values ────────────────────────────────────────────
+    const DEFAULTS = {
+        theme: 'dark',
+        fontSize: 'medium',
+        fontFamily: 'courier-new',
+        uiColors: {
+            primary:   '#4ade80',
+            secondary: '#fbbf24',
+            accent:    '#c084fc'
+        },
+        soundEnabled: true,
+        notificationsEnabled: true,
+        volumeLevel: 70
+    };
+
+    const OVERSEER_DEFAULTS = {
+        difficulty: 'medium',
+        turnTimer: 60,
+        autoSave: true,
+        enableHouseRules: false,
+        criticalHitChance: 5,
+        minDamage: 1,
+        maxLevel: 50,
+        experienceScaling: 1.0
+    };
+
+    // Font family CSS mapping
+    const FONT_MAP = {
+        'courier-new':    "'Courier New', monospace",
+        'courier':        "Courier, monospace",
+        'roboto-mono':    "'Roboto Mono', monospace",
+        'ibm-plex-mono':  "'IBM Plex Mono', monospace",
+        'jetbrains-mono': "'JetBrains Mono', monospace"
+    };
+
+    const FONT_SIZE_MAP = { small: '12px', medium: '14px', large: '17px' };
+
+    // ─── Utility helpers ───────────────────────────────────────────
+    function hexToRgb(hex) {
+        const clean = hex.replace('#', '');
+        if (clean.length !== 6) return null;
+        const r = parseInt(clean.substring(0, 2), 16);
+        const g = parseInt(clean.substring(2, 4), 16);
+        const b = parseInt(clean.substring(4, 6), 16);
+        if (isNaN(r) || isNaN(g) || isNaN(b)) return null;
+        return { r, g, b };
+    }
+
+    function rgbToHex(r, g, b) {
+        return '#' + [r, g, b].map(v => {
+            const hex = Math.max(0, Math.min(255, v)).toString(16).toUpperCase();
+            return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+    }
+
+    function isValidHex(hex) {
+        return /^#[0-9A-Fa-f]{6}$/.test(hex);
+    }
+
+    // ─── Show status message ───────────────────────────────────────
+    function showStatus(msg, isError = false) {
+        const el = document.getElementById('statusMsg');
+        el.textContent = msg;
+        el.className = isError ? 'error' : '';
+        el.style.display = 'block';
+        clearTimeout(el._timer);
+        el._timer = setTimeout(() => { el.style.display = 'none'; }, 3500);
+    }
+
+    // ─── Color sync helpers ────────────────────────────────────────
+    function syncColorFromHex(prefix, hex) {
+        const rgb = hexToRgb(hex);
+        if (!rgb) return;
+        document.getElementById(prefix + 'R').value = rgb.r;
+        document.getElementById(prefix + 'RVal').value = rgb.r;
+        document.getElementById(prefix + 'G').value = rgb.g;
+        document.getElementById(prefix + 'GVal').value = rgb.g;
+        document.getElementById(prefix + 'B').value = rgb.b;
+        document.getElementById(prefix + 'BVal').value = rgb.b;
+        document.getElementById(prefix + 'Hex').value = hex.toUpperCase();
+        document.getElementById(prefix + 'ColorPicker').value = hex;
+        document.getElementById(prefix + 'SwatchBtn').style.backgroundColor = hex;
+        document.getElementById(prefix + 'Dot').style.backgroundColor = hex;
+        document.getElementById(prefix + 'Dot').style.color = hex;
+        updatePreview();
+    }
+
+    function syncColorFromRgb(prefix) {
+        const r = parseInt(document.getElementById(prefix + 'R').value);
+        const g = parseInt(document.getElementById(prefix + 'G').value);
+        const b = parseInt(document.getElementById(prefix + 'B').value);
+        const hex = rgbToHex(r, g, b);
+        document.getElementById(prefix + 'RVal').value = r;
+        document.getElementById(prefix + 'GVal').value = g;
+        document.getElementById(prefix + 'BVal').value = b;
+        document.getElementById(prefix + 'Hex').value = hex;
+        document.getElementById(prefix + 'ColorPicker').value = hex;
+        document.getElementById(prefix + 'SwatchBtn').style.backgroundColor = hex;
+        document.getElementById(prefix + 'Dot').style.backgroundColor = hex;
+        document.getElementById(prefix + 'Dot').style.color = hex;
+        updatePreview();
+    }
+
+    function syncColorFromNumericInput(prefix, channel) {
+        const el   = document.getElementById(prefix + channel + 'Val');
+        const val  = Math.max(0, Math.min(255, parseInt(el.value) || 0));
+        el.value   = val;
+        document.getElementById(prefix + channel).value = val;
+        syncColorFromRgb(prefix);
+    }
+
+    // ─── Update live preview ───────────────────────────────────────
+    function updatePreview() {
+        const pc = document.getElementById('primaryHex').value;
+        const sc = document.getElementById('secondaryHex').value;
+        const ac = document.getElementById('accentHex').value;
+
+        document.getElementById('previewPrimary').style.backgroundColor   = pc;
+        document.getElementById('previewSecondary').style.backgroundColor = sc;
+        document.getElementById('previewAccent').style.backgroundColor    = ac;
+        document.getElementById('previewPrimaryText').style.color   = pc;
+        document.getElementById('previewSecondaryText').style.color = sc;
+        document.getElementById('previewAccentText').style.color    = ac;
+    }
+
+    // ─── Wire up color controls for a named color ──────────────────
+    function wireColor(prefix) {
+        // Native color picker
+        document.getElementById(prefix + 'ColorPicker').addEventListener('input', function() {
+            syncColorFromHex(prefix, this.value);
+        });
+
+        // Swatch button triggers picker
+        document.getElementById(prefix + 'SwatchBtn').addEventListener('click', function() {
+            document.getElementById(prefix + 'ColorPicker').click();
+        });
+
+        // RGB sliders
+        ['R','G','B'].forEach(ch => {
+            document.getElementById(prefix + ch).addEventListener('input', () => syncColorFromRgb(prefix));
+        });
+
+        // Numeric inputs
+        ['R','G','B'].forEach(ch => {
+            const el = document.getElementById(prefix + ch + 'Val');
+            el.addEventListener('change', () => syncColorFromNumericInput(prefix, ch));
+            el.addEventListener('input',  () => syncColorFromNumericInput(prefix, ch));
+        });
+
+        // Hex text input
+        document.getElementById(prefix + 'Hex').addEventListener('input', function() {
+            let hex = this.value.trim();
+            if (!hex.startsWith('#')) hex = '#' + hex;
+            if (isValidHex(hex)) {
+                syncColorFromHex(prefix, hex);
+            }
+        });
+    }
+
+    // ─── Character color section ───────────────────────────────────
+    function buildCharacterColorSection(account) {
+        const container = document.getElementById('characterColorList');
+        container.innerHTML = '';
+
+        if (!account || !account.characters || account.characters.length === 0) {
+            container.innerHTML = '<p style="font-size:12px;color:var(--vault-green);opacity:0.6;">No characters found for this account.</p>';
+            return;
+        }
+
+        account.characters.forEach((char, idx) => {
+            const savedColor = getCharacterColor(char.id) || char.displayColor || '#4ade80';
+            const charId = 'char_color_' + idx;
+            const card = document.createElement('div');
+            card.className = 'character-card';
+            card.innerHTML = `
+                <div class="char-card-header">
+                    <div class="char-dot" id="${charId}_dot" style="background-color:${savedColor};"></div>
+                    <div>
+                        <div class="char-name">${char.name}</div>
+                        <div class="char-campaign">Campaign: ${char.campaignId || 'None'}</div>
+                    </div>
+                </div>
+                <div class="color-controls">
+                    <button class="color-swatch-btn" id="${charId}_swatchBtn" title="Open color picker" style="background-color:${savedColor};">
+                        <input type="color" id="${charId}_picker" value="${savedColor}">
+                    </button>
+                    <div class="rgb-block">
+                        <div class="rgb-row">
+                            <span class="rgb-label">R</span>
+                            <input type="range" class="rgb-slider" id="${charId}_r" min="0" max="255" value="${hexToRgb(savedColor).r}">
+                            <input type="number" class="rgb-value" id="${charId}_rval" min="0" max="255" value="${hexToRgb(savedColor).r}">
+                        </div>
+                        <div class="rgb-row">
+                            <span class="rgb-label">G</span>
+                            <input type="range" class="rgb-slider" id="${charId}_g" min="0" max="255" value="${hexToRgb(savedColor).g}">
+                            <input type="number" class="rgb-value" id="${charId}_gval" min="0" max="255" value="${hexToRgb(savedColor).g}">
+                        </div>
+                        <div class="rgb-row">
+                            <span class="rgb-label">B</span>
+                            <input type="range" class="rgb-slider" id="${charId}_b" min="0" max="255" value="${hexToRgb(savedColor).b}">
+                            <input type="number" class="rgb-value" id="${charId}_bval" min="0" max="255" value="${hexToRgb(savedColor).b}">
+                        </div>
+                    </div>
+                    <input type="text" class="hex-input" id="${charId}_hex" value="${savedColor.toUpperCase()}" maxlength="7">
+                    <div class="color-dot" id="${charId}_preview" style="background-color:${savedColor};"></div>
+                </div>
+            `;
+            container.appendChild(card);
+            wireCharacterColor(charId, char.id);
+        });
+    }
+
+    function wireCharacterColor(charId, characterId) {
+        function syncFromHex(hex) {
+            const rgb = hexToRgb(hex);
+            if (!rgb) return;
+            document.getElementById(charId + '_r').value    = rgb.r;
+            document.getElementById(charId + '_rval').value = rgb.r;
+            document.getElementById(charId + '_g').value    = rgb.g;
+            document.getElementById(charId + '_gval').value = rgb.g;
+            document.getElementById(charId + '_b').value    = rgb.b;
+            document.getElementById(charId + '_bval').value = rgb.b;
+            document.getElementById(charId + '_hex').value  = hex.toUpperCase();
+            document.getElementById(charId + '_picker').value        = hex;
+            document.getElementById(charId + '_swatchBtn').style.backgroundColor = hex;
+            document.getElementById(charId + '_dot').style.backgroundColor       = hex;
+            document.getElementById(charId + '_preview').style.backgroundColor   = hex;
+        }
+
+        function syncFromRgb() {
+            const r = parseInt(document.getElementById(charId + '_r').value);
+            const g = parseInt(document.getElementById(charId + '_g').value);
+            const b = parseInt(document.getElementById(charId + '_b').value);
+            const hex = rgbToHex(r, g, b);
+            document.getElementById(charId + '_rval').value = r;
+            document.getElementById(charId + '_gval').value = g;
+            document.getElementById(charId + '_bval').value = b;
+            syncFromHex(hex);
+        }
+
+        document.getElementById(charId + '_picker').addEventListener('input', function() {
+            syncFromHex(this.value);
+        });
+        document.getElementById(charId + '_swatchBtn').addEventListener('click', function() {
+            document.getElementById(charId + '_picker').click();
+        });
+        ['_r','_g','_b'].forEach(ch => {
+            document.getElementById(charId + ch).addEventListener('input', syncFromRgb);
+        });
+        ['_r','_g','_b'].forEach(ch => {
+            const valEl = document.getElementById(charId + ch + 'val');
+            valEl.addEventListener('change', function() {
+                document.getElementById(charId + ch).value = Math.max(0, Math.min(255, parseInt(this.value) || 0));
+                syncFromRgb();
+            });
+        });
+        document.getElementById(charId + '_hex').addEventListener('input', function() {
+            let hex = this.value.trim();
+            if (!hex.startsWith('#')) hex = '#' + hex;
+            if (isValidHex(hex)) syncFromHex(hex);
+        });
+    }
+
+    // ─── localStorage helpers ──────────────────────────────────────
+    function getStoredSettings() {
+        try {
+            const raw = localStorage.getItem('vaultPlayerSettings');
+            return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+    }
+
+    function getStoredOverseerSettings() {
+        try {
+            const raw = localStorage.getItem('vaultOverseerSettings');
+            return raw ? JSON.parse(raw) : null;
+        } catch(e) { return null; }
+    }
+
+    function getCharacterColor(charId) {
+        try {
+            const raw = localStorage.getItem('vaultCharColors');
+            const store = raw ? JSON.parse(raw) : {};
+            return store[charId] || null;
+        } catch(e) { return null; }
+    }
+
+    function saveCharacterColors(account) {
+        if (!account || !account.characters) return;
+        const store = {};
+        account.characters.forEach((char, idx) => {
+            const charId = 'char_color_' + idx;
+            const hexEl = document.getElementById(charId + '_hex');
+            if (hexEl) store[char.id] = hexEl.value.startsWith('#') ? hexEl.value : '#' + hexEl.value;
+        });
+        localStorage.setItem('vaultCharColors', JSON.stringify(store));
+    }
+
+    // ─── Load settings into form ───────────────────────────────────
+    function loadSettingsToForm(settings) {
+        const s = Object.assign({}, DEFAULTS, settings);
+
+        // Theme
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.checked = (s.theme === 'light');
+        document.getElementById('themeLabel').textContent = s.theme === 'light' ? 'LIGHT MODE' : 'DARK MODE';
+
+        // Font
+        document.getElementById('fontSize').value   = s.fontSize   || 'medium';
+        document.getElementById('fontFamily').value = s.fontFamily || 'courier-new';
+        applyFontPreview();
+
+        // Colors
+        const uc = Object.assign({}, DEFAULTS.uiColors, s.uiColors || {});
+        syncColorFromHex('primary',   uc.primary);
+        syncColorFromHex('secondary', uc.secondary);
+        syncColorFromHex('accent',    uc.accent);
+
+        // Audio / Notifications
+        const soundToggle  = document.getElementById('soundToggle');
+        const notifToggle  = document.getElementById('notificationsToggle');
+        soundToggle.checked  = s.soundEnabled !== false;
+        notifToggle.checked  = s.notificationsEnabled !== false;
+        document.getElementById('soundLabel').textContent = soundToggle.checked  ? 'ENABLED' : 'DISABLED';
+        document.getElementById('notifLabel').textContent = notifToggle.checked  ? 'ENABLED' : 'DISABLED';
+
+        const vol = s.volumeLevel !== undefined ? s.volumeLevel : 70;
+        document.getElementById('volumeSlider').value  = vol;
+        document.getElementById('volumeDisplay').textContent = vol + '%';
+    }
+
+    function loadOverseerSettingsToForm(os) {
+        const s = Object.assign({}, OVERSEER_DEFAULTS, os || {});
+        document.getElementById('difficulty').value = s.difficulty || 'medium';
+
+        document.getElementById('turnTimer').value          = s.turnTimer || 60;
+        document.getElementById('turnTimerDisplay').textContent = (s.turnTimer || 60) + 's';
+
+        document.getElementById('critChance').value         = s.criticalHitChance || 5;
+        document.getElementById('critChanceDisplay').textContent = (s.criticalHitChance || 5) + '%';
+
+        document.getElementById('xpScaling').value          = s.experienceScaling || 1.0;
+        document.getElementById('xpScalingDisplay').textContent = (s.experienceScaling || 1.0).toFixed(1) + '×';
+
+        document.getElementById('minDamage').value  = s.minDamage || 1;
+        document.getElementById('maxLevel').value   = s.maxLevel  || 50;
+
+        const autoSave = document.getElementById('autoSave');
+        autoSave.checked = s.autoSave !== false;
+        document.getElementById('autoSaveLabel').textContent = autoSave.checked ? 'ENABLED' : 'DISABLED';
+
+        const houseRules = document.getElementById('houseRules');
+        houseRules.checked = s.enableHouseRules === true;
+        document.getElementById('houseRulesLabel').textContent = houseRules.checked ? 'ENABLED' : 'DISABLED';
+    }
+
+    // ─── Collect settings from form ────────────────────────────────
+    function collectSettings() {
+        return {
+            theme:     document.getElementById('themeToggle').checked ? 'light' : 'dark',
+            fontSize:  document.getElementById('fontSize').value,
+            fontFamily: document.getElementById('fontFamily').value,
+            uiColors: {
+                primary:   document.getElementById('primaryHex').value,
+                secondary: document.getElementById('secondaryHex').value,
+                accent:    document.getElementById('accentHex').value
+            },
+            soundEnabled:         document.getElementById('soundToggle').checked,
+            notificationsEnabled: document.getElementById('notificationsToggle').checked,
+            volumeLevel:          parseInt(document.getElementById('volumeSlider').value)
+        };
+    }
+
+    function collectOverseerSettings() {
+        return {
+            difficulty:        document.getElementById('difficulty').value,
+            turnTimer:         parseInt(document.getElementById('turnTimer').value),
+            autoSave:          document.getElementById('autoSave').checked,
+            enableHouseRules:  document.getElementById('houseRules').checked,
+            criticalHitChance: parseInt(document.getElementById('critChance').value),
+            minDamage:         parseInt(document.getElementById('minDamage').value),
+            maxLevel:          parseInt(document.getElementById('maxLevel').value),
+            experienceScaling: parseFloat(document.getElementById('xpScaling').value)
+        };
+    }
+
+    // ─── Apply font preview ────────────────────────────────────────
+    function applyFontPreview() {
+        const family = document.getElementById('fontFamily').value;
+        const size   = document.getElementById('fontSize').value;
+        const box    = document.getElementById('fontPreviewBox');
+        box.style.fontFamily = FONT_MAP[family] || "'Courier New', monospace";
+        box.style.fontSize   = FONT_SIZE_MAP[size] || '14px';
+    }
+
+    // ─── Apply settings to page CSS ───────────────────────────────
+    function applySettingsToPage(s) {
+        const root = document.documentElement;
+        if (s.uiColors) {
+            if (s.uiColors.primary)   root.style.setProperty('--vault-green', s.uiColors.primary);
+            if (s.uiColors.secondary) root.style.setProperty('--vault-gold',  s.uiColors.secondary);
+            if (s.uiColors.accent)    root.style.setProperty('--vault-accent', s.uiColors.accent);
+        }
+        if (s.fontFamily) document.body.style.fontFamily = FONT_MAP[s.fontFamily] || "'Courier New', monospace";
+        if (s.fontSize)   document.body.style.fontSize   = FONT_SIZE_MAP[s.fontSize] || '14px';
+    }
+
+    // ─── Save ──────────────────────────────────────────────────────
+    function saveSettings() {
+        const settings = collectSettings();
+
+        // Validate hex colors
+        for (const key of ['primary','secondary','accent']) {
+            const hex = settings.uiColors[key];
+            if (!isValidHex(hex)) {
+                showStatus('⚠ Invalid hex color for ' + key + ': ' + hex, true);
+                return;
+            }
+        }
+
+        localStorage.setItem('vaultPlayerSettings', JSON.stringify(settings));
+
+        // Save character colors
+        const username = localStorage.getItem('username') || localStorage.getItem('currentUser');
+        const account = username && typeof ACCOUNTS !== 'undefined'
+            ? ACCOUNTS.find(a => a.username === username) : null;
+        if (account) saveCharacterColors(account);
+
+        // If overseer, save game settings too
+        const role = localStorage.getItem('userRole') || (account && account.role);
+        if (role === 'admin') {
+            const os = collectOverseerSettings();
+            localStorage.setItem('vaultOverseerSettings', JSON.stringify(os));
+        }
+
+        applySettingsToPage(settings);
+        showStatus('✔ Settings saved successfully!');
+    }
+
+    // ─── Reset ─────────────────────────────────────────────────────
+    function confirmReset() {
+        if (window.confirm('Reset ALL settings to defaults? This cannot be undone.')) {
+            resetSettings();
+        }
+    }
+
+    function resetSettings() {
+        localStorage.removeItem('vaultPlayerSettings');
+        localStorage.removeItem('vaultOverseerSettings');
+        localStorage.removeItem('vaultCharColors');
+        loadSettingsToForm(DEFAULTS);
+        applySettingsToPage(DEFAULTS);
+
+        const username = localStorage.getItem('username') || localStorage.getItem('currentUser');
+        const account = username && typeof ACCOUNTS !== 'undefined'
+            ? ACCOUNTS.find(a => a.username === username) : null;
+        const role = localStorage.getItem('userRole') || (account && account.role);
+
+        if (role === 'admin') {
+            loadOverseerSettingsToForm(OVERSEER_DEFAULTS);
+        }
+        if (account) buildCharacterColorSection(account);
+
+        showStatus('↺ Settings reset to defaults.');
+    }
+
+    function resetColors() {
+        syncColorFromHex('primary',   DEFAULTS.uiColors.primary);
+        syncColorFromHex('secondary', DEFAULTS.uiColors.secondary);
+        syncColorFromHex('accent',    DEFAULTS.uiColors.accent);
+        showStatus('↺ Colors reset to defaults.');
+    }
+
+    // ─── INIT ──────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // Wire up color pickers for the three UI colors
+        wireColor('primary');
+        wireColor('secondary');
+        wireColor('accent');
+
+        // Font preview live updates
+        document.getElementById('fontSize').addEventListener('change', applyFontPreview);
+        document.getElementById('fontFamily').addEventListener('change', applyFontPreview);
+
+        // Theme toggle label
+        document.getElementById('themeToggle').addEventListener('change', function() {
+            document.getElementById('themeLabel').textContent = this.checked ? 'LIGHT MODE' : 'DARK MODE';
+        });
+
+        // Sound / notification toggle labels
+        document.getElementById('soundToggle').addEventListener('change', function() {
+            document.getElementById('soundLabel').textContent = this.checked ? 'ENABLED' : 'DISABLED';
+        });
+        document.getElementById('notificationsToggle').addEventListener('change', function() {
+            document.getElementById('notifLabel').textContent = this.checked ? 'ENABLED' : 'DISABLED';
+        });
+
+        // Auto-save toggle label
+        document.getElementById('autoSave').addEventListener('change', function() {
+            document.getElementById('autoSaveLabel').textContent = this.checked ? 'ENABLED' : 'DISABLED';
+        });
+
+        // House rules toggle label
+        document.getElementById('houseRules').addEventListener('change', function() {
+            document.getElementById('houseRulesLabel').textContent = this.checked ? 'ENABLED' : 'DISABLED';
+        });
+
+        // Volume slider display
+        document.getElementById('volumeSlider').addEventListener('input', function() {
+            document.getElementById('volumeDisplay').textContent = this.value + '%';
+        });
+
+        // Overseer range sliders
+        document.getElementById('turnTimer').addEventListener('input', function() {
+            document.getElementById('turnTimerDisplay').textContent = this.value + 's';
+        });
+        document.getElementById('critChance').addEventListener('input', function() {
+            document.getElementById('critChanceDisplay').textContent = this.value + '%';
+        });
+        document.getElementById('xpScaling').addEventListener('input', function() {
+            document.getElementById('xpScalingDisplay').textContent = parseFloat(this.value).toFixed(1) + '×';
+        });
+
+        // ── Load user context ──────────────────────────────────────
+        const username = localStorage.getItem('username') || localStorage.getItem('currentUser');
+        const account = (username && typeof ACCOUNTS !== 'undefined')
+            ? ACCOUNTS.find(a => a.username === username) : null;
+        const role = localStorage.getItem('userRole') || (account ? account.role : null);
+
+        // Load player settings
+        const storedSettings = getStoredSettings();
+        const baseSettings = (account && account.settings) ? account.settings : DEFAULTS;
+        loadSettingsToForm(storedSettings || baseSettings);
+        applySettingsToPage(storedSettings || baseSettings);
+
+        // Character color section — only for players with characters
+        if (account && account.characters && account.characters.length > 0) {
+            buildCharacterColorSection(account);
+        } else {
+            document.getElementById('characterColorsSection').style.display = 'none';
+        }
+
+        // Overseer-only section
+        if (role === 'admin') {
+            document.getElementById('gameMechanicsSection').style.display = 'block';
+            const storedOs = getStoredOverseerSettings();
+            const baseOs = (typeof gameSettings !== 'undefined') ? gameSettings.overseerSettings : OVERSEER_DEFAULTS;
+            loadOverseerSettingsToForm(storedOs || baseOs);
+        }
+    });
+    </script>
+</body>
+</html>
