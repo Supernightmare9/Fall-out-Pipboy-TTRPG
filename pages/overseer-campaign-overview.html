@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault 215 — Campaign Overview</title>
+    <style>
+        :root {
+            --overseer-blue: #0a1628;
+            --overseer-blue-mid: #0d2045;
+            --overseer-blue-bright: #1a3a6e;
+            --overseer-blue-light: #2a5298;
+            --overseer-gold: #d4a017;
+            --overseer-gold-bright: #f0c040;
+            --overseer-gold-dim: #8b6914;
+            --overseer-white: #e8e8e8;
+            --overseer-red: #cc2200;
+            --overseer-red-bright: #ff3300;
+            --overseer-green: #00cc66;
+            --overseer-green-bright: #00ff80;
+            --overseer-dark: #04080f;
+            --overseer-darker: #020408;
+            --overseer-border: #2a5298;
+            --overseer-glow-gold: rgba(212, 160, 23, 0.6);
+            --overseer-glow-blue: rgba(42, 82, 152, 0.6);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 100%; min-height: 100vh;
+            background-color: var(--overseer-dark);
+            color: var(--overseer-white);
+            font-family: 'Courier New', monospace;
+            background-image:
+                radial-gradient(circle at 15% 30%, rgba(42,82,152,0.12) 0%, transparent 55%),
+                radial-gradient(circle at 85% 70%, rgba(212,160,23,0.08) 0%, transparent 55%);
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg,rgba(0,0,0,0.18),rgba(0,0,0,0.18) 1px,transparent 1px,transparent 3px);
+            pointer-events: none; z-index: 9999;
+        }
+        .hidden { display: none !important; }
+
+        .command-bar {
+            background: var(--overseer-blue-mid); border-bottom: 2px solid var(--overseer-gold);
+            box-shadow: 0 2px 20px var(--overseer-glow-gold); padding: 14px 30px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .command-bar-left { display: flex; align-items: center; gap: 20px; }
+        .overseer-badge { font-size: 9px; color: var(--overseer-gold-bright); letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 6px var(--overseer-glow-gold); }
+        .overseer-title-bar { font-size: 18px; font-weight: bold; color: var(--overseer-gold-bright); letter-spacing: 3px; text-shadow: 0 0 10px var(--overseer-glow-gold); }
+        .command-bar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .cmd-btn {
+            background: transparent; border: 1px solid var(--overseer-gold); color: var(--overseer-gold);
+            font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 1px; padding: 7px 14px;
+            cursor: pointer; transition: all 0.2s; text-transform: uppercase; text-decoration: none; display: inline-block;
+        }
+        .cmd-btn:hover { background: rgba(212,160,23,0.15); box-shadow: 0 0 10px rgba(212,160,23,0.3); }
+        .cmd-btn.danger { border-color: var(--overseer-red-bright); color: var(--overseer-red-bright); }
+        .cmd-btn.danger:hover { background: rgba(255,51,0,0.15); box-shadow: 0 0 10px rgba(255,51,0,0.3); }
+        .cmd-btn.primary { background: linear-gradient(135deg,var(--overseer-gold-dim),var(--overseer-gold)); border-color: var(--overseer-gold-bright); color: var(--overseer-darker); font-weight: bold; }
+        .cmd-btn.primary:hover { background: linear-gradient(135deg,var(--overseer-gold),var(--overseer-gold-bright)); box-shadow: 0 0 15px var(--overseer-glow-gold); }
+
+        .dashboard-content { flex: 1; padding: 30px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(212,160,23,0.4); flex-wrap: wrap; gap: 10px; }
+        .section-title { font-size: 14px; color: var(--overseer-gold); letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 6px var(--overseer-glow-gold); }
+        .section-count { font-size: 11px; color: var(--overseer-white); opacity: 0.6; letter-spacing: 1px; }
+        .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-input {
+            background: var(--overseer-blue-mid); border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright); padding: 8px 12px; font-family: 'Courier New', monospace; font-size: 12px; outline: none; flex: 1; min-width: 180px;
+        }
+        .search-input::placeholder { color: rgba(240,192,64,0.35); }
+        .search-input:focus { border-color: var(--overseer-gold); box-shadow: 0 0 8px var(--overseer-glow-gold); }
+
+        /* CAMPAIGN TABLE */
+        .campaign-table { width: 100%; border-collapse: collapse; }
+        .campaign-table th { background: var(--overseer-blue); color: var(--overseer-gold); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 2px solid var(--overseer-gold-dim); }
+        .campaign-table td { padding: 12px 14px; border-bottom: 1px solid rgba(42,82,152,0.4); font-size: 12px; vertical-align: middle; }
+        .campaign-table tr:hover td { background: rgba(42,82,152,0.2); }
+        .campaign-name-cell { color: var(--overseer-gold-bright); font-weight: bold; font-size: 13px; text-shadow: 0 0 5px var(--overseer-glow-gold); }
+        .campaign-status { font-size: 9px; letter-spacing: 1px; padding: 2px 8px; border: 1px solid; text-transform: uppercase; white-space: nowrap; }
+        .campaign-status.active { border-color: var(--overseer-green-bright); color: var(--overseer-green-bright); }
+        .campaign-status.paused { border-color: var(--overseer-gold-bright); color: var(--overseer-gold-bright); }
+        .campaign-status.ended { border-color: var(--overseer-gold-dim); color: var(--overseer-gold-dim); }
+        .action-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .tbl-btn { background: transparent; border: 1px solid var(--overseer-border); color: var(--overseer-white); font-family: 'Courier New', monospace; font-size: 10px; padding: 4px 10px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+        .tbl-btn:hover { border-color: var(--overseer-gold); color: var(--overseer-gold-bright); }
+        .tbl-btn.danger:hover { border-color: var(--overseer-red-bright); color: var(--overseer-red-bright); }
+
+        /* STATS BAR */
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 30px; }
+        .stat-card { background: var(--overseer-blue-mid); border: 1px solid var(--overseer-border); padding: 16px 20px; text-align: center; }
+        .stat-card-value { font-size: 28px; font-weight: bold; color: var(--overseer-gold-bright); text-shadow: 0 0 10px var(--overseer-glow-gold); }
+        .stat-card-label { font-size: 9px; color: var(--overseer-gold); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; opacity: 0.8; }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--overseer-gold-dim); }
+        .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state-title { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+        .empty-state-text { font-size: 11px; opacity: 0.6; letter-spacing: 1px; }
+
+        /* INFO PANEL */
+        .info-panel { background: var(--overseer-blue-mid); border: 1px solid rgba(212,160,23,0.2); padding: 20px; margin-top: 30px; }
+        .info-panel-title { font-size: 11px; color: var(--overseer-gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(212,160,23,0.2); }
+        .info-list { display: flex; flex-direction: column; gap: 6px; }
+        .info-item { font-size: 11px; color: var(--overseer-white); opacity: 0.7; letter-spacing: 0.5px; }
+        .info-item strong { color: var(--overseer-gold-bright); opacity: 1; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4,8,15,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-panel { background: var(--overseer-blue-mid); border: 2px solid var(--overseer-gold); box-shadow: 0 0 40px var(--overseer-glow-gold); width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { background: var(--overseer-blue); padding: 16px 20px; border-bottom: 1px solid var(--overseer-gold); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-size: 14px; font-weight: bold; color: var(--overseer-gold-bright); letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 8px var(--overseer-glow-gold); }
+        .modal-close-btn { background: transparent; border: 1px solid var(--overseer-gold-dim); color: var(--overseer-gold); font-family: 'Courier New', monospace; font-size: 11px; padding: 5px 10px; cursor: pointer; letter-spacing: 1px; }
+        .modal-close-btn:hover { border-color: var(--overseer-red-bright); color: var(--overseer-red-bright); }
+        .modal-body { padding: 24px 20px; }
+        .modal-section-title { font-size: 11px; color: var(--overseer-gold); letter-spacing: 2px; text-transform: uppercase; margin: 16px 0 10px; padding-bottom: 4px; border-bottom: 1px solid rgba(212,160,23,0.2); }
+        .modal-section-title:first-child { margin-top: 0; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .form-row.single { grid-template-columns: 1fr; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 10px; color: var(--overseer-gold); letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.9; }
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--overseer-blue); border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright); padding: 8px 10px;
+            font-family: 'Courier New', monospace; font-size: 12px; outline: none;
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(240,192,64,0.35); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--overseer-gold); box-shadow: 0 0 8px var(--overseer-glow-gold); }
+        .form-group select option { background: var(--overseer-blue-mid); color: var(--overseer-white); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .modal-footer { padding: 16px 20px; border-top: 1px solid rgba(212,160,23,0.2); display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-btn { background: transparent; border: 1px solid var(--overseer-border); color: var(--overseer-white); font-family: 'Courier New', monospace; font-size: 11px; padding: 8px 16px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s; }
+        .modal-btn:hover { border-color: var(--overseer-gold); color: var(--overseer-gold-bright); }
+        .modal-btn.save-btn { border-color: var(--overseer-gold); color: var(--overseer-gold-bright); background: rgba(212,160,23,0.1); }
+        .modal-btn.save-btn:hover { background: rgba(212,160,23,0.25); box-shadow: 0 0 10px var(--overseer-glow-gold); }
+        .modal-btn.danger { border-color: var(--overseer-red-bright); color: var(--overseer-red-bright); }
+        .modal-btn.danger:hover { background: rgba(255,51,0,0.15); }
+
+        /* MEMBERS LIST IN VIEW MODAL */
+        .member-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .member-badge { background: var(--overseer-blue); border: 1px solid var(--overseer-border); color: var(--overseer-gold-bright); font-size: 11px; padding: 4px 10px; letter-spacing: 0.5px; }
+
+        @media (max-width: 600px) {
+            .command-bar { padding: 12px 16px; }
+            .dashboard-content { padding: 16px; }
+            .campaign-table th, .campaign-table td { padding: 8px; font-size: 11px; }
+            .form-row { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- COMMAND BAR -->
+<div class="command-bar">
+    <div class="command-bar-left">
+        <div>
+            <div class="overseer-badge">⬡ Vault-Tec Authority</div>
+            <div class="overseer-title-bar">CAMPAIGN OVERVIEW</div>
+        </div>
+    </div>
+    <div class="command-bar-right">
+        <button class="cmd-btn" onclick="loadCampaigns()">↻ Refresh</button>
+        <a href="login_hub.html" class="cmd-btn">⬡ Login Hub</a>
+        <a href="index.html" class="cmd-btn">⌂ Main Menu</a>
+        <button class="cmd-btn danger" onclick="doLogout()">⏻ Logout</button>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="dashboard-content">
+
+    <!-- Stats Row -->
+    <div class="stats-row" id="statsRow">
+        <div class="stat-card"><div class="stat-card-value" id="statTotal">0</div><div class="stat-card-label">Total Campaigns</div></div>
+        <div class="stat-card"><div class="stat-card-value" id="statActive">0</div><div class="stat-card-label">Active Campaigns</div></div>
+        <div class="stat-card"><div class="stat-card-value" id="statPlayers">0</div><div class="stat-card-label">Total Players</div></div>
+        <div class="stat-card"><div class="stat-card-value" id="statSessions">0</div><div class="stat-card-label">Total Sessions</div></div>
+    </div>
+
+    <!-- Section Header -->
+    <div class="section-header">
+        <div class="section-title">◈ Campaign Registry</div>
+        <div class="section-count" id="campaignCountLabel">0 campaigns on record</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search campaigns…" oninput="filterCampaigns()">
+        <button class="cmd-btn primary" onclick="openAddModal()">+ New Campaign</button>
+    </div>
+
+    <!-- Campaign Table -->
+    <div style="overflow-x:auto;">
+        <table class="campaign-table" id="campaignTable">
+            <thead>
+                <tr>
+                    <th>Campaign Name</th>
+                    <th>Status</th>
+                    <th>Players</th>
+                    <th>Sessions</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="campaignTableBody"></tbody>
+        </table>
+    </div>
+    <div id="emptyState" class="empty-state hidden">
+        <div class="empty-state-icon">🗺️</div>
+        <div class="empty-state-title">No Campaigns Found</div>
+        <div class="empty-state-text">No campaigns match your search, or no campaigns have been created yet.</div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel">
+        <div class="info-panel-title">▶ Campaign Overview — Console Help</div>
+        <div class="info-list">
+            <div class="info-item"><strong>New Campaign:</strong> Create a new campaign with name, description, and settings</div>
+            <div class="info-item"><strong>View:</strong> See full campaign details, member list, and statistics</div>
+            <div class="info-item"><strong>Edit:</strong> Update campaign name, status, and description</div>
+            <div class="info-item"><strong>Delete:</strong> Permanently remove a campaign record (requires confirmation)</div>
+            <div class="info-item"><strong>Status:</strong> <span style="color:var(--overseer-green-bright)">■</span> Active &nbsp; <span style="color:var(--overseer-gold-bright)">■</span> Paused &nbsp; <span style="color:var(--overseer-gold-dim)">■</span> Ended</div>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div id="viewModal" class="modal-overlay hidden">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <div class="modal-title" id="viewModalTitle">CAMPAIGN DOSSIER</div>
+            <button class="modal-close-btn" onclick="closeModal('viewModal')">✕ CLOSE</button>
+        </div>
+        <div class="modal-body" id="viewModalBody"></div>
+        <div class="modal-footer">
+            <button class="modal-btn save-btn" id="editFromViewBtn">✎ Edit Campaign</button>
+            <button class="modal-btn" onclick="closeModal('viewModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT / ADD MODAL -->
+<div id="editModal" class="modal-overlay hidden">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <div class="modal-title" id="editModalTitle">+ NEW CAMPAIGN</div>
+            <button class="modal-close-btn" onclick="closeModal('editModal')">✕ CLOSE</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-section-title">Campaign Details</div>
+            <div class="form-row single">
+                <div class="form-group"><label>Campaign Name</label><input type="text" id="editName" placeholder="Capital Wasteland" maxlength="80"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Status</label>
+                    <select id="editStatus">
+                        <option value="active">Active</option>
+                        <option value="paused">Paused</option>
+                        <option value="ended">Ended</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Sessions Played</label><input type="number" id="editSessions" min="0" placeholder="0"></div>
+            </div>
+            <div class="form-row single">
+                <div class="form-group"><label>Description / Notes</label><textarea id="editDescription" placeholder="Campaign description, setting, notes…"></textarea></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn save-btn" onclick="saveCampaign()">💾 Save</button>
+            <button class="modal-btn" onclick="closeModal('editModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-panel" style="max-width:420px;">
+        <div class="modal-header">
+            <div class="modal-title">⚠ CONFIRM DELETION</div>
+            <button class="modal-close-btn" onclick="closeModal('deleteModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <p style="color:var(--overseer-white);font-size:13px;line-height:1.6;">
+                Are you sure you want to permanently delete <strong id="deleteCampaignName" style="color:var(--overseer-red-bright)"></strong>? All campaign data will be lost. This cannot be undone.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn danger" onclick="confirmDelete()">✕ Delete</button>
+            <button class="modal-btn" onclick="closeModal('deleteModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/overseer-navigation.js"></script>
+<script>
+let allCampaigns = [];
+let filteredCampaigns = [];
+let editingIndex = null;
+let deletingIndex = null;
+
+function loadCampaigns() {
+    try {
+        allCampaigns = JSON.parse(localStorage.getItem('overseerCampaigns') || '[]');
+        // Also load campaigns from the older key used by overseer.html
+        const oldCampaigns = JSON.parse(localStorage.getItem('campaigns') || '[]');
+        oldCampaigns.forEach(name => {
+            if (typeof name === 'string' && !allCampaigns.find(c => c.name === name)) {
+                allCampaigns.push({ id: 'legacy_' + name, name, status: 'active', sessions: 0, description: '', created: '' });
+            }
+        });
+    } catch(e) { allCampaigns = []; }
+    updateStats();
+    updateCountLabel();
+    filterCampaigns();
+}
+
+function updateStats() {
+    document.getElementById('statTotal').textContent = allCampaigns.length;
+    document.getElementById('statActive').textContent = allCampaigns.filter(c => c.status === 'active').length;
+    const players = allCampaigns.reduce((s, c) => s + (c.playerCount || 0), 0);
+    document.getElementById('statPlayers').textContent = players;
+    const sessions = allCampaigns.reduce((s, c) => s + (parseInt(c.sessions) || 0), 0);
+    document.getElementById('statSessions').textContent = sessions;
+}
+
+function updateCountLabel() {
+    document.getElementById('campaignCountLabel').textContent = allCampaigns.length + ' campaign' + (allCampaigns.length !== 1 ? 's' : '') + ' on record';
+}
+
+function filterCampaigns() {
+    const search = (document.getElementById('searchInput').value || '').toLowerCase();
+    filteredCampaigns = allCampaigns.filter(c =>
+        !search || (c.name || '').toLowerCase().includes(search) || (c.description || '').toLowerCase().includes(search)
+    );
+    renderTable();
+}
+
+function renderTable() {
+    const tbody = document.getElementById('campaignTableBody');
+    const empty = document.getElementById('emptyState');
+    const table = document.getElementById('campaignTable');
+    if (filteredCampaigns.length === 0) {
+        tbody.innerHTML = '';
+        table.style.display = 'none';
+        empty.classList.remove('hidden');
+        return;
+    }
+    empty.classList.add('hidden');
+    table.style.display = '';
+    tbody.innerHTML = filteredCampaigns.map((c, i) => {
+        const created = c.created ? new Date(c.created).toLocaleDateString() : '—';
+        return `<tr>
+            <td class="campaign-name-cell">${escHtml(c.name||'Unnamed')}</td>
+            <td><span class="campaign-status ${c.status||'active'}">${(c.status||'active').toUpperCase()}</span></td>
+            <td>${c.playerCount || 0}</td>
+            <td>${c.sessions || 0}</td>
+            <td>${created}</td>
+            <td><div class="action-btns">
+                <button class="tbl-btn" onclick="openViewModal(${i})">👁 View</button>
+                <button class="tbl-btn" onclick="openEditModal(${i})">✎ Edit</button>
+                <button class="tbl-btn danger" onclick="openDeleteModal(${i})">✕ Delete</button>
+            </div></td>
+        </tr>`;
+    }).join('');
+}
+
+function openViewModal(i) {
+    const c = filteredCampaigns[i];
+    document.getElementById('viewModalTitle').textContent = escHtml(c.name||'Campaign') + ' — DETAILS';
+    const created = c.created ? new Date(c.created).toLocaleString() : '—';
+    document.getElementById('viewModalBody').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:16px;">
+            <div style="background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:10px 12px;">
+                <div style="font-size:9px;color:var(--overseer-gold);letter-spacing:1.5px;text-transform:uppercase;opacity:0.8;margin-bottom:4px;">Status</div>
+                <div style="font-size:14px;color:var(--overseer-white);font-weight:bold;">${(c.status||'active').toUpperCase()}</div>
+            </div>
+            <div style="background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:10px 12px;">
+                <div style="font-size:9px;color:var(--overseer-gold);letter-spacing:1.5px;text-transform:uppercase;opacity:0.8;margin-bottom:4px;">Sessions</div>
+                <div style="font-size:14px;color:var(--overseer-white);font-weight:bold;">${c.sessions||0}</div>
+            </div>
+            <div style="background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:10px 12px;">
+                <div style="font-size:9px;color:var(--overseer-gold);letter-spacing:1.5px;text-transform:uppercase;opacity:0.8;margin-bottom:4px;">Players</div>
+                <div style="font-size:14px;color:var(--overseer-white);font-weight:bold;">${c.playerCount||0}</div>
+            </div>
+            <div style="background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:10px 12px;">
+                <div style="font-size:9px;color:var(--overseer-gold);letter-spacing:1.5px;text-transform:uppercase;opacity:0.8;margin-bottom:4px;">Created</div>
+                <div style="font-size:12px;color:var(--overseer-white);font-weight:bold;">${created}</div>
+            </div>
+        </div>
+        ${c.description ? `<div style="font-size:11px;color:var(--overseer-gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(212,160,23,0.2);">Description</div><div style="font-size:12px;color:var(--overseer-white);opacity:0.8;line-height:1.6;">${escHtml(c.description)}</div>` : ''}
+    `;
+    document.getElementById('editFromViewBtn').onclick = function() { closeModal('viewModal'); openEditModal(i); };
+    openModal('viewModal');
+}
+
+function openAddModal() {
+    editingIndex = null;
+    document.getElementById('editModalTitle').textContent = '+ NEW CAMPAIGN';
+    document.getElementById('editName').value = '';
+    document.getElementById('editStatus').value = 'active';
+    document.getElementById('editSessions').value = '0';
+    document.getElementById('editDescription').value = '';
+    openModal('editModal');
+}
+
+function openEditModal(i) {
+    editingIndex = i;
+    const c = filteredCampaigns[i];
+    document.getElementById('editModalTitle').textContent = '✎ EDIT CAMPAIGN';
+    document.getElementById('editName').value = c.name || '';
+    document.getElementById('editStatus').value = c.status || 'active';
+    document.getElementById('editSessions').value = c.sessions || 0;
+    document.getElementById('editDescription').value = c.description || '';
+    openModal('editModal');
+}
+
+function saveCampaign() {
+    const name = document.getElementById('editName').value.trim();
+    if (!name) { alert('Campaign name is required.'); return; }
+    const data = {
+        name,
+        status: document.getElementById('editStatus').value,
+        sessions: parseInt(document.getElementById('editSessions').value) || 0,
+        description: document.getElementById('editDescription').value.trim()
+    };
+    if (editingIndex !== null) {
+        const c = filteredCampaigns[editingIndex];
+        const idx = allCampaigns.findIndex(x => x.id === c.id);
+        if (idx >= 0) allCampaigns[idx] = { ...allCampaigns[idx], ...data };
+    } else {
+        allCampaigns.push({ id: Date.now(), created: new Date().toISOString(), playerCount: 0, ...data });
+    }
+    persistCampaigns();
+    closeModal('editModal');
+    loadCampaigns();
+}
+
+function openDeleteModal(i) {
+    deletingIndex = i;
+    document.getElementById('deleteCampaignName').textContent = filteredCampaigns[i].name || 'this campaign';
+    openModal('deleteModal');
+}
+
+function confirmDelete() {
+    if (deletingIndex === null) return;
+    const c = filteredCampaigns[deletingIndex];
+    allCampaigns = allCampaigns.filter(x => x.id !== c.id);
+    persistCampaigns();
+    deletingIndex = null;
+    closeModal('deleteModal');
+    loadCampaigns();
+}
+
+function persistCampaigns() {
+    localStorage.setItem('overseerCampaigns', JSON.stringify(allCampaigns));
+    // Keep legacy campaigns list in sync
+    localStorage.setItem('campaigns', JSON.stringify(allCampaigns.map(c => c.name)));
+}
+
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function doLogout() {
+    if (confirm('Terminate Overseer session?')) {
+        window.location.href = 'login_hub.html';
+    }
+}
+
+function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+document.addEventListener('DOMContentLoaded', loadCampaigns);
+</script>
+</body>
+</html>

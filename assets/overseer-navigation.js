@@ -21,14 +21,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="nav-subtitle">AUTHORITY CONSOLE</div>
             </div>
             <ul class="nav-list">
-                <li><a href="overseer-overview.html" class="nav-link" data-page="overseer-overview">👥 PLAYER OVERVIEW</a></li>
-                <li><a href="campaign.html" class="nav-link" data-page="campaign">🗺️ CAMPAIGN OVERVIEW</a></li>
-                <li><a href="enemies.html" class="nav-link" data-page="enemies">👹 ENEMIES</a></li>
-                <li><a href="npcs.html" class="nav-link" data-page="npcs">🗣️ NPCs</a></li>
-                <li><a href="messages.html" class="nav-link" data-page="messages">📻 MESSAGES</a></li>
-                <li><a href="items.html" class="nav-link" data-page="items">📦 ITEMS</a></li>
-                <li><a href="settings.html" class="nav-link" data-page="settings">⚙️ SETTINGS</a></li>
-                <li><a href="stats.html" class="nav-link" data-page="stats">📊 STATS</a></li>
+                <li><a href="overseer-player-overview.html" class="nav-link" data-page="player-overview">👥 PLAYER OVERVIEW</a></li>
+                <li><a href="overseer-campaign-overview.html" class="nav-link" data-page="campaign-overview">🗺️ CAMPAIGN OVERVIEW</a></li>
+                <li><a href="overseer-enemies.html" class="nav-link" data-page="enemies">👹 ENEMIES</a></li>
+                <li><a href="overseer-npcs.html" class="nav-link" data-page="npcs">🗣️ NPCs</a></li>
+                <li><a href="overseer.html" class="nav-link" data-page="overseer">📋 OVERSEER CONSOLE</a></li>
+                <li><a href="overseer-items.html" class="nav-link" data-page="items">📦 ITEMS</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -355,14 +353,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Determine current page
     function getCurrentPage() {
         const path = window.location.pathname;
-        if (path.includes('overseer-overview')) return 'overseer-overview';
-        if (path.includes('campaign')) return 'campaign';
-        if (path.includes('enemies')) return 'enemies';
-        if (path.includes('npcs')) return 'npcs';
-        if (path.includes('messages')) return 'messages';
-        if (path.includes('items')) return 'items';
-        if (path.includes('settings')) return 'settings';
-        if (path.includes('stats')) return 'stats';
+        if (path.includes('overseer-player-overview')) return 'player-overview';
+        if (path.includes('overseer-campaign-overview')) return 'campaign-overview';
+        if (path.includes('overseer-enemies')) return 'enemies';
+        if (path.includes('overseer-npcs')) return 'npcs';
+        if (path.includes('overseer-items')) return 'items';
+        if (path.includes('overseer')) return 'overseer';
         return null;
     }
 
