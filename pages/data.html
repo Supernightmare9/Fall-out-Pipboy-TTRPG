@@ -77,6 +77,36 @@
             background-color: var(--vault-darker);
             border: 3px solid var(--vault-green);
             box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
+            position: relative;
+        }
+
+        .terminal-access-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent;
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            padding: 6px 10px;
+            cursor: pointer;
+            text-decoration: none;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+        }
+
+        .terminal-access-btn:hover {
+            background: rgba(74, 222, 128, 0.1);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 6px var(--vault-gold);
+            box-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
         }
 
         .vault-badge {
@@ -646,6 +676,7 @@
     <div class="container">
         <!-- VAULT HEADER -->
         <div class="vault-header">
+            <a class="terminal-access-btn" href="terminal.html" title="Hacking Minigame">⌨ TERMINAL</a>
             <div class="vault-badge">VAULT-TEC INDUSTRIES PIP-BOY 3000</div>
             <div class="vault-title">CHARACTER DATA</div>
             <div class="vault-subtitle">PERSONAL INFORMATION PROCESSOR</div>
