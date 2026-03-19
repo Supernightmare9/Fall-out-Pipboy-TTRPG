@@ -947,7 +947,10 @@
                 alignment: charAlignment
             };
 
+            console.log('saveCharacterData() called — saving:', characterData);
             localStorage.setItem('characterData', JSON.stringify(characterData));
+            console.log('Character data saved to localStorage.');
+
             document.getElementById('characterNameDisplay').textContent = charName || 'VAULT DWELLER';
 
             const message = document.getElementById('saveMessage');
@@ -1164,6 +1167,39 @@
 
         window.addEventListener('DOMContentLoaded', function() {
             loadCharacterData();
+
+            // Attach auto-save listeners to all 4 character fields
+            const charName = document.getElementById('charName');
+            const charRace = document.getElementById('charRace');
+            const charClass = document.getElementById('charClass');
+            const charAlignment = document.getElementById('charAlignment');
+
+            if (!charName || !charRace || !charClass || !charAlignment) {
+                console.error('One or more character fields not found in DOM.');
+                return;
+            }
+
+            // Debounce helper — delays save until typing has paused
+            function debounce(fn, delay) {
+                let timer;
+                return function() { clearTimeout(timer); timer = setTimeout(fn, delay); };
+            }
+
+            // 'input' fires on every keystroke for text fields — debounced to avoid excessive writes
+            charName.addEventListener('input', debounce(function() {
+                console.log('charName changed — auto-saving...');
+                saveCharacterData();
+            }, 400));
+
+            // 'change' fires once per selection for dropdowns — loop to avoid repetition
+            [charRace, charClass, charAlignment].forEach(function(el) {
+                el.addEventListener('change', function() {
+                    console.log(el.id + ' changed — auto-saving...');
+                    saveCharacterData();
+                });
+            });
+
+            console.log('Character data auto-save listeners attached.');
         });
     </script>
 
