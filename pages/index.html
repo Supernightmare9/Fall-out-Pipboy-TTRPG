@@ -3,8 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fallout Pipboy Login</title>
+    <title>Vault 215 — Access Terminal</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* PIN PAD STYLES */
+        .pin-display {
+            text-align: center;
+            font-size: 22px;
+            letter-spacing: 8px;
+            color: #4ade80;
+            text-shadow: 0 0 10px #4ade80;
+            padding: 14px 10px;
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            margin-bottom: 18px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .pin-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .pin-btn {
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 16px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 1px;
+            transition: all 0.15s ease;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+        }
+
+        .pin-btn:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 18px rgba(74, 222, 128, 0.7);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 8px #fbbf24;
+            transform: translateY(-1px);
+        }
+
+        .pin-btn:active {
+            transform: translateY(0) scale(0.96);
+        }
+
+        .pin-btn.clear-btn {
+            border-color: #fb923c;
+            color: #fb923c;
+            text-shadow: 0 0 5px #fb923c;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        .pin-btn.clear-btn:hover {
+            box-shadow: 0 0 18px rgba(251, 146, 60, 0.6);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 8px #fbbf24;
+        }
+
+        .pin-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pin-submit-btn {
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 14px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .pin-submit-btn:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: #fbbf24;
+            color: #fbbf24;
+            text-shadow: 0 0 10px #fbbf24;
+        }
+
+        .pin-back-btn {
+            background-color: transparent;
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: rgba(74, 222, 128, 0.6);
+            padding: 8px 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        .pin-back-btn:hover {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
+        .pin-section-title {
+            text-align: center;
+            font-size: 11px;
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .error-msg {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px #ff6b6b;
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-top: 10px;
+            min-height: 18px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #vaultNumber {
+            cursor: default;
+            user-select: none;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -14,155 +155,185 @@
             <h1>VAULT NETWORK</h1>
         </div>
 
-        <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <label for="username">VAULT DWELLER:</label>
-                <input type="text" id="username" name="username" placeholder="Enter Username" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">SECURITY CODE:</label>
-                <input type="password" id="password" name="password" placeholder="Enter Password" required>
-            </div>
-            
-            <button type="submit">ACCESS VAULT</button>
-        </form>
+        <!-- ═══════════════════════════════════
+             PLAYER LOGIN SECTION (default view)
+             ═══════════════════════════════════ -->
+        <div id="playerLoginSection">
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">VAULT DWELLER:</label>
+                    <input type="text" id="username" name="username" placeholder="Enter Username" required autocomplete="off">
+                </div>
+                <button type="submit">ACCESS VAULT</button>
+            </form>
+            <div id="loginError" class="error-msg"></div>
+        </div>
 
+        <!-- ═══════════════════════════════════
+             OVERSEER PIN PAD (hidden by default)
+             Revealed by triple-clicking VAULT 215
+             ═══════════════════════════════════ -->
+        <div id="pinPadSection" style="display:none;">
+            <div class="pin-section-title">⬡ OVERSEER IDENTITY VERIFICATION</div>
+            <div id="pinDisplay" class="pin-display">○ ○ ○ ○ ○ ○</div>
+            <div class="pin-grid">
+                <button class="pin-btn" onclick="pinDigit('1')">1</button>
+                <button class="pin-btn" onclick="pinDigit('2')">2</button>
+                <button class="pin-btn" onclick="pinDigit('3')">3</button>
+                <button class="pin-btn" onclick="pinDigit('4')">4</button>
+                <button class="pin-btn" onclick="pinDigit('5')">5</button>
+                <button class="pin-btn" onclick="pinDigit('6')">6</button>
+                <button class="pin-btn" onclick="pinDigit('7')">7</button>
+                <button class="pin-btn" onclick="pinDigit('8')">8</button>
+                <button class="pin-btn" onclick="pinDigit('9')">9</button>
+                <button class="pin-btn clear-btn" onclick="clearPin()">CLR</button>
+                <button class="pin-btn" onclick="pinDigit('0')">0</button>
+                <button class="pin-btn clear-btn" onclick="backspacePin()">⌫</button>
+            </div>
+            <div class="pin-actions">
+                <button class="pin-submit-btn" onclick="submitPin()">▶ CONFIRM IDENTITY</button>
+                <button class="pin-back-btn" onclick="hidePinPad()">← BACK TO DWELLER LOGIN</button>
+            </div>
+            <div id="pinError" class="error-msg"></div>
+        </div>
+
+        <!-- STATUS BAR — triple-click "VAULT 215" to reveal Overseer PIN -->
         <div class="status-bar">
             <div class="status-item">
                 <span class="status-indicator"></span>
                 <span>SYSTEM ONLINE</span>
             </div>
             <div class="status-item">
-                <span>VAULT 111</span>
+                <span id="vaultNumber" onclick="handleVaultClick()">VAULT 215</span>
             </div>
-        </div>
-
-        <div style="text-align:center; margin-top:16px;">
-            <a href="login_hub.html" style="font-family:'Courier New',monospace; font-size:11px; letter-spacing:2px; color:#d4a017; text-decoration:none; border:1px solid #d4a017; padding:6px 16px; display:inline-block; transition:all 0.2s;" onmouseover="this.style.background='rgba(212,160,23,0.1)'" onmouseout="this.style.background='transparent'">⬡ LOGIN HUB</a>
         </div>
     </div>
 
+    <script src="../assets/accounts.js"></script>
     <script>
-        // Initialize IndexedDB
-        let db;
-        const DB_NAME = 'PipBoyGameDB';
-        const STORE_NAME = 'players';
+        // ═══════════════════════════════════════════════════════
+        // CLEAR SESSION ON LOGIN PAGE LOAD (force fresh login)
+        // ═══════════════════════════════════════════════════════
+        sessionStorage.clear();
 
-        function initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, 1);
-
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    db = request.result;
-                    console.log('✓ IndexedDB initialized');
-                    resolve();
-                };
-
-                request.onupgradeneeded = (event) => {
-                    db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-                        console.log('✓ Object store created');
-                    }
-                };
-            });
+        // ═══════════════════════════════════════════════════════
+        // PLAYER LOGIN
+        // ═══════════════════════════════════════════════════════
+        function handleLogin(event) {
+            event.preventDefault();
+            var username = document.getElementById('username').value.trim();
+            var account = ACCOUNTS.find(function(a) { return a.username === username; });
+            if (!account) {
+                showLoginError('⚠ Unknown Vault Dweller ID. Access denied.');
+                return;
+            }
+            sessionStorage.setItem('username', account.username);
+            sessionStorage.setItem('role', account.role);
+            if (account.role === 'admin') {
+                window.location.href = 'overseer.html';
+            } else {
+                window.location.href = 'character.html';
+            }
         }
 
-        // Get player data from IndexedDB
-        function getPlayerDataFromDB() {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readonly');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.get(1);
-
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    console.log('Player data retrieved:', request.result);
-                    resolve(request.result || null);
-                };
-            });
+        function showLoginError(msg) {
+            var el = document.getElementById('loginError');
+            el.textContent = msg;
         }
 
-        // Save player data to IndexedDB
-        function savePlayerDataToDB(playerData) {
-            return new Promise((resolve, reject) => {
-                const transaction = db.transaction([STORE_NAME], 'readwrite');
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.put({ ...playerData, id: 1 });
+        // ═══════════════════════════════════════════════════════
+        // TRIPLE-CLICK "VAULT 215" → REVEAL OVERSEER PIN PAD
+        // ═══════════════════════════════════════════════════════
+        var vaultClickCount = 0;
+        var vaultClickTimer = null;
 
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    console.log('✓ Player data saved to IndexedDB:', playerData);
-                    localStorage.setItem('currentPlayer', JSON.stringify(playerData));
-                    resolve();
-                };
-            });
+        function handleVaultClick() {
+            vaultClickCount++;
+            clearTimeout(vaultClickTimer);
+            vaultClickTimer = setTimeout(function() { vaultClickCount = 0; }, 700);
+            if (vaultClickCount >= 3) {
+                vaultClickCount = 0;
+                showPinPad();
+            }
         }
 
-        // Initialize database on page load
-        window.addEventListener('DOMContentLoaded', async function() {
-            try {
-                await initDB();
-                console.log('✓ Database ready');
-            } catch (error) {
-                console.error('Error initializing database:', error);
+        function showPinPad() {
+            document.getElementById('playerLoginSection').style.display = 'none';
+            document.getElementById('pinPadSection').style.display = 'block';
+            pinEntry = '';
+            updatePinDisplay();
+            document.getElementById('pinError').textContent = '';
+        }
+
+        function hidePinPad() {
+            document.getElementById('pinPadSection').style.display = 'none';
+            document.getElementById('playerLoginSection').style.display = 'block';
+            pinEntry = '';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // PIN PAD LOGIC
+        // ═══════════════════════════════════════════════════════
+        var pinEntry = '';
+        var MAX_PIN_LENGTH = 6;
+
+        function pinDigit(digit) {
+            if (pinEntry.length >= MAX_PIN_LENGTH) return;
+            pinEntry += digit;
+            updatePinDisplay();
+        }
+
+        function clearPin() {
+            pinEntry = '';
+            updatePinDisplay();
+            document.getElementById('pinError').textContent = '';
+        }
+
+        function backspacePin() {
+            pinEntry = pinEntry.slice(0, -1);
+            updatePinDisplay();
+        }
+
+        function updatePinDisplay() {
+            var display = document.getElementById('pinDisplay');
+            var dots = '';
+            for (var i = 0; i < MAX_PIN_LENGTH; i++) {
+                if (i > 0) dots += ' ';
+                dots += (i < pinEntry.length) ? '●' : '○';
+            }
+            display.textContent = dots;
+        }
+
+        function submitPin() {
+            if (pinEntry.length === 0) {
+                document.getElementById('pinError').textContent = 'Enter your PIN code.';
+                return;
+            }
+            var overseer = ACCOUNTS.find(function(a) { return a.role === 'admin'; });
+            if (overseer && overseer.pin === pinEntry) {
+                sessionStorage.setItem('username', overseer.username);
+                sessionStorage.setItem('role', overseer.role);
+                window.location.href = 'overseer.html';
+            } else {
+                document.getElementById('pinError').textContent = '⚠ INCORRECT PIN. ACCESS DENIED.';
+                pinEntry = '';
+                updatePinDisplay();
+            }
+        }
+
+        // Allow Enter key to submit PIN
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('pinPadSection').style.display !== 'none') {
+                if (e.key === 'Enter') {
+                    submitPin();
+                } else if (e.key === 'Backspace') {
+                    backspacePin();
+                } else if (e.key >= '0' && e.key <= '9') {
+                    pinDigit(e.key);
+                }
             }
         });
-
-        async function handleLogin(event) {
-            event.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            const validAccounts = {
-                'Dillon': 'test',
-                'Vault Dweller': 'vault111',
-                'Survivor': '2077',
-                'Agent': 'minutemen',
-                'Overseer': 'vault101'
-            };
-            
-            if (validAccounts[username] === password) {
-                try {
-                    // Get existing player data if it exists
-                    const existingPlayer = await getPlayerDataFromDB();
-                    console.log('Existing player data:', existingPlayer);
-                    
-                    let playerData;
-                    
-                    if (existingPlayer && existingPlayer.characterName === username) {
-                        // Player exists - KEEP their existing data (XP, level, health)
-                        console.log('✓ Found existing player, preserving data');
-                        playerData = existingPlayer;
-                    } else {
-                        // New player or different account - create fresh data
-                        console.log('✓ Creating new player data');
-                        playerData = {
-                            id: 1,
-                            characterName: username,
-                            vault: '111',
-                            level: 1,
-                            health: 100,
-                            xp: 0
-                        };
-                    }
-                    
-                    // Save to IndexedDB
-                    await savePlayerDataToDB(playerData);
-                    
-                    // Redirect to character page
-                    window.location.href = 'character.html';
-                } catch (error) {
-                    console.error('Error during login:', error);
-                    alert('Error loading player data!');
-                }
-            } else {
-                alert('Invalid Vault Dweller credentials!');
-            }
-        }
     </script>
 </body>
 </html>

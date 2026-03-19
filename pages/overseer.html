@@ -1926,8 +1926,57 @@
             .add-combatant-row { grid-template-columns: 1fr 1fr; }
         }
     </style>
+<script src="../assets/accounts.js"></script>
+    <script src="../assets/campaigns.js"></script>
 </head>
 <body>
+
+<!-- ===================== SESSION GUARD ===================== -->
+<script>
+    (function() {
+        var role = sessionStorage.getItem('role');
+        if (role !== 'admin') {
+            window.location.replace('index.html');
+        }
+    })();
+</script>
+
+<!-- ===================== CAMPAIGN SELECTOR MODAL ===================== -->
+<div id="campaignSelectorModal" style="
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(4,8,15,0.9);z-index:9000;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+">
+    <div style="
+        background:var(--overseer-blue-mid);
+        border:3px solid var(--overseer-gold);
+        box-shadow:0 0 40px var(--overseer-glow-gold);
+        padding:36px;max-width:560px;width:100%;
+        max-height:80vh;overflow-y:auto;
+        position:relative;
+        animation:fadeIn 0.25s ease-out;
+    ">
+        <div style="
+            text-align:center;font-size:16px;
+            color:var(--overseer-gold-bright);
+            text-shadow:0 0 8px var(--overseer-glow-gold);
+            letter-spacing:3px;text-transform:uppercase;
+            margin-bottom:6px;font-family:'Courier New',monospace;
+        ">⬡ SELECT CAMPAIGN</div>
+        <div style="
+            text-align:center;font-size:10px;
+            color:rgba(212,160,23,0.5);letter-spacing:2px;
+            text-transform:uppercase;margin-bottom:24px;
+            padding-bottom:14px;border-bottom:1px solid rgba(212,160,23,0.3);
+            font-family:'Courier New',monospace;
+        ">Choose a campaign to manage</div>
+        <div id="campaignSelectorBody" style="
+            text-align:center;color:var(--overseer-gold);
+            font-family:'Courier New',monospace;font-size:12px;
+            letter-spacing:1px;padding:16px;
+        ">▌ LOADING CAMPAIGN DATA...</div>
+    </div>
+</div>
 
 <!-- ===================== DASHBOARD SCREEN ===================== -->
 <div id="dashboardScreen">
@@ -1941,12 +1990,13 @@
             </div>
             <div class="overseer-id-display">
                 Overseer: <span id="overseerNameDisplay">—</span>
+                &nbsp;|&nbsp;
+                Campaign: <span id="overseerCampaignDisplay">—</span>
             </div>
         </div>
         <div class="command-bar-right">
+            <button class="cmd-btn" onclick="showCampaignModal()">⚑ Switch Campaign</button>
             <button class="cmd-btn" onclick="refreshDashboard()">↻ Refresh</button>
-            <a href="login_hub.html" class="cmd-btn" style="text-decoration:none; display:inline-block; line-height:normal;">⬡ Login Hub</a>
-            <a href="index.html" class="cmd-btn" style="text-decoration:none; display:inline-block; line-height:normal;">⌂ Main Menu</a>
             <button class="cmd-btn danger" onclick="logoutOverseer()">⏻ Logout</button>
         </div>
     </div>
@@ -1974,69 +2024,23 @@
     <!-- Main Content -->
     <div class="dashboard-content">
 
-        <!-- Characters Section -->
-        <div class="section-header" id="overseer-characters">
-            <div class="section-title">◈ Resident Dossiers</div>
-            <div class="section-count" id="charCountLabel">0 characters on record</div>
+        <!-- Campaign Players Section -->
+        <div class="section-header" id="overseer-players">
+            <div class="section-title">◈ Campaign Players</div>
+            <div class="section-count" id="playerCountLabel">0 players in campaign</div>
         </div>
 
-        <div class="characters-grid" id="charactersGrid">
-            <!-- populated by JS -->
+        <div class="characters-grid" id="playersGrid">
+            <!-- populated by JS from campaigns.js -->
         </div>
 
-        <!-- Info Panel -->
-        <div class="info-panel" style="margin-top:30px;">
-            <div class="info-panel-title">▶ Overseer Information — Console Help</div>
-            <div class="info-list">
-                <div class="info-item"><strong>View Full:</strong> See complete character dossier</div>
-                <div class="info-item"><strong>Edit Stats:</strong> Modify any character stat or attribute</div>
-                <div class="info-item"><strong>Inventory:</strong> Add or remove items from a character's inventory</div>
-                <div class="info-item"><strong>Delete:</strong> Permanently remove a character record</div>
-                <div class="info-item"><strong>Health:</strong> <span style="color:var(--overseer-green-bright)">■</span> Healthy ≥60% &nbsp;
-                    <span style="color:var(--overseer-gold-bright)">■</span> Caution 30–59% &nbsp;
-                    <span style="color:var(--overseer-red-bright)">■</span> Critical &lt;30%</div>
-                <div class="info-item"><strong>Data Sync:</strong> All edits sync with Pip-Boy pages via localStorage</div>
-            </div>
-        </div>
-
-        <!-- ==================== CAMPAIGN MANAGEMENT ==================== -->
+        <!-- ==================== ACTIVE CAMPAIGN SELECTOR ==================== -->
         <div class="section-header" id="overseer-campaign" style="margin-top:40px;">
-            <div class="section-title">◈ Campaign Management</div>
-        </div>
-
-        <div class="campaign-panel">
-            <div class="campaign-panel-title">⚑ Active Campaign</div>
-
-            <!-- Switch/select campaign -->
-            <div class="campaign-row">
-                <span class="campaign-label">Active Campaign:</span>
-                <select class="campaign-select" id="campaignSelect" onchange="switchCampaign(this.value)">
-                    <option value="">— No Campaign —</option>
+            <div class="section-title">◈ Active Campaign</div>
+            <div>
+                <select class="campaign-select" id="campaignSelect" onchange="switchCampaignDropdown(this.value)">
+                    <option value="">— Select Campaign —</option>
                 </select>
-                <span class="campaign-active-badge" id="activeCampaignBadge"></span>
-            </div>
-
-            <!-- Create new campaign -->
-            <div class="campaign-row">
-                <span class="campaign-label">New Campaign:</span>
-                <input type="text" class="campaign-input" id="newCampaignName" placeholder="e.g. Capital Wasteland" maxlength="60">
-                <button class="cmd-btn" onclick="createCampaign()">+ Create</button>
-            </div>
-
-            <!-- Delete campaign -->
-            <div class="campaign-row">
-                <span class="campaign-label">Delete Campaign:</span>
-                <select class="campaign-select" id="deleteCampaignSelect">
-                    <option value="">— Select to Delete —</option>
-                </select>
-                <button class="cmd-btn danger" onclick="deleteCampaign()">✕ Delete</button>
-            </div>
-        </div>
-
-        <!-- ==================== CAMPAIGN DASHBOARD ==================== -->
-        <div id="campaignDashboard" class="hidden">
-            <div class="campaign-dashboard" id="campaignDashboardGrid">
-                <!-- populated by JS -->
             </div>
         </div>
 
@@ -2107,54 +2111,6 @@
             </div>
         </div>
 
-        <!-- ==================== MESSAGING SYSTEM ==================== -->
-        <div class="section-header" id="overseer-messages" style="margin-top:40px;">
-            <div class="section-title">◈ Campaign Communications</div>
-        </div>
-
-        <div class="messaging-panel">
-            <div class="messaging-panel-title">
-                <span>✉ Message Composer</span>
-                <span class="msg-campaign-badge" id="msgCampaignBadge">No active campaign</span>
-            </div>
-
-            <!-- Composer -->
-            <div class="msg-composer" id="msgComposer">
-                <div class="msg-composer-left">
-                    <div>
-                        <div class="msg-field-label">Sender Type</div>
-                        <select class="msg-select" id="msgSenderType" onchange="toggleNpcField()">
-                            <option value="overseer">Overseer</option>
-                            <option value="unknown">Unknown</option>
-                            <option value="npc">NPC</option>
-                        </select>
-                    </div>
-                    <div id="npcNameField">
-                        <div class="msg-field-label">NPC Name</div>
-                        <input type="text" class="msg-input" id="msgNpcName" placeholder="e.g. Raider Chief" maxlength="50">
-                    </div>
-                </div>
-                <div class="msg-composer-right">
-                    <div>
-                        <div class="msg-field-label">Message</div>
-                        <textarea class="msg-textarea" id="msgText" placeholder="Enter your message…" maxlength="1000"></textarea>
-                    </div>
-                    <div class="msg-btn-row">
-                        <button class="cmd-btn" style="background:var(--overseer-blue-light);" onclick="sendOverseerMessage()">▶ Send</button>
-                        <button class="cmd-btn" onclick="clearComposer()">↺ Clear</button>
-                    </div>
-                    <div id="msgFeedback" style="font-size:11px;color:var(--overseer-green-bright);min-height:16px;"></div>
-                </div>
-            </div>
-
-            <!-- Chat History -->
-            <div style="margin-top:18px;">
-                <div class="msg-field-label" style="margin-bottom:8px;font-size:11px;opacity:1;color:var(--overseer-gold-bright);">▶ Chat History (newest at bottom)</div>
-                <div class="chat-history" id="overseerChatHistory">
-                    <div class="chat-empty" id="chatEmptyNote">No campaign selected or no messages yet.</div>
-                </div>
-            </div>
-        </div>
 
     </div>
 </div>
@@ -2589,279 +2545,101 @@
     // ======================================
     // OVERSEER DASHBOARD INIT
     // ======================================
-    // The PIN pad in login_hub.html is the sole login interface.
-    // overseer.html always opens directly to the dashboard.
-    document.getElementById('overseerNameDisplay').textContent = 'Head Overseer';
+    var _sessionUsername = sessionStorage.getItem('username') || 'Overseer';
+    var _sessionCampaignName = sessionStorage.getItem('campaignName') || '—';
+    document.getElementById('overseerNameDisplay').textContent = _sessionUsername;
+    document.getElementById('overseerCampaignDisplay').textContent = _sessionCampaignName;
     document.getElementById('tickerTimestamp').textContent =
         'SESSION START: ' + new Date().toLocaleTimeString();
-    refreshDashboard();
-    initCampaigns();
 
-    // Poll for new messages every 3 seconds (real-time feel)
-    setInterval(function() { renderChatHistory(); }, 3000);
+    // ── CAMPAIGN SELECTOR MODAL ──────────────────────────────
+    function showCampaignModal() {
+        document.getElementById('campaignSelectorModal').style.display = 'flex';
+        renderCampaignSelectorOptions();
+    }
+
+    function hideCampaignModal() {
+        document.getElementById('campaignSelectorModal').style.display = 'none';
+    }
+
+    function renderCampaignSelectorOptions() {
+        var body = document.getElementById('campaignSelectorBody');
+        if (typeof CAMPAIGNS === 'undefined' || CAMPAIGNS.length === 0) {
+            body.innerHTML = '<div style="color:rgba(212,160,23,0.6);font-size:11px;text-align:center;letter-spacing:1px;">No campaigns found in campaigns.js.</div>';
+            return;
+        }
+        var html = '';
+        CAMPAIGNS.forEach(function(c) {
+            html += '<div onclick="selectOverseerCampaign(\'' + escHtml(c.id) + '\')" style="' +
+                'background:var(--overseer-blue);border:2px solid rgba(212,160,23,0.3);' +
+                'padding:16px 18px;margin-bottom:12px;cursor:pointer;' +
+                'transition:all 0.2s ease;border-radius:2px;text-align:left;' +
+                'font-family:Courier New,monospace;"' +
+                '>';
+            html += '<div style="font-size:14px;font-weight:bold;color:var(--overseer-gold-bright);text-shadow:0 0 5px var(--overseer-glow-gold);letter-spacing:1px;margin-bottom:6px;">⚑ ' + escHtml(c.name) + '</div>';
+            html += '<div style="font-size:10px;color:rgba(212,160,23,0.6);letter-spacing:1px;display:flex;flex-wrap:wrap;gap:12px;">';
+            html += '<span><span style="color:rgba(212,160,23,0.5);">PLAYERS:</span> ' + (c.players ? c.players.length : 0) + '</span>';
+            html += '<span><span style="color:rgba(212,160,23,0.5);">STATUS:</span> ' + escHtml(c.status.toUpperCase()) + '</span>';
+            html += '</div>';
+            html += '</div>';
+        });
+        body.innerHTML = html;
+    }
+
+    function selectOverseerCampaign(campaignId) {
+        var campaign = CAMPAIGNS.find(function(c) { return c.id === campaignId; });
+        if (!campaign) return;
+        sessionStorage.setItem('campaignId', campaignId);
+        sessionStorage.setItem('campaignName', campaign.name);
+        hideCampaignModal();
+        document.getElementById('overseerCampaignDisplay').textContent = campaign.name;
+        populateCampaignDropdown();
+        refreshDashboard();
+    }
+
+    function populateCampaignDropdown() {
+        var sel = document.getElementById('campaignSelect');
+        if (!sel) return;
+        var currentId = sessionStorage.getItem('campaignId');
+        sel.innerHTML = '<option value="">— Select Campaign —</option>';
+        if (typeof CAMPAIGNS !== 'undefined') {
+            CAMPAIGNS.forEach(function(c) {
+                var opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name + (c.status === 'active' ? ' ★' : '');
+                if (c.id === currentId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+    }
+
+    function switchCampaignDropdown(id) {
+        if (!id) return;
+        var campaign = CAMPAIGNS.find(function(c) { return c.id === id; });
+        if (!campaign) return;
+        sessionStorage.setItem('campaignId', id);
+        sessionStorage.setItem('campaignName', campaign.name);
+        document.getElementById('overseerCampaignDisplay').textContent = campaign.name;
+        refreshDashboard();
+    }
 
     function logoutOverseer() {
         if (!confirm('Terminate Overseer session?')) return;
-        window.location.href = 'login_hub.html';
+        sessionStorage.clear();
+        window.location.href = 'index.html';
     }
 
-    // ======================================
-    // CAMPAIGN MANAGEMENT
-    // ======================================
-
-    function loadCampaigns() {
-        try {
-            const raw = localStorage.getItem('vault215_campaigns');
-            if (raw) return JSON.parse(raw);
-        } catch (e) {}
-        return [];
-    }
-
-    function saveCampaigns(campaigns) {
-        localStorage.setItem('vault215_campaigns', JSON.stringify(campaigns));
-    }
-
-    function getActiveCampaign() {
-        const campaigns = loadCampaigns();
-        return campaigns.find(function(c) { return c.isActive; }) || null;
-    }
-
-    function initCampaigns() {
-        populateCampaignDropdowns();
-        updateCampaignBadges();
-        renderChatHistory();
-        toggleNpcField();
-        // Show dashboard for active campaign on load
-        showCampaignDashboard(getActiveCampaign());
-    }
-
-    function populateCampaignDropdowns() {
-        const campaigns = loadCampaigns();
-        const select = document.getElementById('campaignSelect');
-        const delSelect = document.getElementById('deleteCampaignSelect');
-
-        // Save current values
-        const prevActive = select.value;
-        const prevDel = delSelect.value;
-
-        // Rebuild options
-        select.innerHTML = '<option value="">— No Campaign —</option>';
-        delSelect.innerHTML = '<option value="">— Select to Delete —</option>';
-
-        campaigns.forEach(function(c) {
-            const opt1 = document.createElement('option');
-            opt1.value = c.id;
-            opt1.textContent = c.name + (c.isActive ? ' ★' : '');
-            if (c.isActive) opt1.selected = true;
-            select.appendChild(opt1);
-
-            const opt2 = document.createElement('option');
-            opt2.value = c.id;
-            opt2.textContent = c.name;
-            if (c.id === prevDel) opt2.selected = true;
-            delSelect.appendChild(opt2);
-        });
-    }
-
-    function updateCampaignBadges() {
-        const active = getActiveCampaign();
-        const badge = document.getElementById('activeCampaignBadge');
-        const msgBadge = document.getElementById('msgCampaignBadge');
-        if (active) {
-            badge.textContent = '★ Active: ' + active.name;
-            msgBadge.textContent = '⚑ ' + active.name;
+    // ── ON LOAD: show campaign modal or load saved campaign ──
+    (function() {
+        populateCampaignDropdown();
+        var savedId = sessionStorage.getItem('campaignId');
+        if (savedId) {
+            hideCampaignModal();
+            refreshDashboard();
         } else {
-            badge.textContent = '';
-            msgBadge.textContent = 'No active campaign';
+            showCampaignModal();
         }
-    }
-
-    function createCampaign() {
-        const input = document.getElementById('newCampaignName');
-        const name = input.value.trim();
-        if (!name) {
-            showMsgFeedback('Enter a campaign name.', false);
-            return;
-        }
-        const campaigns = loadCampaigns();
-        // Check duplicate name
-        if (campaigns.some(function(c) { return c.name.toLowerCase() === name.toLowerCase(); })) {
-            showMsgFeedback('A campaign with that name already exists.', false);
-            return;
-        }
-        const isFirst = campaigns.length === 0;
-        const newCampaign = {
-            id: 'camp_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
-            name: name,
-            createdAt: Date.now(),
-            isActive: isFirst,
-            chatHistory: []
-        };
-        campaigns.push(newCampaign);
-        saveCampaigns(campaigns);
-        input.value = '';
-        populateCampaignDropdowns();
-        updateCampaignBadges();
-        renderChatHistory();
-        if (isFirst) showCampaignDashboard(newCampaign);
-        showMsgFeedback('Campaign "' + escHtml(name) + '" created' + (isFirst ? ' and set active.' : '.'), true);
-    }
-
-    function switchCampaign(id) {
-        const campaigns = loadCampaigns();
-        campaigns.forEach(function(c) { c.isActive = (c.id === id); });
-        saveCampaigns(campaigns);
-        populateCampaignDropdowns();
-        updateCampaignBadges();
-        renderChatHistory();
-        // Show campaign dashboard
-        const active = campaigns.find(function(c) { return c.id === id; });
-        showCampaignDashboard(active || null);
-    }
-
-    function deleteCampaign() {
-        const delSelect = document.getElementById('deleteCampaignSelect');
-        const id = delSelect.value;
-        if (!id) {
-            showMsgFeedback('Select a campaign to delete.', false);
-            return;
-        }
-        let campaigns = loadCampaigns();
-        const camp = campaigns.find(function(c) { return c.id === id; });
-        if (!camp) return;
-        if (!confirm('Delete campaign "' + camp.name + '" and ALL its messages? This cannot be undone.')) return;
-        const wasActive = camp.isActive;
-        campaigns = campaigns.filter(function(c) { return c.id !== id; });
-        if (wasActive && campaigns.length > 0) {
-            campaigns[0].isActive = true;
-        }
-        saveCampaigns(campaigns);
-        populateCampaignDropdowns();
-        updateCampaignBadges();
-        renderChatHistory();
-        showCampaignDashboard(campaigns.find(function(c) { return c.isActive; }) || null);
-        showMsgFeedback('Campaign deleted.', true);
-    }
-
-    // ======================================
-    // MESSAGING
-    // ======================================
-
-    function toggleNpcField() {
-        const type = document.getElementById('msgSenderType').value;
-        const field = document.getElementById('npcNameField');
-        field.style.display = (type === 'npc') ? 'block' : 'none';
-    }
-
-    function clearComposer() {
-        document.getElementById('msgText').value = '';
-        document.getElementById('msgNpcName').value = '';
-        document.getElementById('msgSenderType').value = 'overseer';
-        toggleNpcField();
-        document.getElementById('msgFeedback').textContent = '';
-    }
-
-    function showMsgFeedback(text, success) {
-        const el = document.getElementById('msgFeedback');
-        el.textContent = text;
-        el.style.color = success ? 'var(--overseer-green-bright)' : 'var(--overseer-red-bright)';
-        setTimeout(function() { if (el.textContent === text) el.textContent = ''; }, 3500);
-    }
-
-    function sendOverseerMessage() {
-        const active = getActiveCampaign();
-        if (!active) {
-            showMsgFeedback('No active campaign. Create or select one first.', false);
-            return;
-        }
-        const type = document.getElementById('msgSenderType').value;
-        const npcName = document.getElementById('msgNpcName').value.trim();
-        const text = document.getElementById('msgText').value.trim();
-
-        if (!text) {
-            showMsgFeedback('Message cannot be empty.', false);
-            return;
-        }
-        if (type === 'npc' && !npcName) {
-            showMsgFeedback('Enter an NPC name.', false);
-            return;
-        }
-
-        const senderName = type === 'overseer' ? 'Overseer'
-                         : type === 'unknown'  ? 'Unknown'
-                         : npcName;
-
-        const campaigns = loadCampaigns();
-        const camp = campaigns.find(function(c) { return c.id === active.id; });
-        if (!camp) return;
-
-        const msg = {
-            id: 'msg_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
-            senderType: type,
-            senderName: senderName,
-            message: text,
-            timestamp: Date.now(),
-            fromPlayer: false,
-            playerId: null
-        };
-        camp.chatHistory.push(msg);
-        saveCampaigns(campaigns);
-        clearComposer();
-        renderChatHistory();
-        showMsgFeedback('Message sent.', true);
-    }
-
-    function deleteMessage(msgId) {
-        const active = getActiveCampaign();
-        if (!active) return;
-        const campaigns = loadCampaigns();
-        const camp = campaigns.find(function(c) { return c.id === active.id; });
-        if (!camp) return;
-        camp.chatHistory = camp.chatHistory.filter(function(m) { return m.id !== msgId; });
-        saveCampaigns(campaigns);
-        renderChatHistory();
-    }
-
-    function formatTimestamp(ts) {
-        const d = new Date(ts);
-        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-    }
-
-    function renderChatHistory() {
-        const container = document.getElementById('overseerChatHistory');
-        const active = getActiveCampaign();
-
-        if (!active) {
-            container.innerHTML = '<div class="chat-empty">No campaign selected or no messages yet.</div>';
-            return;
-        }
-
-        const history = active.chatHistory || [];
-        if (history.length === 0) {
-            container.innerHTML = '<div class="chat-empty">No messages in "' + escHtml(active.name) + '" yet.</div>';
-            return;
-        }
-
-        const wasAtBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 60;
-
-        container.innerHTML = history.map(function(msg) {
-            const typeClass = msg.fromPlayer ? 'player' : msg.senderType;
-            const typeLabel = msg.fromPlayer ? 'Player' : (msg.senderType === 'npc' ? 'NPC' : msg.senderType.charAt(0).toUpperCase() + msg.senderType.slice(1));
-            return '<div class="chat-msg ' + typeClass + '">' +
-                '<button class="chat-delete-btn" onclick="deleteMessage(\'' + escHtml(msg.id) + '\')" title="Delete message">✕</button>' +
-                '<div class="chat-msg-header">' +
-                    '<span class="chat-sender ' + typeClass + '">' + escHtml(msg.senderName) + '</span>' +
-                    '<span class="chat-type-badge ' + typeClass + '">' + typeLabel + '</span>' +
-                    '<span class="chat-timestamp">' + formatTimestamp(msg.timestamp) + '</span>' +
-                '</div>' +
-                '<div class="chat-msg-text">' + escHtml(msg.message) + '</div>' +
-            '</div>';
-        }).join('');
-
-        if (wasAtBottom) {
-            container.scrollTop = container.scrollHeight;
-        }
-    }
+    })();
 
     // ======================================
     // DATA HELPERS
@@ -2997,33 +2775,70 @@
     // DASHBOARD
     // ======================================
     function refreshDashboard() {
-        const charData = gatherCharacterData();
-        const grid = document.getElementById('charactersGrid');
+        var campaignId = sessionStorage.getItem('campaignId');
+        var grid = document.getElementById('playersGrid');
+        if (!grid) return;
         grid.innerHTML = '';
 
-        // We display the single active character (this game is single-character per browser)
-        // The Overseer can see and manage it.
-        const hasChar = charData.name && charData.name !== '';
-
-        if (!hasChar) {
-            grid.innerHTML = `
-                <div class="empty-vault">
-                    <div class="empty-vault-title">NO RESIDENTS ON RECORD</div>
-                    <div class="empty-vault-text">
-                        No character data found in the Vault database.<br>
-                        Have players log in and create their characters first,<br>
-                        then return here to manage them.
-                    </div>
-                </div>`;
-            document.getElementById('charCountLabel').textContent = '0 characters on record';
-            document.getElementById('tickerCharCount').querySelector('span:last-child').textContent = 'CHARACTERS ON RECORD: 0';
+        if (!campaignId || typeof CAMPAIGNS === 'undefined') {
+            grid.innerHTML = '<div class="empty-vault"><div class="empty-vault-title">NO CAMPAIGN SELECTED</div><div class="empty-vault-text">Select a campaign to view players.</div></div>';
+            document.getElementById('playerCountLabel').textContent = '0 players in campaign';
+            document.getElementById('tickerCharCount').querySelector('span:last-child').textContent = 'CAMPAIGN: NONE';
             return;
         }
 
-        document.getElementById('charCountLabel').textContent = '1 character on record';
-        document.getElementById('tickerCharCount').querySelector('span:last-child').textContent = 'CHARACTERS ON RECORD: 1';
+        var campaign = CAMPAIGNS.find(function(c) { return c.id === campaignId; });
+        if (!campaign) {
+            grid.innerHTML = '<div class="empty-vault"><div class="empty-vault-title">CAMPAIGN NOT FOUND</div><div class="empty-vault-text">Campaign data could not be loaded.</div></div>';
+            return;
+        }
 
-        grid.appendChild(buildCharacterCard(charData));
+        var players = campaign.players || [];
+        document.getElementById('playerCountLabel').textContent = players.length + ' player' + (players.length !== 1 ? 's' : '') + ' in campaign';
+        document.getElementById('tickerCharCount').querySelector('span:last-child').textContent = 'CAMPAIGN: ' + campaign.name.toUpperCase();
+
+        if (players.length === 0) {
+            grid.innerHTML = '<div class="empty-vault"><div class="empty-vault-title">NO PLAYERS</div><div class="empty-vault-text">No players have joined this campaign yet.</div></div>';
+            return;
+        }
+
+        players.forEach(function(p) {
+            // Get display color from accounts
+            var pAccount = typeof ACCOUNTS !== 'undefined' ? ACCOUNTS.find(function(a) { return a.username === p.username; }) : null;
+            var displayColor = '#00ff80';
+            if (pAccount && pAccount.characters) {
+                var pChar = pAccount.characters.find(function(c) { return c.campaignId === campaignId; });
+                if (pChar && pChar.displayColor) displayColor = pChar.displayColor;
+            }
+            grid.appendChild(buildPlayerCard(p, displayColor));
+        });
+    }
+
+    function buildPlayerCard(p, displayColor) {
+        var card = document.createElement('div');
+        card.className = 'character-card';
+        var hpPct = p.maxHp > 0 ? Math.min(100, Math.round((p.currentHp / p.maxHp) * 100)) : 0;
+        var status = hpPct >= 60 ? 'healthy' : hpPct >= 30 ? 'caution' : 'critical';
+        var statusLabels = { healthy: 'ACTIVE', caution: 'CAUTION', critical: 'CRITICAL' };
+        var barColor = status === 'healthy' ? 'var(--overseer-green-bright)' : status === 'caution' ? 'var(--overseer-gold-bright)' : 'var(--overseer-red-bright)';
+        card.innerHTML =
+            '<div class="card-header">' +
+            '<div>' +
+            '<div class="card-name" style="display:flex;align-items:center;gap:8px;">' +
+            '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + escHtml(displayColor) + ';box-shadow:0 0 6px ' + escHtml(displayColor) + ';flex-shrink:0;"></span>' +
+            escHtml(p.characterName) + '</div>' +
+            '<div class="card-identity">' + escHtml(p.username) + '</div>' +
+            '</div>' +
+            '<div class="card-status"><div class="status-badge ' + status + '">' + statusLabels[status] + '</div></div>' +
+            '</div>' +
+            '<div class="card-stats">' +
+            '<div class="card-stat"><div class="card-stat-label">Current HP</div><div class="card-stat-value hp-value ' + status + '">' + p.currentHp + '</div></div>' +
+            '<div class="card-stat"><div class="card-stat-label">Max HP</div><div class="card-stat-value">' + p.maxHp + '</div></div>' +
+            '<div class="mini-bar-wrap"><div class="mini-bar-label">Health</div>' +
+            '<div class="mini-bar-bg"><div class="mini-bar-fill" style="width:' + hpPct + '%;background:' + barColor + ';box-shadow:0 0 6px ' + barColor + ';"></div></div>' +
+            '</div>' +
+            '</div>';
+        return card;
     }
 
     function getHealthStatus(health, maxHealth) {
@@ -3453,85 +3268,6 @@
         const prev = ticker.textContent;
         ticker.textContent = '✓ INVENTORY SAVED — ' + new Date().toLocaleTimeString();
         setTimeout(function() { ticker.textContent = prev; }, 3000);
-    }
-
-    // ======================================
-    // CAMPAIGN DASHBOARD
-    // ======================================
-    function showCampaignDashboard(campaign) {
-        const dash = document.getElementById('campaignDashboard');
-        const grid = document.getElementById('campaignDashboardGrid');
-        if (!campaign) {
-            dash.classList.add('hidden');
-            return;
-        }
-        dash.classList.remove('hidden');
-        const statusClass = 'camp-dash-status-' + (campaign.status || 'active');
-        const statusLabel = (campaign.status || 'active').toUpperCase();
-        const created = campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : '—';
-        const members = (campaign.members && campaign.members.length > 0)
-            ? campaign.members.map(function(m) { return escHtml(m); }).join(', ')
-            : 'No members listed';
-        const desc = campaign.description ? escHtml(campaign.description) : 'No description.';
-        grid.innerHTML =
-            '<div class="camp-dash-stat">' +
-                '<div class="camp-dash-label">Campaign</div>' +
-                '<div class="camp-dash-value">' + escHtml(campaign.name) + '</div>' +
-            '</div>' +
-            '<div class="camp-dash-stat">' +
-                '<div class="camp-dash-label">Status</div>' +
-                '<div class="camp-dash-value ' + statusClass + '">' + statusLabel + '</div>' +
-            '</div>' +
-            '<div class="camp-dash-stat">' +
-                '<div class="camp-dash-label">Sessions</div>' +
-                '<div class="camp-dash-value">' + (campaign.sessions || 0) + '</div>' +
-            '</div>' +
-            '<div class="camp-dash-stat">' +
-                '<div class="camp-dash-label">Players</div>' +
-                '<div class="camp-dash-value">' + (campaign.playerCount || 0) + '</div>' +
-            '</div>' +
-            '<div class="camp-dash-stat">' +
-                '<div class="camp-dash-label">Created</div>' +
-                '<div class="camp-dash-value">' + created + '</div>' +
-            '</div>' +
-            '<div class="camp-dash-desc">' +
-                '<div style="font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Members</div>' +
-                '<div>' + members + '</div>' +
-            '</div>' +
-            '<div class="camp-dash-desc">' +
-                '<div style="font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Description</div>' +
-                '<div>' + desc + '</div>' +
-            '</div>' +
-            '<div class="camp-dash-actions">' +
-                '<button class="cmd-btn" onclick="incrementSessions()">+ Session</button>' +
-                '<button class="cmd-btn" onclick="toggleCampaignStatus()">⟳ Toggle Status</button>' +
-                '<button class="cmd-btn danger" onclick="deleteCampaign()">✕ End Campaign</button>' +
-            '</div>';
-    }
-
-    function incrementSessions() {
-        const active = getActiveCampaign();
-        if (!active) return;
-        const campaigns = loadCampaigns();
-        const camp = campaigns.find(function(c) { return c.id === active.id; });
-        if (!camp) return;
-        camp.sessions = (camp.sessions || 0) + 1;
-        saveCampaigns(campaigns);
-        showCampaignDashboard(camp);
-        addCombatLog('<span class="log-action">Session ' + camp.sessions + ' started for campaign: ' + escHtml(camp.name) + '</span>');
-    }
-
-    function toggleCampaignStatus() {
-        const active = getActiveCampaign();
-        if (!active) return;
-        const campaigns = loadCampaigns();
-        const camp = campaigns.find(function(c) { return c.id === active.id; });
-        if (!camp) return;
-        const statuses = ['active', 'paused', 'ended'];
-        const currentIdx = statuses.indexOf(camp.status || 'active');
-        camp.status = statuses[(currentIdx + 1) % statuses.length];
-        saveCampaigns(campaigns);
-        showCampaignDashboard(camp);
     }
 
     // ======================================
@@ -4068,7 +3804,7 @@
     renderInitiativeList();
     restoreCombatLog();
 
-
+    function escHtml(str) {
         if (!str) return '';
         return String(str)
             .replace(/&/g, '&amp;')

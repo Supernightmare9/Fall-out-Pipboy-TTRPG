@@ -159,6 +159,7 @@
             border-radius: 3px;
             position: relative;
             z-index: 1;
+            margin-bottom: 20px;
         }
 
         .character-section h3 {
@@ -263,49 +264,180 @@
             text-shadow: 0 0 3px var(--vault-gold);
         }
 
-        .nav-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-top: 30px;
-            flex-wrap: wrap;
-            position: relative;
-            z-index: 1;
-        }
-
-        .nav-button {
-            flex: 1;
-            min-width: 150px;
-            background-color: var(--vault-blue-dark);
-            border: 2px solid var(--vault-green);
-            color: var(--vault-green);
-            padding: 12px 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: 0 0 5px var(--vault-green);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-            border-radius: 2px;
-        }
-
-        .nav-button:hover {
-            background-color: var(--vault-blue-light);
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 10px var(--vault-gold);
-            transform: translateY(-2px);
-        }
-
         .empty-state {
             color: var(--vault-info);
             font-style: italic;
             font-size: 11px;
             text-shadow: 0 0 2px var(--vault-info);
+        }
+
+        /* Player HP row */
+        .player-hp-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            background-color: var(--vault-dark);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 2px;
+            font-size: 11px;
+        }
+
+        .player-hp-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-color-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            box-shadow: 0 0 4px currentColor;
+        }
+
+        .player-hp-bar-wrap {
+            flex: 1;
+            margin: 0 12px;
+        }
+
+        .player-hp-bar-bg {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            height: 6px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .player-hp-bar-fill {
+            height: 100%;
+            background: var(--vault-green);
+            box-shadow: 0 0 4px var(--vault-green);
+            transition: width 0.4s;
+        }
+
+        .player-hp-bar-fill.caution { background: var(--vault-gold); box-shadow: 0 0 4px var(--vault-gold); }
+        .player-hp-bar-fill.critical { background: var(--vault-error); box-shadow: 0 0 4px var(--vault-error); }
+
+        .player-hp-text {
+            color: var(--vault-green);
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        /* ═══════════════════════════════════
+           CAMPAIGN SELECTOR MODAL
+           ═══════════════════════════════════ */
+        .campaign-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .campaign-modal-panel {
+            background: var(--vault-darker);
+            border: 3px solid var(--vault-green);
+            box-shadow: 0 0 40px rgba(74, 222, 128, 0.4);
+            padding: 30px;
+            max-width: 560px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalAppear 0.25s ease-out;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.95); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .campaign-modal-title {
+            text-align: center;
+            font-size: 16px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 8px var(--vault-gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .campaign-modal-sub {
+            text-align: center;
+            font-size: 10px;
+            color: rgba(74, 222, 128, 0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(74, 222, 128, 0.3);
+        }
+
+        .campaign-modal-loading {
+            text-align: center;
+            color: var(--vault-green);
+            font-size: 12px;
+            letter-spacing: 2px;
+            padding: 20px;
+        }
+
+        .campaign-option {
+            background: var(--vault-dark);
+            border: 2px solid rgba(74, 222, 128, 0.3);
+            padding: 16px 18px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+
+        .campaign-option:hover {
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+            transform: translateX(4px);
+        }
+
+        .campaign-option-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .campaign-option-details {
+            font-size: 10px;
+            color: rgba(74, 222, 128, 0.7);
+            letter-spacing: 1px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .campaign-option-detail {
+            display: flex;
+            gap: 4px;
+        }
+
+        .campaign-option-detail-label {
+            color: rgba(251, 191, 36, 0.6);
+        }
+
+        .campaign-no-campaigns {
+            text-align: center;
+            color: rgba(74, 222, 128, 0.5);
+            font-size: 12px;
+            letter-spacing: 1px;
+            padding: 20px;
         }
 
         @media (max-width: 768px) {
@@ -321,14 +453,6 @@
                 font-size: 20px;
             }
 
-            .nav-buttons {
-                flex-direction: column;
-            }
-
-            .nav-button {
-                width: 100%;
-            }
-
             .character-section h3 {
                 font-size: 12px;
             }
@@ -340,13 +464,24 @@
     </style>
 </head>
 <body>
+    <!-- CAMPAIGN SELECTOR MODAL -->
+    <div id="campaignModal" class="campaign-modal-overlay">
+        <div class="campaign-modal-panel">
+            <div class="campaign-modal-title">SELECT YOUR CAMPAIGN</div>
+            <div class="campaign-modal-sub">Choose a campaign to continue</div>
+            <div id="campaignModalBody" class="campaign-modal-loading">
+                ▌ LOADING CAMPAIGN DATA...
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- HEADER -->
         <div class="vault-header">
             <div class="vault-badge">VAULT-TEC INDUSTRIES CHARACTER PROFILE</div>
             <div class="vault-title">PIP-BOY CHARACTER</div>
             <div class="vault-subtitle">PERSONAL INFORMATION PROCESSOR</div>
-            <div class="vault-info">Vault 215 Resident • Character Profile System</div>
+            <div class="vault-info" id="headerInfo">Vault 215 Resident • <span id="headerCampaign">—</span></div>
         </div>
 
         <!-- CHARACTER INFO SECTION -->
@@ -364,25 +499,39 @@
                 <h3>⚙ Character Information</h3>
                 <div class="stat-row">
                     <span class="stat-label">Name:</span>
-                    <span class="stat-value" id="characterName">No Data</span>
+                    <span class="stat-value" id="characterName">—</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Race:</span>
-                    <span class="stat-value" id="characterRace">No Data</span>
+                    <span class="stat-value" id="characterRace">—</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Class:</span>
-                    <span class="stat-value" id="characterClass">No Data</span>
+                    <span class="stat-value" id="characterClass">—</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Alignment:</span>
-                    <span class="stat-value" id="characterAlignment">No Data</span>
+                    <span class="stat-value" id="characterAlignment">—</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Vault:</span>
                     <span class="stat-value">215</span>
                 </div>
+                <div class="stat-row">
+                    <span class="stat-label">Campaign:</span>
+                    <span class="stat-value" id="characterCampaign">—</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">HP:</span>
+                    <span class="stat-value" id="characterHp">—</span>
+                </div>
             </div>
+        </div>
+
+        <!-- PARTY STATUS SECTION -->
+        <div class="character-section">
+            <h3>👥 Party Status</h3>
+            <div id="partyStatus" class="empty-state">Loading party data...</div>
         </div>
 
         <!-- BACKSTORY SECTION -->
@@ -394,124 +543,205 @@
         <!-- INVENTORY SUMMARY SECTION -->
         <div class="character-section">
             <h3>📦 Inventory Summary</h3>
-            <div id="inventorySummary" class="empty-state">Loading inventory data...</div>
+            <div id="inventorySummary" class="empty-state">No inventory data available</div>
         </div>
 
         <!-- ACTIVE QUESTS SECTION -->
         <div class="character-section">
             <h3>📋 Active Quests</h3>
-            <ul class="stat-list" id="activeQuests"></ul>
+            <ul class="stat-list" id="activeQuests">
+                <li class="stat-list-item empty-state">No active quests</li>
+            </ul>
         </div>
 
     </div>
 
+    <script src="../assets/accounts.js"></script>
+    <script src="../assets/campaigns.js"></script>
     <script>
-        function loadAllData() {
-            console.log('Available localStorage keys:', Object.keys(localStorage));
-            
-            var characterDataStr = localStorage.getItem('characterData');
-            console.log('characterData raw:', characterDataStr);
-            
-            if (characterDataStr) {
-                try {
-                    var character = JSON.parse(characterDataStr);
-                    console.log('Parsed character data:', character);
-                    document.getElementById('characterName').textContent = character.name || 'Vault Dweller';
-                    document.getElementById('characterRace').textContent = character.race || 'N/A';
-                    document.getElementById('characterClass').textContent = character.class || 'N/A';
-                    document.getElementById('characterAlignment').textContent = character.alignment || 'N/A';
-                } catch (e) {
-                    console.error('Error parsing characterData:', e);
-                }
-            } else {
-                console.log('No characterData found in localStorage');
-            }
-
-            var characterImageStr = localStorage.getItem('characterImage');
-            console.log('characterImage exists:', !!characterImageStr);
-            
-            if (characterImageStr) {
-                var portraitDiv = document.getElementById('characterPortrait');
-                portraitDiv.innerHTML = '';
-                var img = document.createElement('img');
-                img.src = characterImageStr;
-                img.alt = 'Character Portrait';
-                portraitDiv.appendChild(img);
-            }
-
-            var characterBackstory = localStorage.getItem('characterBackstory');
-            if (characterBackstory) {
-                var backstoryDiv = document.getElementById('backstoryContent');
-                backstoryDiv.textContent = characterBackstory;
-                backstoryDiv.style.color = 'var(--vault-green)';
-                backstoryDiv.style.fontSize = '12px';
-                backstoryDiv.style.lineHeight = '1.6';
-                backstoryDiv.style.textShadow = '0 0 2px var(--vault-green)';
-            }
-
-            var inventoryDataStr = localStorage.getItem('pipboyInventory');
-            if (inventoryDataStr) {
-                try {
-                    var inventory = JSON.parse(inventoryDataStr);
-                    var summaryDiv = document.getElementById('inventorySummary');
-                    var summaryHTML = '';
-                    var totalItems = 0;
-
-                    var categories = Object.keys(inventory);
-                    for (var i = 0; i < categories.length; i++) {
-                        var category = categories[i];
-                        var count = inventory[category].length;
-                        totalItems += count;
-                        summaryHTML += '<div class="inventory-summary"><span class="category">' + category.toUpperCase() + ':</span><span class="count">' + count + ' item(s)</span></div>';
-                    }
-
-                    if (totalItems === 0) {
-                        summaryHTML = '<div class="empty-state">No items in inventory</div>';
-                    } else {
-                        summaryHTML = '<div style="color: var(--vault-gold); text-shadow: 0 0 3px var(--vault-gold); font-weight: bold; margin-bottom: 10px;">Total Items: ' + totalItems + '</div>' + summaryHTML;
-                    }
-
-                    summaryDiv.innerHTML = summaryHTML;
-                } catch (e) {
-                    console.error('Error parsing inventory:', e);
-                }
-            } else {
-                document.getElementById('inventorySummary').innerHTML = '<div class="empty-state">No inventory data available</div>';
-            }
-
-            var dataDataStr = localStorage.getItem('pipboyData');
-            if (dataDataStr) {
-                try {
-                    var data = JSON.parse(dataDataStr);
-                    var questsList = document.getElementById('activeQuests');
-                    var activeQuests = [];
-                    
-                    for (var j = 0; j < data.quests.length; j++) {
-                        if (data.quests[j].status === 'ACTIVE') {
-                            activeQuests.push(data.quests[j]);
-                        }
-                    }
-
-                    if (activeQuests.length === 0) {
-                        questsList.innerHTML = '<li class="stat-list-item empty-state">No active quests</li>';
-                    } else {
-                        var html = '';
-                        for (var k = 0; k < activeQuests.length; k++) {
-                            var quest = activeQuests[k];
-                            html += '<li class="stat-list-item"><span class="stat-list-label">' + quest.title + '</span><div style="margin-top: 3px; color: var(--vault-green); text-shadow: 0 0 2px var(--vault-green);">' + quest.desc + '</div></li>';
-                        }
-                        questsList.innerHTML = html;
-                    }
-                } catch (e) {
-                    console.error('Error parsing quests:', e);
-                }
-            } else {
-                document.getElementById('activeQuests').innerHTML = '<li class="stat-list-item empty-state">No quest data available</li>';
-            }
+        // ═══════════════════════════════════════════════════════
+        // SESSION CHECK — redirect to login if not authenticated
+        // ═══════════════════════════════════════════════════════
+        var sessionUsername = sessionStorage.getItem('username');
+        if (!sessionUsername) {
+            window.location.replace('index.html');
         }
 
-        window.addEventListener('DOMContentLoaded', loadAllData);
-        window.addEventListener('focus', loadAllData);
+        // ═══════════════════════════════════════════════════════
+        // LOAD PLAYER ACCOUNT DATA
+        // ═══════════════════════════════════════════════════════
+        var currentAccount = ACCOUNTS.find(function(a) { return a.username === sessionUsername; });
+        if (!currentAccount) {
+            // No account found → force logout
+            sessionStorage.clear();
+            window.location.replace('index.html');
+        } else if (currentAccount.role === 'admin') {
+            // Admin should use overseer.html
+            window.location.replace('overseer.html');
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // CAMPAIGN MODAL
+        // ═══════════════════════════════════════════════════════
+        function showCampaignModal() {
+            document.getElementById('campaignModal').style.display = 'flex';
+            renderCampaignOptions();
+        }
+
+        function hideCampaignModal() {
+            document.getElementById('campaignModal').style.display = 'none';
+        }
+
+        function renderCampaignOptions() {
+            var body = document.getElementById('campaignModalBody');
+
+            // Find campaigns this player is in
+            var playerCampaigns = [];
+            CAMPAIGNS.forEach(function(campaign) {
+                var playerEntry = campaign.players.find(function(p) {
+                    return p.username === sessionUsername;
+                });
+                if (playerEntry) {
+                    playerCampaigns.push({ campaign: campaign, playerEntry: playerEntry });
+                }
+            });
+
+            if (playerCampaigns.length === 0) {
+                body.innerHTML = '<div class="campaign-no-campaigns">No campaigns found for ' + escHtml(sessionUsername) + '.<br>Ask your Overseer to add you to a campaign.</div>';
+                return;
+            }
+
+            var html = '';
+            playerCampaigns.forEach(function(item) {
+                var c = item.campaign;
+                var pe = item.playerEntry;
+                html += '<div class="campaign-option" onclick="selectCampaign(\'' + escHtml(c.id) + '\')">';
+                html += '<div class="campaign-option-name">⚑ ' + escHtml(c.name) + '</div>';
+                html += '<div class="campaign-option-details">';
+                html += '<div class="campaign-option-detail"><span class="campaign-option-detail-label">CHARACTER:</span><span>' + escHtml(pe.characterName) + '</span></div>';
+                html += '<div class="campaign-option-detail"><span class="campaign-option-detail-label">HP:</span><span>' + pe.currentHp + '/' + pe.maxHp + '</span></div>';
+                html += '<div class="campaign-option-detail"><span class="campaign-option-detail-label">STATUS:</span><span>' + escHtml(c.status.toUpperCase()) + '</span></div>';
+                html += '<div class="campaign-option-detail"><span class="campaign-option-detail-label">JOINED:</span><span>' + escHtml(pe.joinedDate) + '</span></div>';
+                html += '</div></div>';
+            });
+
+            body.innerHTML = html;
+        }
+
+        function selectCampaign(campaignId) {
+            var campaign = CAMPAIGNS.find(function(c) { return c.id === campaignId; });
+            if (!campaign) return;
+
+            sessionStorage.setItem('campaignId', campaignId);
+            sessionStorage.setItem('campaignName', campaign.name);
+            hideCampaignModal();
+            loadCampaignData(campaign);
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // LOAD CAMPAIGN DATA
+        // ═══════════════════════════════════════════════════════
+        function loadCampaignData(campaign) {
+            // Update header
+            document.getElementById('headerCampaign').textContent = campaign.name;
+            document.getElementById('characterCampaign').textContent = campaign.name;
+
+            // Get this player's entry in the campaign
+            var playerEntry = campaign.players.find(function(p) {
+                return p.username === sessionUsername;
+            });
+
+            // Get character info from accounts
+            var charAccount = null;
+            if (currentAccount && currentAccount.characters) {
+                charAccount = currentAccount.characters.find(function(c) {
+                    return c.campaignId === campaign.id;
+                });
+            }
+
+            // Display character info
+            if (playerEntry) {
+                document.getElementById('characterName').textContent = playerEntry.characterName || sessionUsername;
+                document.getElementById('characterHp').textContent = playerEntry.currentHp + ' / ' + playerEntry.maxHp;
+            }
+
+            if (charAccount) {
+                document.getElementById('characterName').textContent = charAccount.name || (playerEntry && playerEntry.characterName) || sessionUsername;
+            }
+
+            // Display other players (party status)
+            renderPartyStatus(campaign);
+        }
+
+        function renderPartyStatus(campaign) {
+            var partyDiv = document.getElementById('partyStatus');
+            var otherPlayers = campaign.players.filter(function(p) {
+                return p.username !== sessionUsername;
+            });
+
+            if (otherPlayers.length === 0) {
+                partyDiv.innerHTML = '<div class="empty-state">No other players in this campaign.</div>';
+                return;
+            }
+
+            var html = '';
+            otherPlayers.forEach(function(p) {
+                var hpPct = p.maxHp > 0 ? Math.min(100, Math.round((p.currentHp / p.maxHp) * 100)) : 0;
+                var statusClass = hpPct >= 60 ? '' : hpPct >= 30 ? 'caution' : 'critical';
+
+                // Get display color from accounts
+                var pAccount = ACCOUNTS.find(function(a) { return a.username === p.username; });
+                var displayColor = '#4ade80';
+                if (pAccount && pAccount.characters) {
+                    var pChar = pAccount.characters.find(function(c) { return c.campaignId === campaign.id; });
+                    if (pChar && pChar.displayColor) displayColor = pChar.displayColor;
+                }
+
+                html += '<div class="player-hp-row">';
+                html += '<div class="player-hp-name">';
+                html += '<span class="player-color-dot" style="background:' + escHtml(displayColor) + ';color:' + escHtml(displayColor) + '"></span>';
+                html += '<span style="color:var(--vault-gold);font-weight:bold;">' + escHtml(p.characterName) + '</span>';
+                html += '</div>';
+                html += '<div class="player-hp-bar-wrap">';
+                html += '<div class="player-hp-bar-bg"><div class="player-hp-bar-fill ' + statusClass + '" style="width:' + hpPct + '%"></div></div>';
+                html += '</div>';
+                html += '<span class="player-hp-text">' + p.currentHp + '/' + p.maxHp + '</span>';
+                html += '</div>';
+            });
+
+            partyDiv.innerHTML = html;
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // UTILITY
+        // ═══════════════════════════════════════════════════════
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // INIT — Show campaign selector on page load
+        // ═══════════════════════════════════════════════════════
+        window.addEventListener('DOMContentLoaded', function() {
+            // Check if a campaign is already selected in this session
+            var savedCampaignId = sessionStorage.getItem('campaignId');
+            if (savedCampaignId) {
+                var savedCampaign = CAMPAIGNS.find(function(c) { return c.id === savedCampaignId; });
+                if (savedCampaign) {
+                    hideCampaignModal();
+                    loadCampaignData(savedCampaign);
+                    return;
+                }
+            }
+            // Always show campaign selector
+            showCampaignModal();
+        });
     </script>
     <script src="../assets/navigation.js"></script>
 </body>
