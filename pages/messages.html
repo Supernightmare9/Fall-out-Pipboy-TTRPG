@@ -5,431 +5,623 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pip-Boy Messages - Vault 215</title>
     <style>
-        /* ===========================
-           VAULT 215 MESSAGES PAGE
-           =========================== */
-
         :root {
-            --vault-primary: #4ade80;
-            --vault-secondary: #fbbf24;
-            --vault-dark: #0a0a0a;
-            --vault-darker: #1a1a1a;
-            --vault-accent: #c084fc;
-            --vault-success: #4ade80;
-            --vault-error: #ff6b6b;
-            --vault-warning: #fbbf24;
-            --vault-info: #9333ea;
-            --vault-green: #4ade80;
-            --vault-gold: #fbbf24;
-            --vault-blue-dark: #2d5016;
-            --vault-blue-light: #3d6b1f;
+            --green: #4ade80;
+            --gold: #fbbf24;
+            --dark: #0a0a0a;
+            --darker: #111111;
+            --panel: #141414;
+            --border: #2a2a2a;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            min-height: 100vh;
-            background-color: var(--vault-dark);
-            color: var(--vault-green);
-            font-family: 'Courier New', monospace;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
-        }
-
-        body {
-            padding: 20px;
-        }
-
-        /* Scanline effect */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; background: var(--dark); color: var(--green); font-family: 'Courier New', monospace; overflow: hidden; }
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
             pointer-events: none;
-            z-index: 10;
+            z-index: 9999;
         }
 
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 1000px;
-            margin: 0 auto;
+        /* LAYOUT */
+        #app { display: flex; flex-direction: column; height: 100vh; }
+        #header {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--green);
+            background: var(--darker);
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(74,222,128,0.2);
         }
+        #header h1 { font-size: 1.1rem; letter-spacing: 2px; color: var(--green); text-shadow: 0 0 8px var(--green); }
+        #header span { font-size: 0.7rem; color: var(--gold); }
+        #main { display: flex; flex: 1; overflow: hidden; }
 
-        /* ===== VAULT HEADER ===== */
-        .vault-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            border: 2px solid var(--vault-green);
-            border-radius: 8px;
-            background-color: var(--vault-darker);
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+        /* LEFT COLUMN */
+        #sidebar {
+            width: 300px;
+            min-width: 300px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            background: var(--darker);
         }
-
-        .vault-title {
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--vault-gold);
-            text-shadow: 0 0 15px var(--vault-gold);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-        }
-
-        .vault-subtitle {
-            font-size: 12px;
-            color: var(--vault-green);
-            text-shadow: 0 0 8px var(--vault-green);
-            letter-spacing: 2px;
-            margin-top: 5px;
-        }
-
-        /* ===== SECTION PANELS ===== */
-        .section-panel {
-            background-color: var(--vault-darker);
-            border: 2px solid var(--vault-green);
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
-        }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--vault-gold);
-            text-shadow: 0 0 8px var(--vault-gold);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--vault-green);
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        /* ===== MESSAGE LIST ===== */
-        .message-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .message-item {
-            border: 1px solid var(--vault-green);
-            border-radius: 4px;
-            padding: 12px 15px;
-            margin-bottom: 10px;
-            background-color: var(--vault-dark);
+        #sidebar-top { padding: 10px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
+        #new-conv-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 6px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
             cursor: pointer;
-            transition: all 0.2s ease;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        #new-conv-btn:hover { background: rgba(251,191,36,0.1); box-shadow: 0 0 6px rgba(251,191,36,0.4); }
+        #search-input {
+            background: var(--dark);
+            border: 1px solid var(--border);
+            color: var(--green);
+            padding: 5px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            outline: none;
+        }
+        #search-input:focus { border-color: var(--green); box-shadow: 0 0 4px rgba(74,222,128,0.3); }
+        #search-input::placeholder { color: #555; }
+
+        /* NPC selector */
+        #npc-selector { display: none; padding: 8px; border-bottom: 1px solid var(--border); background: #0d0d0d; }
+        #npc-selector select {
+            width: 100%;
+            background: var(--dark);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            outline: none;
+            cursor: pointer;
         }
 
-        .message-item:hover {
-            border-color: var(--vault-gold);
-            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
-        }
+        /* Conversation list */
+        #conv-list { flex: 1; overflow-y: auto; }
+        #conv-list::-webkit-scrollbar { width: 4px; }
+        #conv-list::-webkit-scrollbar-track { background: var(--dark); }
+        #conv-list::-webkit-scrollbar-thumb { background: #333; }
 
-        .message-item.unread {
-            border-left: 4px solid var(--vault-gold);
+        .conv-section-label { padding: 6px 10px; font-size: 0.65rem; color: #555; letter-spacing: 2px; border-bottom: 1px solid #1a1a1a; }
+        .conv-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: background 0.15s;
         }
+        .conv-item:hover { background: rgba(74,222,128,0.04); }
+        .conv-item.active { background: rgba(74,222,128,0.08); border-left: 2px solid var(--green); }
+        .conv-item-top { display: flex; justify-content: space-between; align-items: center; }
+        .conv-name { font-size: 0.8rem; font-weight: bold; color: var(--green); }
+        .conv-name.unread { color: #fff; }
+        .conv-time { font-size: 0.65rem; color: #555; }
+        .conv-preview-row { display: flex; justify-content: space-between; align-items: center; }
+        .conv-preview { font-size: 0.7rem; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+        .conv-preview.unread { color: #999; }
+        .unread-badge {
+            background: var(--gold);
+            color: #000;
+            font-size: 0.6rem;
+            padding: 1px 5px;
+            border-radius: 10px;
+            font-weight: bold;
+            min-width: 18px;
+            text-align: center;
+        }
+        .archived-label { font-size: 0.65rem; color: #555; font-style: italic; }
 
-        .message-header {
+        /* RIGHT COLUMN */
+        #detail { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        #detail-empty {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+        }
+        #detail-header {
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--darker);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 6px;
+            flex-shrink: 0;
         }
-
-        .message-sender {
-            font-size: 13px;
-            font-weight: bold;
-            color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        #detail-header-left h2 { font-size: 0.9rem; color: var(--green); }
+        #detail-header-left p { font-size: 0.7rem; color: var(--gold); }
+        #detail-header-actions { display: flex; gap: 8px; }
+        .hdr-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #888;
+            padding: 4px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
         }
+        .hdr-btn:hover { border-color: var(--green); color: var(--green); }
+        .hdr-btn.archive { border-color: #444; }
+        .hdr-btn.archive:hover { border-color: var(--gold); color: var(--gold); }
 
-        .message-date {
-            font-size: 10px;
-            color: var(--vault-green);
-            opacity: 0.7;
-        }
-
-        .message-subject {
-            font-size: 12px;
-            color: var(--vault-green);
-            text-shadow: 0 0 4px var(--vault-green);
-            margin-bottom: 4px;
-            font-weight: bold;
-        }
-
-        .message-preview {
-            font-size: 11px;
-            color: var(--vault-green);
-            opacity: 0.7;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* ===== MESSAGE DETAIL ===== */
-        .message-detail {
-            display: none;
-            background-color: var(--vault-dark);
-            border: 1px solid var(--vault-green);
-            border-radius: 4px;
-            padding: 15px;
-            margin-top: 10px;
-        }
-
-        .message-detail.active {
-            display: block;
-        }
-
-        .message-body {
-            font-size: 12px;
-            color: var(--vault-green);
-            line-height: 1.7;
-            white-space: pre-wrap;
-        }
-
-        /* ===== COMPOSE AREA ===== */
-        .compose-area {
+        /* Message thread */
+        #messages-thread {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
+        #messages-thread::-webkit-scrollbar { width: 4px; }
+        #messages-thread::-webkit-scrollbar-track { background: var(--dark); }
+        #messages-thread::-webkit-scrollbar-thumb { background: #333; }
 
-        .compose-input {
-            background-color: var(--vault-dark);
-            border: 1px solid var(--vault-green);
-            border-radius: 4px;
-            padding: 10px 12px;
-            color: var(--vault-green);
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            outline: none;
-            transition: border-color 0.2s ease;
+        .msg-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            font-size: 0.78rem;
+            line-height: 1.5;
         }
-
-        .compose-input:focus {
-            border-color: var(--vault-gold);
-            box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
-        }
-
-        .compose-input::placeholder {
-            color: rgba(74, 222, 128, 0.4);
-        }
-
-        textarea.compose-input {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .vault-btn {
-            padding: 10px 20px;
-            background-color: var(--vault-darker);
-            border: 2px solid var(--vault-green);
-            border-radius: 4px;
-            color: var(--vault-green);
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .msg-bubble.from-player {
             align-self: flex-end;
+            background: rgba(74,222,128,0.1);
+            border-left: 3px solid var(--green);
         }
-
-        .vault-btn:hover {
-            background-color: var(--vault-dark);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 8px var(--vault-gold);
-            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+        .msg-bubble.from-npc {
+            align-self: flex-start;
+            background: rgba(251,191,36,0.05);
+            border-left: 3px solid var(--gold);
         }
+        .msg-meta { font-size: 0.65rem; color: #555; margin-bottom: 3px; }
+        .msg-meta.from-player { color: rgba(74,222,128,0.6); }
+        .msg-meta.from-npc { color: rgba(251,191,36,0.5); }
+        .msg-text { color: #ccc; }
+        .msg-bubble.from-player .msg-text { color: rgba(74,222,128,0.9); }
 
-        /* ===== STATUS BAR ===== */
-        .status-bar {
-            text-align: center;
-            font-size: 11px;
-            color: var(--vault-green);
-            opacity: 0.6;
-            margin-top: 5px;
+        /* Compose */
+        #compose-area {
+            border-top: 1px solid var(--border);
+            padding: 10px 16px;
+            display: flex;
+            gap: 8px;
+            background: var(--darker);
+            flex-shrink: 0;
         }
-
-        /* ===== FOOTER ===== */
-        .vault-footer {
-            text-align: center;
-            padding: 15px;
-            border-top: 1px solid var(--vault-green);
-            font-size: 10px;
-            color: var(--vault-green);
-            opacity: 0.5;
-            margin-top: 30px;
+        #msg-input {
+            flex: 1;
+            background: var(--dark);
+            border: 1px solid var(--border);
+            color: var(--green);
+            padding: 8px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            resize: none;
+            outline: none;
+            min-height: 60px;
+        }
+        #msg-input:focus { border-color: var(--green); box-shadow: 0 0 6px rgba(74,222,128,0.2); }
+        #msg-input::placeholder { color: #444; }
+        #send-btn {
+            background: rgba(74,222,128,0.1);
+            border: 1px solid var(--green);
+            color: var(--green);
+            padding: 0 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
             letter-spacing: 1px;
-            text-transform: uppercase;
+            transition: all 0.2s;
         }
+        #send-btn:hover { background: rgba(74,222,128,0.2); box-shadow: 0 0 8px rgba(74,222,128,0.4); }
 
-        .vault-footer span {
-            color: var(--vault-gold);
-        }
-
-        /* ===== EMPTY STATE ===== */
-        .empty-state {
-            text-align: center;
-            padding: 30px;
-            color: var(--vault-green);
-            opacity: 0.5;
-            font-size: 12px;
-            letter-spacing: 1px;
-        }
+        /* Nav */
+        #nav-bar { border-top: 1px solid var(--border); background: var(--darker); padding: 6px 0; flex-shrink: 0; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <div class="vault-header">
-            <div class="vault-title">📻 MESSAGES</div>
-            <div class="vault-subtitle" id="charName">VAULT 215 COMMUNICATION SYSTEM</div>
-        </div>
+<div id="app">
+    <div id="header">
+        <h1>📻 MESSAGES — VAULT 215 COMMUNICATION SYSTEM</h1>
+        <span>ENCRYPTED CHANNEL // AUTHORIZED PERSONNEL ONLY</span>
+    </div>
 
-        <!-- INBOX -->
-        <div class="section-panel">
-            <div class="section-title">📬 INBOX</div>
-            <ul class="message-list" id="messageList">
-                <li class="empty-state">[ NO MESSAGES RECEIVED ]</li>
-            </ul>
-        </div>
-
-        <!-- COMPOSE -->
-        <div class="section-panel">
-            <div class="section-title">✏ COMPOSE MESSAGE</div>
-            <div class="compose-area">
-                <input class="compose-input" id="msgTo" type="text" placeholder="TO: Recipient name..." />
-                <input class="compose-input" id="msgSubject" type="text" placeholder="SUBJECT: ..." />
-                <textarea class="compose-input" id="msgBody" placeholder="MESSAGE BODY..."></textarea>
-                <button class="vault-btn" onclick="sendMessage()">📤 SEND TRANSMISSION</button>
+    <div id="main">
+        <!-- LEFT SIDEBAR -->
+        <div id="sidebar">
+            <div id="sidebar-top">
+                <button id="new-conv-btn" onclick="toggleNpcSelector()">+ NEW CONVERSATION</button>
+                <input id="search-input" type="text" placeholder="[Search conversations...]" oninput="renderConvList()" />
             </div>
-            <div class="status-bar" id="sendStatus"></div>
+            <div id="npc-selector">
+                <select id="npc-select" onchange="startNewConv(this.value)">
+                    <option value="">-- SELECT CONTACT --</option>
+                </select>
+            </div>
+            <div id="conv-list"></div>
         </div>
 
-        <!-- FOOTER -->
-        <div class="vault-footer">
-            <p>VAULT <span>215</span> RESIDENT • PROPERTY OF VAULT-TEC INDUSTRIES</p>
-            <p style="margin-top: 5px;">Communications Secured and Encrypted</p>
+        <!-- RIGHT DETAIL -->
+        <div id="detail">
+            <div id="detail-empty">[ SELECT A CONVERSATION ]</div>
+            <div id="detail-content" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+                <div id="detail-header">
+                    <div id="detail-header-left">
+                        <h2 id="dh-name"></h2>
+                        <p id="dh-role"></p>
+                    </div>
+                    <div id="detail-header-actions">
+                        <button class="hdr-btn" onclick="markRead()">✓ MARK READ</button>
+                        <button class="hdr-btn archive" onclick="archiveCurrent()">⬇ ARCHIVE</button>
+                    </div>
+                </div>
+                <div id="messages-thread"></div>
+                <div id="compose-area">
+                    <textarea id="msg-input" placeholder="Type your message..." onkeydown="handleKey(event)"></textarea>
+                    <button id="send-btn" onclick="sendMessage()">SEND</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        // ═══════════════════════════════════════════════════════════
-        // MESSAGES PAGE - VAULT 215
-        // ═══════════════════════════════════════════════════════════
+    <div id="nav-bar" id="nav-placeholder"></div>
+</div>
 
-        function loadMessages() {
-            const messages = JSON.parse(localStorage.getItem('pipboyMessages') || '[]');
-            const list = document.getElementById('messageList');
-            if (messages.length === 0) {
-                list.innerHTML = '<li class="empty-state">[ NO MESSAGES RECEIVED ]</li>';
-                return;
-            }
-            list.innerHTML = '';
-            messages.forEach((msg, index) => {
-                const item = document.createElement('li');
-                item.className = 'message-item' + (msg.unread ? ' unread' : '');
-                item.innerHTML = `
-                    <div class="message-header">
-                        <span class="message-sender">${escapeHtml(msg.from)}</span>
-                        <span class="message-date">${escapeHtml(msg.date)}</span>
-                    </div>
-                    <div class="message-subject">${escapeHtml(msg.subject)}</div>
-                    <div class="message-preview">${escapeHtml(msg.body)}</div>
-                    <div class="message-detail" id="detail-${index}">
-                        <div class="message-body">${escapeHtml(msg.body)}</div>
-                    </div>
-                `;
-                item.addEventListener('click', function() {
-                    const detail = document.getElementById(`detail-${index}`);
-                    detail.classList.toggle('active');
-                    if (msg.unread) {
-                        msg.unread = false;
-                        item.classList.remove('unread');
-                        localStorage.setItem('pipboyMessages', JSON.stringify(messages));
-                    }
+<script src="../assets/data/npcs.js"></script>
+<script src="../assets/data/campaigns.js"></script>
+<script src="../assets/helpers/settingsManager.js"></script>
+<script src="../assets/navigation.js"></script>
+
+<script>
+// ── UTILS ────────────────────────────────────────────────────────────────────
+function escapeHtml(text) {
+    if (!text) return '';
+    return String(text)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function relativeTime(ts) {
+    const diff = Math.floor((Date.now() - ts) / 1000);
+    if (diff < 60) return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
+    return new Date(ts).toLocaleDateString();
+}
+
+function genId() { return '_' + Math.random().toString(36).substr(2,9); }
+
+// ── NPC REPLIES ──────────────────────────────────────────────────────────────
+const REPLIES = {
+    friendly: ["I'm happy to help!", "Good to hear from you!", "Stay safe out there!", "Always a pleasure!", "Let me know if you need anything else."],
+    neutral:  ["Understood.", "Acknowledged.", "Copy that.", "Got it.", "Noted."],
+    hostile:  ["...", "Don't bother me.", "What do you want?", "Make it quick.", "I'm busy."]
+};
+
+const OVERSEER_REPLIES = [
+    "The Overseer has received your message.",
+    "Acknowledged, Vault Dweller.",
+    "Message logged. Stay vigilant.",
+    "Understood. Report to your sector.",
+    "This channel is monitored. Proceed carefully."
+];
+
+function getReply(conv) {
+    if (conv.contactId === 'overseer') {
+        return OVERSEER_REPLIES[Math.floor(Math.random() * OVERSEER_REPLIES.length)];
+    }
+    const npc = (typeof NPCS !== 'undefined' ? NPCS : []).find(n => n.id === conv.contactId);
+    const attitude = npc ? (npc.attitude || 'neutral') : 'neutral';
+    const pool = REPLIES[attitude] || REPLIES.neutral;
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'vault_messages';
+
+function loadData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    return null;
+}
+
+function saveData(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+function initData() {
+    let data = loadData();
+    if (data) return data;
+
+    data = { conversations: [] };
+
+    // Overseer conversation from campaigns
+    const overseerMsgs = [];
+    try {
+        if (typeof CAMPAIGNS !== 'undefined' && CAMPAIGNS[0] && CAMPAIGNS[0].messages) {
+            CAMPAIGNS[0].messages.forEach((m, i) => {
+                overseerMsgs.push({
+                    id: m.id || genId(),
+                    fromContact: true,
+                    text: m.text,
+                    timestamp: m.timestamp ? new Date(m.timestamp).getTime() : (Date.now() - (CAMPAIGNS[0].messages.length - i) * 3600000)
                 });
-                list.appendChild(item);
             });
         }
+    } catch(e) {}
 
-        function sendMessage() {
-            const to = document.getElementById('msgTo').value.trim();
-            const subject = document.getElementById('msgSubject').value.trim();
-            const body = document.getElementById('msgBody').value.trim();
-            const status = document.getElementById('sendStatus');
+    data.conversations.push({
+        id: 'conv_overseer',
+        contactId: 'overseer',
+        contactName: 'Overseer',
+        contactRole: 'Vault 215 Administrator',
+        messages: overseerMsgs,
+        unreadCount: overseerMsgs.length,
+        lastActivity: overseerMsgs.length ? overseerMsgs[overseerMsgs.length-1].timestamp : Date.now(),
+        archived: false
+    });
 
-            if (!to || !subject || !body) {
-                status.textContent = '[ ERROR: ALL FIELDS REQUIRED ]';
-                status.style.color = 'var(--vault-error)';
-                return;
-            }
+    // System
+    data.conversations.push({
+        id: 'conv_system',
+        contactId: 'system',
+        contactName: 'SYSTEM',
+        contactRole: 'Vault Communication Network',
+        messages: [{
+            id: genId(),
+            fromContact: true,
+            text: 'Welcome to the Vault 215 Communication System. All messages are monitored and recorded. Use this system to contact NPCs and receive mission briefings.',
+            timestamp: Date.now() - 86400000
+        }],
+        unreadCount: 1,
+        lastActivity: Date.now() - 86400000,
+        archived: false
+    });
 
-            const sent = JSON.parse(localStorage.getItem('pipboySentMessages') || '[]');
-            sent.push({
-                to: to,
-                subject: subject,
-                body: body,
-                date: new Date().toLocaleDateString()
+    // NPC conversations
+    if (typeof NPCS !== 'undefined') {
+        NPCS.forEach((npc, i) => {
+            data.conversations.push({
+                id: 'conv_' + npc.id,
+                contactId: npc.id,
+                contactName: npc.name,
+                contactRole: npc.role || '',
+                messages: [],
+                unreadCount: 0,
+                lastActivity: Date.now() - (i+2) * 3600000 * 6,
+                archived: false
             });
-            localStorage.setItem('pipboySentMessages', JSON.stringify(sent));
-
-            document.getElementById('msgTo').value = '';
-            document.getElementById('msgSubject').value = '';
-            document.getElementById('msgBody').value = '';
-            status.textContent = '[ TRANSMISSION SENT SUCCESSFULLY ]';
-            status.style.color = 'var(--vault-success)';
-            setTimeout(() => { status.textContent = ''; }, 3000);
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            return String(text)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
-        }
-
-        function loadCharacterName() {
-            const name = localStorage.getItem('characterName') || localStorage.getItem('pipboyCharacterName');
-            if (name) {
-                const safeName = String(name).replace(/[^a-zA-Z0-9 '\-]/g, '').trim().toUpperCase();
-                if (safeName) {
-                    document.getElementById('charName').textContent = `${safeName} • VAULT 215 COMMUNICATION SYSTEM`;
-                }
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', function() {
-            loadCharacterName();
-            loadMessages();
         });
-    </script>
-    <script src="../assets/helpers/settingsManager.js"></script>
-    <script src="../assets/navigation.js"></script>
+    }
+
+    saveData(data);
+    return data;
+}
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let appData = initData();
+let activeConvId = null;
+
+// ── RENDER CONVERSATION LIST ─────────────────────────────────────────────────
+function renderConvList() {
+    const search = (document.getElementById('search-input').value || '').toLowerCase();
+    const list = document.getElementById('conv-list');
+    list.innerHTML = '';
+
+    const active = appData.conversations.filter(c => !c.archived);
+    const archived = appData.conversations.filter(c => c.archived);
+
+    function matchesSearch(c) {
+        if (!search) return true;
+        if (c.contactName.toLowerCase().includes(search)) return true;
+        return c.messages.some(m => m.text.toLowerCase().includes(search));
+    }
+
+    const filtered = active.filter(matchesSearch).sort((a,b) => b.lastActivity - a.lastActivity);
+    const filteredArchived = archived.filter(matchesSearch).sort((a,b) => b.lastActivity - a.lastActivity);
+
+    if (filtered.length === 0 && filteredArchived.length === 0) {
+        list.innerHTML = '<div style="padding:16px;color:#444;font-size:0.75rem;text-align:center;">No conversations found.</div>';
+        return;
+    }
+
+    filtered.forEach(c => list.appendChild(buildConvItem(c)));
+
+    if (filteredArchived.length > 0) {
+        const lbl = document.createElement('div');
+        lbl.className = 'conv-section-label';
+        lbl.textContent = '── ARCHIVED ──';
+        list.appendChild(lbl);
+        filteredArchived.forEach(c => list.appendChild(buildConvItem(c, true)));
+    }
+}
+
+function buildConvItem(conv, isArchived) {
+    const el = document.createElement('div');
+    el.className = 'conv-item' + (conv.id === activeConvId ? ' active' : '');
+    el.onclick = () => openConv(conv.id);
+
+    const lastMsg = conv.messages[conv.messages.length - 1];
+    const preview = lastMsg ? lastMsg.text.substring(0, 50) + (lastMsg.text.length > 50 ? '...' : '') : '(no messages)';
+    const time = relativeTime(conv.lastActivity);
+    const hasUnread = conv.unreadCount > 0;
+
+    el.innerHTML = `
+        <div class="conv-item-top">
+            <span class="conv-name${hasUnread ? ' unread' : ''}">${escapeHtml(conv.contactName)}</span>
+            <span class="conv-time">${escapeHtml(time)}</span>
+        </div>
+        <div class="conv-preview-row">
+            <span class="conv-preview${hasUnread ? ' unread' : ''}">${escapeHtml(preview)}</span>
+            ${hasUnread ? `<span class="unread-badge">${conv.unreadCount}</span>` : (isArchived ? '<span class="archived-label">archived</span>' : '')}
+        </div>`;
+    return el;
+}
+
+// ── OPEN CONVERSATION ────────────────────────────────────────────────────────
+function openConv(convId) {
+    activeConvId = convId;
+    const conv = appData.conversations.find(c => c.id === convId);
+    if (!conv) return;
+
+    document.getElementById('detail-empty').style.display = 'none';
+    const dc = document.getElementById('detail-content');
+    dc.style.display = 'flex';
+
+    document.getElementById('dh-name').textContent = conv.contactName;
+    document.getElementById('dh-role').textContent = conv.contactRole;
+
+    renderMessages(conv);
+    renderConvList();
+}
+
+function renderMessages(conv) {
+    const thread = document.getElementById('messages-thread');
+    thread.innerHTML = '';
+
+    if (conv.messages.length === 0) {
+        thread.innerHTML = '<div style="color:#444;font-size:0.75rem;text-align:center;margin-top:40px;">No messages yet. Send one!</div>';
+        return;
+    }
+
+    conv.messages.forEach(msg => {
+        const bubble = document.createElement('div');
+        bubble.className = 'msg-bubble ' + (msg.fromContact ? 'from-npc' : 'from-player');
+        const sender = msg.fromContact ? escapeHtml(conv.contactName) : 'You';
+        const metaClass = msg.fromContact ? 'from-npc' : 'from-player';
+        bubble.innerHTML = `
+            <div class="msg-meta ${metaClass}">${sender} · ${relativeTime(msg.timestamp)}</div>
+            <div class="msg-text">${escapeHtml(msg.text)}</div>`;
+        thread.appendChild(bubble);
+    });
+
+    requestAnimationFrame(() => { thread.scrollTop = thread.scrollHeight; });
+}
+
+// ── SEND MESSAGE ─────────────────────────────────────────────────────────────
+function sendMessage() {
+    if (!activeConvId) return;
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const conv = appData.conversations.find(c => c.id === activeConvId);
+    if (!conv) return;
+
+    const msg = { id: genId(), fromContact: false, text: text, timestamp: Date.now() };
+    conv.messages.push(msg);
+    conv.lastActivity = msg.timestamp;
+    input.value = '';
+    saveData(appData);
+    renderMessages(conv);
+    renderConvList();
+
+    // Auto-reply
+    setTimeout(() => {
+        const reply = getReply(conv);
+        const rMsg = { id: genId(), fromContact: true, text: reply, timestamp: Date.now() };
+        conv.messages.push(rMsg);
+        conv.lastActivity = rMsg.timestamp;
+        saveData(appData);
+        if (activeConvId === conv.id) renderMessages(conv);
+        renderConvList();
+    }, 1200);
+}
+
+function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+// ── MARK READ ────────────────────────────────────────────────────────────────
+function markRead() {
+    if (!activeConvId) return;
+    const conv = appData.conversations.find(c => c.id === activeConvId);
+    if (conv) { conv.unreadCount = 0; saveData(appData); renderConvList(); }
+}
+
+// ── ARCHIVE ──────────────────────────────────────────────────────────────────
+function archiveCurrent() {
+    if (!activeConvId) return;
+    const conv = appData.conversations.find(c => c.id === activeConvId);
+    if (conv) {
+        conv.archived = !conv.archived;
+        saveData(appData);
+        renderConvList();
+    }
+}
+
+// ── NEW CONVERSATION ─────────────────────────────────────────────────────────
+function toggleNpcSelector() {
+    const sel = document.getElementById('npc-selector');
+    const isVisible = sel.style.display === 'block';
+    sel.style.display = isVisible ? 'none' : 'block';
+
+    if (!isVisible) {
+        const select = document.getElementById('npc-select');
+        select.innerHTML = '<option value="">-- SELECT CONTACT --</option>';
+        const existing = new Set(appData.conversations.map(c => c.contactId));
+        if (typeof NPCS !== 'undefined') {
+            NPCS.forEach(npc => {
+                if (!existing.has(npc.id)) {
+                    const opt = document.createElement('option');
+                    opt.value = npc.id;
+                    opt.textContent = npc.name + ' (' + npc.role + ')';
+                    select.appendChild(opt);
+                }
+            });
+        }
+        if (select.options.length === 1) {
+            select.innerHTML = '<option value="">-- ALL NPCS ALREADY ADDED --</option>';
+        }
+    }
+}
+
+function startNewConv(npcId) {
+    if (!npcId) return;
+    document.getElementById('npc-selector').style.display = 'none';
+
+    const existing = appData.conversations.find(c => c.contactId === npcId);
+    if (existing) { openConv(existing.id); return; }
+
+    const npc = (typeof NPCS !== 'undefined' ? NPCS : []).find(n => n.id === npcId);
+    if (!npc) return;
+
+    const conv = {
+        id: 'conv_' + npcId + '_' + genId(),
+        contactId: npcId,
+        contactName: npc.name,
+        contactRole: npc.role || '',
+        messages: [],
+        unreadCount: 0,
+        lastActivity: Date.now(),
+        archived: false
+    };
+    appData.conversations.unshift(conv);
+    saveData(appData);
+    renderConvList();
+    openConv(conv.id);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+renderConvList();
+</script>
 </body>
 </html>
