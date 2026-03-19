@@ -170,6 +170,7 @@
     <script src="../assets/accounts.js"></script>
     <script src="../assets/campaigns.js"></script>
     <script src="../assets/enemies.js"></script>
+    <script src="../assets/helpers/storageManager.js"></script>
 </head>
 <body>
 
@@ -201,6 +202,9 @@
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
         <button class="cmd-btn success" onclick="exportCampaign()">[SAVE CAMPAIGN]</button>
+        <button class="cmd-btn success" onclick="handleStorageExport()">[EXPORT CAMPAIGN]</button>
+        <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(this)">
+        <button class="cmd-btn success" onclick="document.getElementById('importFile').click()">[IMPORT CAMPAIGN]</button>
         <button class="cmd-btn danger"  onclick="logoutOverseer()">[LOGOUT]</button>
     </div>
 </div>
@@ -598,14 +602,51 @@
         var t=document.getElementById('exportToast');if(t){t.classList.add('visible');setTimeout(function(){t.classList.remove('visible');},3000);}
     };
 
-    window.logoutOverseer=function(){sessionStorage.clear();window.location.replace('index.html');};
+    window.logoutOverseer=function(){StorageManager.disableAutoSave();sessionStorage.clear();window.location.replace('index.html');};
 
     document.addEventListener('DOMContentLoaded',function(){
         populateCampaignDropdown();
         var id=sessionStorage.getItem('campaignId');
         if(!id&&typeof CAMPAIGNS!=='undefined'&&CAMPAIGNS.length>0){id=CAMPAIGNS[0].id;sessionStorage.setItem('campaignId',id);sessionStorage.setItem('campaignName',CAMPAIGNS[0].name);}
-        if(id)loadCampaign(id);else{populateCampaignDropdown();addLog('Select a campaign to begin','blue');}
+        if(id){loadCampaign(id);}else{populateCampaignDropdown();addLog('Select a campaign to begin','blue');}
+
+        // Enable auto-save every 30 seconds
+        var activeCampaignId=sessionStorage.getItem('campaignId')||id;
+        if(activeCampaignId){StorageManager.enableAutoSave(activeCampaignId,30000);}
+
+        // Save on any combat action
+        document.addEventListener('combatAction',function(e){
+            var cid=sessionStorage.getItem('campaignId')||_campaignId;
+            if(cid)StorageManager.manualSave(cid);
+        });
     });
+
+    // Final save + disable auto-save on page unload
+    window.addEventListener('beforeunload',function(){
+        StorageManager.disableAutoSave();
+        var cid=sessionStorage.getItem('campaignId')||_campaignId;
+        if(cid)StorageManager.manualSave(cid);
+    });
+
+    // StorageManager-powered JSON export
+    window.handleStorageExport=function(){
+        var cid=sessionStorage.getItem('campaignId')||_campaignId;
+        if(!cid){addLog('No campaign loaded to export','red');return;}
+        StorageManager.exportCampaign(cid);
+        addLog('Campaign exported as JSON','green');
+    };
+
+    // Import campaign from JSON file
+    window.handleImport=function(input){
+        var file=input&&input.files&&input.files[0];
+        if(!file){return;}
+        StorageManager.importCampaign(file,function(err,importedId){
+            if(err){addLog('Import failed: '+err.message,'red');return;}
+            addLog('Campaign imported: '+importedId+'. Reload to apply.','green');
+            // Reset the file input so the same file can be re-selected
+            input.value='';
+        });
+    };
 })();
 </script>
 </body>

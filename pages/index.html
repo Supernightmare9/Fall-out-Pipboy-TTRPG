@@ -210,6 +210,7 @@
     </div>
 
     <script src="../assets/accounts.js"></script>
+    <script src="../assets/helpers/storageManager.js"></script>
     <script>
         // ═══════════════════════════════════════════════════════
         // CLEAR SESSION ON LOGIN PAGE LOAD (force fresh login)
@@ -229,6 +230,14 @@
             }
             sessionStorage.setItem('username', account.username);
             sessionStorage.setItem('role', account.role);
+
+            // Load player session to resume last campaign
+            var playerSession = StorageManager.loadPlayerSession(account.username);
+            if (playerSession && playerSession.currentCampaign) {
+                sessionStorage.setItem('activeCampaign', playerSession.currentCampaign);
+                sessionStorage.setItem('campaignId', playerSession.currentCampaign);
+            }
+
             if (account.role === 'admin') {
                 window.location.href = 'overseer.html';
             } else {

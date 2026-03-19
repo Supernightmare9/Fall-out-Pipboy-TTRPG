@@ -10,6 +10,8 @@ const CAMPAIGNS = [
     overseerId: "Overseer",
     status: "active",
     created: "2025-03-19",
+    createdAt: 1742342400000,
+    lastModified: 1742342400000,
     description: "A new group of vault dwellers emerges into the unforgiving Mojave Desert. Factions vie for power, ancient secrets lie buried in the sand, and every choice carries consequences. Can the party carve out a place in this broken world—or will it swallow them whole?",
 
     // ── PLAYERS ─────────────────────────────────────────────────────────────
@@ -121,7 +123,8 @@ const CAMPAIGNS = [
       combatants: [],   // All combatants in initiative order (players + enemies)
       round: 1,         // Rounds start at 1; increments each time the initiative order cycles
       status: "inactive", // "inactive" | "active" | "completed"
-      startTime: null
+      startTime: null,
+      lastSave: null    // Timestamp of last save
     },
 
     // ── CAMPAIGN CONTENT ────────────────────────────────────────────────────
