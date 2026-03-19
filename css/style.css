@@ -1,3 +1,23 @@
+/* ═══════════════════════════════════════════════════════════
+   VAULT 215 GLOBAL VARIABLES
+   ═══════════════════════════════════════════════════════════ */
+:root {
+    --primary:        #4ade80;
+    --dark-bg:        #0a0a0a;
+    --accent:         #fbbf24;
+    --danger:         #ff6b6b;
+    --font-primary:   'Courier New', monospace;
+
+    /* Player / Overseer theme variables */
+    --player-color:     #4ade80;
+    --player-primary:   #4ade80;
+    --overseer-primary: #60a5fa;
+    --overseer-accent:  #fbbf24;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BASE / SHARED STYLES — LOGIN PAGE
+   ═══════════════════════════════════════════════════════════ */
 /* ===========================
    FALLOUT PIPBOY LOGIN STYLE
    =========================== */
@@ -257,6 +277,9 @@ button[type="submit"]:active {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE / MEDIA QUERIES
+   ═══════════════════════════════════════════════════════════ */
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
     .login-container {

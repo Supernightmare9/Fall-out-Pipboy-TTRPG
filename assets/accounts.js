@@ -31,7 +31,15 @@ const ACCOUNTS = [
         displayColor: "#4ade80"
       }
     ],
-    settings: { ...DEFAULT_PLAYER_SETTINGS }
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#4ade80",
+      displayName: "Jade",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
   },
   {
     username: "Katie",
@@ -46,7 +54,15 @@ const ACCOUNTS = [
         displayColor: "#fbbf24"
       }
     ],
-    settings: { ...DEFAULT_PLAYER_SETTINGS }
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#fbbf24",
+      displayName: "Katie",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
   },
   {
     username: "Moe",
@@ -61,7 +77,15 @@ const ACCOUNTS = [
         displayColor: "#c084fc"
       }
     ],
-    settings: { ...DEFAULT_PLAYER_SETTINGS }
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#c084fc",
+      displayName: "Moe",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
   },
   {
     username: "Nikki",
@@ -76,7 +100,15 @@ const ACCOUNTS = [
         displayColor: "#fb923c"
       }
     ],
-    settings: { ...DEFAULT_PLAYER_SETTINGS }
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#fb923c",
+      displayName: "Nikki",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
   },
   {
     username: "Zach",
@@ -91,7 +123,15 @@ const ACCOUNTS = [
         displayColor: "#38bdf8"
       }
     ],
-    settings: { ...DEFAULT_PLAYER_SETTINGS }
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#38bdf8",
+      displayName: "Zach",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
   },
   {
     username: "David",
@@ -106,7 +146,15 @@ const ACCOUNTS = [
         displayColor: "#f87171"
       }
     ],
-    settings: { ...DEFAULT_PLAYER_SETTINGS }
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#f87171",
+      displayName: "David",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
   },
   {
     username: "Overseer",
@@ -114,6 +162,14 @@ const ACCOUNTS = [
     pin: "082998",
     // Admin manages campaigns rather than playing characters
     characters: [],
-    settings: { ...DEFAULT_PLAYER_SETTINGS }
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#60a5fa",
+      displayName: "Overseer",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
   }
 ];

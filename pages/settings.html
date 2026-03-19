@@ -576,6 +576,7 @@
 <body>
     <!-- Navigation (hamburger injected by navigation.js) -->
     <script src="../assets/accounts.js"></script>
+    <script src="../assets/helpers/settingsManager.js"></script>
     <script src="../assets/settings.js"></script>
     <script src="../assets/navigation.js"></script>
 
@@ -594,6 +595,14 @@
              ══════════════════════════════════════ -->
         <section class="settings-section">
             <h2 class="section-title"><span class="section-icon">👤</span>Account Preferences</h2>
+
+            <!-- Display Name -->
+            <div class="form-row">
+                <span class="form-label">Display Name</span>
+                <div class="form-control">
+                    <input type="text" id="displayName" placeholder="Enter your display name" maxlength="32" autocomplete="off">
+                </div>
+            </div>
 
             <!-- Theme Toggle -->
             <div class="form-row">
@@ -1362,13 +1371,36 @@
         localStorage.setItem('vaultPlayerSettings', JSON.stringify(settings));
 
         // Save character colors
-        const username = localStorage.getItem('username') || localStorage.getItem('currentUser');
+        const username = sessionStorage.getItem('username') || localStorage.getItem('username') || localStorage.getItem('currentUser');
         const account = username && typeof ACCOUNTS !== 'undefined'
             ? ACCOUNTS.find(a => a.username === username) : null;
         if (account) saveCharacterColors(account);
 
+        // Save preferences via SettingsManager
+        if (typeof SettingsManager !== 'undefined') {
+            const displayNameEl = document.getElementById('displayName');
+            // Map detailed fontFamily to the simplified SettingsManager font category
+            const fontFamilyMap = {
+                'courier-new':    'monospace',
+                'courier':        'monospace',
+                'roboto-mono':    'monospace',
+                'ibm-plex-mono':  'monospace',
+                'jetbrains-mono': 'monospace'
+            };
+            const prefs = {
+                displayColor:         settings.uiColors.primary,
+                displayName:          displayNameEl ? displayNameEl.value.trim() : (username || ''),
+                theme:                settings.theme,
+                font:                 fontFamilyMap[settings.fontFamily] || 'monospace',
+                soundEnabled:         settings.soundEnabled,
+                notificationsEnabled: settings.notificationsEnabled
+            };
+            SettingsManager.saveAllSettings(prefs);
+            SettingsManager.applySettingsToPage(prefs);
+        }
+
         // If overseer, save game settings too
-        const role = localStorage.getItem('userRole') || (account && account.role);
+        const role = sessionStorage.getItem('role') || localStorage.getItem('userRole') || (account && account.role);
         if (role === 'admin') {
             const os = collectOverseerSettings();
             localStorage.setItem('vaultOverseerSettings', JSON.stringify(os));
@@ -1389,13 +1421,14 @@
         localStorage.removeItem('vaultPlayerSettings');
         localStorage.removeItem('vaultOverseerSettings');
         localStorage.removeItem('vaultCharColors');
+        if (typeof SettingsManager !== 'undefined') SettingsManager.clearAllSettings();
         loadSettingsToForm(DEFAULTS);
         applySettingsToPage(DEFAULTS);
 
-        const username = localStorage.getItem('username') || localStorage.getItem('currentUser');
+        const username = sessionStorage.getItem('username') || localStorage.getItem('username') || localStorage.getItem('currentUser');
         const account = username && typeof ACCOUNTS !== 'undefined'
             ? ACCOUNTS.find(a => a.username === username) : null;
-        const role = localStorage.getItem('userRole') || (account && account.role);
+        const role = sessionStorage.getItem('role') || localStorage.getItem('userRole') || (account && account.role);
 
         if (role === 'admin') {
             loadOverseerSettingsToForm(OVERSEER_DEFAULTS);
@@ -1414,6 +1447,13 @@
 
     // ─── INIT ──────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function() {
+
+        // ── Auth check ─────────────────────────────────────────────
+        var sessionUsername = sessionStorage.getItem('username');
+        if (!sessionUsername) {
+            window.location.replace('index.html');
+            return;
+        }
 
         // Wire up color pickers for the three UI colors
         wireColor('primary');
@@ -1464,10 +1504,19 @@
         });
 
         // ── Load user context ──────────────────────────────────────
-        const username = localStorage.getItem('username') || localStorage.getItem('currentUser');
-        const account = (username && typeof ACCOUNTS !== 'undefined')
-            ? ACCOUNTS.find(a => a.username === username) : null;
-        const role = localStorage.getItem('userRole') || (account ? account.role : null);
+        var username = sessionStorage.getItem('username') || localStorage.getItem('username') || localStorage.getItem('currentUser');
+        var account = (username && typeof ACCOUNTS !== 'undefined')
+            ? ACCOUNTS.find(function(a) { return a.username === username; }) : null;
+        var role = sessionStorage.getItem('role') || localStorage.getItem('userRole') || (account ? account.role : null);
+
+        // Load preferences via SettingsManager (displayName, displayColor, theme, font)
+        if (typeof SettingsManager !== 'undefined') {
+            var prefs = SettingsManager.getAllSettings();
+            var displayNameEl = document.getElementById('displayName');
+            if (displayNameEl) {
+                displayNameEl.value = prefs.displayName || username || '';
+            }
+        }
 
         // Load player settings
         const storedSettings = getStoredSettings();
