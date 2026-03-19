@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <li><a href="inventory.html" class="nav-link" data-page="inventory">🎒 INVENTORY</a></li>
                 <li><a href="data.html" class="nav-link" data-page="data">📋 DATA</a></li>
                 <li><a href="messages.html" class="nav-link" data-page="messages">📻 MESSAGES</a></li>
+                <li><a href="settings.html" class="nav-link" data-page="settings">⚙ SETTINGS</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -315,6 +316,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (path.includes('inventory')) return 'inventory';
         if (path.includes('data')) return 'data';
         if (path.includes('messages')) return 'messages';
+        if (path.includes('settings')) return 'settings';
         return null;
     }
 

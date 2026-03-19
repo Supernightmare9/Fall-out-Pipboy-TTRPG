@@ -3,6 +3,20 @@
 // Each player account links to one or more characters and a campaign.
 // No passwords are stored here — authentication is handled separately.
 
+const DEFAULT_PLAYER_SETTINGS = {
+  theme: "dark",             // dark / light
+  fontSize: "medium",        // small / medium / large
+  fontFamily: "courier-new", // courier-new / courier / roboto-mono / ibm-plex-mono / jetbrains-mono
+  uiColors: {
+    primary:   "#4ade80",    // Main color (RGB adjustable)
+    secondary: "#fbbf24",    // Secondary color (RGB adjustable)
+    accent:    "#c084fc"     // Accent color (RGB adjustable)
+  },
+  soundEnabled: true,
+  notificationsEnabled: true,
+  volumeLevel: 70            // 0-100
+};
+
 const ACCOUNTS = [
   {
     username: "Jade",
@@ -13,9 +27,11 @@ const ACCOUNTS = [
         name: "Jade",
         campaignId: "campaign_001",
         currentHp: 100,
-        maxHp: 100
+        maxHp: 100,
+        displayColor: "#4ade80"
       }
-    ]
+    ],
+    settings: { ...DEFAULT_PLAYER_SETTINGS }
   },
   {
     username: "Katie",
@@ -26,9 +42,11 @@ const ACCOUNTS = [
         name: "Katie",
         campaignId: "campaign_001",
         currentHp: 100,
-        maxHp: 100
+        maxHp: 100,
+        displayColor: "#fbbf24"
       }
-    ]
+    ],
+    settings: { ...DEFAULT_PLAYER_SETTINGS }
   },
   {
     username: "Moe",
@@ -39,9 +57,11 @@ const ACCOUNTS = [
         name: "Moe",
         campaignId: "campaign_001",
         currentHp: 100,
-        maxHp: 100
+        maxHp: 100,
+        displayColor: "#c084fc"
       }
-    ]
+    ],
+    settings: { ...DEFAULT_PLAYER_SETTINGS }
   },
   {
     username: "Nikki",
@@ -52,9 +72,11 @@ const ACCOUNTS = [
         name: "Nikki",
         campaignId: "campaign_001",
         currentHp: 100,
-        maxHp: 100
+        maxHp: 100,
+        displayColor: "#fb923c"
       }
-    ]
+    ],
+    settings: { ...DEFAULT_PLAYER_SETTINGS }
   },
   {
     username: "Zach",
@@ -65,9 +87,11 @@ const ACCOUNTS = [
         name: "Zach",
         campaignId: "campaign_001",
         currentHp: 100,
-        maxHp: 100
+        maxHp: 100,
+        displayColor: "#38bdf8"
       }
-    ]
+    ],
+    settings: { ...DEFAULT_PLAYER_SETTINGS }
   },
   {
     username: "David",
@@ -78,14 +102,17 @@ const ACCOUNTS = [
         name: "David",
         campaignId: "campaign_001",
         currentHp: 100,
-        maxHp: 100
+        maxHp: 100,
+        displayColor: "#f87171"
       }
-    ]
+    ],
+    settings: { ...DEFAULT_PLAYER_SETTINGS }
   },
   {
     username: "Overseer",
     role: "admin",
     // Admin manages campaigns rather than playing characters
-    characters: []
+    characters: [],
+    settings: { ...DEFAULT_PLAYER_SETTINGS }
   }
 ];
