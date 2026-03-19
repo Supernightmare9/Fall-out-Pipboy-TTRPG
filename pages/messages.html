@@ -415,7 +415,20 @@
         }
 
         function loadCharacterName() {
-            const name = localStorage.getItem('characterName') || localStorage.getItem('pipboyCharacterName');
+            var name = '';
+            try {
+                var raw = localStorage.getItem('characterData');
+                if (raw) {
+                    var parsed = JSON.parse(raw);
+                    name = (parsed && parsed.name) ? parsed.name : '';
+                }
+            } catch (e) {
+                console.warn('messages: could not parse characterData:', e);
+            }
+            // Fallback to legacy keys
+            if (!name) {
+                name = localStorage.getItem('characterName') || localStorage.getItem('pipboyCharacterName') || '';
+            }
             if (name) {
                 const safeName = String(name).replace(/[^a-zA-Z0-9 '\-]/g, '').trim().toUpperCase();
                 if (safeName) {

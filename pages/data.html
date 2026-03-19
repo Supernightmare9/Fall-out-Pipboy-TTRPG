@@ -1164,6 +1164,15 @@
 
         window.addEventListener('DOMContentLoaded', function() {
             loadCharacterData();
+
+            // Auto-save whenever any character info field changes
+            ['charName', 'charRace', 'charClass', 'charAlignment'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('change', saveCharacterData);
+                    el.addEventListener('input', saveCharacterData);
+                }
+            });
         });
     </script>
 

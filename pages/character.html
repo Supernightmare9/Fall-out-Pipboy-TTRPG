@@ -425,6 +425,14 @@
                 }
             } else {
                 console.log('No characterData found in localStorage');
+                var infoSection = document.getElementById('characterName');
+                if (infoSection) {
+                    infoSection.innerHTML = '<a href="data.html" style="color:var(--vault-gold);text-decoration:underline;">Enter character info</a>';
+                }
+                ['characterRace','characterClass','characterAlignment'].forEach(function(id) {
+                    var el = document.getElementById(id);
+                    if (el) el.textContent = '—';
+                });
             }
 
             var characterImageStr = localStorage.getItem('characterImage');
