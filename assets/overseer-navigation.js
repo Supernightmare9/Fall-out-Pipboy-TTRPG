@@ -1,5 +1,6 @@
 // ═══════════════════════════════════════════════════════════
 // VAULT 215 OVERSEER HAMBURGER NAVIGATION SYSTEM
+// Authority Console — Blue & Gold Theme
 // Slides in from left, highlights current page
 // ═══════════════════════════════════════════════════════════
 
@@ -15,8 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
         <nav id="sideNav" class="side-nav">
             <button id="closeBtn" class="close-btn">✕</button>
             <div class="nav-header">
-                <div class="nav-title">VAULT 215</div>
-                <div class="nav-subtitle">OVERSEER CONSOLE</div>
+                <div class="nav-authority-badge">⬡</div>
+                <div class="nav-title">VAULT 215 OVERSEER</div>
+                <div class="nav-subtitle">AUTHORITY CONSOLE</div>
             </div>
             <ul class="nav-list">
                 <li><a href="overseer-overview.html" class="nav-link" data-page="overseer-overview">👥 PLAYER OVERVIEW</a></li>
@@ -45,13 +47,18 @@ document.addEventListener('DOMContentLoaded', function() {
     styleSheet.textContent = `
         /* ═══════════════════════════════════════════════════════════
            VAULT 215 OVERSEER HAMBURGER MENU STYLES
+           Authority Console — Blue & Gold Theme
            ═══════════════════════════════════════════════════════════ */
 
         :root {
-            --vault-green: #4ade80;
-            --vault-gold: #fbbf24;
-            --vault-dark: #0a0a0a;
-            --vault-darker: #1a1a1a;
+            --overseer-dark: #0a1628;
+            --overseer-blue-mid: #0d2045;
+            --overseer-blue-bright: #1a3a6e;
+            --overseer-gold: #d4a017;
+            --overseer-gold-bright: #f0c040;
+            --overseer-gold-dim: #8b6914;
+            --overseer-white: #e8e8e8;
+            --overseer-red-bright: #ff3300;
         }
 
         /* HAMBURGER BUTTON */
@@ -60,9 +67,9 @@ document.addEventListener('DOMContentLoaded', function() {
             top: 20px;
             left: 20px;
             z-index: 1000;
-            background-color: var(--vault-darker);
-            border: 2px solid var(--vault-green);
-            color: var(--vault-green);
+            background-color: var(--overseer-blue-mid);
+            border: 2px solid var(--overseer-gold);
+            color: var(--overseer-gold);
             width: 50px;
             height: 50px;
             border-radius: 4px;
@@ -71,19 +78,19 @@ document.addEventListener('DOMContentLoaded', function() {
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            text-shadow: 0 0 10px var(--vault-green);
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+            text-shadow: 0 0 10px var(--overseer-gold);
+            box-shadow: 0 0 15px rgba(212, 160, 23, 0.4);
             transition: all 0.3s ease;
             font-family: 'Courier New', monospace;
             font-weight: bold;
         }
 
         .hamburger-btn:hover {
-            background-color: var(--vault-dark);
-            box-shadow: 0 0 25px rgba(74, 222, 128, 0.6);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 15px var(--vault-gold);
+            background-color: var(--overseer-dark);
+            box-shadow: 0 0 25px rgba(212, 160, 23, 0.7);
+            border-color: var(--overseer-gold-bright);
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 15px var(--overseer-gold-bright);
             transform: scale(1.05);
         }
 
@@ -98,13 +105,37 @@ document.addEventListener('DOMContentLoaded', function() {
             top: 0;
             width: 300px;
             height: 100vh;
-            background-color: var(--vault-darker);
-            border-right: 3px solid var(--vault-green);
-            box-shadow: 5px 0 30px rgba(74, 222, 128, 0.4);
+            background-color: var(--overseer-dark);
+            border-right: 3px solid var(--overseer-gold);
+            box-shadow: 5px 0 30px rgba(212, 160, 23, 0.4);
             z-index: 999;
             transition: left 0.4s ease;
             overflow-y: auto;
             padding-top: 20px;
+        }
+
+        /* SCANLINE EFFECT ON NAV PANEL */
+        .side-nav::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .side-nav > * {
+            position: relative;
+            z-index: 2;
         }
 
         .side-nav.active {
@@ -116,9 +147,9 @@ document.addEventListener('DOMContentLoaded', function() {
             position: absolute;
             top: 15px;
             right: 15px;
-            background-color: transparent;
-            border: 2px solid var(--vault-green);
-            color: var(--vault-green);
+            background-color: var(--overseer-blue-mid);
+            border: 2px solid var(--overseer-gold);
+            color: var(--overseer-gold);
             width: 40px;
             height: 40px;
             border-radius: 4px;
@@ -127,42 +158,52 @@ document.addEventListener('DOMContentLoaded', function() {
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            text-shadow: 0 0 5px var(--vault-green);
+            text-shadow: 0 0 5px var(--overseer-gold);
             transition: all 0.3s ease;
             font-family: 'Courier New', monospace;
             font-weight: bold;
+            z-index: 3;
         }
 
         .close-btn:hover {
-            background-color: var(--vault-dark);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 10px var(--vault-gold);
+            background-color: var(--overseer-dark);
+            border-color: var(--overseer-gold-bright);
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 10px var(--overseer-gold-bright);
         }
 
         /* MENU HEADER */
         .nav-header {
             text-align: center;
             padding: 20px 15px;
-            border-bottom: 2px solid var(--vault-green);
+            border-bottom: 2px solid var(--overseer-gold);
             margin-bottom: 20px;
+            background-color: var(--overseer-blue-mid);
+        }
+
+        .nav-authority-badge {
+            color: var(--overseer-gold-bright);
+            font-size: 28px;
+            text-shadow: 0 0 12px var(--overseer-gold-bright), 0 0 24px rgba(240, 192, 64, 0.5);
+            line-height: 1;
+            margin-bottom: 6px;
         }
 
         .nav-title {
-            color: var(--vault-gold);
-            font-size: 18px;
+            color: var(--overseer-gold);
+            font-size: 16px;
             font-weight: bold;
-            text-shadow: 0 0 10px var(--vault-gold);
+            text-shadow: 0 0 10px var(--overseer-gold), 0 0 20px rgba(212, 160, 23, 0.4);
             letter-spacing: 2px;
             text-transform: uppercase;
             font-family: 'Courier New', monospace;
         }
 
         .nav-subtitle {
-            color: var(--vault-green);
+            color: var(--overseer-gold-dim);
             font-size: 10px;
-            text-shadow: 0 0 5px var(--vault-green);
-            letter-spacing: 1px;
+            text-shadow: 0 0 5px var(--overseer-gold-dim);
+            letter-spacing: 2px;
             text-transform: uppercase;
             margin-top: 5px;
             font-family: 'Courier New', monospace;
@@ -182,44 +223,43 @@ document.addEventListener('DOMContentLoaded', function() {
         .nav-link {
             display: block;
             padding: 15px 15px;
-            background-color: var(--vault-dark);
-            border: 2px solid var(--vault-green);
-            color: var(--vault-green);
+            background-color: var(--overseer-blue-mid);
+            border: 2px solid var(--overseer-blue-bright);
+            color: var(--overseer-white);
             text-decoration: none;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             font-weight: bold;
-            text-shadow: 0 0 5px var(--vault-green);
             letter-spacing: 1px;
             text-transform: uppercase;
             cursor: pointer;
             border-radius: 3px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+            box-shadow: 0 0 8px rgba(26, 58, 110, 0.3);
         }
 
         .nav-link:hover {
-            background-color: var(--vault-darker);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 10px var(--vault-gold);
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.5);
+            background-color: var(--overseer-blue-bright);
+            border-color: var(--overseer-gold);
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 10px var(--overseer-gold-bright);
+            box-shadow: 0 0 20px rgba(212, 160, 23, 0.4);
             transform: translateX(5px);
         }
 
         /* ACTIVE PAGE HIGHLIGHT */
         .nav-link.active {
-            background-color: #2d5016;
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 15px var(--vault-gold);
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5), inset 0 0 10px rgba(251, 191, 36, 0.2);
+            background-color: var(--overseer-blue-bright);
+            border-color: var(--overseer-gold);
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 15px var(--overseer-gold-bright);
+            box-shadow: 0 0 20px rgba(212, 160, 23, 0.5), inset 0 0 10px rgba(212, 160, 23, 0.15);
         }
 
         /* LOGOUT BUTTON */
         .logout-container {
             padding: 10px 10px 20px;
-            border-top: 2px solid var(--vault-green);
+            border-top: 2px solid var(--overseer-gold-dim);
             margin-top: 10px;
         }
 
@@ -227,29 +267,29 @@ document.addEventListener('DOMContentLoaded', function() {
             display: block;
             width: 100%;
             padding: 15px 15px;
-            background-color: var(--vault-dark);
-            border: 2px solid #ff6b6b;
-            color: #ff6b6b;
+            background-color: var(--overseer-blue-mid);
+            border: 2px solid var(--overseer-red-bright);
+            color: var(--overseer-red-bright);
             text-decoration: none;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             font-weight: bold;
-            text-shadow: 0 0 5px #ff6b6b;
+            text-shadow: 0 0 5px var(--overseer-red-bright);
             letter-spacing: 1px;
             text-transform: uppercase;
             cursor: pointer;
             border-radius: 3px;
             transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+            box-shadow: 0 0 10px rgba(255, 51, 0, 0.25);
             text-align: left;
         }
 
         .logout-button:hover {
-            background-color: var(--vault-darker);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 10px var(--vault-gold);
-            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            background-color: var(--overseer-dark);
+            border-color: var(--overseer-red-bright);
+            color: var(--overseer-red-bright);
+            text-shadow: 0 0 12px var(--overseer-red-bright);
+            box-shadow: 0 0 20px rgba(255, 51, 0, 0.5);
             transform: translateX(5px);
         }
 
@@ -264,7 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
+            background-color: rgba(4, 8, 15, 0.8);
             z-index: 998;
             opacity: 0;
             visibility: hidden;
