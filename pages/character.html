@@ -1064,6 +1064,7 @@
     <script src="../assets/accounts.js"></script>
     <script src="../assets/campaigns.js"></script>
     <script src="../assets/helpers/settingsManager.js"></script>
+    <script src="../assets/helpers/storageManager.js"></script>
     <script>
     // ════════════════════════════════════════════════════════════
     //  VAULT 215 — CHARACTER PAGE (PHASE 4)
@@ -1105,16 +1106,46 @@
             if (saved) {
                 document.getElementById('campaignSelector').value = savedId;
                 loadCampaignPage(saved);
-                return;
+            } else {
+                var first = getPlayerCampaigns()[0];
+                if (first) {
+                    document.getElementById('campaignSelector').value = first.campaign.id;
+                    loadCampaignPage(first.campaign);
+                }
+            }
+        } else {
+            // Auto-select first campaign the player belongs to
+            var first = getPlayerCampaigns()[0];
+            if (first) {
+                document.getElementById('campaignSelector').value = first.campaign.id;
+                loadCampaignPage(first.campaign);
             }
         }
 
-        // Auto-select first campaign the player belongs to
-        var first = getPlayerCampaigns()[0];
-        if (first) {
-            document.getElementById('campaignSelector').value = first.campaign.id;
-            loadCampaignPage(first.campaign);
+        // Enable auto-save every 30 seconds
+        var campaignId = sessionStorage.getItem('campaignId');
+        if (campaignId) {
+            StorageManager.enableAutoSave(campaignId, 30000);
         }
+
+        // Save player session whenever HP changes
+        document.addEventListener('hpChange', function(e) {
+            var username   = sessionStorage.getItem('username');
+            var cid        = sessionStorage.getItem('campaignId');
+            if (!username || !cid) return;
+            StorageManager.savePlayerSession(username, {
+                currentCampaign: cid,
+                currentHp:       e.detail.newHp,
+                maxHp:           e.detail.maxHp,
+                inCombat:        !!(activeCampaign && activeCampaign.activeEncounter && activeCampaign.activeEncounter.status === 'active'),
+                timestamp:       Date.now()
+            });
+        });
+    });
+
+    // Final save on page unload
+    window.addEventListener('beforeunload', function() {
+        StorageManager.disableAutoSave();
     });
 
     // ── CAMPAIGN SELECTOR ────────────────────────────────────────
@@ -1360,6 +1391,11 @@
         saveCampaignData(activeCampaign);
         hpLastUpdated = new Date();
         updateHpTimestamp();
+
+        // Notify StorageManager (and any other listeners) of HP change
+        document.dispatchEvent(new CustomEvent('hpChange', {
+            detail: { newHp: myEntry.currentHp, maxHp: myEntry.maxHp }
+        }));
 
         // Flash success message
         var msg = document.getElementById('hpSuccessMsg');
