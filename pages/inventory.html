@@ -5,888 +5,1161 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pip-Boy Inventory - Vault 215</title>
     <link rel="stylesheet" href="../css/branding.css">
+    <!--  branding.css provides base reset, CSS vars, scanline, body padding  -->
     <style>
-        /* ===========================
-           VAULT 215 BRANDING SYSTEM
-           FALLOUT PIP-BOY THEME
-           =========================== */
+        /* Layout */
+        body { padding: 12px; }
 
-        :root {
-            --vault-primary: #4ade80;
-            --vault-secondary: #fbbf24;
-            --vault-dark: #0a0a0a;
-            --vault-darker: #1a1a1a;
-            --vault-accent: #c084fc;
-            --vault-success: #4ade80;
-            --vault-error: #ff6b6b;
-            --vault-warning: #fbbf24;
-            --vault-info: #9333ea;
-            --vault-green: #4ade80;
-            --vault-gold: #fbbf24;
-            --vault-blue-dark: #2d5016;
-            --vault-blue-light: #3d6b1f;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            min-height: 100vh;
-            background-color: var(--vault-dark);
-            color: var(--vault-green);
-            font-family: 'Courier New', monospace;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
-        }
-
-        body {
-            padding: 20px;
-        }
-
-        /* Scanline effect */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .container {
+        #inv-root {
             position: relative;
             z-index: 1;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
-        }
-
-        /* ===== VAULT HEADER ===== */
-        .vault-header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background-color: var(--vault-darker);
-            border: 3px solid var(--vault-green);
-            box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
-        }
-
-        .vault-badge {
-            font-size: 10px;
-            color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .vault-title {
-            font-size: 28px;
-            font-weight: bold;
-            letter-spacing: 4px;
-            color: var(--vault-green);
-            text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
-            animation: vault-glow 2s ease-in-out infinite;
-            margin-bottom: 10px;
-        }
-
-        @keyframes vault-glow {
-            0%, 100% {
-                text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
-            }
-            50% {
-                text-shadow: 0 0 15px var(--vault-green), 0 0 30px rgba(74, 222, 128, 0.8);
-            }
-        }
-
-        .vault-subtitle {
-            font-size: 12px;
-            color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-            letter-spacing: 2px;
-        }
-
-        .vault-info {
-            font-size: 11px;
-            color: var(--vault-green);
-            text-shadow: 0 0 3px var(--vault-green);
-            margin-top: 8px;
-            border-top: 1px solid rgba(74, 222, 128, 0.3);
-            padding-top: 8px;
-        }
-
-        /* ===== VAULT FOOTER ===== */
-        .vault-footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(74, 222, 128, 0.3);
-            font-size: 10px;
-            color: var(--vault-green);
-            text-shadow: 0 0 3px var(--vault-green);
-        }
-
-        .vault-footer span {
-            color: var(--vault-gold);
-            text-shadow: 0 0 3px var(--vault-gold);
-            font-weight: bold;
-        }
-
-        /* ===== VAULT SEARCH ===== */
-        .vault-search {
-            background-color: var(--vault-darker);
-            border: 2px solid var(--vault-green);
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .vault-search-box {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        .vault-search-label {
-            color: var(--vault-gold);
-            font-size: 11px;
-            font-weight: bold;
-            text-shadow: 0 0 3px var(--vault-gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .vault-search-input {
-            background-color: var(--vault-dark);
-            border: 1px solid var(--vault-green);
-            color: var(--vault-green);
-            padding: 8px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            text-shadow: 0 0 5px var(--vault-green);
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .vault-search-input:focus {
-            outline: none;
-            border-color: var(--vault-gold);
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
-            color: var(--vault-gold);
-        }
-
-        /* ===== VAULT TABS ===== */
-        .vault-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .vault-tab {
-            background-color: var(--vault-blue-dark);
-            border: 2px solid var(--vault-green);
-            color: var(--vault-green);
-            padding: 12px 20px;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-            text-shadow: 0 0 5px var(--vault-green);
-            position: relative;
-            z-index: 1;
-        }
-
-        .vault-tab:hover {
-            background-color: var(--vault-blue-light);
-            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 10px var(--vault-gold);
-        }
-
-        .vault-tab.active {
-            background-color: var(--vault-blue-light);
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 10px var(--vault-gold);
-        }
-
-        /* ===== TAB CONTENT ===== */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .tab-content h2 {
-            color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-            font-size: 14px;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--vault-green);
-            padding-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        /* ===== VAULT FORM ===== */
-        .vault-form {
-            background-color: var(--vault-dark);
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            padding: 20px;
-            border-radius: 3px;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .vault-form-title {
-            color: var(--vault-accent);
-            font-size: 12px;
-            font-weight: bold;
-            text-shadow: 0 0 3px var(--vault-accent);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
-        }
-
-        .vault-form-group {
             display: flex;
             flex-direction: column;
-            position: relative;
-            z-index: 1;
-            margin-bottom: 15px;
+            gap: 10px;
         }
 
-        .vault-form-label {
-            color: var(--vault-green);
-            font-size: 10px;
-            text-shadow: 0 0 3px var(--vault-green);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-
-        .vault-form-input {
-            background-color: var(--vault-darker);
-            border: 1px solid var(--vault-green);
-            color: var(--vault-green);
-            padding: 8px 12px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            text-shadow: 0 0 5px var(--vault-green);
-            transition: all 0.3s ease;
-            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
-            position: relative;
-            z-index: 1;
-        }
-
-        .vault-form-input:focus {
-            outline: none;
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            box-shadow: 0 0 10px rgba(251, 191, 36, 0.4), inset 0 0 5px rgba(74, 222, 128, 0.1);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        /* ===== VAULT BUTTONS ===== */
-        .vault-btn {
-            background-color: var(--vault-blue-dark);
-            border: 2px solid var(--vault-green);
-            color: var(--vault-green);
-            padding: 10px 20px;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            font-weight: bold;
-            cursor: pointer;
-            text-shadow: 0 0 5px var(--vault-green);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
-            position: relative;
-            z-index: 1;
-        }
-
-        .vault-btn:hover {
-            background-color: var(--vault-blue-light);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
-            text-shadow: 0 0 10px var(--vault-gold);
-        }
-
-        .vault-btn-danger {
-            background-color: #8b3a3a;
-            border-color: var(--vault-error);
-            color: var(--vault-error);
-            text-shadow: 0 0 5px var(--vault-error);
-        }
-
-        .vault-btn-danger:hover {
-            background-color: #a84a4a;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
-        }
-
-        .vault-btn-secondary {
-            background-color: #4a5a3a;
-            border: 1px solid #9ecc71;
-            color: #9ecc71;
-        }
-
-        .vault-btn-secondary:hover {
-            background-color: #5a6a4a;
-            box-shadow: 0 0 10px rgba(158, 204, 113, 0.5);
-        }
-
-        /* ===== MESSAGES ===== */
-        .vault-message {
-            margin-top: 15px;
-            font-size: 12px;
-            color: var(--vault-green);
-            text-shadow: 0 0 3px var(--vault-green);
-            min-height: 20px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .vault-message.success {
-            color: var(--vault-success);
-            text-shadow: 0 0 5px var(--vault-success);
-        }
-
-        .vault-message.error {
-            color: var(--vault-error);
-            text-shadow: 0 0 5px var(--vault-error);
-        }
-
-        /* ===== ITEM LIST ===== */
-        .item-list {
-            list-style: none;
-            margin-bottom: 30px;
-        }
-
-        .item-card {
-            padding: 15px;
-            background-color: var(--vault-dark);
-            border: 1px solid rgba(74, 222, 128, 0.2);
-            border-radius: 3px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .item-card:hover {
-            background-color: rgba(74, 222, 128, 0.05);
-            border-color: rgba(74, 222, 128, 0.4);
-        }
-
-        .item-header {
+        /* Stats Bar */
+        #stats-bar {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 10px 16px;
+            background: #1a1a1a;
+            border: 2px solid #4ade80;
+            box-shadow: 0 0 10px rgba(74,222,128,0.3);
         }
-
-        .item-name {
-            color: var(--vault-gold);
-            text-shadow: 0 0 3px var(--vault-gold);
+        #stats-bar .title {
+            font-size: 18px;
             font-weight: bold;
-            font-size: 13px;
+            letter-spacing: 3px;
+            color: #4ade80;
+            text-shadow: 0 0 8px #4ade80;
             flex: 1;
         }
-
-        .item-actions {
-            display: flex;
-            gap: 8px;
-            align-items: center;
+        .stat-chip {
+            font-size: 11px;
+            padding: 4px 10px;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            letter-spacing: 1px;
+            white-space: nowrap;
         }
+        .stat-chip span { color: #fbbf24; font-weight: bold; }
+        .stat-chip.over { border-color: #ff6b6b; color: #ff6b6b; }
+        .stat-chip.over span { color: #ff6b6b; }
 
-        .favorite-btn, .edit-btn, .delete-btn {
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-            border-radius: 2px;
-            position: relative;
-            z-index: 1;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-
-        .favorite-btn {
-            background: none;
-            border: 1px solid var(--vault-gold);
-            color: var(--vault-gold);
-        }
-
-        .favorite-btn:hover {
-            background-color: var(--vault-gold);
-            color: var(--vault-dark);
-        }
-
-        .favorite-btn.favorited {
-            background-color: var(--vault-gold);
-            color: var(--vault-dark);
-        }
-
-        .edit-btn {
-            background-color: #4a5a3a;
-            border: 1px solid #9ecc71;
-            color: #9ecc71;
-        }
-
-        .edit-btn:hover {
-            background-color: #5a6a4a;
-            box-shadow: 0 0 10px rgba(158, 204, 113, 0.5);
-        }
-
-        .delete-btn {
-            background-color: #8b3a3a;
-            border: 1px solid var(--vault-error);
-            color: var(--vault-error);
-        }
-
-        .delete-btn:hover {
-            background-color: #a84a4a;
-            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
-        }
-
-        .item-body {
+        /* Main 2-column */
+        #main-cols {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 280px 1fr;
             gap: 10px;
-            margin-bottom: 10px;
+            min-height: 420px;
         }
 
-        .item-detail {
-            color: var(--vault-green);
-            font-size: 11px;
-            text-shadow: 0 0 3px var(--vault-green);
-        }
-
-        .detail-label {
-            color: var(--vault-gold);
-            font-weight: bold;
-            text-shadow: 0 0 3px var(--vault-gold);
-            font-size: 10px;
-        }
-
-        .item-description {
-            color: var(--vault-green);
-            font-size: 11px;
-            margin-bottom: 10px;
-            font-style: italic;
-        }
-
-        .item-footer {
+        /* Equipment Panel */
+        #equip-panel {
+            background: #111;
+            border: 2px solid #4ade80;
+            box-shadow: 0 0 10px rgba(74,222,128,0.3);
             display: flex;
-            gap: 10px;
-            align-items: center;
-            border-top: 1px solid rgba(74, 222, 128, 0.2);
-            padding-top: 10px;
+            flex-direction: column;
         }
-
-        .quantity-control {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
-
-        .quantity-control button {
-            background-color: var(--vault-blue-dark);
-            border: 1px solid var(--vault-green);
-            color: var(--vault-green);
-            padding: 4px 8px;
-            cursor: pointer;
+        .panel-header {
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #4ade80;
             font-size: 11px;
-            transition: all 0.2s ease;
-            border-radius: 2px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .quantity-control button:hover {
-            background-color: var(--vault-blue-light);
-            border-color: var(--vault-gold);
-            color: var(--vault-gold);
-        }
-
-        .quantity-display {
-            color: var(--vault-green);
-            font-size: 12px;
-            min-width: 50px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .empty-message {
-            color: var(--vault-info);
-            text-align: center;
-            padding: 40px 20px;
-            font-size: 12px;
-            font-style: italic;
-            text-shadow: 0 0 2px var(--vault-info);
-        }
-
-        /* ===== MODAL ===== */
-        .vault-modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            overflow-y: auto;
-        }
-
-        .vault-modal.active {
-            display: block;
-        }
-
-        .vault-modal-content {
-            background-color: var(--vault-darker);
-            border: 3px solid var(--vault-green);
-            padding: 30px;
-            border-radius: 5px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 0 0 30px rgba(74, 222, 128, 0.5);
-            margin: 50px auto;
-            animation: vault-slideIn 0.3s ease;
-        }
-
-        @keyframes vault-slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .vault-modal-title {
-            color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-            font-size: 16px;
-            font-weight: bold;
             letter-spacing: 2px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--vault-green);
-            padding-bottom: 10px;
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+        }
+        #equip-slots {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .eq-slot {
+            border: 1px solid #2d5016;
+            padding: 6px 8px;
+            background: #0d1a0d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: border-color 0.15s;
+        }
+        .eq-slot:hover { border-color: #4ade80; }
+        .eq-slot .slot-icon { font-size: 15px; flex-shrink: 0; width: 20px; text-align: center; }
+        .eq-slot .slot-info { flex: 1; min-width: 0; }
+        .eq-slot .slot-label {
+            font-size: 9px;
+            color: #fbbf24;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }
+        .eq-slot .slot-item {
+            font-size: 11px;
+            color: #4ade80;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .eq-slot .slot-item.empty { color: #2d5016; font-style: italic; }
+        .eq-slot .unequip-btn {
+            background: none;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            font-size: 10px;
+            padding: 2px 5px;
+            cursor: pointer;
+            flex-shrink: 0;
+            font-family: 'Courier New', monospace;
+        }
+        .eq-slot .unequip-btn:hover { background: rgba(255,107,107,0.15); }
 
-        .vault-modal-buttons {
+        #equip-mods {
+            padding: 8px 10px;
+            border-top: 1px solid #2d5016;
+            font-size: 10px;
+            color: #9ca3af;
+        }
+        #equip-mods .mod-title {
+            color: #fbbf24;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+            font-size: 9px;
+        }
+        #equip-mods .mod-line { color: #4ade80; margin: 2px 0; }
+
+        /* Inventory Panel */
+        #inv-panel {
+            background: #111;
+            border: 2px solid #4ade80;
+            box-shadow: 0 0 10px rgba(74,222,128,0.3);
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            justify-content: flex-end;
+            flex-direction: column;
+        }
+        #inv-toolbar {
+            display: flex;
+            gap: 6px;
+            padding: 8px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #4ade80;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        #inv-search {
+            flex: 1;
+            min-width: 120px;
+            background: #0a0a0a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 4px 8px;
+            outline: none;
+        }
+        #inv-search::placeholder { color: #2d5016; }
+        #inv-search:focus { border-color: #fbbf24; box-shadow: 0 0 5px rgba(251,191,36,0.4); }
+        #filter-select {
+            background: #0a0a0a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 4px 6px;
+            outline: none;
+            cursor: pointer;
+        }
+        #filter-select:focus { border-color: #fbbf24; }
+        .toolbar-btn {
+            background: #1a1a1a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 4px 10px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.15s;
+        }
+        .toolbar-btn:hover { background: rgba(74,222,128,0.15); box-shadow: 0 0 5px rgba(74,222,128,0.3); }
+        .toolbar-btn.gold { border-color: #fbbf24; color: #fbbf24; }
+        .toolbar-btn.gold:hover { background: rgba(251,191,36,0.15); }
+
+        #inv-list-wrap { flex: 1; overflow-y: auto; max-height: 380px; }
+        #inv-list { list-style: none; padding: 4px; }
+
+        .inv-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 8px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .inv-item:hover { border-color: #4ade80; background: #0d1a0d; }
+        .inv-item.selected { border-color: #fbbf24; background: #1a1500; }
+        .inv-item .rarity-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .inv-item .item-name {
+            flex: 1;
+            font-size: 12px;
+            color: #4ade80;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .inv-item .item-qty  { font-size: 11px; color: #9ca3af; width: 36px; text-align: right; }
+        .inv-item .item-wt   { font-size: 11px; color: #9ca3af; width: 52px; text-align: right; }
+        .inv-item .item-val  { font-size: 11px; color: #fbbf24; width: 52px; text-align: right; }
+
+        .inv-empty {
+            text-align: center;
+            color: #2d5016;
+            font-size: 12px;
+            padding: 40px 20px;
+            letter-spacing: 1px;
         }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            .vault-header {
-                padding: 20px;
-            }
+        /* Details Panel */
+        #details-panel {
+            background: #111;
+            border: 2px solid #4ade80;
+            box-shadow: 0 0 10px rgba(74,222,128,0.3);
+        }
+        #details-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background: #1a1a1a;
+            border-bottom: 1px solid #4ade80;
+            cursor: pointer;
+            user-select: none;
+        }
+        #details-header .dtitle {
+            flex: 1;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+        }
+        #details-toggle { color: #4ade80; font-size: 14px; transition: transform 0.2s; }
+        #details-toggle.collapsed { transform: rotate(-90deg); }
 
-            .vault-title {
-                font-size: 20px;
-            }
+        #details-body {
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 12px;
+            overflow: hidden;
+            transition: max-height 0.25s ease;
+            max-height: 300px;
+        }
+        #details-body.hidden { max-height: 0; padding: 0 12px; overflow: hidden; }
 
-            .vault-tabs {
-                flex-direction: column;
-            }
+        #details-info .d-name {
+            font-size: 16px;
+            color: #4ade80;
+            text-shadow: 0 0 6px #4ade80;
+            margin-bottom: 6px;
+        }
+        #details-info .d-desc {
+            font-size: 11px;
+            color: #9ca3af;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        .d-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+        .d-meta-chip {
+            font-size: 10px;
+            padding: 2px 8px;
+            border: 1px solid #2d5016;
+            color: #4ade80;
+        }
+        .d-meta-chip.rarity-common    { border-color: #4ade80; }
+        .d-meta-chip.rarity-uncommon  { border-color: #fbbf24; color: #fbbf24; }
+        .d-meta-chip.rarity-rare      { border-color: #c084fc; color: #c084fc; }
+        .d-meta-chip.rarity-legendary { border-color: #ff9500; color: #ff9500; }
+        .d-props { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .d-prop-tag {
+            font-size: 10px;
+            padding: 2px 7px;
+            background: #1a1a1a;
+            border: 1px solid #2d5016;
+            color: #9ca3af;
+        }
 
-            .vault-tab {
-                width: 100%;
-                text-align: left;
-            }
+        #details-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+            justify-content: flex-start;
+            min-width: 90px;
+        }
+        .action-btn {
+            width: 90px;
+            background: #1a1a1a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 6px 0;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-align: center;
+            transition: all 0.15s;
+        }
+        .action-btn:hover  { background: rgba(74,222,128,0.15); box-shadow: 0 0 5px rgba(74,222,128,0.4); }
+        .action-btn.danger { border-color: #ff6b6b; color: #ff6b6b; }
+        .action-btn.danger:hover { background: rgba(255,107,107,0.15); }
+        .action-btn.gold   { border-color: #fbbf24; color: #fbbf24; }
+        .action-btn.gold:hover { background: rgba(251,191,36,0.15); }
 
-            .vault-search {
-                flex-direction: column;
-            }
+        #details-placeholder {
+            padding: 16px;
+            text-align: center;
+            color: #2d5016;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
 
-            .vault-search-box {
-                width: 100%;
-            }
+        /* Modals */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: #111;
+            border: 2px solid #4ade80;
+            box-shadow: 0 0 30px rgba(74,222,128,0.4);
+            width: 90%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 20px;
+            position: relative;
+        }
+        .modal-title {
+            font-size: 14px;
+            letter-spacing: 3px;
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #2d5016;
+            padding-bottom: 8px;
+        }
+        .modal-close {
+            position: absolute;
+            top: 14px; right: 14px;
+            background: none;
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+            font-size: 14px;
+            padding: 2px 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        .modal-close:hover { background: rgba(255,107,107,0.15); }
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group.full { grid-column: 1 / -1; }
+        .form-label { font-size: 10px; color: #fbbf24; letter-spacing: 1px; }
+        .form-input, .form-select, .form-textarea {
+            background: #0a0a0a;
+            border: 1px solid #4ade80;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 6px 8px;
+            outline: none;
+            width: 100%;
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 4px rgba(251,191,36,0.3);
+        }
+        .form-textarea { resize: vertical; min-height: 60px; }
+        .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+        .modal-msg { font-size: 11px; color: #ff6b6b; min-height: 16px; margin-top: 8px; }
 
-            .item-body {
-                grid-template-columns: 1fr;
-            }
+        .slot-picker-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+        .slot-pick-btn {
+            width: 100%;
+            background: #0d1a0d;
+            border: 1px solid #2d5016;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 8px 12px;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.1s;
+        }
+        .slot-pick-btn:hover { border-color: #4ade80; background: #1a2e1a; }
+        .slot-pick-btn .slot-pick-icon { font-size: 16px; width: 22px; text-align: center; }
+        .slot-pick-btn .slot-pick-occupied { font-size: 10px; color: #ff6b6b; margin-left: auto; }
 
-            .item-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
+        /* Catalog template list */
+        #tpl-list {
+            max-height: 160px;
+            overflow-y: auto;
+            border: 1px solid #2d5016;
+            margin-bottom: 8px;
+        }
+        .tpl-row {
+            padding: 5px 8px;
+            cursor: pointer;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid #0d1a0d;
+        }
+        .tpl-row:hover { background: #1a2e1a; }
+        .tpl-row.selected { background: #1a1500; border-left: 2px solid #fbbf24; }
 
-            .vault-modal-content {
-                width: 95%;
-                margin: 20px auto;
-            }
+        /* Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #2d5016; border-radius: 2px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4ade80; }
 
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
+        /* Responsive */
+        @media (max-width: 640px) {
+            #main-cols { grid-template-columns: 1fr; }
+            #inv-list-wrap { max-height: 260px; }
+            #equip-slots { max-height: 260px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <div class="vault-header">
-            <div class="vault-badge">VAULT-TEC INDUSTRIES AUTOMATED INVENTORY SYSTEM</div>
-            <div class="vault-title">PIP-BOY INVENTORY</div>
-            <div class="vault-subtitle">ITEM MANAGEMENT SYSTEM</div>
-            <div class="vault-info">Vault 215 Resident • Portable Information Processor</div>
+
+<!-- VAULT 215 INVENTORY SYSTEM -->
+<div id="inv-root">
+
+    <!-- Stats Bar -->
+    <div id="stats-bar">
+        <div class="title">&#127890; INVENTORY</div>
+        <div class="stat-chip" id="stat-items">ITEMS: <span id="sv-items">0</span></div>
+        <div class="stat-chip" id="stat-weight">WEIGHT: <span id="sv-weight">0</span> / <span id="sv-maxw">150</span> lb</div>
+        <div class="stat-chip" id="stat-value">VALUE: <span id="sv-value">0</span>&#162;</div>
+    </div>
+
+    <!-- Main Columns -->
+    <div id="main-cols">
+
+        <!-- LEFT: Equipment Slots -->
+        <div id="equip-panel">
+            <div class="panel-header">&#9881; EQUIPPED GEAR</div>
+            <div id="equip-slots"></div>
+            <div id="equip-mods">
+                <div class="mod-title">&#9658; ACTIVE MODIFIERS</div>
+                <div id="mod-lines"></div>
+            </div>
         </div>
 
-        <!-- SEARCH & FILTER -->
-        <div class="vault-search">
-            <div class="vault-search-box">
-                <label class="vault-search-label">Search Items</label>
-                <input type="text" class="vault-search-input" id="searchInput" placeholder="Search by name..." onkeyup="filterAndSort()">
-            </div>
-            <div class="vault-search-box">
-                <label class="vault-search-label">Sort By</label>
-                <select id="sortSelect" class="vault-search-input" onchange="filterAndSort()" style="cursor: pointer;">
-                    <option value="name">Name (A-Z)</option>
-                    <option value="name-desc">Name (Z-A)</option>
-                    <option value="quantity">Quantity (Low-High)</option>
-                    <option value="quantity-desc">Quantity (High-Low)</option>
-                    <option value="value">Value (Low-High)</option>
-                    <option value="value-desc">Value (High-Low)</option>
-                    <option value="favorites">Favorites First</option>
+        <!-- RIGHT: Inventory Grid -->
+        <div id="inv-panel">
+            <div id="inv-toolbar">
+                <input type="text" id="inv-search" placeholder="[ SEARCH ITEMS... ]" oninput="handleSearch()">
+                <select id="filter-select" onchange="handleFilter()">
+                    <option value="all">ALL</option>
+                    <option value="weapon">WEAPONS</option>
+                    <option value="armor">ARMOR</option>
+                    <option value="consumable">CONSUMABLES</option>
+                    <option value="misc">MISC</option>
+                    <option value="ammo">AMMO</option>
                 </select>
+                <button class="toolbar-btn gold" onclick="openAddModal()">+ ADD ITEM</button>
+                <button class="toolbar-btn" onclick="clearInventory()" title="Clear all inventory">X CLEAR</button>
+            </div>
+            <div id="inv-list-wrap">
+                <ul id="inv-list"></ul>
             </div>
         </div>
 
-        <!-- TABS -->
-        <div class="vault-tabs">
-            <div class="vault-tab active" onclick="switchTab('weapons', this)">⚔ Weapons</div>
-            <div class="vault-tab" onclick="switchTab('apparel', this)">👕 Apparel</div>
-            <div class="vault-tab" onclick="switchTab('misc', this)">📦 Misc</div>
-            <div class="vault-tab" onclick="switchTab('aid', this)">⚕ Aid</div>
-            <div class="vault-tab" onclick="switchTab('ammo', this)">💣 Ammo</div>
-        </div>
+    </div>
 
-        <!-- WEAPONS TAB -->
-        <div id="weapons" class="tab-content active">
-            <h2>⚔ Weapons - Vault 215</h2>
-            <div class="vault-form">
-                <div class="vault-form-title">+ Add Weapon</div>
-                <div class="form-grid">
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Item Name</label>
-                        <input type="text" class="vault-form-input" id="weaponName" placeholder="e.g., Laser Rifle">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Damage</label>
-                        <input type="number" class="vault-form-input" id="weaponDamage" placeholder="e.g., 25">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value (Caps)</label>
-                        <input type="number" class="vault-form-input" id="weaponValue" placeholder="e.g., 500">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Damage Type</label>
-                        <input type="text" class="vault-form-input" id="weaponDamageType" placeholder="e.g., Energy">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="weaponDesc" placeholder="Optional description">
-                    </div>
-                </div>
-                <button class="vault-btn" onclick="addItem('weapons')">ADD WEAPON</button>
-                <div class="vault-message" id="weaponsMessage"></div>
+    <!-- Details Panel -->
+    <div id="details-panel">
+        <div id="details-header" onclick="toggleDetails()">
+            <div class="dtitle">&#9658; ITEM DETAILS</div>
+            <div id="details-toggle">&#9660;</div>
+        </div>
+        <div id="details-body" class="hidden">
+            <div id="details-info">
+                <div id="details-placeholder">[ SELECT AN ITEM TO VIEW DETAILS ]</div>
             </div>
-            <ul class="item-list" id="weaponsList"></ul>
-        </div>
-
-        <!-- APPAREL TAB -->
-        <div id="apparel" class="tab-content">
-            <h2>👕 Apparel - Vault 215</h2>
-            <div class="vault-form">
-                <div class="vault-form-title">+ Add Apparel</div>
-                <div class="form-grid">
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Item Name</label>
-                        <input type="text" class="vault-form-input" id="apparelName" placeholder="e.g., Combat Armor">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Defense Rating (DR)</label>
-                        <input type="number" class="vault-form-input" id="apparelDR" placeholder="e.g., 35">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value (Caps)</label>
-                        <input type="number" class="vault-form-input" id="apparelValue" placeholder="e.g., 300">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="apparelDesc" placeholder="Optional description">
-                    </div>
-                </div>
-                <button class="vault-btn" onclick="addItem('apparel')">ADD APPAREL</button>
-                <div class="vault-message" id="apparelMessage"></div>
-            </div>
-            <ul class="item-list" id="apparelList"></ul>
-        </div>
-
-        <!-- MISCELLANEOUS TAB -->
-        <div id="misc" class="tab-content">
-            <h2>📦 Miscellaneous - Vault 215</h2>
-            <div class="vault-form">
-                <div class="vault-form-title">+ Add Misc Item</div>
-                <div class="form-grid">
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Item Name</label>
-                        <input type="text" class="vault-form-input" id="miscName" placeholder="e.g., Fusion Core">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Quantity</label>
-                        <input type="number" class="vault-form-input" id="miscQuantity" placeholder="1" min="1">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value per Item (Caps)</label>
-                        <input type="number" class="vault-form-input" id="miscValue" placeholder="e.g., 100">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Rarity</label>
-                        <input type="text" class="vault-form-input" id="miscRarity" placeholder="e.g., Common">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="miscDesc" placeholder="Optional description">
-                    </div>
-                </div>
-                <button class="vault-btn" onclick="addItem('misc')">ADD ITEM</button>
-                <div class="vault-message" id="miscMessage"></div>
-            </div>
-            <ul class="item-list" id="miscList"></ul>
-        </div>
-
-        <!-- AID TAB -->
-        <div id="aid" class="tab-content">
-            <h2>⚕ Aid & Consumables - Vault 215</h2>
-            <div class="vault-form">
-                <div class="vault-form-title">+ Add Aid Item</div>
-                <div class="form-grid">
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Item Name</label>
-                        <input type="text" class="vault-form-input" id="aidName" placeholder="e.g., Stimpak">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Quantity</label>
-                        <input type="number" class="vault-form-input" id="aidQuantity" placeholder="1" min="1">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Effect Type</label>
-                        <input type="text" class="vault-form-input" id="aidEffect" placeholder="e.g., Health">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Effect Amount</label>
-                        <input type="text" class="vault-form-input" id="aidAmount" placeholder="e.g., Restores 100 HP">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value (Caps)</label>
-                        <input type="number" class="vault-form-input" id="aidValue" placeholder="e.g., 25">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="aidDesc" placeholder="Optional description">
-                    </div>
-                </div>
-                <button class="vault-btn" onclick="addItem('aid')">ADD AID ITEM</button>
-                <div class="vault-message" id="aidMessage"></div>
-            </div>
-            <ul class="item-list" id="aidList"></ul>
-        </div>
-
-        <!-- AMMO TAB -->
-        <div id="ammo" class="tab-content">
-            <h2>💣 Ammunition - Vault 215</h2>
-            <div class="vault-form">
-                <div class="vault-form-title">+ Add Ammo</div>
-                <div class="form-grid">
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Ammo Type</label>
-                        <input type="text" class="vault-form-input" id="ammoName" placeholder="e.g., 10mm Round">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Quantity</label>
-                        <input type="number" class="vault-form-input" id="ammoQuantity" placeholder="287" min="1">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Value per Round (Caps)</label>
-                        <input type="number" class="vault-form-input" id="ammoValue" placeholder="e.g., 1" step="0.1">
-                    </div>
-                    <div class="vault-form-group">
-                        <label class="vault-form-label">Weapon Type</label>
-                        <input type="text" class="vault-form-input" id="ammoWeapon" placeholder="e.g., 10mm Pistol">
-                    </div>
-                    <div class="vault-form-group" style="grid-column: 1 / -1;">
-                        <label class="vault-form-label">Description</label>
-                        <input type="text" class="vault-form-input" id="ammoDesc" placeholder="Optional description">
-                    </div>
-                </div>
-                <button class="vault-btn" onclick="addItem('ammo')">ADD AMMO</button>
-                <div class="vault-message" id="ammoMessage"></div>
-            </div>
-            <ul class="item-list" id="ammoList"></ul>
-        </div>
-
-                <!-- FOOTER -->
-        <div class="vault-footer">
-            <p>VAULT <span>215</span> RESIDENT • PROPERTY OF VAULT-TEC INDUSTRIES</p>
-            <p style="margin-top: 5px;">Inventory Data Secured and Synchronized</p>
+            <div id="details-actions" style="display:none"></div>
         </div>
     </div>
 
-    <script src="../assets/helpers/settingsManager.js"></script>
-    <script src="../assets/navigation.js"></script> 
+</div>
+
+<!-- ADD ITEM MODAL -->
+<div class="modal-overlay" id="add-modal">
+    <div class="modal-box">
+        <div class="modal-title">+ ADD ITEM TO INVENTORY</div>
+        <button class="modal-close" onclick="closeAddModal()">X</button>
+
+        <div class="form-group" style="margin-bottom:6px">
+            <div class="form-label">PICK FROM CATALOG (optional)</div>
+            <input type="text" class="form-input" id="tpl-search" placeholder="Filter catalog..." oninput="filterTemplates()">
+        </div>
+        <div id="tpl-list"></div>
+        <hr style="border:none;border-top:1px dashed #2d5016;margin:10px 0">
+
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label class="form-label">NAME *</label>
+                <input type="text" class="form-input" id="f-name" placeholder="Item name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">TYPE</label>
+                <select class="form-select" id="f-type">
+                    <option value="weapon">Weapon</option>
+                    <option value="armor">Armor</option>
+                    <option value="consumable">Consumable</option>
+                    <option value="ammo">Ammo</option>
+                    <option value="misc" selected>Misc</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">RARITY</label>
+                <select class="form-select" id="f-rarity">
+                    <option value="common" selected>Common</option>
+                    <option value="uncommon">Uncommon</option>
+                    <option value="rare">Rare</option>
+                    <option value="legendary">Legendary</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">QUANTITY</label>
+                <input type="number" class="form-input" id="f-qty" value="1" min="1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">WEIGHT (lb)</label>
+                <input type="number" class="form-input" id="f-weight" value="0" min="0" step="0.1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">VALUE (cents)</label>
+                <input type="number" class="form-input" id="f-value" value="0" min="0">
+            </div>
+            <div class="form-group full">
+                <label class="form-label">DESCRIPTION</label>
+                <textarea class="form-textarea" id="f-desc" placeholder="Item description..."></textarea>
+            </div>
+            <div class="form-group full">
+                <label class="form-label">PROPERTIES (comma-separated)</label>
+                <input type="text" class="form-input" id="f-props" placeholder="e.g. Ranged, Semi-Auto">
+            </div>
+        </div>
+        <div class="modal-msg" id="add-msg"></div>
+        <div class="modal-footer">
+            <button class="toolbar-btn" onclick="closeAddModal()">CANCEL</button>
+            <button class="toolbar-btn gold" onclick="submitAddItem()">ADD TO INVENTORY</button>
+        </div>
+    </div>
+</div>
+
+<!-- EQUIP SLOT PICKER MODAL -->
+<div class="modal-overlay" id="slot-modal">
+    <div class="modal-box" style="max-width:360px">
+        <div class="modal-title">CHOOSE EQUIPMENT SLOT</div>
+        <button class="modal-close" onclick="closeSlotModal()">X</button>
+        <div id="slot-picker-list" class="slot-picker-list"></div>
+    </div>
+</div>
+
+<script src="../assets/data/items.js"></script>
+<script src="../assets/data/campaigns.js"></script>
+<script>
+/* ── Constants & State ────────────────────────────────────── */
+var LS_INV  = 'vault_inventory';
+var LS_EQ   = 'vault_equipment';
+var MAX_CARRY = 150;
+
+var SLOT_CONFIG = [
+    { key: 'head',            label: 'Head',             icon: '\u26CF', types: ['armor'] },
+    { key: 'body',            label: 'Body',             icon: '\uD83D\uDEE1', types: ['armor'] },
+    { key: 'hands',           label: 'Hands',            icon: '\uD83E\uDDE4', types: ['armor'] },
+    { key: 'legs',            label: 'Legs',             icon: '\uD83E\uDDB5', types: ['armor'] },
+    { key: 'feet',            label: 'Feet',             icon: '\uD83D\uDC5F', types: ['armor'] },
+    { key: 'back',            label: 'Back',             icon: '\uD83C\uDF92', types: ['armor', 'misc'] },
+    { key: 'primaryWeapon',   label: 'Primary Weapon',   icon: '\uD83D\uDD2B', types: ['weapon'] },
+    { key: 'secondaryWeapon', label: 'Secondary Weapon', icon: '\uD83D\uDDE1', types: ['weapon'] }
+];
+
+var RARITY_COLORS = {
+    common:    '#4ade80',
+    uncommon:  '#fbbf24',
+    rare:      '#c084fc',
+    legendary: '#ff9500'
+};
+
+var DEFAULT_EQUIPMENT = {
+    head: null, body: null, hands: null, legs: null,
+    feet: null, back: null, primaryWeapon: null, secondaryWeapon: null
+};
+
+var inventory  = [];
+var equipment  = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT));
+var selectedId = null;
+var addTemplateSelected = null;
+var slotModalUid = null;
+
+/* ── Security ─────────────────────────────────────────────── */
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+/* ── Persistence ──────────────────────────────────────────── */
+function saveData() {
+    try {
+        localStorage.setItem(LS_INV, JSON.stringify(inventory));
+        localStorage.setItem(LS_EQ,  JSON.stringify(equipment));
+    } catch (e) { /* storage unavailable */ }
+}
+
+function loadData() {
+    var rawInv = null, rawEq = null;
+    try { rawInv = localStorage.getItem(LS_INV); } catch(e){}
+    try { rawEq  = localStorage.getItem(LS_EQ);  } catch(e){}
+
+    if (rawInv) {
+        try { inventory = JSON.parse(rawInv); } catch(e) { inventory = []; }
+    } else {
+        inventory = buildStarterInventory();
+    }
+
+    if (rawEq) {
+        try {
+            var parsed = JSON.parse(rawEq);
+            equipment = Object.assign({}, DEFAULT_EQUIPMENT, parsed);
+        } catch(e) { equipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT)); }
+    } else {
+        equipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT));
+    }
+}
+
+function buildStarterInventory() {
+    var items = [];
+    var starterIds = [
+        'item_10mm_pistol_1','item_stimpak_1','item_rad_away_1','item_nuka_cola_1',
+        'item_leather_armor_1','item_frag_grenade_1','item_hunting_knife_1','item_caps_1'
+    ];
+    var qtys = {
+        item_stimpak_1: 3, item_rad_away_1: 2, item_nuka_cola_1: 3,
+        item_caps_1: 250, item_frag_grenade_1: 2
+    };
+
+    if (typeof ITEMS !== 'undefined') {
+        for (var i = 0; i < starterIds.length; i++) {
+            var id = starterIds[i];
+            var tpl = null;
+            for (var j = 0; j < ITEMS.length; j++) {
+                if (ITEMS[j].id === id) { tpl = ITEMS[j]; break; }
+            }
+            if (tpl) items.push(makeInventoryItem(tpl, qtys[id] || 1));
+        }
+    }
+
+    if (typeof CAMPAIGNS !== 'undefined' && CAMPAIGNS.length > 0) {
+        var campInv = CAMPAIGNS[0].inventory || [];
+        for (var k = 0; k < campInv.length; k++) {
+            var ci = campInv[k];
+            var dup = false;
+            for (var m = 0; m < items.length; m++) {
+                if (items[m].name === ci.name) { dup = true; break; }
+            }
+            if (!dup) {
+                items.push({
+                    uid: 'cmp_' + ci.id,
+                    id: ci.id, name: ci.name,
+                    type: ci.type || 'misc', rarity: 'common',
+                    quantity: ci.quantity || 1, weight: ci.weight || 0,
+                    value: ci.value || 0, description: ci.description || '',
+                    properties: []
+                });
+            }
+        }
+    }
+
+    items.push({
+        uid: 'ammo_10mm_start', id: 'ammo_10mm', name: '10mm Rounds',
+        type: 'ammo', rarity: 'common', quantity: 120, weight: 0, value: 1,
+        description: 'Standard 10mm pistol ammunition.', properties: ['10mm', 'Pistol Ammo']
+    });
+
+    return items;
+}
+
+function makeInventoryItem(tpl, qty) {
+    return {
+        uid: 'inv_' + tpl.id + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+        id: tpl.id, name: tpl.name, type: tpl.type,
+        rarity: tpl.rarity || 'common', quantity: qty || 1,
+        weight: tpl.weight || 0, value: tpl.value || 0,
+        description: tpl.description || '',
+        properties: Array.isArray(tpl.properties) ? tpl.properties.slice() : []
+    };
+}
+
+/* ── Render: Stats Bar ────────────────────────────────────── */
+function renderStats() {
+    var totalItems = 0, totalWeight = 0, totalValue = 0;
+    for (var i = 0; i < inventory.length; i++) {
+        var it = inventory[i];
+        var q = it.quantity || 1;
+        totalItems  += q;
+        totalWeight += (it.weight || 0) * q;
+        totalValue  += (it.value  || 0) * q;
+    }
+    document.getElementById('sv-items').textContent  = totalItems;
+    document.getElementById('sv-weight').textContent = totalWeight.toFixed(1);
+    document.getElementById('sv-maxw').textContent   = MAX_CARRY;
+    document.getElementById('sv-value').textContent  = totalValue.toLocaleString();
+    var wChip = document.getElementById('stat-weight');
+    if (totalWeight > MAX_CARRY) { wChip.classList.add('over'); }
+    else { wChip.classList.remove('over'); }
+}
+
+/* ── Render: Equipment Slots ──────────────────────────────── */
+function renderEquipment() {
+    var container = document.getElementById('equip-slots');
+    var html = '';
+    for (var i = 0; i < SLOT_CONFIG.length; i++) {
+        var slot = SLOT_CONFIG[i];
+        var equipped = equipment[slot.key];
+        var itemName = equipped ? escapeHtml(equipped.name) : '[EMPTY]';
+        var isEmpty  = !equipped;
+        html += '<div class="eq-slot">' +
+            '<div class="slot-icon">' + slot.icon + '</div>' +
+            '<div class="slot-info">' +
+                '<div class="slot-label">' + escapeHtml(slot.label) + '</div>' +
+                '<div class="slot-item' + (isEmpty ? ' empty' : '') + '">' + itemName + '</div>' +
+            '</div>' +
+            (!isEmpty ? '<button class="unequip-btn" onclick="unequipSlot(\'' + escapeHtml(slot.key) + '\')" title="Unequip">X</button>' : '') +
+        '</div>';
+    }
+    container.innerHTML = html;
+    renderModifiers();
+}
+
+function renderModifiers() {
+    var modEl = document.getElementById('mod-lines');
+    var mods  = [];
+    for (var i = 0; i < SLOT_CONFIG.length; i++) {
+        var slot = SLOT_CONFIG[i];
+        var item = equipment[slot.key];
+        if (!item) continue;
+        var props = item.properties || [];
+        for (var j = 0; j < props.length; j++) {
+            if (/^DR\s*\d+/i.test(props[j])) {
+                mods.push(slot.icon + ' ' + escapeHtml(item.name) + ': ' + escapeHtml(props[j]));
+            } else if (/strength boost/i.test(props[j])) {
+                mods.push(slot.icon + ' ' + escapeHtml(item.name) + ': ' + escapeHtml(props[j]));
+            }
+        }
+    }
+    if (mods.length === 0) {
+        modEl.innerHTML = '<div style="color:#2d5016;font-size:10px">No active modifiers</div>';
+    } else {
+        var html = '';
+        for (var k = 0; k < mods.length; k++) {
+            html += '<div class="mod-line">&#9658; ' + mods[k] + '</div>';
+        }
+        modEl.innerHTML = html;
+    }
+}
+
+/* ── Render: Inventory List ───────────────────────────────── */
+function getFilteredInventory() {
+    var search = (document.getElementById('inv-search').value || '').toLowerCase().trim();
+    var filter = document.getElementById('filter-select').value;
+    var result = [];
+    for (var i = 0; i < inventory.length; i++) {
+        var item = inventory[i];
+        var matchType = filter === 'all' || item.type === filter;
+        var matchName = !search || item.name.toLowerCase().indexOf(search) !== -1;
+        if (matchType && matchName) result.push(item);
+    }
+    return result;
+}
+
+function renderInventory() {
+    var list    = document.getElementById('inv-list');
+    var visible = getFilteredInventory();
+    if (visible.length === 0) {
+        list.innerHTML = '<li class="inv-empty">[ NO ITEMS FOUND ]</li>';
+        return;
+    }
+    var html = '';
+    for (var i = 0; i < visible.length; i++) {
+        var item  = visible[i];
+        var color = RARITY_COLORS[item.rarity] || RARITY_COLORS.common;
+        var isSel = item.uid === selectedId;
+        var qty   = item.quantity || 1;
+        var wt    = ((item.weight || 0) * qty).toFixed(1);
+        var val   = (item.value || 0) * qty;
+        html += '<li class="inv-item' + (isSel ? ' selected' : '') + '" ' +
+            'onclick="selectItem(\'' + escapeHtml(item.uid) + '\')" ' +
+            'data-uid="' + escapeHtml(item.uid) + '">' +
+            '<span class="rarity-dot" style="background:' + color + ';box-shadow:0 0 4px ' + color + '"></span>' +
+            '<span class="item-name">' + escapeHtml(item.name) + '</span>' +
+            '<span class="item-qty">' + qty + 'x</span>' +
+            '<span class="item-wt">' + wt + 'lb</span>' +
+            '<span class="item-val">' + val + '&#162;</span>' +
+        '</li>';
+    }
+    list.innerHTML = html;
+}
+
+/* ── Render: Details Panel ────────────────────────────────── */
+function renderDetails() {
+    var infoEl    = document.getElementById('details-info');
+    var actionsEl = document.getElementById('details-actions');
+
+    if (!selectedId) {
+        infoEl.innerHTML = '<div id="details-placeholder">[ SELECT AN ITEM TO VIEW DETAILS ]</div>';
+        actionsEl.style.display = 'none';
+        return;
+    }
+
+    var item = null;
+    for (var i = 0; i < inventory.length; i++) {
+        if (inventory[i].uid === selectedId) { item = inventory[i]; break; }
+    }
+    if (!item) { selectedId = null; renderDetails(); return; }
+
+    var color = RARITY_COLORS[item.rarity] || RARITY_COLORS.common;
+    var propsHtml = '';
+    var props = item.properties || [];
+    for (var j = 0; j < props.length; j++) {
+        propsHtml += '<span class="d-prop-tag">' + escapeHtml(props[j]) + '</span>';
+    }
+
+    infoEl.innerHTML =
+        '<div class="d-name" style="color:' + color + ';text-shadow:0 0 6px ' + color + '">' + escapeHtml(item.name) + '</div>' +
+        '<div class="d-meta">' +
+            '<span class="d-meta-chip rarity-' + escapeHtml(item.rarity) + '">' + escapeHtml(item.rarity).toUpperCase() + '</span>' +
+            '<span class="d-meta-chip">' + escapeHtml(item.type).toUpperCase() + '</span>' +
+            '<span class="d-meta-chip">WT: ' + escapeHtml(String(item.weight || 0)) + 'lb</span>' +
+            '<span class="d-meta-chip">VAL: ' + escapeHtml(String(item.value || 0)) + '&#162;</span>' +
+            '<span class="d-meta-chip">QTY: ' + escapeHtml(String(item.quantity || 1)) + '</span>' +
+        '</div>' +
+        '<div class="d-desc">' + escapeHtml(item.description || 'No description available.') + '</div>' +
+        (propsHtml ? '<div class="d-props">' + propsHtml + '</div>' : '');
+
+    var equippedSlotKey = null;
+    for (var key in equipment) {
+        if (equipment[key] && equipment[key].uid === item.uid) { equippedSlotKey = key; break; }
+    }
+    var canEquip = item.type === 'weapon' || item.type === 'armor';
+    var canUse   = item.type === 'consumable';
+
+    var actHtml = '';
+    if (canEquip) {
+        if (equippedSlotKey) {
+            actHtml += '<button class="action-btn gold" onclick="unequipSlot(\'' + escapeHtml(equippedSlotKey) + '\')">UNEQUIP</button>';
+        } else {
+            actHtml += '<button class="action-btn" onclick="openSlotModal(\'' + escapeHtml(item.uid) + '\')">EQUIP</button>';
+        }
+    }
+    if (canUse) {
+        actHtml += '<button class="action-btn gold" onclick="useItem(\'' + escapeHtml(item.uid) + '\')">USE</button>';
+    }
+    actHtml += '<button class="action-btn danger" onclick="dropItem(\'' + escapeHtml(item.uid) + '\')">DROP</button>';
+
+    actionsEl.innerHTML     = actHtml;
+    actionsEl.style.display = 'flex';
+}
+
+/* ── Actions ──────────────────────────────────────────────── */
+function selectItem(uid) {
+    selectedId = uid;
+    var body   = document.getElementById('details-body');
+    var toggle = document.getElementById('details-toggle');
+    if (body.classList.contains('hidden')) {
+        body.classList.remove('hidden');
+        toggle.classList.remove('collapsed');
+    }
+    renderInventory();
+    renderDetails();
+}
+
+function equipItem(uid, slotKey) {
+    var item = null;
+    for (var i = 0; i < inventory.length; i++) {
+        if (inventory[i].uid === uid) { item = inventory[i]; break; }
+    }
+    if (!item) return;
+    for (var key in equipment) {
+        if (equipment[key] && equipment[key].uid === uid) equipment[key] = null;
+    }
+    equipment[slotKey] = { uid: item.uid, name: item.name, properties: item.properties ? item.properties.slice() : [] };
+    saveData();
+    renderAll();
+    closeSlotModal();
+}
+
+function unequipSlot(slotKey) {
+    equipment[slotKey] = null;
+    saveData();
+    renderAll();
+}
+
+function dropItem(uid) {
+    for (var key in equipment) {
+        if (equipment[key] && equipment[key].uid === uid) equipment[key] = null;
+    }
+    var newInv = [];
+    for (var i = 0; i < inventory.length; i++) {
+        if (inventory[i].uid !== uid) newInv.push(inventory[i]);
+    }
+    inventory = newInv;
+    if (selectedId === uid) selectedId = null;
+    saveData();
+    renderAll();
+}
+
+function useItem(uid) {
+    var item = null;
+    for (var i = 0; i < inventory.length; i++) {
+        if (inventory[i].uid === uid) { item = inventory[i]; break; }
+    }
+    if (!item) return;
+    if (item.quantity > 1) {
+        item.quantity -= 1;
+    } else {
+        dropItem(uid);
+        return;
+    }
+    saveData();
+    renderAll();
+}
+
+function clearInventory() {
+    if (!confirm('Clear all inventory items? This cannot be undone.')) return;
+    inventory = [];
+    equipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT));
+    selectedId = null;
+    saveData();
+    renderAll();
+}
+
+/* ── Search / Filter ──────────────────────────────────────── */
+function handleSearch() { renderInventory(); }
+function handleFilter() { renderInventory(); }
+
+/* ── Toggle Details ───────────────────────────────────────── */
+function toggleDetails() {
+    var body   = document.getElementById('details-body');
+    var toggle = document.getElementById('details-toggle');
+    body.classList.toggle('hidden');
+    toggle.classList.toggle('collapsed');
+}
+
+/* ── Add Item Modal ───────────────────────────────────────── */
+function openAddModal() {
+    addTemplateSelected = null;
+    clearAddForm();
+    renderTemplateList('');
+    document.getElementById('add-modal').classList.add('open');
+    document.getElementById('f-name').focus();
+}
+
+function closeAddModal() {
+    document.getElementById('add-modal').classList.remove('open');
+    document.getElementById('add-msg').textContent = '';
+}
+
+function renderTemplateList(query) {
+    var container = document.getElementById('tpl-list');
+    if (typeof ITEMS === 'undefined') {
+        container.innerHTML = '<div style="padding:8px;font-size:10px;color:#2d5016">No catalog available</div>';
+        return;
+    }
+    var filtered = [];
+    for (var i = 0; i < ITEMS.length; i++) {
+        if (!query || ITEMS[i].name.toLowerCase().indexOf(query.toLowerCase()) !== -1) {
+            filtered.push(ITEMS[i]);
+        }
+    }
+    if (filtered.length === 0) {
+        container.innerHTML = '<div style="padding:8px;font-size:10px;color:#2d5016">No matches</div>';
+        return;
+    }
+    var html = '';
+    for (var j = 0; j < filtered.length; j++) {
+        var tpl   = filtered[j];
+        var color = RARITY_COLORS[tpl.rarity] || RARITY_COLORS.common;
+        var isSel = addTemplateSelected && addTemplateSelected.id === tpl.id;
+        html += '<div class="tpl-row' + (isSel ? ' selected' : '') + '" ' +
+            'onclick="selectTemplate(\'' + escapeHtml(tpl.id) + '\')" ' +
+            'data-tpl-id="' + escapeHtml(tpl.id) + '">' +
+            '<span style="width:8px;height:8px;border-radius:50%;background:' + color + ';display:inline-block;flex-shrink:0"></span>' +
+            '<span style="flex:1">' + escapeHtml(tpl.name) + '</span>' +
+            '<span style="color:#9ca3af;font-size:10px">' + escapeHtml(tpl.type) + '</span>' +
+        '</div>';
+    }
+    container.innerHTML = html;
+}
+
+function filterTemplates() {
+    renderTemplateList(document.getElementById('tpl-search').value);
+}
+
+function selectTemplate(tplId) {
+    if (typeof ITEMS === 'undefined') return;
+    var tpl = null;
+    for (var i = 0; i < ITEMS.length; i++) {
+        if (ITEMS[i].id === tplId) { tpl = ITEMS[i]; break; }
+    }
+    if (!tpl) return;
+    addTemplateSelected = tpl;
+    document.getElementById('f-name').value   = tpl.name;
+    document.getElementById('f-type').value   = tpl.type;
+    document.getElementById('f-rarity').value = tpl.rarity || 'common';
+    document.getElementById('f-weight').value = tpl.weight || 0;
+    document.getElementById('f-value').value  = tpl.value  || 0;
+    document.getElementById('f-desc').value   = tpl.description || '';
+    document.getElementById('f-props').value  = (tpl.properties || []).join(', ');
+    document.getElementById('f-qty').value    = 1;
+    renderTemplateList(document.getElementById('tpl-search').value);
+}
+
+function clearAddForm() {
+    document.getElementById('f-name').value    = '';
+    document.getElementById('f-desc').value    = '';
+    document.getElementById('f-props').value   = '';
+    document.getElementById('f-type').value    = 'misc';
+    document.getElementById('f-rarity').value  = 'common';
+    document.getElementById('f-qty').value     = 1;
+    document.getElementById('f-weight').value  = 0;
+    document.getElementById('f-value').value   = 0;
+    document.getElementById('tpl-search').value = '';
+}
+
+function submitAddItem() {
+    var name = document.getElementById('f-name').value.trim();
+    if (!name) { document.getElementById('add-msg').textContent = 'Name is required.'; return; }
+    var qty = parseInt(document.getElementById('f-qty').value, 10) || 1;
+    var propsRaw = document.getElementById('f-props').value.split(',');
+    var props = [];
+    for (var i = 0; i < propsRaw.length; i++) {
+        var p = propsRaw[i].trim();
+        if (p) props.push(p);
+    }
+    var newItem = {
+        uid:         'inv_custom_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
+        id:          addTemplateSelected ? addTemplateSelected.id : 'custom_' + Date.now(),
+        name:        name,
+        type:        document.getElementById('f-type').value,
+        rarity:      document.getElementById('f-rarity').value,
+        quantity:    qty,
+        weight:      parseFloat(document.getElementById('f-weight').value) || 0,
+        value:       parseFloat(document.getElementById('f-value').value)  || 0,
+        description: document.getElementById('f-desc').value.trim(),
+        properties:  props
+    };
+    inventory.push(newItem);
+    saveData();
+    closeAddModal();
+    selectedId = newItem.uid;
+    renderAll();
+}
+
+/* ── Equip Slot Modal ─────────────────────────────────────── */
+function openSlotModal(uid) {
+    var item = null;
+    for (var i = 0; i < inventory.length; i++) {
+        if (inventory[i].uid === uid) { item = inventory[i]; break; }
+    }
+    if (!item) return;
+
+    slotModalUid = uid;
+    var validSlots = [];
+    for (var j = 0; j < SLOT_CONFIG.length; j++) {
+        var slot = SLOT_CONFIG[j];
+        if (slot.types.indexOf(item.type) !== -1) validSlots.push(slot);
+    }
+
+    if (validSlots.length === 0) { alert('This item cannot be equipped.'); return; }
+    if (validSlots.length === 1) { equipItem(uid, validSlots[0].key); return; }
+
+    var listEl = document.getElementById('slot-picker-list');
+    var html = '';
+    for (var k = 0; k < validSlots.length; k++) {
+        var vs  = validSlots[k];
+        var occ = equipment[vs.key];
+        var occHtml = occ ? '<span class="slot-pick-occupied">Replaces: ' + escapeHtml(occ.name) + '</span>' : '';
+        html += '<button class="slot-pick-btn" onclick="equipItem(\'' + escapeHtml(uid) + '\',\'' + vs.key + '\')">' +
+            '<span class="slot-pick-icon">' + vs.icon + '</span>' +
+            '<span>' + escapeHtml(vs.label) + '</span>' +
+            occHtml +
+        '</button>';
+    }
+    listEl.innerHTML = html;
+    document.getElementById('slot-modal').classList.add('open');
+}
+
+function closeSlotModal() {
+    slotModalUid = null;
+    document.getElementById('slot-modal').classList.remove('open');
+}
+
+/* ── Render All ───────────────────────────────────────────── */
+function renderAll() {
+    renderStats();
+    renderEquipment();
+    renderInventory();
+    renderDetails();
+}
+
+/* ── Close modals on overlay click ───────────────────────── */
+document.getElementById('add-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeAddModal();
+});
+document.getElementById('slot-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeSlotModal();
+});
+
+/* ── Init ─────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function() {
+    loadData();
+    renderAll();
+});
+</script>
+
+<script src="../assets/helpers/settingsManager.js"></script>
+<script src="../assets/navigation.js"></script>
 </body>
 </html>
