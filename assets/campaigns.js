@@ -71,8 +71,9 @@ const CAMPAIGNS = [
     activeEncounter: {
       enemies: [],      // Active enemy instances (copied from ENEMIES pool)
       combatants: [],   // All combatants in initiative order (players + enemies)
-      round: 0,
-      status: "inactive" // "inactive" | "active" | "completed"
+      round: 1,         // Rounds start at 1; increments each time the initiative order cycles
+      status: "inactive", // "inactive" | "active" | "completed"
+      startTime: null
     },
 
     // ── CAMPAIGN CONTENT ────────────────────────────────────────────────────
