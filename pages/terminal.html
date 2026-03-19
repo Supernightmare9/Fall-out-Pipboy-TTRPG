@@ -458,7 +458,7 @@
         }
     </style>
 </head>
-<body>
+<body data-page="terminal">
 
 <!-- VICTORY OVERLAY -->
 <div class="overlay" id="victoryOverlay">
@@ -471,8 +471,8 @@
         </div>
         <div class="overlay-xp" id="victoryXP">+ 0 XP AWARDED</div>
         <div class="overlay-btns">
+            <button class="action-btn" onclick="goToData()">BACK TO DATA</button>
             <button class="action-btn" onclick="startNewGame()">NEW TERMINAL</button>
-            <button class="action-btn" onclick="goToMenu()">MAIN MENU</button>
             <button class="action-btn danger" onclick="logout()">LOGOUT</button>
         </div>
     </div>
@@ -488,8 +488,8 @@
             PASSWORD WAS: <strong id="defeatPassword" style="color:#FF3300;letter-spacing:3px;"></strong>
         </div>
         <div class="overlay-btns">
+            <button class="action-btn" onclick="goToData()">BACK TO DATA</button>
             <button class="action-btn" onclick="startNewGame()">TRY AGAIN</button>
-            <button class="action-btn" onclick="goToMenu()">MAIN MENU</button>
             <button class="action-btn danger" onclick="logout()">LOGOUT</button>
         </div>
     </div>
@@ -507,6 +507,7 @@
             <span>ROBCO INDUSTRIES (TM) TERMLINK PROTOCOL</span>
             <span class="difficulty-badge" id="difficultyBadge">MEDIUM</span>
             <span>OPERATOR: <strong id="playerNameDisplay">UNKNOWN</strong></span>
+            <span>INT: <strong id="intelligenceDisplay">5</strong></span>
         </div>
     </div>
 
@@ -545,6 +546,7 @@
 
         <!-- ACTIONS -->
         <div class="actions-section">
+            <button class="action-btn" onclick="goToData()">BACK</button>
             <button class="action-btn" onclick="startNewGame()">NEW GAME</button>
             <button class="action-btn" onclick="goToMenu()">MAIN MENU</button>
             <button class="action-btn danger" onclick="logout()">LOGOUT</button>
@@ -553,6 +555,7 @@
     </div><!-- /terminal-body -->
 </div><!-- /terminal-wrapper -->
 
+<script src="../assets/xp_system.js"></script>
 <script>
 // ════════════════════════════════════════════════
 //  FALLOUT TERMINAL HACKING MINIGAME
@@ -590,12 +593,11 @@ const WORD_POOLS = {
 // ── DIFFICULTY CONFIG ─────────────────────────
 
 const DIFFICULTY_CONFIG = {
-    easy:   { label: 'EASY',   xp: 50,  wordCount: 8  },
-    medium: { label: 'MEDIUM', xp: 100, wordCount: 8  },
-    hard:   { label: 'HARD',   xp: 150, wordCount: 8  }
+    easy:   { label: 'EASY',   xp: 25,  wordCount: 8  },
+    medium: { label: 'MEDIUM', xp: 50,  wordCount: 8  },
+    hard:   { label: 'HARD',   xp: 100, wordCount: 8  }
 };
 
-const XP_PER_LEVEL = 1000;
 const MAX_ATTEMPTS = 4;
 
 // ── GAME STATE ────────────────────────────────
@@ -619,32 +621,57 @@ window.addEventListener('DOMContentLoaded', function () {
 });
 
 function loadPlayerInfo() {
-    // Load player name
+    let intelligenceLoaded = false;
+
+    // Primary: load from characterData
     try {
         const charData = localStorage.getItem('characterData');
         if (charData) {
             const parsed = JSON.parse(charData);
             if (parsed.name) gameState.playerName = parsed.name.toUpperCase();
+            if (parsed.stats && parsed.stats.intelligence !== undefined) {
+                gameState.intelligence = parseInt(parsed.stats.intelligence) || 5;
+                intelligenceLoaded = true;
+            }
+        } else {
+            console.warn('Terminal: no characterData found in localStorage');
+            // Show a non-blocking notice in the feedback section
+            const feedbackSection = document.getElementById('feedbackSection');
+            if (feedbackSection) {
+                feedbackSection.innerHTML =
+                    '<div class="feedback-line new">WARNING: NO CHARACTER DATA FOUND. DEFAULTING TO INTELLIGENCE: 5.<span class="cursor-blink"></span></div>';
+            }
         }
-        if (gameState.playerName === 'UNKNOWN') {
+    } catch (e) {
+        console.error('Terminal: error parsing characterData:', e);
+    }
+
+    // Fallback name from currentPlayer
+    if (gameState.playerName === 'UNKNOWN') {
+        try {
             const currentPlayer = localStorage.getItem('currentPlayer');
             if (currentPlayer) {
                 const parsed = JSON.parse(currentPlayer);
                 if (parsed.characterName) gameState.playerName = parsed.characterName.toUpperCase();
             }
-        }
-    } catch (e) { /* keep default */ }
+        } catch (e) { /* keep default */ }
+    }
 
-    // Load intelligence from SPECIAL stats
-    try {
-        const special = localStorage.getItem('pipboySpecial');
-        if (special) {
-            const parsed = JSON.parse(special);
-            gameState.intelligence = parseInt(parsed.intelligence) || 5;
-        }
-    } catch (e) { /* keep default 5 */ }
+    // Fallback intelligence from pipboySpecial
+    if (!intelligenceLoaded) {
+        try {
+            const special = localStorage.getItem('pipboySpecial');
+            if (special) {
+                const parsed = JSON.parse(special);
+                if (parsed.intelligence !== undefined) {
+                    gameState.intelligence = parseInt(parsed.intelligence) || 5;
+                }
+            }
+        } catch (e) { /* keep default 5 */ }
+    }
 
     document.getElementById('playerNameDisplay').textContent = gameState.playerName;
+    document.getElementById('intelligenceDisplay').textContent = gameState.intelligence;
 }
 
 // ── DIFFICULTY DETERMINATION ──────────────────
@@ -871,27 +898,35 @@ function guessWord(word) {
 function awardXP() {
     const xpReward = DIFFICULTY_CONFIG[gameState.difficulty].xp;
 
-    // Update pipboyPlayerData
+    // Update pipboyPlayerData using xp_system.js level calculation
     try {
         const saved = localStorage.getItem('pipboyPlayerData');
         let playerData = saved ? JSON.parse(saved) : { xp: 0, level: 1 };
-        playerData.xp = (playerData.xp || 0) + xpReward;
-        playerData.level = Math.floor(playerData.xp / XP_PER_LEVEL) + 1;
+        const oldXP = playerData.xp || 0;
+        const newXP = oldXP + xpReward;
+        playerData.xp = newXP;
+        playerData.level = getLevelFromXP(newXP);
         localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
-        localStorage.setItem('pipboyXP', String(playerData.xp));
+        localStorage.setItem('pipboyXP', String(newXP));
         localStorage.setItem('pipboyLevel', String(playerData.level));
-    } catch (e) { /* fail silently */ }
+    } catch (e) {
+        console.error('Terminal: error saving XP to pipboyPlayerData:', e);
+    }
 
-    // Update currentPlayer (IndexedDB sync key)
+    // Update currentPlayer if it exists
     try {
         const saved = localStorage.getItem('currentPlayer');
         if (saved) {
             const player = JSON.parse(saved);
-            player.xp = (player.xp || 0) + xpReward;
-            player.level = Math.floor(player.xp / XP_PER_LEVEL) + 1;
+            const oldXP = player.xp || 0;
+            const newXP = oldXP + xpReward;
+            player.xp = newXP;
+            player.level = getLevelFromXP(newXP);
             localStorage.setItem('currentPlayer', JSON.stringify(player));
         }
-    } catch (e) { /* fail silently */ }
+    } catch (e) {
+        console.error('Terminal: error saving XP to currentPlayer:', e);
+    }
 
     setTimeout(function () { showVictory(xpReward); }, 800);
 }
@@ -911,13 +946,21 @@ function showDefeat() {
 
 // ── NAVIGATION ───────────────────────────────
 
+function goToData() {
+    window.location.href = 'data.html';
+}
+
 function goToMenu() {
-    window.location.href = 'character.html';
+    window.location.href = 'data.html';
 }
 
 function logout() {
+    localStorage.clear();
     window.location.href = 'index.html';
 }
 </script>
+
+<!-- Player Navigation (shared hamburger menu) -->
+<script src="../assets/navigation.js"></script>
 </body>
 </html>
