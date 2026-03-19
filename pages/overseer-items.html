@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault 215 — Item Catalog</title>
+    <style>
+        :root {
+            --overseer-blue: #0a1628;
+            --overseer-blue-mid: #0d2045;
+            --overseer-blue-bright: #1a3a6e;
+            --overseer-blue-light: #2a5298;
+            --overseer-gold: #d4a017;
+            --overseer-gold-bright: #f0c040;
+            --overseer-gold-dim: #8b6914;
+            --overseer-white: #e8e8e8;
+            --overseer-red: #cc2200;
+            --overseer-red-bright: #ff3300;
+            --overseer-green: #00cc66;
+            --overseer-green-bright: #00ff80;
+            --overseer-dark: #04080f;
+            --overseer-darker: #020408;
+            --overseer-border: #2a5298;
+            --overseer-glow-gold: rgba(212, 160, 23, 0.6);
+            /* Item rarity colors */
+            --rarity-common: #aaaaaa;
+            --rarity-uncommon: #4ade80;
+            --rarity-rare: #60a5fa;
+            --rarity-legendary: #f59e0b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            width: 100%; min-height: 100vh; background-color: var(--overseer-dark);
+            color: var(--overseer-white); font-family: 'Courier New', monospace;
+            background-image: radial-gradient(circle at 15% 30%, rgba(42,82,152,0.12) 0%, transparent 55%),
+                radial-gradient(circle at 85% 70%, rgba(212,160,23,0.08) 0%, transparent 55%);
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg,rgba(0,0,0,0.18),rgba(0,0,0,0.18) 1px,transparent 1px,transparent 3px);
+            pointer-events: none; z-index: 9999;
+        }
+        .hidden { display: none !important; }
+
+        .command-bar {
+            background: var(--overseer-blue-mid); border-bottom: 2px solid var(--overseer-gold);
+            box-shadow: 0 2px 20px var(--overseer-glow-gold); padding: 14px 30px;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+            position: sticky; top: 0; z-index: 100;
+        }
+        .command-bar-left { display: flex; align-items: center; gap: 20px; }
+        .overseer-badge { font-size: 9px; color: var(--overseer-gold-bright); letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 6px var(--overseer-glow-gold); }
+        .overseer-title-bar { font-size: 18px; font-weight: bold; color: var(--overseer-gold-bright); letter-spacing: 3px; text-shadow: 0 0 10px var(--overseer-glow-gold); }
+        .command-bar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .cmd-btn {
+            background: transparent; border: 1px solid var(--overseer-gold); color: var(--overseer-gold);
+            font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 1px; padding: 7px 14px;
+            cursor: pointer; transition: all 0.2s; text-transform: uppercase; text-decoration: none; display: inline-block;
+        }
+        .cmd-btn:hover { background: rgba(212,160,23,0.15); box-shadow: 0 0 10px rgba(212,160,23,0.3); }
+        .cmd-btn.danger { border-color: var(--overseer-red-bright); color: var(--overseer-red-bright); }
+        .cmd-btn.danger:hover { background: rgba(255,51,0,0.15); box-shadow: 0 0 10px rgba(255,51,0,0.3); }
+        .cmd-btn.primary { background: linear-gradient(135deg,var(--overseer-gold-dim),var(--overseer-gold)); border-color: var(--overseer-gold-bright); color: var(--overseer-darker); font-weight: bold; }
+        .cmd-btn.primary:hover { background: linear-gradient(135deg,var(--overseer-gold),var(--overseer-gold-bright)); box-shadow: 0 0 15px var(--overseer-glow-gold); }
+
+        .dashboard-content { flex: 1; padding: 30px; max-width: 1400px; margin: 0 auto; width: 100%; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(212,160,23,0.4); flex-wrap: wrap; gap: 10px; }
+        .section-title { font-size: 14px; color: var(--overseer-gold); letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 6px var(--overseer-glow-gold); }
+        .section-count { font-size: 11px; color: var(--overseer-white); opacity: 0.6; letter-spacing: 1px; }
+        .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .search-input {
+            background: var(--overseer-blue-mid); border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright); padding: 8px 12px; font-family: 'Courier New', monospace; font-size: 12px; outline: none; flex: 1; min-width: 180px;
+        }
+        .search-input::placeholder { color: rgba(240,192,64,0.35); }
+        .search-input:focus { border-color: var(--overseer-gold); box-shadow: 0 0 8px var(--overseer-glow-gold); }
+        .filter-select {
+            background: var(--overseer-blue-mid); border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright); padding: 8px 12px; font-family: 'Courier New', monospace; font-size: 12px; outline: none; cursor: pointer;
+        }
+        .filter-select option { background: var(--overseer-blue-mid); color: var(--overseer-white); }
+
+        /* ITEM GRID */
+        .item-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+        .item-card { background: var(--overseer-blue-mid); border: 1px solid var(--overseer-border); transition: all 0.2s; position: relative; overflow: hidden; }
+        .item-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .item-card.rarity-common::before { background: var(--rarity-common); }
+        .item-card.rarity-uncommon::before { background: var(--rarity-uncommon); box-shadow: 0 0 8px var(--rarity-uncommon); }
+        .item-card.rarity-rare::before { background: var(--rarity-rare); box-shadow: 0 0 8px var(--rarity-rare); }
+        .item-card.rarity-legendary::before { background: var(--rarity-legendary); box-shadow: 0 0 12px var(--rarity-legendary); }
+        .item-card:hover { border-color: var(--overseer-gold); box-shadow: 0 0 25px var(--overseer-glow-gold); transform: translateY(-2px); }
+        .card-header { background: var(--overseer-blue); padding: 14px 16px; border-bottom: 1px solid rgba(212,160,23,0.2); display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+        .card-name { font-size: 15px; font-weight: bold; letter-spacing: 0.5px; word-break: break-word; }
+        .card-name.rarity-common { color: var(--rarity-common); }
+        .card-name.rarity-uncommon { color: var(--rarity-uncommon); text-shadow: 0 0 6px rgba(74,222,128,0.4); }
+        .card-name.rarity-rare { color: var(--rarity-rare); text-shadow: 0 0 6px rgba(96,165,250,0.4); }
+        .card-name.rarity-legendary { color: var(--rarity-legendary); text-shadow: 0 0 8px rgba(245,158,11,0.5); }
+        .card-category { font-size: 9px; color: var(--overseer-white); opacity: 0.55; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
+        .rarity-badge { font-size: 8px; letter-spacing: 1px; padding: 2px 6px; border: 1px solid; text-transform: uppercase; flex-shrink: 0; white-space: nowrap; }
+        .rarity-badge.rarity-common { border-color: var(--rarity-common); color: var(--rarity-common); opacity: 0.7; }
+        .rarity-badge.rarity-uncommon { border-color: var(--rarity-uncommon); color: var(--rarity-uncommon); }
+        .rarity-badge.rarity-rare { border-color: var(--rarity-rare); color: var(--rarity-rare); }
+        .rarity-badge.rarity-legendary { border-color: var(--rarity-legendary); color: var(--rarity-legendary); animation: glow-pulse 2s ease-in-out infinite; }
+        .card-stats { padding: 12px 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .card-stat { display: flex; flex-direction: column; gap: 2px; }
+        .card-stat-label { font-size: 9px; color: var(--overseer-gold); letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.8; }
+        .card-stat-value { font-size: 13px; color: var(--overseer-white); font-weight: bold; }
+        .card-desc { padding: 0 16px 12px; font-size: 11px; color: var(--overseer-white); opacity: 0.6; line-height: 1.5; }
+        .card-actions { padding: 10px 16px; display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid rgba(212,160,23,0.15); }
+        .card-btn { background: transparent; border: 1px solid var(--overseer-border); color: var(--overseer-white); font-family: 'Courier New', monospace; font-size: 10px; padding: 5px 10px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; flex: 1; }
+        .card-btn:hover { border-color: var(--overseer-gold); color: var(--overseer-gold-bright); }
+        .card-btn.danger:hover { border-color: var(--overseer-red-bright); color: var(--overseer-red-bright); }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--overseer-gold-dim); }
+        .empty-state-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state-title { font-size: 14px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+        .empty-state-text { font-size: 11px; opacity: 0.6; letter-spacing: 1px; }
+
+        /* INFO PANEL */
+        .info-panel { background: var(--overseer-blue-mid); border: 1px solid rgba(212,160,23,0.2); padding: 20px; margin-top: 30px; }
+        .info-panel-title { font-size: 11px; color: var(--overseer-gold); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid rgba(212,160,23,0.2); }
+        .info-list { display: flex; flex-direction: column; gap: 6px; }
+        .info-item { font-size: 11px; color: var(--overseer-white); opacity: 0.7; letter-spacing: 0.5px; }
+        .info-item strong { color: var(--overseer-gold-bright); opacity: 1; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(4,8,15,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-panel { background: var(--overseer-blue-mid); border: 2px solid var(--overseer-gold); box-shadow: 0 0 40px var(--overseer-glow-gold); width: 100%; max-width: 660px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { background: var(--overseer-blue); padding: 16px 20px; border-bottom: 1px solid var(--overseer-gold); display: flex; align-items: center; justify-content: space-between; }
+        .modal-title { font-size: 14px; font-weight: bold; color: var(--overseer-gold-bright); letter-spacing: 3px; text-transform: uppercase; text-shadow: 0 0 8px var(--overseer-glow-gold); }
+        .modal-close-btn { background: transparent; border: 1px solid var(--overseer-gold-dim); color: var(--overseer-gold); font-family: 'Courier New', monospace; font-size: 11px; padding: 5px 10px; cursor: pointer; letter-spacing: 1px; }
+        .modal-close-btn:hover { border-color: var(--overseer-red-bright); color: var(--overseer-red-bright); }
+        .modal-body { padding: 24px 20px; }
+        .modal-section-title { font-size: 11px; color: var(--overseer-gold); letter-spacing: 2px; text-transform: uppercase; margin: 16px 0 10px; padding-bottom: 4px; border-bottom: 1px solid rgba(212,160,23,0.2); }
+        .modal-section-title:first-child { margin-top: 0; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+        .form-row.single { grid-template-columns: 1fr; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        .form-group label { font-size: 10px; color: var(--overseer-gold); letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.9; }
+        .form-group input, .form-group select, .form-group textarea {
+            background: var(--overseer-blue); border: 1px solid var(--overseer-border);
+            color: var(--overseer-gold-bright); padding: 8px 10px;
+            font-family: 'Courier New', monospace; font-size: 12px; outline: none;
+        }
+        .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(240,192,64,0.35); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--overseer-gold); box-shadow: 0 0 8px var(--overseer-glow-gold); }
+        .form-group select option { background: var(--overseer-blue-mid); color: var(--overseer-white); }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .modal-footer { padding: 16px 20px; border-top: 1px solid rgba(212,160,23,0.2); display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-btn { background: transparent; border: 1px solid var(--overseer-border); color: var(--overseer-white); font-family: 'Courier New', monospace; font-size: 11px; padding: 8px 16px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s; }
+        .modal-btn:hover { border-color: var(--overseer-gold); color: var(--overseer-gold-bright); }
+        .modal-btn.save-btn { border-color: var(--overseer-gold); color: var(--overseer-gold-bright); background: rgba(212,160,23,0.1); }
+        .modal-btn.save-btn:hover { background: rgba(212,160,23,0.25); box-shadow: 0 0 10px var(--overseer-glow-gold); }
+        .modal-btn.danger { border-color: var(--overseer-red-bright); color: var(--overseer-red-bright); }
+        .modal-btn.danger:hover { background: rgba(255,51,0,0.15); }
+
+        /* GIVE ITEM MODAL */
+        .give-item-msg { font-size: 12px; color: var(--overseer-white); opacity: 0.8; margin-bottom: 16px; line-height: 1.5; }
+
+        @keyframes glow-pulse { 0%,100%{opacity:1;box-shadow:0 0 4px rgba(245,158,11,0.4)}50%{opacity:0.8;box-shadow:0 0 10px rgba(245,158,11,0.8)} }
+
+        @media (max-width: 600px) {
+            .command-bar { padding: 12px 16px; }
+            .dashboard-content { padding: 16px; }
+            .item-grid { grid-template-columns: 1fr; }
+            .form-row, .form-row.triple { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- COMMAND BAR -->
+<div class="command-bar">
+    <div class="command-bar-left">
+        <div>
+            <div class="overseer-badge">⬡ Vault-Tec Authority</div>
+            <div class="overseer-title-bar">ITEM CATALOG</div>
+        </div>
+    </div>
+    <div class="command-bar-right">
+        <button class="cmd-btn" onclick="loadItems()">↻ Refresh</button>
+        <a href="login_hub.html" class="cmd-btn">⬡ Login Hub</a>
+        <a href="index.html" class="cmd-btn">⌂ Main Menu</a>
+        <button class="cmd-btn danger" onclick="doLogout()">⏻ Logout</button>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="dashboard-content">
+
+    <!-- Section Header -->
+    <div class="section-header">
+        <div class="section-title">◈ Item Registry</div>
+        <div class="section-count" id="itemCountLabel">0 items on record</div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search items by name or description…" oninput="filterItems()">
+        <select class="filter-select" id="categoryFilter" onchange="filterItems()">
+            <option value="">All Categories</option>
+            <option value="weapon">Weapons</option>
+            <option value="armor">Armor</option>
+            <option value="consumable">Consumables</option>
+            <option value="misc">Miscellaneous</option>
+        </select>
+        <select class="filter-select" id="rarityFilter" onchange="filterItems()">
+            <option value="">All Rarities</option>
+            <option value="common">Common</option>
+            <option value="uncommon">Uncommon</option>
+            <option value="rare">Rare</option>
+            <option value="legendary">Legendary</option>
+        </select>
+        <button class="cmd-btn primary" onclick="openAddModal()">+ New Item</button>
+    </div>
+
+    <!-- Item Grid -->
+    <div class="item-grid" id="itemGrid"></div>
+    <div id="emptyState" class="empty-state hidden">
+        <div class="empty-state-icon">📦</div>
+        <div class="empty-state-title">No Items On Record</div>
+        <div class="empty-state-text">No items match your search, or no items have been added yet.</div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel">
+        <div class="info-panel-title">▶ Item Catalog — Console Help</div>
+        <div class="info-list">
+            <div class="info-item"><strong>New Item:</strong> Create an item with name, stats, rarity, and description</div>
+            <div class="info-item"><strong>Rarity:</strong>
+                <span style="color:var(--rarity-common)">■ Common</span> &nbsp;
+                <span style="color:var(--rarity-uncommon)">■ Uncommon</span> &nbsp;
+                <span style="color:var(--rarity-rare)">■ Rare</span> &nbsp;
+                <span style="color:var(--rarity-legendary)">■ Legendary</span>
+            </div>
+            <div class="info-item"><strong>Give Item:</strong> Assign an item directly to a player's inventory</div>
+            <div class="info-item"><strong>Categories:</strong> Weapon, Armor, Consumable, Miscellaneous</div>
+            <div class="info-item"><strong>Data Sync:</strong> Items can be added to player inventories via localStorage</div>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT / ADD MODAL -->
+<div id="editModal" class="modal-overlay hidden">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <div class="modal-title" id="editModalTitle">+ NEW ITEM</div>
+            <button class="modal-close-btn" onclick="closeModal('editModal')">✕ CLOSE</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-section-title">Identity</div>
+            <div class="form-row">
+                <div class="form-group"><label>Item Name</label><input type="text" id="editName" placeholder="10mm Pistol" maxlength="80"></div>
+                <div class="form-group"><label>Category</label>
+                    <select id="editCategory">
+                        <option value="weapon">Weapon</option>
+                        <option value="armor">Armor</option>
+                        <option value="consumable">Consumable</option>
+                        <option value="misc">Miscellaneous</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>Rarity</label>
+                    <select id="editRarity">
+                        <option value="common">Common</option>
+                        <option value="uncommon">Uncommon</option>
+                        <option value="rare">Rare</option>
+                        <option value="legendary">Legendary</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Quantity (default)</label><input type="number" id="editQty" min="1" placeholder="1"></div>
+            </div>
+            <div class="modal-section-title">Stats</div>
+            <div class="form-row triple">
+                <div class="form-group"><label>Value (caps)</label><input type="number" id="editValue" min="0" placeholder="0"></div>
+                <div class="form-group"><label>Weight (lbs)</label><input type="number" id="editWeight" min="0" step="0.1" placeholder="0"></div>
+                <div class="form-group"><label>Damage / Effect</label><input type="text" id="editDamage" placeholder="2d6, +2 STR…"></div>
+            </div>
+            <div class="form-row single">
+                <div class="form-group"><label>Description</label><textarea id="editDescription" placeholder="A semi-automatic pistol chambered in 10mm. Standard issue sidearm."></textarea></div>
+            </div>
+            <div class="form-row single">
+                <div class="form-group"><label>Special Properties</label><input type="text" id="editProperties" placeholder="Fire damage, +1 to Perception checks…"></div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn save-btn" onclick="saveItem()">💾 Save Item</button>
+            <button class="modal-btn" onclick="closeModal('editModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div id="viewModal" class="modal-overlay hidden">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <div class="modal-title" id="viewModalTitle">ITEM DOSSIER</div>
+            <button class="modal-close-btn" onclick="closeModal('viewModal')">✕ CLOSE</button>
+        </div>
+        <div class="modal-body" id="viewModalBody"></div>
+        <div class="modal-footer">
+            <button class="modal-btn save-btn" id="editFromViewBtn">✎ Edit Item</button>
+            <button class="modal-btn" id="giveItemBtn">🎁 Give to Player</button>
+            <button class="modal-btn" onclick="closeModal('viewModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- GIVE ITEM MODAL -->
+<div id="giveModal" class="modal-overlay hidden">
+    <div class="modal-panel" style="max-width:460px;">
+        <div class="modal-header">
+            <div class="modal-title">🎁 GIVE ITEM TO PLAYER</div>
+            <button class="modal-close-btn" onclick="closeModal('giveModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <p class="give-item-msg">Give <strong id="giveItemName" style="color:var(--overseer-gold-bright)"></strong> to a player. Enter the character name exactly as it appears in their Pip-Boy.</p>
+            <div class="form-group" style="margin-bottom:12px;">
+                <label>Character Name</label>
+                <input type="text" id="givePlayerName" placeholder="Exact character name…">
+            </div>
+            <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="giveQty" min="1" value="1">
+            </div>
+            <div id="giveFeedback" style="font-size:11px;color:var(--overseer-green-bright);margin-top:10px;min-height:16px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn save-btn" onclick="confirmGiveItem()">🎁 Give Item</button>
+            <button class="modal-btn" onclick="closeModal('giveModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div id="deleteModal" class="modal-overlay hidden">
+    <div class="modal-panel" style="max-width:420px;">
+        <div class="modal-header">
+            <div class="modal-title">⚠ CONFIRM DELETION</div>
+            <button class="modal-close-btn" onclick="closeModal('deleteModal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <p style="color:var(--overseer-white);font-size:13px;line-height:1.6;">
+                Permanently delete <strong id="deleteItemName" style="color:var(--overseer-red-bright)"></strong> from the catalog? This cannot be undone.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn danger" onclick="confirmDelete()">✕ Delete</button>
+            <button class="modal-btn" onclick="closeModal('deleteModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script src="../assets/overseer-navigation.js"></script>
+<script>
+let allItems = [];
+let filteredItems = [];
+let editingIndex = null;
+let deletingIndex = null;
+let givingIndex = null;
+
+const categoryLabels = { weapon:'Weapon', armor:'Armor', consumable:'Consumable', misc:'Misc' };
+const rarityLabels = { common:'Common', uncommon:'Uncommon', rare:'Rare', legendary:'Legendary' };
+
+function loadItems() {
+    try { allItems = JSON.parse(localStorage.getItem('overseerItems') || '[]'); }
+    catch(e) { allItems = []; }
+    updateCountLabel();
+    filterItems();
+}
+
+function updateCountLabel() {
+    document.getElementById('itemCountLabel').textContent = allItems.length + ' item' + (allItems.length !== 1 ? 's' : '') + ' on record';
+}
+
+function filterItems() {
+    const search = (document.getElementById('searchInput').value || '').toLowerCase();
+    const cat = document.getElementById('categoryFilter').value;
+    const rar = document.getElementById('rarityFilter').value;
+    filteredItems = allItems.filter(it => {
+        const matchSearch = !search || (it.name||'').toLowerCase().includes(search) || (it.description||'').toLowerCase().includes(search);
+        const matchCat = !cat || it.category === cat;
+        const matchRar = !rar || it.rarity === rar;
+        return matchSearch && matchCat && matchRar;
+    });
+    renderGrid();
+}
+
+function renderGrid() {
+    const grid = document.getElementById('itemGrid');
+    const empty = document.getElementById('emptyState');
+    if (filteredItems.length === 0) { grid.innerHTML = ''; empty.classList.remove('hidden'); return; }
+    empty.classList.add('hidden');
+    grid.innerHTML = filteredItems.map((it, i) => {
+        const rar = it.rarity || 'common';
+        const desc = (it.description || '').slice(0, 80) + ((it.description||'').length > 80 ? '…' : '');
+        return `
+        <div class="item-card rarity-${rar}">
+            <div class="card-header">
+                <div>
+                    <div class="card-name rarity-${rar}">${escHtml(it.name||'Unknown Item')}</div>
+                    <div class="card-category">${categoryLabels[it.category]||'Misc'}</div>
+                </div>
+                <span class="rarity-badge rarity-${rar}">${rarityLabels[rar]||rar}</span>
+            </div>
+            <div class="card-stats">
+                <div class="card-stat"><span class="card-stat-label">Value</span><span class="card-stat-value">${it.value||0}¢</span></div>
+                <div class="card-stat"><span class="card-stat-label">Weight</span><span class="card-stat-value">${it.weight||0} lb</span></div>
+                <div class="card-stat"><span class="card-stat-label">DMG/FX</span><span class="card-stat-value">${escHtml(it.damage||'—')}</span></div>
+            </div>
+            ${desc ? `<div class="card-desc">${escHtml(desc)}</div>` : ''}
+            <div class="card-actions">
+                <button class="card-btn" onclick="openViewModal(${i})">👁 View</button>
+                <button class="card-btn" onclick="openEditModal(${i})">✎ Edit</button>
+                <button class="card-btn" onclick="openGiveModal(${i})">🎁 Give</button>
+                <button class="card-btn danger" onclick="openDeleteModal(${i})">✕</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function openViewModal(i) {
+    const it = filteredItems[i];
+    const rar = it.rarity || 'common';
+    document.getElementById('viewModalTitle').textContent = escHtml(it.name||'Item') + ' — DETAILS';
+    document.getElementById('viewModalBody').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:16px;">
+            ${stCell('Category',categoryLabels[it.category]||'—')}
+            ${stCell('Rarity',rarityLabels[rar]||rar)}
+            ${stCell('Value',`${it.value||0} caps`)}
+            ${stCell('Weight',`${it.weight||0} lbs`)}
+            ${stCell('Damage/Effect',it.damage||'—')}
+            ${stCell('Qty',it.qty||1)}
+        </div>
+        ${it.description ? `<div style="font-size:11px;color:var(--overseer-gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(212,160,23,0.2);">Description</div><div style="font-size:12px;color:var(--overseer-white);opacity:0.85;line-height:1.6;margin-bottom:16px;">${escHtml(it.description)}</div>` : ''}
+        ${it.properties ? `<div style="font-size:11px;color:var(--overseer-gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(212,160,23,0.2);">Special Properties</div><div style="font-size:12px;color:var(--overseer-white);opacity:0.85;">${escHtml(it.properties)}</div>` : ''}
+    `;
+    document.getElementById('editFromViewBtn').onclick = function() { closeModal('viewModal'); openEditModal(i); };
+    document.getElementById('giveItemBtn').onclick = function() { closeModal('viewModal'); openGiveModal(i); };
+    openModal('viewModal');
+}
+
+function stCell(label, val) {
+    return `<div style="background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:10px 12px;"><div style="font-size:9px;color:var(--overseer-gold);letter-spacing:1.5px;text-transform:uppercase;opacity:0.8;margin-bottom:4px;">${escHtml(label)}</div><div style="font-size:13px;color:var(--overseer-white);font-weight:bold;">${escHtml(String(val))}</div></div>`;
+}
+
+function openGiveModal(i) {
+    givingIndex = i;
+    const it = filteredItems[i];
+    document.getElementById('giveItemName').textContent = it.name || 'item';
+    document.getElementById('givePlayerName').value = '';
+    document.getElementById('giveQty').value = '1';
+    document.getElementById('giveFeedback').textContent = '';
+    openModal('giveModal');
+}
+
+function confirmGiveItem() {
+    if (givingIndex === null) return;
+    const it = filteredItems[givingIndex];
+    const playerName = document.getElementById('givePlayerName').value.trim();
+    const qty = parseInt(document.getElementById('giveQty').value) || 1;
+    if (!playerName) { document.getElementById('giveFeedback').textContent = '⚠ Please enter a character name.'; return; }
+    const key = 'character_' + playerName;
+    let charData = {};
+    try { charData = JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) {}
+    if (!charData.name) {
+        document.getElementById('giveFeedback').style.color = 'var(--overseer-red-bright)';
+        document.getElementById('giveFeedback').textContent = '✕ Character "' + escHtml(playerName) + '" not found in localStorage.';
+        return;
+    }
+    if (!Array.isArray(charData.inventory)) charData.inventory = [];
+    const existingIdx = charData.inventory.findIndex(x => x.name === it.name);
+    if (existingIdx >= 0) {
+        charData.inventory[existingIdx].qty = (charData.inventory[existingIdx].qty || 1) + qty;
+    } else {
+        charData.inventory.push({ name: it.name, category: it.category, rarity: it.rarity, value: it.value, weight: it.weight, qty, description: it.description });
+    }
+    localStorage.setItem(key, JSON.stringify(charData));
+    document.getElementById('giveFeedback').style.color = 'var(--overseer-green-bright)';
+    document.getElementById('giveFeedback').textContent = '✔ ' + qty + 'x ' + it.name + ' added to ' + playerName + '\'s inventory!';
+}
+
+function openAddModal() {
+    editingIndex = null;
+    document.getElementById('editModalTitle').textContent = '+ NEW ITEM';
+    ['editName','editDamage','editDescription','editProperties'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('editCategory').value = 'misc';
+    document.getElementById('editRarity').value = 'common';
+    document.getElementById('editQty').value = '1';
+    document.getElementById('editValue').value = '0';
+    document.getElementById('editWeight').value = '0';
+    openModal('editModal');
+}
+
+function openEditModal(i) {
+    editingIndex = i;
+    const it = filteredItems[i];
+    document.getElementById('editModalTitle').textContent = '✎ EDIT ITEM';
+    document.getElementById('editName').value = it.name||'';
+    document.getElementById('editCategory').value = it.category||'misc';
+    document.getElementById('editRarity').value = it.rarity||'common';
+    document.getElementById('editQty').value = it.qty||1;
+    document.getElementById('editValue').value = it.value||0;
+    document.getElementById('editWeight').value = it.weight||0;
+    document.getElementById('editDamage').value = it.damage||'';
+    document.getElementById('editDescription').value = it.description||'';
+    document.getElementById('editProperties').value = it.properties||'';
+    openModal('editModal');
+}
+
+function saveItem() {
+    const name = document.getElementById('editName').value.trim();
+    if (!name) { alert('Item name is required.'); return; }
+    const data = {
+        name, category: document.getElementById('editCategory').value,
+        rarity: document.getElementById('editRarity').value,
+        qty: parseInt(document.getElementById('editQty').value)||1,
+        value: parseInt(document.getElementById('editValue').value)||0,
+        weight: parseFloat(document.getElementById('editWeight').value)||0,
+        damage: document.getElementById('editDamage').value.trim(),
+        description: document.getElementById('editDescription').value.trim(),
+        properties: document.getElementById('editProperties').value.trim()
+    };
+    if (editingIndex !== null) {
+        const idx = allItems.findIndex(x => x.id === filteredItems[editingIndex].id);
+        if (idx >= 0) allItems[idx] = { ...allItems[idx], ...data };
+    } else {
+        allItems.push({ id: Date.now(), created: new Date().toISOString(), ...data });
+    }
+    localStorage.setItem('overseerItems', JSON.stringify(allItems));
+    closeModal('editModal');
+    loadItems();
+}
+
+function openDeleteModal(i) {
+    deletingIndex = i;
+    document.getElementById('deleteItemName').textContent = filteredItems[i].name||'this item';
+    openModal('deleteModal');
+}
+
+function confirmDelete() {
+    if (deletingIndex === null) return;
+    const id = filteredItems[deletingIndex].id;
+    allItems = allItems.filter(it => it.id !== id);
+    localStorage.setItem('overseerItems', JSON.stringify(allItems));
+    deletingIndex = null;
+    closeModal('deleteModal');
+    loadItems();
+}
+
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+function doLogout() {
+    if (confirm('Terminate Overseer session?')) { window.location.href = 'login_hub.html'; }
+}
+
+function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+document.addEventListener('DOMContentLoaded', loadItems);
+</script>
+</body>
+</html>
