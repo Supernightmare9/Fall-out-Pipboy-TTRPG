@@ -111,6 +111,7 @@ const ACCOUNTS = [
   {
     username: "Overseer",
     role: "admin",
+    pin: "082998",
     // Admin manages campaigns rather than playing characters
     characters: [],
     settings: { ...DEFAULT_PLAYER_SETTINGS }

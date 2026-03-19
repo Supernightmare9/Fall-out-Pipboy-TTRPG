@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="nav-authority-badge">⬡</div>
                 <div class="nav-title">VAULT 215 OVERSEER</div>
                 <div class="nav-subtitle">AUTHORITY CONSOLE</div>
+                <div id="navCampaignName" class="nav-campaign-display"></div>
             </div>
             <ul class="nav-list">
                 <li><a href="overseer-player-overview.html" class="nav-link" data-page="player-overview">👥 PLAYER OVERVIEW</a></li>
@@ -29,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <li><a href="overseer-items.html" class="nav-link" data-page="items">📦 ITEMS</a></li>
             </ul>
             <div class="logout-container">
+                <button id="switchCampaignBtn" class="switch-campaign-button">⚑ SWITCH CAMPAIGN</button>
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
             </div>
         </nav>
@@ -207,6 +209,16 @@ document.addEventListener('DOMContentLoaded', function() {
             font-family: 'Courier New', monospace;
         }
 
+        .nav-campaign-display {
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            color: rgba(212, 160, 23, 0.6);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 6px;
+            min-height: 14px;
+        }
+
         /* NAVIGATION LIST */
         .nav-list {
             list-style: none;
@@ -259,6 +271,39 @@ document.addEventListener('DOMContentLoaded', function() {
             padding: 10px 10px 20px;
             border-top: 2px solid var(--overseer-gold-dim);
             margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .switch-campaign-button {
+            display: block;
+            width: 100%;
+            padding: 15px 15px;
+            background-color: var(--overseer-blue-mid);
+            border: 2px solid var(--overseer-gold);
+            color: var(--overseer-gold);
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--overseer-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(212, 160, 23, 0.2);
+            text-align: left;
+        }
+
+        .switch-campaign-button:hover {
+            background-color: var(--overseer-dark);
+            border-color: var(--overseer-gold-bright);
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 12px var(--overseer-gold-bright);
+            box-shadow: 0 0 20px rgba(212, 160, 23, 0.5);
+            transform: translateX(5px);
         }
 
         .logout-button {
@@ -393,15 +438,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Logout functionality
     const logoutBtn = document.getElementById('logoutBtn');
+    const switchCampaignBtn = document.getElementById('switchCampaignBtn');
 
     function logout() {
         closeMenu();
-        localStorage.clear();
+        sessionStorage.clear();
         window.location.href = 'index.html';
+    }
+
+    function switchCampaign() {
+        closeMenu();
+        if (typeof showCampaignModal === 'function') {
+            showCampaignModal();
+        } else {
+            window.location.href = 'overseer.html';
+        }
     }
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
+    }
+
+    if (switchCampaignBtn) {
+        switchCampaignBtn.addEventListener('click', switchCampaign);
+    }
+
+    // Show current campaign name
+    var campaignId = sessionStorage.getItem('campaignId');
+    if (campaignId) {
+        var navCampaignEl = document.getElementById('navCampaignName');
+        if (navCampaignEl) {
+            navCampaignEl.textContent = '⚑ ' + (sessionStorage.getItem('campaignName') || campaignId);
+        }
     }
 
     // Close menu with Escape key
