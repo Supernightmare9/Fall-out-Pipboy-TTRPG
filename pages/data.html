@@ -539,6 +539,25 @@
     }
 
     // ═══════════════════════════════════════════
+    // COPY STORE: avoid inline JSON in onclick
+    // Keys are monotonic integers; values are the
+    // strings to copy. Never stored in HTML attrs.
+    // ═══════════════════════════════════════════
+    var _copyStore = {};
+    var _copyCounter = 0;
+
+    function storeCopy(text) {
+        var key = ++_copyCounter;
+        _copyStore[key] = text;
+        return key;
+    }
+
+    function copyFromStore(key, btnEl) {
+        var text = _copyStore[key];
+        if (text !== undefined) copyToClipboard(text, btnEl);
+    }
+
+    // ═══════════════════════════════════════════
     // COPY TO CLIPBOARD
     // ═══════════════════════════════════════════
     function copyToClipboard(text, btnEl) {
@@ -604,7 +623,7 @@
 
             var inventoryCount = (c.inventory || []).length;
             var sessionCount = (c.sessions || []).length;
-            var campaignJson = JSON.stringify(c, null, 2);
+            var copyKey = storeCopy(JSON.stringify(c, null, 2));
 
             return '<div class="campaign-card ' + statusClass + '" data-name="' + escapeHtml((c.name || '').toLowerCase()) + '">' +
                 '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">' +
@@ -614,7 +633,7 @@
                     '</div>' +
                     '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">' +
                         '<span class="status-badge ' + statusBadgeClass + '">' + escapeHtml(c.status || 'active') + '</span>' +
-                        '<button class="copy-btn" onclick="copyToClipboard(' + JSON.stringify(campaignJson) + ', this)">\u2398 Copy</button>' +
+                        '<button class="copy-btn" onclick="copyFromStore(' + copyKey + ', this)">\u2398 Copy</button>' +
                     '</div>' +
                 '</div>' +
                 '<div style="font-size:11px;opacity:0.75;line-height:1.6;margin-bottom:10px;">' + escapeHtml(c.description || '') + '</div>' +
@@ -665,7 +684,7 @@
             var abilitiesHtml = (enemy.abilities || []).map(function(a) { return '<span class="card-tag">' + escapeHtml(a) + '</span>'; }).join('');
             var lootHtml = (enemy.loot || []).map(function(l) { return '<span class="card-tag" style="border-color:rgba(251,191,36,0.3);color:rgba(251,191,36,0.8);">' + escapeHtml(l) + '</span>'; }).join('');
             var hidden = (enemyFilterActive !== 'all' && diff !== enemyFilterActive) || (query && !(enemy.name || '').toLowerCase().includes(query));
-            var enemyJson = JSON.stringify(enemy, null, 2);
+            var copyKey = storeCopy(JSON.stringify(enemy, null, 2));
 
             return '<div class="data-card ' + cardClass + '" data-difficulty="' + escapeHtml(diff) + '" data-name="' + escapeHtml((enemy.name||'').toLowerCase()) + '" style="' + (hidden ? 'display:none' : '') + '">' +
                 '<div class="card-header"><div class="card-name">' + escapeHtml(enemy.name) + '</div><span class="difficulty-badge ' + badgeClass + '">' + escapeHtml(diff) + '</span></div>' +
@@ -678,7 +697,7 @@
                 '</div>' +
                 (abilitiesHtml ? '<div style="margin-bottom:6px;font-size:9px;letter-spacing:2px;opacity:0.5;text-transform:uppercase;">Abilities</div><div class="card-tags">' + abilitiesHtml + '</div>' : '') +
                 (lootHtml ? '<div style="margin-bottom:6px;font-size:9px;letter-spacing:2px;opacity:0.5;text-transform:uppercase;">Loot</div><div class="card-tags">' + lootHtml + '</div>' : '') +
-                '<div class="card-actions"><button class="copy-btn" onclick="copyToClipboard(' + JSON.stringify(enemyJson) + ', this)">\u2398 Copy</button></div>' +
+                '<div class="card-actions"><button class="copy-btn" onclick="copyFromStore(' + copyKey + ', this)">\u2398 Copy</button></div>' +
             '</div>';
         }).join('');
     }
@@ -722,7 +741,7 @@
             var cardClass = 'rarity-' + escapeHtml(rarity);
             var propsHtml = (item.properties || []).map(function(p) { return '<span class="card-tag">' + escapeHtml(p) + '</span>'; }).join('');
             var hidden = (itemFilterActive !== 'all' && (item.type || '') !== itemFilterActive) || (query && !(item.name || '').toLowerCase().includes(query));
-            var itemJson = JSON.stringify(item, null, 2);
+            var copyKey = storeCopy(JSON.stringify(item, null, 2));
 
             return '<div class="data-card ' + cardClass + '" data-type="' + escapeHtml(item.type||'') + '" data-name="' + escapeHtml((item.name||'').toLowerCase()) + '" style="' + (hidden ? 'display:none' : '') + '">' +
                 '<div class="card-header"><div class="card-name">' + escapeHtml(item.name) + '</div><span class="rarity-badge ' + badgeClass + '">' + escapeHtml(rarity) + '</span></div>' +
@@ -734,7 +753,7 @@
                     '<div class="card-stat"><div class="stat-label">Rarity</div><div class="stat-value" style="color:inherit;">' + escapeHtml(rarity) + '</div></div>' +
                 '</div>' +
                 (propsHtml ? '<div class="card-tags">' + propsHtml + '</div>' : '') +
-                '<div class="card-actions"><button class="copy-btn" onclick="copyToClipboard(' + JSON.stringify(itemJson) + ', this)">\u2398 Copy</button></div>' +
+                '<div class="card-actions"><button class="copy-btn" onclick="copyFromStore(' + copyKey + ', this)">\u2398 Copy</button></div>' +
             '</div>';
         }).join('');
     }
@@ -778,7 +797,7 @@
             var cardClass = 'attitude-' + escapeHtml(attitude);
             var questsHtml = (npc.quests || []).map(function(q) { return '<span class="card-tag" style="border-color:rgba(192,132,252,0.4);color:rgba(192,132,252,0.8);">' + escapeHtml(q) + '</span>'; }).join('');
             var hidden = (npcFilterActive !== 'all' && attitude !== npcFilterActive) || (query && !(npc.name || '').toLowerCase().includes(query));
-            var npcJson = JSON.stringify(npc, null, 2);
+            var copyKey = storeCopy(JSON.stringify(npc, null, 2));
 
             return '<div class="data-card ' + cardClass + '" data-attitude="' + escapeHtml(attitude) + '" data-name="' + escapeHtml((npc.name||'').toLowerCase()) + '" style="' + (hidden ? 'display:none' : '') + '">' +
                 '<div class="card-header"><div class="card-name">' + escapeHtml(npc.name) + '</div><span class="attitude-badge ' + badgeClass + '">' + escapeHtml(attitude) + '</span></div>' +
@@ -786,7 +805,7 @@
                 '<div class="card-description">' + escapeHtml(npc.description || '') + '</div>' +
                 '<div class="card-stats"><div class="card-stat" style="grid-column:1/-1;"><div class="stat-label">Location</div><div class="stat-value" style="font-size:11px;">' + escapeHtml(npc.location || '\u2014') + '</div></div></div>' +
                 (questsHtml ? '<div style="margin-bottom:6px;font-size:9px;letter-spacing:2px;opacity:0.5;text-transform:uppercase;">Quests</div><div class="card-tags">' + questsHtml + '</div>' : '') +
-                '<div class="card-actions"><button class="copy-btn" onclick="copyToClipboard(' + JSON.stringify(npcJson) + ', this)">\u2398 Copy</button></div>' +
+                '<div class="card-actions"><button class="copy-btn" onclick="copyFromStore(' + copyKey + ', this)">\u2398 Copy</button></div>' +
             '</div>';
         }).join('');
     }
@@ -817,27 +836,39 @@
 
         var query = (document.getElementById('search-ls').value || '').toLowerCase();
 
+        // Use a counter for collision-free unique IDs; store ls key as data-attr for copy.
+        var counter = 0;
         grid.innerHTML = keys.map(function(key) {
+            counter++;
             var rawVal = localStorage.getItem(key) || '';
             var size = new Blob([rawVal]).size;
             var sizeStr = size > 1024 ? (size / 1024).toFixed(1) + ' KB' : size + ' B';
             var displayVal = rawVal;
             try { displayVal = JSON.stringify(JSON.parse(rawVal), null, 2); } catch(e) {}
             var hidden = query && !key.toLowerCase().includes(query);
-            var itemId = 'ls-val-' + key.replace(/[^a-zA-Z0-9]/g, '_');
+            var itemId = 'ls-val-' + counter;
 
-            return '<div class="ls-item" data-key="' + escapeHtml(key.toLowerCase()) + '" style="' + (hidden ? 'display:none' : '') + '">' +
+            return '<div class="ls-item" data-key="' + escapeHtml(key.toLowerCase()) + '" data-ls-key="' + escapeHtml(key) + '" style="' + (hidden ? 'display:none' : '') + '">' +
                 '<div class="ls-key">' + escapeHtml(key) + '</div>' +
-                '<div class="ls-value" id="' + escapeHtml(itemId) + '">' + escapeHtml(displayVal) + '</div>' +
+                '<div class="ls-value" id="' + itemId + '">' + escapeHtml(displayVal) + '</div>' +
                 '<div class="ls-item-footer">' +
                     '<span class="ls-size">' + escapeHtml(sizeStr) + '</span>' +
                     '<div class="ls-actions">' +
-                        '<button class="copy-btn" onclick="copyToClipboard(' + JSON.stringify(rawVal) + ', this)">\u2398 Copy</button>' +
-                        '<button class="copy-btn" onclick="toggleLsExpand(\'' + escapeHtml(itemId) + '\', this)">\u25bc Expand</button>' +
+                        '<button class="copy-btn" onclick="copyLsEntry(this)">\u2398 Copy</button>' +
+                        '<button class="copy-btn" onclick="toggleLsExpand(\'' + itemId + '\', this)">\u25bc Expand</button>' +
                     '</div>' +
                 '</div>' +
             '</div>';
         }).join('');
+    }
+
+    function copyLsEntry(btn) {
+        var item = btn.closest('.ls-item');
+        if (!item) return;
+        var lsKey = item.dataset.lsKey;
+        if (lsKey === undefined) return;
+        var val = localStorage.getItem(lsKey);
+        copyToClipboard(val !== null ? val : '', btn);
     }
 
     function toggleLsExpand(itemId, btn) {

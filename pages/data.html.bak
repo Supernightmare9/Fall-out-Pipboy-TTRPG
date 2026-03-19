@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fallout Pipboy Data - Vault 215</title>
+    <style>
+        /* ===========================
+           VAULT 215 DATA PAGE
+           COMPLETE BRANDING
+           =========================== */
+
+        :root {
+            --vault-primary: #4ade80;
+            --vault-secondary: #fbbf24;
+            --vault-dark: #0a0a0a;
+            --vault-darker: #1a1a1a;
+            --vault-accent: #c084fc;
+            --vault-success: #4ade80;
+            --vault-error: #ff6b6b;
+            --vault-warning: #fbbf24;
+            --vault-info: #9333ea;
+            --vault-green: #4ade80;
+            --vault-gold: #fbbf24;
+            --vault-blue-dark: #2d5016;
+            --vault-blue-light: #3d6b1f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--vault-dark);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* ===== VAULT HEADER ===== */
+        .vault-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background-color: var(--vault-darker);
+            border: 3px solid var(--vault-green);
+            box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
+            position: relative;
+        }
+
+        .terminal-access-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: transparent;
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            padding: 6px 10px;
+            cursor: pointer;
+            text-decoration: none;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+            box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+        }
+
+        .terminal-access-btn:hover {
+            background: rgba(74, 222, 128, 0.1);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 6px var(--vault-gold);
+            box-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
+        }
+
+        .vault-badge {
+            font-size: 10px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .vault-title {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 4px;
+            color: var(--vault-green);
+            text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
+            animation: vault-glow 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes vault-glow {
+            0%, 100% {
+                text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
+            }
+            50% {
+                text-shadow: 0 0 15px var(--vault-green), 0 0 30px rgba(74, 222, 128, 0.8);
+            }
+        }
+
+        .vault-subtitle {
+            font-size: 12px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            letter-spacing: 2px;
+        }
+
+        .vault-info {
+            font-size: 11px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+            margin-top: 8px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            padding-top: 8px;
+        }
+
+        /* ===== VAULT FOOTER ===== */
+        .vault-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(74, 222, 128, 0.3);
+            font-size: 10px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+        }
+
+        .vault-footer span {
+            color: var(--vault-gold);
+            text-shadow: 0 0 3px var(--vault-gold);
+            font-weight: bold;
+        }
+
+        /* ===== MAIN TAB NAVIGATION ===== */
+        .main-tab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--vault-green);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .main-tab-button {
+            background-color: var(--vault-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .main-tab-button:hover {
+            background-color: var(--vault-darker);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        .main-tab-button.active {
+            background-color: var(--vault-blue-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        /* ===== SUBTAB NAVIGATION ===== */
+        .subtab-nav {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--vault-green);
+            padding-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .subtab-button {
+            background-color: var(--vault-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+
+        .subtab-button:hover {
+            background-color: var(--vault-darker);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        .subtab-button.active {
+            background-color: var(--vault-blue-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        .main-tab-content {
+            display: none;
+        }
+
+        .main-tab-content.active {
+            display: block;
+        }
+
+        .subtab-content {
+            display: none;
+        }
+
+        .subtab-content.active {
+            display: block;
+        }
+
+        /* ===== CHARACTER PROFILE SECTION ===== */
+        .character-profile {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .data-section {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            border-radius: 3px;
+        }
+
+        .character-image-box {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            border-radius: 3px;
+        }
+
+        .character-image {
+            width: 100%;
+            height: 300px;
+            background-color: var(--vault-dark);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .character-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .character-image-placeholder {
+            color: var(--vault-green);
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        .image-upload-btn {
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 10px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            width: 100%;
+            border-radius: 2px;
+        }
+
+        .image-upload-btn:hover {
+            background-color: var(--vault-blue-light);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+        }
+
+        .character-info-box {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.3);
+            border-radius: 3px;
+        }
+
+        .section-title {
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px var(--vault-gold);
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--vault-green);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .info-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--vault-gold);
+            font-size: 11px;
+            font-weight: bold;
+            text-shadow: 0 0 3px var(--vault-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            color: var(--vault-green);
+            font-size: 13px;
+            text-shadow: 0 0 3px var(--vault-green);
+        }
+
+        .info-input {
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-gold);
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px var(--vault-gold);
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .info-input:focus {
+            outline: none;
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: var(--vault-gold);
+        }
+
+        .info-textarea {
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-gold);
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-shadow: 0 0 5px var(--vault-gold);
+            width: 100%;
+            height: 150px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+            resize: vertical;
+        }
+
+        .info-textarea:focus {
+            outline: none;
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: var(--vault-gold);
+        }
+
+        .data-list {
+            list-style: none;
+        }
+
+        .data-item {
+            padding: 15px;
+            background-color: var(--vault-dark);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 3px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .data-item:hover {
+            background-color: rgba(74, 222, 128, 0.05);
+            border-color: rgba(74, 222, 128, 0.4);
+        }
+
+        .item-title {
+            color: var(--vault-gold);
+            text-shadow: 0 0 3px var(--vault-gold);
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+
+        .item-description {
+            color: var(--vault-green);
+            font-size: 11px;
+            line-height: 1.6;
+            margin-bottom: 5px;
+            text-shadow: 0 0 2px var(--vault-green);
+        }
+
+        .item-status {
+            color: var(--vault-green);
+            font-size: 10px;
+            opacity: 0.8;
+            text-shadow: 0 0 2px var(--vault-green);
+        }
+
+        .item-delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #8b3a3a;
+            border: 1px solid var(--vault-error);
+            color: var(--vault-error);
+            padding: 4px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 3px var(--vault-error);
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+
+        .item-delete-btn:hover {
+            background-color: #a84a4a;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+        }
+
+        .empty-message {
+            color: var(--vault-accent);
+            text-align: center;
+            padding: 30px;
+            font-size: 12px;
+            font-style: italic;
+            text-shadow: 0 0 2px var(--vault-accent);
+        }
+
+        /* ===== ADD FORM SECTION ===== */
+        .add-form {
+            background-color: var(--vault-dark);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            padding: 20px;
+            border-radius: 3px;
+            margin-top: 20px;
+        }
+
+        .form-title {
+            color: var(--vault-accent);
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 3px var(--vault-accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            color: var(--vault-green);
+            font-size: 10px;
+            text-shadow: 0 0 3px var(--vault-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-input {
+            background-color: var(--vault-darker);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-gold);
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            text-shadow: 0 0 5px var(--vault-gold);
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.1);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.6), inset 0 0 5px rgba(74, 222, 128, 0.1);
+            color: var(--vault-gold);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* ===== BUTTON SECTION ===== */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            flex: 1;
+            min-width: 120px;
+            background-color: var(--vault-blue-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 12px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+            border-radius: 2px;
+        }
+
+        .action-button:hover {
+            background-color: var(--vault-blue-light);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.8);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+            transform: translateY(-2px);
+        }
+
+        .action-button.small {
+            flex: 0;
+            min-width: auto;
+            padding: 8px 12px;
+            font-size: 10px;
+        }
+        
+        .message {
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--vault-green);
+            text-shadow: 0 0 3px var(--vault-green);
+            min-height: 20px;
+        }
+
+        .message.success {
+            color: var(--vault-green);
+            text-shadow: 0 0 5px var(--vault-green);
+        }
+
+        .message.error {
+            color: var(--vault-error);
+            text-shadow: 0 0 5px var(--vault-error);
+        }
+
+        .static-value {
+            background-color: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px var(--vault-green);
+            width: 100%;
+            border-radius: 3px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .character-profile {
+                grid-template-columns: 1fr;
+            }
+
+            .vault-header {
+                padding: 20px;
+            }
+
+            .vault-title {
+                font-size: 20px;
+            }
+
+            .main-tab-nav {
+                flex-direction: column;
+            }
+
+            .subtab-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- VAULT HEADER -->
+        <div class="vault-header">
+            <a class="terminal-access-btn" href="terminal.html" title="Hacking Minigame">⌨ TERMINAL</a>
+            <div class="vault-badge">VAULT-TEC INDUSTRIES PIP-BOY 3000</div>
+            <div class="vault-title">CHARACTER DATA</div>
+            <div class="vault-subtitle">PERSONAL INFORMATION PROCESSOR</div>
+            <div class="vault-info" id="characterNameDisplay">Vault 215 Resident • Data Module</div>
+        </div>
+
+        <!-- MAIN TAB NAVIGATION -->
+        <div class="main-tab-nav">
+            <button class="main-tab-button active" data-tab="profile" onclick="switchMainTab('profile')">PROFILE</button>
+            <button class="main-tab-button" data-tab="backstory" onclick="switchMainTab('backstory')">BACKSTORY</button>
+            <button class="main-tab-button" data-tab="data" onclick="switchMainTab('data')">DATA</button>
+        </div>
+
+        <!-- PROFILE TAB -->
+        <div id="profile" class="main-tab-content active">
+            <div class="character-profile">
+                <!-- CHARACTER IMAGE -->
+                <div class="character-image-box">
+                    <div class="section-title" style="margin-bottom: 15px;">Character Portrait</div>
+                    <div class="character-image" id="characterImageContainer">
+                        <div class="character-image-placeholder">No image uploaded</div>
+                    </div>
+                    <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                    <button class="image-upload-btn" onclick="document.getElementById('imageUpload').click()">UPLOAD IMAGE</button>
+                </div>
+
+                <!-- CHARACTER INFO -->
+                <div class="character-info-box">
+                    <div class="section-title">Character Information</div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">Character Name</div>
+                        <input type="text" class="info-input" id="charName" placeholder="Enter character name" value="Vault Dweller">
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Race</div>
+                        <select class="info-input" id="charRace" style="cursor: pointer;">
+                            <option value="">Select a race...</option>
+                            <option value="Human">Human</option>
+                            <option value="Ghoul">Ghoul</option>
+                            <option value="Super Mutant">Super Mutant</option>
+                            <option value="Synth">Synth</option>
+                            <option value="Mirelurk">Mirelurk</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Vault Number</div>
+                        <div class="static-value">VAULT 215</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Occupation/Class</div>
+                        <input type="text" class="info-input" id="charClass" placeholder="e.g., Scavenger, Soldier">
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Alignment</div>
+                        <select class="info-input" id="charAlignment" style="cursor: pointer;">
+                            <option value="">Select alignment...</option>
+                            <option value="Good">Good (Helpful)</option>
+                            <option value="Neutral">Neutral (Survivor)</option>
+                            <option value="Evil">Evil (Raider)</option>
+                            <option value="Chaotic">Chaotic (Wild Card)</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="action-button" onclick="saveCharacterData()">SAVE DATA</button>
+                        <button class="action-button" onclick="clearCharacterData()">CLEAR ALL</button>
+                    </div>
+                    <div class="message" id="saveMessage"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BACKSTORY TAB -->
+        <div id="backstory" class="main-tab-content">
+            <div class="data-section">
+                <div class="section-title">Character Backstory</div>
+                <textarea class="info-textarea" id="characterBackstory" placeholder="Write your character's backstory here... Their origins, motivations, past experiences, and what drives them in the wasteland..."></textarea>
+                <div class="button-group">
+                    <button class="action-button" onclick="saveBackstory()">SAVE BACKSTORY</button>
+                    <button class="action-button" onclick="clearBackstory()">CLEAR</button>
+                </div>
+                <div class="message" id="backstoryMessage"></div>
+            </div>
+        </div>
+
+        <!-- DATA TAB -->
+        <div id="data" class="main-tab-content">
+            <!-- SUB-TABS FOR DATA -->
+            <div class="subtab-nav">
+                <button class="subtab-button active" data-subtab="quests" onclick="switchSubTab('quests')">QUESTS</button>
+                <button class="subtab-button" data-subtab="npcs" onclick="switchSubTab('npcs')">NPCs</button>
+                <button class="subtab-button" data-subtab="factions" onclick="switchSubTab('factions')">FACTIONS</button>
+            </div>
+
+            <!-- QUESTS SUB-TAB -->
+            <div id="quests" class="subtab-content active">
+                <!-- ACTIVE QUESTS -->
+                <div class="data-section">
+                    <div class="section-title">📋 Active Quests</div>
+                    <ul class="data-list" id="activeQuestsList">
+                        <li class="data-item">
+                            <div class="item-title">War Never Changes</div>
+                            <div class="item-description">Learn the history of the Great War and its impact on the wasteland.</div>
+                            <div class="item-status">Status: In Progress | Objectives: 3/5</div>
+                        </li>
+                        <li class="data-item">
+                            <div class="item-title">Escape the Vault</div>
+                            <div class="item-description">Find a way out of Vault 111 and discover what happened to the world.</div>
+                            <div class="item-status">Status: Active | Location: Vault 111</div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- COMPLETED QUESTS -->
+                <div class="data-section">
+                    <div class="section-title">✓ Completed Quests</div>
+                    <ul class="data-list" id="completedQuestsList">
+                        <li class="data-item">
+                            <div class="item-title">Out of the Shadows</div>
+                            <div class="item-description">Complete the Fallout Shelter Underground Tutorial</div>
+                            <div class="item-status">Status: Completed | Reward: 100 XP</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- NPCs SUB-TAB -->
+            <div id="npcs" class="subtab-content">
+                <div class="data-section">
+                    <div class="section-title">👥 Notable NPCs</div>
+                    <ul class="data-list" id="npcsList">
+                    </ul>
+
+                    <!-- ADD NPC FORM -->
+                    <div class="add-form">
+                        <div class="form-title">+ Add New NPC</div>
+                        <div class="form-group">
+                            <label class="form-label">NPC Name</label>
+                            <input type="text" class="form-input" id="npcName" placeholder="e.g., Preston Garvey">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-input" id="npcDescription" placeholder="What is this NPC known for?">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-input" id="npcLocation" placeholder="e.g., Diamond City">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Affinity/Notes</label>
+                            <input type="text" class="form-input" id="npcNotes" placeholder="e.g., Faction: Minutemen | Affinity: Friendly">
+                        </div>
+                        <div class="form-buttons">
+                            <button class="action-button small" onclick="addNPC()">ADD NPC</button>
+                            <button class="action-button small" onclick="clearNPCForm()" style="background-color: #8b3a3a; border-color: var(--vault-error); color: var(--vault-error); text-shadow: 0 0 5px var(--vault-error);">CLEAR</button>
+                        </div>
+                        <div class="message" id="npcMessage"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FACTIONS SUB-TAB -->
+            <div id="factions" class="subtab-content">
+                <div class="data-section">
+                    <div class="section-title">⚔ Factions</div>
+                    <ul class="data-list" id="factionsList">
+                    </ul>
+
+                    <!-- ADD FACTION FORM -->
+                    <div class="add-form">
+                        <div class="form-title">+ Add New Faction</div>
+                        <div class="form-group">
+                            <label class="form-label">Faction Name</label>
+                            <input type="text" class="form-input" id="factionName" placeholder="e.g., The Brotherhood of Steel">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Description</label>
+                            <input type="text" class="form-input" id="factionDescription" placeholder="What does this faction do?">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reputation</label>
+                            <select class="form-input" id="factionReputation" style="cursor: pointer;">
+                                <option value="">Select reputation...</option>
+                                <option value="Friendly">Friendly</option>
+                                <option value="Neutral">Neutral</option>
+                                <option value="Hostile">Hostile</option>
+                                <option value="Unknown">Unknown</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notes</label>
+                            <input type="text" class="form-input" id="factionNotes" placeholder="e.g., Quests Available: Yes">
+                        </div>
+                        <div class="form-buttons">
+                            <button class="action-button small" onclick="addFaction()">ADD FACTION</button>
+                            <button class="action-button small" onclick="clearFactionForm()" style="background-color: #8b3a3a; border-color: var(--vault-error); color: var(--vault-error); text-shadow: 0 0 5px var(--vault-error);">CLEAR</button>
+                        </div>
+                        <div class="message" id="factionMessage"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VAULT FOOTER -->
+        <div class="vault-footer">
+            <p>VAULT <span>215</span> RESIDENT • DATA MODULE</p>
+            <p style="margin-top: 5px;">Personal Information Secured and Synchronized</p>
+        </div>
+    </div>
+
+    <script>
+        let customNPCs = [];
+        let customFactions = [];
+
+        function switchMainTab(tabName) {
+            document.getElementById('profile').classList.remove('active');
+            document.getElementById('backstory').classList.remove('active');
+            document.getElementById('data').classList.remove('active');
+            
+            const buttons = document.querySelectorAll('.main-tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        function switchSubTab(subtabName) {
+            document.getElementById('quests').classList.remove('active');
+            document.getElementById('npcs').classList.remove('active');
+            document.getElementById('factions').classList.remove('active');
+            
+            const buttons = document.querySelectorAll('.subtab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(subtabName).classList.add('active');
+            document.querySelector(`[data-subtab="${subtabName}"]`).classList.add('active');
+        }
+
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imageContainer = document.getElementById('characterImageContainer');
+                    imageContainer.innerHTML = `<img src="${event.target.result}" alt="Character Portrait">`;
+                    localStorage.setItem('characterImage', event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function saveCharacterData() {
+            const charName = document.getElementById('charName').value;
+            const charRace = document.getElementById('charRace').value;
+            const charClass = document.getElementById('charClass').value;
+            const charAlignment = document.getElementById('charAlignment').value;
+
+            const characterData = {
+                name: charName,
+                race: charRace,
+                class: charClass,
+                alignment: charAlignment
+            };
+
+            console.log('saveCharacterData() called — saving:', characterData);
+            localStorage.setItem('characterData', JSON.stringify(characterData));
+            console.log('Character data saved to localStorage.');
+
+            document.getElementById('characterNameDisplay').textContent = charName || 'VAULT DWELLER';
+
+            const message = document.getElementById('saveMessage');
+            message.textContent = '✓ Character data saved successfully!';
+            message.className = 'message success';
+            setTimeout(() => { message.textContent = ''; }, 3000);
+        }
+
+        function saveBackstory() {
+            const backstory = document.getElementById('characterBackstory').value;
+            localStorage.setItem('characterBackstory', backstory);
+
+            const message = document.getElementById('backstoryMessage');
+            message.textContent = '✓ Backstory saved successfully!';
+            message.className = 'message success';
+            setTimeout(() => { message.textContent = ''; }, 3000);
+        }
+
+        function addNPC() {
+            const name = document.getElementById('npcName').value.trim();
+            const description = document.getElementById('npcDescription').value.trim();
+            const location = document.getElementById('npcLocation').value.trim();
+            const notes = document.getElementById('npcNotes').value.trim();
+
+            if (!name) {
+                const message = document.getElementById('npcMessage');
+                message.textContent = '⚠ Please enter an NPC name!';
+                message.className = 'message error';
+                return;
+            }
+
+            customNPCs.push({
+                id: 'custom-' + Date.now(),
+                name: name,
+                description: description,
+                location: location,
+                notes: notes
+            });
+
+            localStorage.setItem('customNPCs', JSON.stringify(customNPCs));
+            clearNPCForm();
+            renderNPCs();
+
+            const message = document.getElementById('npcMessage');
+            message.textContent = `✓ ${name} added successfully!`;
+            message.className = 'message success';
+            setTimeout(() => { message.textContent = ''; }, 3000);
+        }
+
+        function deleteNPC(id) {
+            customNPCs = customNPCs.filter(npc => npc.id !== id);
+            localStorage.setItem('customNPCs', JSON.stringify(customNPCs));
+            renderNPCs();
+        }
+
+        function clearNPCForm() {
+            document.getElementById('npcName').value = '';
+            document.getElementById('npcDescription').value = '';
+            document.getElementById('npcLocation').value = '';
+            document.getElementById('npcNotes').value = '';
+        }
+
+        function renderNPCs() {
+            const list = document.getElementById('npcsList');
+            let html = '';
+
+            if (customNPCs.length === 0) {
+                html = '<div class="empty-message">No NPCs added yet. Create your first NPC below!</div>';
+            } else {
+                customNPCs.forEach((npc) => {
+                    html += `
+                        <li class="data-item">
+                            <div class="item-title">${npc.name}</div>
+                            <div class="item-description">${npc.description}</div>
+                            <div class="item-status">Location: ${npc.location} | ${npc.notes}</div>
+                            <button class="item-delete-btn" onclick="deleteNPC('${npc.id}')">DELETE</button>
+                        </li>
+                    `;
+                });
+            }
+
+            list.innerHTML = html;
+        }
+
+        function addFaction() {
+            const name = document.getElementById('factionName').value.trim();
+            const description = document.getElementById('factionDescription').value.trim();
+            const reputation = document.getElementById('factionReputation').value.trim();
+            const notes = document.getElementById('factionNotes').value.trim();
+
+            if (!name) {
+                const message = document.getElementById('factionMessage');
+                message.textContent = '⚠ Please enter a faction name!';
+                message.className = 'message error';
+                return;
+            }
+
+            customFactions.push({
+                id: 'custom-' + Date.now(),
+                name: name,
+                description: description,
+                reputation: reputation,
+                notes: notes
+            });
+
+            localStorage.setItem('customFactions', JSON.stringify(customFactions));
+            clearFactionForm();
+            renderFactions();
+
+            const message = document.getElementById('factionMessage');
+            message.textContent = `✓ ${name} added successfully!`;
+            message.className = 'message success';
+            setTimeout(() => { message.textContent = ''; }, 3000);
+        }
+
+        function deleteFaction(id) {
+            customFactions = customFactions.filter(faction => faction.id !== id);
+            localStorage.setItem('customFactions', JSON.stringify(customFactions));
+            renderFactions();
+        }
+
+        function clearFactionForm() {
+            document.getElementById('factionName').value = '';
+            document.getElementById('factionDescription').value = '';
+            document.getElementById('factionReputation').value = '';
+            document.getElementById('factionNotes').value = '';
+        }
+
+        function renderFactions() {
+            const list = document.getElementById('factionsList');
+            let html = '';
+
+            if (customFactions.length === 0) {
+                html = '<div class="empty-message">No Factions added yet. Create your first faction below!</div>';
+            } else {
+                customFactions.forEach((faction) => {
+                    html += `
+                        <li class="data-item">
+                            <div class="item-title">${faction.name}</div>
+                            <div class="item-description">${faction.description}</div>
+                            <div class="item-status">Reputation: ${faction.reputation} | ${faction.notes}</div>
+                            <button class="item-delete-btn" onclick="deleteFaction('${faction.id}')">DELETE</button>
+                        </li>
+                    `;
+                });
+            }
+
+            list.innerHTML = html;
+        }
+
+        function clearCharacterData() {
+            if (confirm('Are you sure you want to clear all character data?')) {
+                document.getElementById('charName').value = 'Vault Dweller';
+                document.getElementById('charRace').value = '';
+                document.getElementById('charClass').value = '';
+                document.getElementById('charAlignment').value = '';
+                document.getElementById('characterImageContainer').innerHTML = '<div class="character-image-placeholder">No image uploaded</div>';
+                
+                localStorage.removeItem('characterData');
+                localStorage.removeItem('characterImage');
+
+                const message = document.getElementById('saveMessage');
+                message.textContent = '✓ Character data cleared!';
+                message.className = 'message success';
+                setTimeout(() => { message.textContent = ''; }, 3000);
+            }
+        }
+
+        function clearBackstory() {
+            if (confirm('Are you sure you want to clear the backstory?')) {
+                document.getElementById('characterBackstory').value = '';
+                localStorage.removeItem('characterBackstory');
+
+                const message = document.getElementById('backstoryMessage');
+                message.textContent = '✓ Backstory cleared!';
+                message.className = 'message success';
+                setTimeout(() => { message.textContent = ''; }, 3000);
+            }
+        }
+
+        function loadCharacterData() {
+            const savedData = localStorage.getItem('characterData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('charName').value = data.name || 'Vault Dweller';
+                document.getElementById('charRace').value = data.race || '';
+                document.getElementById('charClass').value = data.class || '';
+                document.getElementById('charAlignment').value = data.alignment || '';
+                document.getElementById('characterNameDisplay').textContent = data.name || 'VAULT DWELLER';
+            }
+
+            const savedImage = localStorage.getItem('characterImage');
+            if (savedImage) {
+                document.getElementById('characterImageContainer').innerHTML = `<img src="${savedImage}" alt="Character Portrait">`;
+            }
+
+            const savedBackstory = localStorage.getItem('characterBackstory');
+            if (savedBackstory) {
+                document.getElementById('characterBackstory').value = savedBackstory;
+            }
+
+            const savedNPCs = localStorage.getItem('customNPCs');
+            if (savedNPCs) {
+                customNPCs = JSON.parse(savedNPCs);
+            }
+            renderNPCs();
+
+            const savedFactions = localStorage.getItem('customFactions');
+            if (savedFactions) {
+                customFactions = JSON.parse(savedFactions);
+            }
+            renderFactions();
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCharacterData();
+
+            // Attach auto-save listeners to all 4 character fields
+            const charName = document.getElementById('charName');
+            const charRace = document.getElementById('charRace');
+            const charClass = document.getElementById('charClass');
+            const charAlignment = document.getElementById('charAlignment');
+
+            if (!charName || !charRace || !charClass || !charAlignment) {
+                console.error('One or more character fields not found in DOM.');
+                return;
+            }
+
+            // Debounce helper — delays save until typing has paused
+            function debounce(fn, delay) {
+                let timer;
+                return function() { clearTimeout(timer); timer = setTimeout(fn, delay); };
+            }
+
+            // 'input' fires on every keystroke for text fields — debounced to avoid excessive writes
+            charName.addEventListener('input', debounce(function() {
+                console.log('charName changed — auto-saving...');
+                saveCharacterData();
+            }, 400));
+
+            // 'change' fires once per selection for dropdowns — loop to avoid repetition
+            [charRace, charClass, charAlignment].forEach(function(el) {
+                el.addEventListener('change', function() {
+                    console.log(el.id + ' changed — auto-saving...');
+                    saveCharacterData();
+                });
+            });
+
+            console.log('Character data auto-save listeners attached.');
+        });
+    </script>
+
+    <!-- Bottom Navigation (shared) -->
+    <script src="../assets/helpers/settingsManager.js"></script>
+    <script src="../assets/navigation.js"></script>
+</body>
+</html>
