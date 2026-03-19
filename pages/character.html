@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pip-Boy Character - Vault 215</title>
+    <title>Pip-Boy Character — Vault 215</title>
     <style>
         /* ===========================
            VAULT 215 CHARACTER PAGE
-           COMPLETE BRANDING
+           PHASE 4: PLAYER SIDE MIRROR
            =========================== */
 
         :root {
@@ -19,18 +19,12 @@
             --vault-success: #4ade80;
             --vault-error: #ff6b6b;
             --vault-warning: #fbbf24;
-            --vault-info: #9333ea;
+            --vault-info: #60a5fa;
             --vault-green: #4ade80;
             --vault-gold: #fbbf24;
-            --vault-blue-dark: #2d5016;
-            --vault-blue-light: #3d6b1f;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             width: 100%;
@@ -38,29 +32,23 @@
             background-color: var(--vault-dark);
             color: var(--vault-green);
             font-family: 'Courier New', monospace;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 20% 50%, rgba(58, 102, 20, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 80% 80%, rgba(58, 102, 20, 0.1) 0%, transparent 50%);
         }
 
-        body {
-            padding: 20px;
-        }
+        body { padding: 20px; }
 
-        /* Scanline effect */
+        /* Scanline overlay */
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background: repeating-linear-gradient(
                 0deg,
-                rgba(0, 0, 0, 0.15),
-                rgba(0, 0, 0, 0.15) 1px,
-                transparent 1px,
-                transparent 2px
+                rgba(0,0,0,0.12), rgba(0,0,0,0.12) 1px,
+                transparent 1px, transparent 2px
             );
             pointer-events: none;
             z-index: 10;
@@ -69,225 +57,405 @@
         .container {
             position: relative;
             z-index: 1;
-            max-width: 1000px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* ===== VAULT HEADER ===== */
+        /* ===== TOP BAR ===== */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px 16px;
+            background-color: var(--vault-darker);
+            border: 1px solid rgba(74,222,128,0.3);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .top-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .top-bar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+        .campaign-select-label {
+            font-size: 10px;
+            color: var(--vault-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        #campaignSelector {
+            background: var(--vault-dark);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 6px 10px;
+            cursor: pointer;
+            outline: none;
+            min-width: 180px;
+        }
+
+        #campaignSelector:focus { border-color: var(--vault-gold); }
+
+        .vault-btn {
+            background: var(--vault-darker);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            padding: 7px 14px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .vault-btn:hover {
+            background: rgba(74,222,128,0.12);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            box-shadow: 0 0 10px rgba(251,191,36,0.3);
+        }
+
+        .vault-btn-danger {
+            border-color: var(--vault-error);
+            color: var(--vault-error);
+        }
+        .vault-btn-danger:hover {
+            background: rgba(255,107,107,0.12);
+            border-color: #ff9090;
+            color: #ff9090;
+            box-shadow: 0 0 10px rgba(255,107,107,0.3);
+        }
+
+        /* ===== HEADER ===== */
         .vault-header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
+            margin-bottom: 24px;
+            padding: 20px 30px;
             background-color: var(--vault-darker);
             border: 3px solid var(--vault-green);
-            box-shadow: 0 0 30px rgba(74, 222, 128, 0.4);
+            box-shadow: 0 0 30px rgba(74,222,128,0.3);
         }
 
         .vault-badge {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
             letter-spacing: 2px;
             text-transform: uppercase;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .vault-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             letter-spacing: 4px;
             color: var(--vault-green);
-            text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
-            animation: vault-glow 2s ease-in-out infinite;
-            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--vault-green);
+            animation: glow 2s ease-in-out infinite;
+            margin-bottom: 6px;
         }
 
-        @keyframes vault-glow {
-            0%, 100% {
-                text-shadow: 0 0 10px var(--vault-green), 0 0 20px rgba(74, 222, 128, 0.5);
-            }
-            50% {
-                text-shadow: 0 0 15px var(--vault-green), 0 0 30px rgba(74, 222, 128, 0.8);
-            }
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px var(--vault-green); }
+            50%       { text-shadow: 0 0 20px var(--vault-green), 0 0 30px rgba(74,222,128,0.5); }
         }
 
         .vault-subtitle {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
             letter-spacing: 2px;
         }
 
-        .vault-info {
+        /* ===== PANEL ===== */
+        .panel {
+            background: var(--vault-darker);
+            border: 1px solid rgba(74,222,128,0.3);
+            padding: 18px;
+            margin-bottom: 0;
+        }
+
+        .panel-title {
             font-size: 11px;
-            color: var(--vault-green);
-            text-shadow: 0 0 3px var(--vault-green);
-            margin-top: 8px;
-            border-top: 1px solid rgba(74, 222, 128, 0.3);
-            padding-top: 8px;
-        }
-
-        /* ===== VAULT FOOTER ===== */
-        .vault-footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(74, 222, 128, 0.3);
-            font-size: 10px;
-            color: var(--vault-green);
-            text-shadow: 0 0 3px var(--vault-green);
-        }
-
-        .vault-footer span {
-            color: var(--vault-gold);
-            text-shadow: 0 0 3px var(--vault-gold);
             font-weight: bold;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--vault-gold);
+            text-shadow: 0 0 5px rgba(251,191,36,0.5);
+            border-bottom: 1px solid rgba(251,191,36,0.3);
+            padding-bottom: 8px;
+            margin-bottom: 14px;
         }
 
-        /* Character-specific styles */
-        .character-container {
+        /* ===== THREE-COLUMN GRID ===== */
+        .character-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .character-section {
-            background-color: var(--vault-darker);
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            padding: 20px;
-            border-radius: 3px;
-            position: relative;
-            z-index: 1;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
             margin-bottom: 20px;
         }
 
-        .character-section h3 {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--vault-gold);
-            color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-            font-size: 14px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
+        @media (max-width: 1200px) {
+            .character-grid { grid-template-columns: 1fr 1fr; }
         }
 
-        /* Character Portrait */
-        .character-portrait {
-            width: 100%;
-            height: 350px;
-            background-color: var(--vault-dark);
-            border: 1px solid rgba(74, 222, 128, 0.3);
+        @media (max-width: 768px) {
+            .character-grid { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ===== CHARACTER INFO (LEFT COLUMN) ===== */
+        .char-name-display {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--vault-green);
+            text-shadow: 0 0 8px var(--vault-green);
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .char-color-row {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            border-radius: 3px;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .char-color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .char-username {
+            font-size: 10px;
+            color: rgba(74,222,128,0.6);
+            letter-spacing: 1px;
+        }
+
+        /* HP Display */
+        .hp-display {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin: 12px 0 8px;
+        }
+
+        .hp-current {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--vault-green);
+            text-shadow: 0 0 10px var(--vault-green);
+            line-height: 1;
+        }
+
+        .hp-sep { font-size: 20px; color: rgba(74,222,128,0.5); }
+
+        .hp-max {
+            font-size: 20px;
+            color: rgba(74,222,128,0.7);
+        }
+
+        .hp-label {
+            font-size: 10px;
+            color: var(--vault-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 4px;
+            align-self: center;
+        }
+
+        /* Health bar */
+        .hp-bar-wrap { margin: 6px 0 10px; }
+
+        .hp-bar-bg {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(74,222,128,0.2);
+            height: 10px;
+            border-radius: 2px;
             overflow: hidden;
         }
 
-        .character-portrait img {
-            width: 100%;
+        .hp-bar-fill {
             height: 100%;
-            object-fit: cover;
+            transition: width 0.4s, background 0.4s;
+            border-radius: 2px;
         }
 
-        .character-portrait-placeholder {
+        .hp-bar-fill.hp-high   { background: var(--vault-green); box-shadow: 0 0 6px var(--vault-green); }
+        .hp-bar-fill.hp-mid    { background: var(--vault-gold);  box-shadow: 0 0 6px var(--vault-gold); }
+        .hp-bar-fill.hp-low    { background: var(--vault-error); box-shadow: 0 0 6px var(--vault-error); }
+
+        /* HP Controls */
+        .hp-controls {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .hp-btn {
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.4);
             color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .hp-btn:hover {
+            background: rgba(74,222,128,0.2);
+            border-color: var(--vault-green);
+            box-shadow: 0 0 8px rgba(74,222,128,0.4);
+        }
+
+        .hp-btn.minus {
+            border-color: rgba(255,107,107,0.4);
+            color: var(--vault-error);
+        }
+        .hp-btn.minus:hover {
+            background: rgba(255,107,107,0.12);
+            border-color: var(--vault-error);
+            box-shadow: 0 0 8px rgba(255,107,107,0.3);
+        }
+
+        .hp-input-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .hp-manual-input {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.4);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
             font-size: 12px;
-            opacity: 0.6;
-            text-shadow: 0 0 3px var(--vault-green);
+            padding: 6px 10px;
+            width: 80px;
+            outline: none;
+        }
+
+        .hp-manual-input:focus { border-color: var(--vault-gold); }
+
+        .hp-update-btn {
+            background: rgba(74,222,128,0.1);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 6px 14px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .hp-update-btn:hover {
+            background: rgba(74,222,128,0.25);
+            box-shadow: 0 0 12px rgba(74,222,128,0.5);
+        }
+
+        .hp-timestamp {
+            font-size: 9px;
+            color: rgba(74,222,128,0.5);
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .hp-success-msg {
+            font-size: 10px;
+            color: var(--vault-success);
+            letter-spacing: 1px;
+            animation: fadeMsg 3s ease forwards;
+            display: none;
+        }
+
+        @keyframes fadeMsg {
+            0%   { opacity: 1; }
+            70%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin: 10px 0;
+        }
+
+        .stat-box {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 8px 4px;
+            text-align: center;
+        }
+
+        .stat-box-label {
+            font-size: 9px;
+            color: var(--vault-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .stat-box-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--vault-green);
+            text-shadow: 0 0 4px rgba(74,222,128,0.4);
+            display: block;
+        }
+
+        .stat-box-mod {
+            font-size: 9px;
+            color: rgba(74,222,128,0.6);
+            display: block;
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(74, 222, 128, 0.1);
-        }
-
-        .stat-label {
-            color: var(--vault-gold);
-            font-weight: bold;
-            font-size: 11px;
-            text-transform: uppercase;
-            text-shadow: 0 0 3px var(--vault-gold);
-        }
-
-        .stat-value {
-            color: var(--vault-green);
-            font-size: 12px;
-            font-weight: bold;
-            text-shadow: 0 0 2px var(--vault-green);
-        }
-
-        .inventory-summary {
-            background-color: var(--vault-blue-dark);
-            border: 1px solid var(--vault-green);
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 2px;
-            font-size: 11px;
-        }
-
-        .inventory-summary .category {
-            color: var(--vault-gold);
-            font-weight: bold;
-            text-shadow: 0 0 3px var(--vault-gold);
-            text-transform: uppercase;
-        }
-
-        .inventory-summary .count {
-            color: var(--vault-green);
-            text-shadow: 0 0 2px var(--vault-green);
-        }
-
-        .stat-list {
-            list-style: none;
-            font-size: 11px;
-            margin-bottom: 10px;
-        }
-
-        .stat-list-item {
-            color: var(--vault-green);
-            text-shadow: 0 0 2px var(--vault-green);
             padding: 5px 0;
-            border-bottom: 1px solid rgba(74, 222, 128, 0.1);
-        }
-
-        .stat-list-label {
-            color: var(--vault-gold);
-            font-weight: bold;
-            text-shadow: 0 0 3px var(--vault-gold);
-        }
-
-        .empty-state {
-            color: var(--vault-info);
-            font-style: italic;
-            font-size: 11px;
-            text-shadow: 0 0 2px var(--vault-info);
-        }
-
-        /* Player HP row */
-        .player-hp-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            margin-bottom: 8px;
-            background-color: var(--vault-dark);
-            border: 1px solid rgba(74, 222, 128, 0.2);
-            border-radius: 2px;
+            border-bottom: 1px solid rgba(74,222,128,0.08);
             font-size: 11px;
         }
 
-        .player-hp-name {
+        .stat-label { color: var(--vault-gold); font-weight: bold; }
+        .stat-value { color: var(--vault-green); }
+
+        .skills-list {
+            list-style: none;
+            font-size: 10px;
+            margin-top: 6px;
+        }
+
+        .skills-list li {
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(74,222,128,0.06);
+            color: var(--vault-green);
+        }
+
+        .skills-list li::before { content: "▸ "; color: var(--vault-gold); }
+
+        /* ===== MIDDLE COLUMN — PARTY & COMBAT ===== */
+        .player-row {
             display: flex;
             align-items: center;
             gap: 8px;
+            padding: 8px;
+            margin-bottom: 6px;
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.15);
         }
 
         .player-color-dot {
@@ -295,17 +463,20 @@
             height: 10px;
             border-radius: 50%;
             flex-shrink: 0;
-            box-shadow: 0 0 4px currentColor;
         }
 
-        .player-hp-bar-wrap {
-            flex: 1;
-            margin: 0 12px;
+        .player-name {
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            min-width: 50px;
         }
+
+        .player-hp-bar-wrap { flex: 1; }
 
         .player-hp-bar-bg {
-            background: var(--vault-dark);
-            border: 1px solid rgba(74, 222, 128, 0.2);
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(74,222,128,0.15);
             height: 6px;
             border-radius: 2px;
             overflow: hidden;
@@ -313,436 +484,1217 @@
 
         .player-hp-bar-fill {
             height: 100%;
-            background: var(--vault-green);
-            box-shadow: 0 0 4px var(--vault-green);
             transition: width 0.4s;
-        }
-
-        .player-hp-bar-fill.caution { background: var(--vault-gold); box-shadow: 0 0 4px var(--vault-gold); }
-        .player-hp-bar-fill.critical { background: var(--vault-error); box-shadow: 0 0 4px var(--vault-error); }
-
-        .player-hp-text {
-            color: var(--vault-green);
-            font-size: 11px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-
-        /* ═══════════════════════════════════
-           CAMPAIGN SELECTOR MODAL
-           ═══════════════════════════════════ */
-        .campaign-modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .campaign-modal-panel {
-            background: var(--vault-darker);
-            border: 3px solid var(--vault-green);
-            box-shadow: 0 0 40px rgba(74, 222, 128, 0.4);
-            padding: 30px;
-            max-width: 560px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: relative;
-            animation: modalAppear 0.25s ease-out;
-        }
-
-        @keyframes modalAppear {
-            from { opacity: 0; transform: scale(0.95); }
-            to   { opacity: 1; transform: scale(1); }
-        }
-
-        .campaign-modal-title {
-            text-align: center;
-            font-size: 16px;
-            color: var(--vault-gold);
-            text-shadow: 0 0 8px var(--vault-gold);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-
-        .campaign-modal-sub {
-            text-align: center;
-            font-size: 10px;
-            color: rgba(74, 222, 128, 0.6);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid rgba(74, 222, 128, 0.3);
-        }
-
-        .campaign-modal-loading {
-            text-align: center;
-            color: var(--vault-green);
-            font-size: 12px;
-            letter-spacing: 2px;
-            padding: 20px;
-        }
-
-        .campaign-option {
-            background: var(--vault-dark);
-            border: 2px solid rgba(74, 222, 128, 0.3);
-            padding: 16px 18px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
             border-radius: 2px;
         }
 
-        .campaign-option:hover {
-            border-color: var(--vault-gold);
-            box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
-            transform: translateX(4px);
+        .player-hp-bar-fill.hp-high   { background: var(--vault-green); }
+        .player-hp-bar-fill.hp-mid    { background: var(--vault-gold); }
+        .player-hp-bar-fill.hp-low    { background: var(--vault-error); }
+
+        .player-hp-text {
+            font-size: 10px;
+            color: var(--vault-green);
+            white-space: nowrap;
+            min-width: 60px;
+            text-align: right;
         }
 
-        .campaign-option-name {
-            font-size: 14px;
+        .player-status-badge {
+            font-size: 8px;
+            padding: 2px 6px;
+            border-radius: 2px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .badge-alive { background: rgba(74,222,128,0.15); color: var(--vault-green); border: 1px solid rgba(74,222,128,0.3); }
+        .badge-unconscious { background: rgba(251,191,36,0.15); color: var(--vault-gold); border: 1px solid rgba(251,191,36,0.3); }
+        .badge-dead { background: rgba(255,107,107,0.15); color: var(--vault-error); border: 1px solid rgba(255,107,107,0.3); }
+
+        /* Combat status */
+        .combat-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            margin-bottom: 12px;
+            border: 1px solid;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .combat-active-badge {
+            border-color: var(--vault-error);
+            color: var(--vault-error);
+            box-shadow: 0 0 8px rgba(255,107,107,0.3);
+            animation: combatPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes combatPulse {
+            0%, 100% { box-shadow: 0 0 8px rgba(255,107,107,0.3); }
+            50%       { box-shadow: 0 0 16px rgba(255,107,107,0.6); }
+        }
+
+        .combat-inactive-badge {
+            border-color: rgba(74,222,128,0.3);
+            color: rgba(74,222,128,0.6);
+        }
+
+        .combat-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(74,222,128,0.08);
+            font-size: 11px;
+        }
+
+        /* ===== RIGHT COLUMN — MESSAGES ===== */
+        .messages-list {
+            max-height: 320px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding-right: 4px;
+        }
+
+        .messages-list::-webkit-scrollbar { width: 4px; }
+        .messages-list::-webkit-scrollbar-track { background: var(--vault-dark); }
+        .messages-list::-webkit-scrollbar-thumb { background: rgba(74,222,128,0.3); border-radius: 2px; }
+
+        .message-item {
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            border-left: 3px solid;
+            background: var(--vault-dark);
+            font-size: 11px;
+        }
+
+        .message-normal  { border-color: var(--vault-info); }
+        .message-important { border-color: var(--vault-gold); background: rgba(251,191,36,0.05); }
+
+        .message-time {
+            font-size: 9px;
+            color: rgba(74,222,128,0.5);
+            margin-bottom: 3px;
+            letter-spacing: 1px;
+        }
+
+        .message-text {
+            color: var(--vault-green);
+            line-height: 1.4;
+        }
+
+        .message-important .message-text { color: var(--vault-gold); }
+
+        .empty-state {
+            font-size: 11px;
+            color: rgba(74,222,128,0.4);
+            font-style: italic;
+            padding: 10px 0;
+        }
+
+        /* ===== TABS ===== */
+        .tabs-container { margin-top: 20px; }
+
+        .tab-buttons {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid rgba(74,222,128,0.3);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: var(--vault-darker);
+            border: 1px solid rgba(74,222,128,0.3);
+            border-bottom: none;
+            color: rgba(74,222,128,0.6);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 8px 18px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: var(--vault-green);
+            background: rgba(74,222,128,0.08);
+        }
+
+        .tab-btn.active {
+            background: var(--vault-darker);
+            color: var(--vault-gold);
+            border-color: var(--vault-gold);
+            border-bottom: 2px solid var(--vault-darker);
+            text-shadow: 0 0 5px rgba(251,191,36,0.5);
+            margin-bottom: -2px;
+        }
+
+        .tab-content { display: none; padding: 20px; background: var(--vault-darker); border: 1px solid rgba(74,222,128,0.2); border-top: none; }
+        .tab-content.active { display: block; }
+
+        /* ===== INVENTORY TAB ===== */
+        .filter-bar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .filter-btn {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: rgba(74,222,128,0.6);
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            padding: 4px 10px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.15s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .inventory-item {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 10px 12px;
+            transition: border-color 0.2s;
+        }
+
+        .inventory-item:hover { border-color: rgba(74,222,128,0.5); }
+        .inventory-item.hidden { display: none; }
+
+        .item-name {
+            font-size: 12px;
             font-weight: bold;
             color: var(--vault-gold);
-            text-shadow: 0 0 5px var(--vault-gold);
-            letter-spacing: 1px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
-        .campaign-option-details {
+        .item-desc {
             font-size: 10px;
-            color: rgba(74, 222, 128, 0.7);
-            letter-spacing: 1px;
+            color: rgba(74,222,128,0.6);
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .item-stats {
             display: flex;
-            flex-wrap: wrap;
             gap: 12px;
+            font-size: 9px;
+            flex-wrap: wrap;
         }
 
-        .campaign-option-detail {
-            display: flex;
-            gap: 4px;
-        }
+        .item-stat { color: rgba(74,222,128,0.5); }
+        .item-stat span { color: var(--vault-green); font-weight: bold; }
 
-        .campaign-option-detail-label {
-            color: rgba(251, 191, 36, 0.6);
-        }
-
-        .campaign-no-campaigns {
-            text-align: center;
-            color: rgba(74, 222, 128, 0.5);
-            font-size: 12px;
+        .item-type-badge {
+            display: inline-block;
+            font-size: 8px;
+            padding: 1px 6px;
+            border-radius: 2px;
+            text-transform: uppercase;
             letter-spacing: 1px;
-            padding: 20px;
+            margin-bottom: 4px;
+            border: 1px solid;
         }
 
-        @media (max-width: 768px) {
-            .character-container {
-                grid-template-columns: 1fr;
-            }
+        .type-weapon   { border-color: var(--vault-error);  color: var(--vault-error); }
+        .type-armor    { border-color: var(--vault-info);   color: var(--vault-info); }
+        .type-consumable { border-color: var(--vault-success); color: var(--vault-success); }
+        .type-gear     { border-color: var(--vault-gold);   color: var(--vault-gold); }
+        .type-misc     { border-color: rgba(74,222,128,0.4); color: rgba(74,222,128,0.6); }
 
-            .vault-header {
-                padding: 20px;
-            }
+        .inventory-footer {
+            padding: 10px 0 0;
+            border-top: 1px solid rgba(74,222,128,0.2);
+            font-size: 11px;
+        }
 
-            .vault-title {
-                font-size: 20px;
-            }
+        .inventory-footer .stat-label { color: var(--vault-gold); }
+        .inventory-footer .stat-value { color: var(--vault-green); }
 
-            .character-section h3 {
-                font-size: 12px;
-            }
+        /* ===== QUEST LOG TAB ===== */
+        .quest-card {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
 
-            .character-portrait {
-                height: 250px;
-            }
+        .quest-card.completed { border-color: rgba(74,222,128,0.1); opacity: 0.65; }
+        .quest-card.failed    { border-color: rgba(255,107,107,0.2); opacity: 0.65; }
+
+        .quest-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .quest-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--vault-gold);
+        }
+
+        .quest-status-badge {
+            font-size: 8px;
+            padding: 2px 8px;
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .quest-active    { background: rgba(74,222,128,0.12); color: var(--vault-green); border: 1px solid rgba(74,222,128,0.3); }
+        .quest-completed { background: rgba(96,165,250,0.12); color: var(--vault-info);  border: 1px solid rgba(96,165,250,0.3); }
+        .quest-failed    { background: rgba(255,107,107,0.12); color: var(--vault-error); border: 1px solid rgba(255,107,107,0.3); }
+
+        .quest-desc {
+            font-size: 11px;
+            color: rgba(74,222,128,0.7);
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .quest-progress-wrap { margin-bottom: 10px; }
+
+        .quest-progress-label {
+            font-size: 9px;
+            color: rgba(74,222,128,0.5);
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+
+        .quest-progress-bg {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(74,222,128,0.15);
+            height: 6px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .quest-progress-fill {
+            height: 100%;
+            background: var(--vault-green);
+            box-shadow: 0 0 4px var(--vault-green);
+            border-radius: 2px;
+            transition: width 0.4s;
+        }
+
+        .objectives-list {
+            list-style: none;
+            margin: 8px 0;
+        }
+
+        .objectives-list li {
+            font-size: 10px;
+            padding: 3px 0;
+            color: rgba(74,222,128,0.7);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .objectives-list li.done { color: rgba(74,222,128,0.4); text-decoration: line-through; }
+
+        .obj-check {
+            font-size: 10px;
+            color: var(--vault-green);
+            flex-shrink: 0;
+        }
+
+        .obj-pending { color: rgba(74,222,128,0.3); }
+
+        .quest-reward {
+            font-size: 10px;
+            color: var(--vault-gold);
+            padding-top: 8px;
+            border-top: 1px solid rgba(74,222,128,0.1);
+        }
+
+        .quest-section-header {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(74,222,128,0.4);
+            padding: 12px 0 8px;
+            border-bottom: 1px dashed rgba(74,222,128,0.15);
+            margin-bottom: 10px;
+        }
+
+        /* ===== ABILITIES TAB ===== */
+        .ability-card {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 10px 14px;
+            margin-bottom: 8px;
+        }
+
+        .ability-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            margin-bottom: 3px;
+        }
+
+        .ability-desc {
+            font-size: 10px;
+            color: rgba(74,222,128,0.6);
+            line-height: 1.4;
+        }
+
+        .skills-section { margin-top: 16px; }
+
+        .skill-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 8px;
+            margin-bottom: 4px;
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.1);
+            font-size: 11px;
+        }
+
+        .skill-name { color: var(--vault-green); }
+
+        .skill-badge {
+            font-size: 8px;
+            padding: 1px 6px;
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .skill-proficient { background: rgba(74,222,128,0.12); color: var(--vault-green); border: 1px solid rgba(74,222,128,0.3); }
+        .skill-standard   { background: rgba(74,222,128,0.04); color: rgba(74,222,128,0.4); border: 1px solid rgba(74,222,128,0.1); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 480px) {
+            body { padding: 10px; }
+            .vault-title { font-size: 18px; letter-spacing: 2px; }
+            .hp-current { font-size: 28px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .tab-btn { padding: 6px 10px; font-size: 9px; }
         }
     </style>
 </head>
 <body>
-    <!-- CAMPAIGN SELECTOR MODAL -->
-    <div id="campaignModal" class="campaign-modal-overlay">
-        <div class="campaign-modal-panel">
-            <div class="campaign-modal-title">SELECT YOUR CAMPAIGN</div>
-            <div class="campaign-modal-sub">Choose a campaign to continue</div>
-            <div id="campaignModalBody" class="campaign-modal-loading">
-                ▌ LOADING CAMPAIGN DATA...
-            </div>
-        </div>
-    </div>
-
     <div class="container">
-        <!-- HEADER -->
+
+        <!-- ── TOP BAR ────────────────────────────────────── -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <span class="campaign-select-label">Campaign:</span>
+                <select id="campaignSelector" title="Switch Campaign"></select>
+                <button class="vault-btn" onclick="refreshAll()">↻ Refresh</button>
+            </div>
+            <div class="top-bar-right">
+                <span id="sessionUser" style="font-size:10px;color:rgba(74,222,128,0.5);letter-spacing:1px;"></span>
+                <button class="vault-btn vault-btn-danger" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <!-- ── HEADER ─────────────────────────────────────── -->
         <div class="vault-header">
-            <div class="vault-badge">VAULT-TEC INDUSTRIES CHARACTER PROFILE</div>
-            <div class="vault-title">PIP-BOY CHARACTER</div>
-            <div class="vault-subtitle">PERSONAL INFORMATION PROCESSOR</div>
-            <div class="vault-info" id="headerInfo">Vault 215 Resident • <span id="headerCampaign">—</span></div>
+            <div class="vault-badge">VAULT-TEC INDUSTRIES — PERSONAL INFORMATION PROCESSOR</div>
+            <div class="vault-title" id="pageTitle">PIP-BOY TERMINAL</div>
+            <div class="vault-subtitle" id="pageSubtitle">SELECT A CAMPAIGN TO CONTINUE</div>
         </div>
 
-        <!-- CHARACTER INFO SECTION -->
-        <div class="character-container">
-            <!-- LEFT COLUMN: CHARACTER PORTRAIT -->
-            <div class="character-section">
-                <h3>📷 Character Portrait</h3>
-                <div class="character-portrait" id="characterPortrait">
-                    <div class="character-portrait-placeholder">No image uploaded</div>
+        <!-- ── THREE-COLUMN GRID ──────────────────────────── -->
+        <div class="character-grid">
+
+            <!-- LEFT: CHARACTER INFO & STATUS -->
+            <div class="panel" id="leftPanel">
+                <div class="panel-title">⚙ Character Status</div>
+
+                <div class="char-name-display" id="charNameDisplay">—</div>
+                <div class="char-color-row">
+                    <div class="char-color-dot" id="charColorDot" style="background:#4ade80;"></div>
+                    <span class="char-username" id="charUsername"></span>
+                </div>
+
+                <!-- HP Display -->
+                <div class="hp-display">
+                    <span class="hp-current" id="hpCurrent">—</span>
+                    <span class="hp-sep">/</span>
+                    <span class="hp-max" id="hpMax">—</span>
+                    <span class="hp-label">HP</span>
+                </div>
+
+                <!-- Health bar -->
+                <div class="hp-bar-wrap">
+                    <div class="hp-bar-bg">
+                        <div class="hp-bar-fill hp-high" id="hpBarFill" style="width:100%"></div>
+                    </div>
+                </div>
+
+                <!-- Quick HP Buttons -->
+                <div class="hp-controls">
+                    <button class="hp-btn minus" onclick="adjustHp(-5)">− 5</button>
+                    <button class="hp-btn minus" onclick="adjustHp(-1)">− 1</button>
+                    <button class="hp-btn"       onclick="adjustHp(+1)">+ 1</button>
+                    <button class="hp-btn"       onclick="adjustHp(+5)">+ 5</button>
+                </div>
+
+                <!-- Manual HP Input -->
+                <div class="hp-input-row">
+                    <input type="number" id="hpManualInput" class="hp-manual-input" placeholder="Set HP" min="0">
+                    <button class="hp-update-btn" onclick="setHpManual()">Update HP</button>
+                </div>
+
+                <div class="hp-timestamp" id="hpTimestamp">Last updated: —</div>
+                <div class="hp-success-msg" id="hpSuccessMsg">✓ HP UPDATED!</div>
+
+                <!-- Stats Section -->
+                <div class="panel-title" style="margin-top:16px;">S.P.E.C.I.A.L. STATS</div>
+                <div class="stats-grid" id="statsGrid">
+                    <!-- populated by JS -->
+                </div>
+
+                <div class="stat-row" style="margin-top:10px;">
+                    <span class="stat-label">Armor Class</span>
+                    <span class="stat-value" id="charAc">—</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Proficiency Bonus</span>
+                    <span class="stat-value" id="charProf">—</span>
+                </div>
+
+                <div class="panel-title" style="margin-top:14px;">Skills</div>
+                <ul class="skills-list" id="skillsList">
+                    <li class="empty-state" style="list-style:none;">No skills loaded</li>
+                </ul>
+            </div>
+
+            <!-- MIDDLE: PARTY STATUS & COMBAT -->
+            <div class="panel" id="middlePanel">
+                <!-- Party Status -->
+                <div class="panel-title">👥 Party Status
+                    <button class="vault-btn" style="float:right;padding:2px 8px;font-size:9px;" onclick="refreshAll()">↻</button>
+                </div>
+                <div id="partyStatusList">
+                    <div class="empty-state">Loading party...</div>
+                </div>
+
+                <!-- Combat Status -->
+                <div class="panel-title" style="margin-top:18px;">⚔ Combat Status</div>
+                <div id="combatStatusSection">
+                    <div class="combat-indicator combat-inactive-badge">
+                        ○ NO ACTIVE COMBAT
+                    </div>
                 </div>
             </div>
 
-            <!-- RIGHT COLUMN: CHARACTER DATA -->
-            <div class="character-section">
-                <h3>⚙ Character Information</h3>
-                <div class="stat-row">
-                    <span class="stat-label">Name:</span>
-                    <span class="stat-value" id="characterName">—</span>
+            <!-- RIGHT: MESSAGES FROM OVERSEER -->
+            <div class="panel" id="rightPanel">
+                <div class="panel-title">📡 Overseer Messages
+                    <button class="vault-btn vault-btn-danger" style="float:right;padding:2px 8px;font-size:9px;" onclick="clearMessages()">Clear</button>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Race:</span>
-                    <span class="stat-value" id="characterRace">—</span>
+                <div class="messages-list" id="messagesList">
+                    <div class="empty-state">No messages yet.</div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Class:</span>
-                    <span class="stat-value" id="characterClass">—</span>
+            </div>
+
+        </div><!-- end .character-grid -->
+
+        <!-- ── TABS ──────────────────────────────────────── -->
+        <div class="tabs-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('inventory', this)">📦 Inventory</button>
+                <button class="tab-btn"        onclick="switchTab('quests', this)">📋 Quest Log</button>
+                <button class="tab-btn"        onclick="switchTab('abilities', this)">✦ Abilities &amp; Skills</button>
+            </div>
+
+            <!-- TAB 1: INVENTORY -->
+            <div class="tab-content active" id="tab-inventory">
+                <div class="filter-bar" id="inventoryFilters">
+                    <button class="filter-btn active" onclick="filterInventory('all', this)">All</button>
+                    <button class="filter-btn" onclick="filterInventory('weapon', this)">Weapons</button>
+                    <button class="filter-btn" onclick="filterInventory('armor', this)">Armor</button>
+                    <button class="filter-btn" onclick="filterInventory('consumable', this)">Consumables</button>
+                    <button class="filter-btn" onclick="filterInventory('gear', this)">Gear</button>
+                    <button class="filter-btn" onclick="filterInventory('misc', this)">Misc</button>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Alignment:</span>
-                    <span class="stat-value" id="characterAlignment">—</span>
+                <div class="inventory-grid" id="inventoryGrid">
+                    <div class="empty-state">Load a campaign to view inventory.</div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Vault:</span>
-                    <span class="stat-value">215</span>
+                <div class="inventory-footer" id="inventoryFooter"></div>
+            </div>
+
+            <!-- TAB 2: QUEST LOG -->
+            <div class="tab-content" id="tab-quests">
+                <div id="questLogContent">
+                    <div class="empty-state">Load a campaign to view quests.</div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Campaign:</span>
-                    <span class="stat-value" id="characterCampaign">—</span>
-                </div>
-                <div class="stat-row">
-                    <span class="stat-label">HP:</span>
-                    <span class="stat-value" id="characterHp">—</span>
+            </div>
+
+            <!-- TAB 3: ABILITIES/SKILLS -->
+            <div class="tab-content" id="tab-abilities">
+                <div id="abilitiesContent">
+                    <div class="empty-state">Load a campaign to view abilities.</div>
                 </div>
             </div>
         </div>
 
-        <!-- PARTY STATUS SECTION -->
-        <div class="character-section">
-            <h3>👥 Party Status</h3>
-            <div id="partyStatus" class="empty-state">Loading party data...</div>
-        </div>
-
-        <!-- BACKSTORY SECTION -->
-        <div class="character-section">
-            <h3>📖 Backstory</h3>
-            <div id="backstoryContent" class="empty-state">No backstory available</div>
-        </div>
-
-        <!-- INVENTORY SUMMARY SECTION -->
-        <div class="character-section">
-            <h3>📦 Inventory Summary</h3>
-            <div id="inventorySummary" class="empty-state">No inventory data available</div>
-        </div>
-
-        <!-- ACTIVE QUESTS SECTION -->
-        <div class="character-section">
-            <h3>📋 Active Quests</h3>
-            <ul class="stat-list" id="activeQuests">
-                <li class="stat-list-item empty-state">No active quests</li>
-            </ul>
-        </div>
-
-    </div>
+    </div><!-- end .container -->
 
     <script src="../assets/accounts.js"></script>
     <script src="../assets/campaigns.js"></script>
     <script>
-        // ═══════════════════════════════════════════════════════
-        // SESSION CHECK — redirect to login if not authenticated
-        // ═══════════════════════════════════════════════════════
-        var sessionUsername = sessionStorage.getItem('username');
-        if (!sessionUsername) {
-            window.location.replace('index.html');
-        }
+    // ════════════════════════════════════════════════════════════
+    //  VAULT 215 — CHARACTER PAGE (PHASE 4)
+    //  Player Side Mirror
+    // ════════════════════════════════════════════════════════════
 
-        // ═══════════════════════════════════════════════════════
-        // LOAD PLAYER ACCOUNT DATA
-        // ═══════════════════════════════════════════════════════
-        var currentAccount = ACCOUNTS.find(function(a) { return a.username === sessionUsername; });
-        if (!currentAccount) {
-            // No account found → force logout
-            sessionStorage.clear();
-            window.location.replace('index.html');
-        } else if (currentAccount.role === 'admin') {
-            // Admin should use overseer.html
-            window.location.replace('overseer.html');
-        }
+    // ── AUTH CHECK ──────────────────────────────────────────────
+    var sessionUsername = sessionStorage.getItem('username');
+    if (!sessionUsername) { window.location.replace('index.html'); }
 
-        // ═══════════════════════════════════════════════════════
-        // CAMPAIGN MODAL
-        // ═══════════════════════════════════════════════════════
-        function showCampaignModal() {
-            document.getElementById('campaignModal').style.display = 'flex';
-            renderCampaignOptions();
-        }
+    var currentAccount = ACCOUNTS.find(function(a) { return a.username === sessionUsername; });
+    if (!currentAccount) {
+        sessionStorage.clear();
+        window.location.replace('index.html');
+    } else if (currentAccount.role === 'admin') {
+        window.location.replace('overseer.html');
+    }
 
-        function hideCampaignModal() {
-            document.getElementById('campaignModal').style.display = 'none';
-        }
+    document.getElementById('sessionUser').textContent = sessionUsername.toUpperCase();
 
-        function renderCampaignOptions() {
-            var body = document.getElementById('campaignModalBody');
+    // ── STATE ───────────────────────────────────────────────────
+    var activeCampaign = null;
+    var hpLastUpdated  = null;
+    var refreshInterval = null;
 
-            // Find campaigns this player is in
-            var playerCampaigns = [];
-            CAMPAIGNS.forEach(function(campaign) {
-                var playerEntry = campaign.players.find(function(p) {
-                    return p.username === sessionUsername;
-                });
-                if (playerEntry) {
-                    playerCampaigns.push({ campaign: campaign, playerEntry: playerEntry });
-                }
-            });
+    // ── LOCAL STORAGE KEY ────────────────────────────────────────
+    function lsKey(campaignId) {
+        return 'vault215_campaign_' + campaignId;
+    }
 
-            if (playerCampaigns.length === 0) {
-                body.innerHTML = '<div class="campaign-no-campaigns">No campaigns found for ' + escHtml(sessionUsername) + '.<br>Ask your Overseer to add you to a campaign.</div>';
+    // ── INIT ────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', function() {
+        buildCampaignSelector();
+
+        // Restore last-used campaign from session
+        var savedId = sessionStorage.getItem('campaignId');
+        if (savedId) {
+            var saved = getCampaignData(savedId);
+            if (saved) {
+                document.getElementById('campaignSelector').value = savedId;
+                loadCampaignPage(saved);
                 return;
             }
-
-            var html = '';
-            playerCampaigns.forEach(function(item) {
-                var c = item.campaign;
-                var pe = item.playerEntry;
-                html += '<div class="campaign-option" onclick="selectCampaign(\'' + escHtml(c.id) + '\')">';
-                html += '<div class="campaign-option-name">⚑ ' + escHtml(c.name) + '</div>';
-                html += '<div class="campaign-option-details">';
-                html += '<div class="campaign-option-detail"><span class="campaign-option-detail-label">CHARACTER:</span><span>' + escHtml(pe.characterName) + '</span></div>';
-                html += '<div class="campaign-option-detail"><span class="campaign-option-detail-label">HP:</span><span>' + pe.currentHp + '/' + pe.maxHp + '</span></div>';
-                html += '<div class="campaign-option-detail"><span class="campaign-option-detail-label">STATUS:</span><span>' + escHtml(c.status.toUpperCase()) + '</span></div>';
-                html += '<div class="campaign-option-detail"><span class="campaign-option-detail-label">JOINED:</span><span>' + escHtml(pe.joinedDate) + '</span></div>';
-                html += '</div></div>';
-            });
-
-            body.innerHTML = html;
         }
 
-        function selectCampaign(campaignId) {
-            var campaign = CAMPAIGNS.find(function(c) { return c.id === campaignId; });
-            if (!campaign) return;
-
-            sessionStorage.setItem('campaignId', campaignId);
-            sessionStorage.setItem('campaignName', campaign.name);
-            hideCampaignModal();
-            loadCampaignData(campaign);
+        // Auto-select first campaign the player belongs to
+        var first = getPlayerCampaigns()[0];
+        if (first) {
+            document.getElementById('campaignSelector').value = first.campaign.id;
+            loadCampaignPage(first.campaign);
         }
+    });
 
-        // ═══════════════════════════════════════════════════════
-        // LOAD CAMPAIGN DATA
-        // ═══════════════════════════════════════════════════════
-        function loadCampaignData(campaign) {
-            // Update header
-            document.getElementById('headerCampaign').textContent = campaign.name;
-            document.getElementById('characterCampaign').textContent = campaign.name;
-
-            // Get this player's entry in the campaign
-            var playerEntry = campaign.players.find(function(p) {
-                return p.username === sessionUsername;
-            });
-
-            // Get character info from accounts
-            var charAccount = null;
-            if (currentAccount && currentAccount.characters) {
-                charAccount = currentAccount.characters.find(function(c) {
-                    return c.campaignId === campaign.id;
-                });
-            }
-
-            // Display character info
-            if (playerEntry) {
-                document.getElementById('characterName').textContent = playerEntry.characterName || sessionUsername;
-                document.getElementById('characterHp').textContent = playerEntry.currentHp + ' / ' + playerEntry.maxHp;
-            }
-
-            if (charAccount) {
-                document.getElementById('characterName').textContent = charAccount.name || (playerEntry && playerEntry.characterName) || sessionUsername;
-            }
-
-            // Display other players (party status)
-            renderPartyStatus(campaign);
-        }
-
-        function renderPartyStatus(campaign) {
-            var partyDiv = document.getElementById('partyStatus');
-            var otherPlayers = campaign.players.filter(function(p) {
-                return p.username !== sessionUsername;
-            });
-
-            if (otherPlayers.length === 0) {
-                partyDiv.innerHTML = '<div class="empty-state">No other players in this campaign.</div>';
-                return;
-            }
-
-            var html = '';
-            otherPlayers.forEach(function(p) {
-                var hpPct = p.maxHp > 0 ? Math.min(100, Math.round((p.currentHp / p.maxHp) * 100)) : 0;
-                var statusClass = hpPct >= 60 ? '' : hpPct >= 30 ? 'caution' : 'critical';
-
-                // Get display color from accounts
-                var pAccount = ACCOUNTS.find(function(a) { return a.username === p.username; });
-                var displayColor = '#4ade80';
-                if (pAccount && pAccount.characters) {
-                    var pChar = pAccount.characters.find(function(c) { return c.campaignId === campaign.id; });
-                    if (pChar && pChar.displayColor) displayColor = pChar.displayColor;
-                }
-
-                html += '<div class="player-hp-row">';
-                html += '<div class="player-hp-name">';
-                html += '<span class="player-color-dot" style="background:' + escHtml(displayColor) + ';color:' + escHtml(displayColor) + '"></span>';
-                html += '<span style="color:var(--vault-gold);font-weight:bold;">' + escHtml(p.characterName) + '</span>';
-                html += '</div>';
-                html += '<div class="player-hp-bar-wrap">';
-                html += '<div class="player-hp-bar-bg"><div class="player-hp-bar-fill ' + statusClass + '" style="width:' + hpPct + '%"></div></div>';
-                html += '</div>';
-                html += '<span class="player-hp-text">' + p.currentHp + '/' + p.maxHp + '</span>';
-                html += '</div>';
-            });
-
-            partyDiv.innerHTML = html;
-        }
-
-        // ═══════════════════════════════════════════════════════
-        // UTILITY
-        // ═══════════════════════════════════════════════════════
-        function escHtml(str) {
-            if (!str) return '';
-            return String(str)
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
-
-        // ═══════════════════════════════════════════════════════
-        // INIT — Show campaign selector on page load
-        // ═══════════════════════════════════════════════════════
-        window.addEventListener('DOMContentLoaded', function() {
-            // Check if a campaign is already selected in this session
-            var savedCampaignId = sessionStorage.getItem('campaignId');
-            if (savedCampaignId) {
-                var savedCampaign = CAMPAIGNS.find(function(c) { return c.id === savedCampaignId; });
-                if (savedCampaign) {
-                    hideCampaignModal();
-                    loadCampaignData(savedCampaign);
-                    return;
-                }
-            }
-            // Always show campaign selector
-            showCampaignModal();
+    // ── CAMPAIGN SELECTOR ────────────────────────────────────────
+    function getPlayerCampaigns() {
+        var list = [];
+        CAMPAIGNS.forEach(function(c) {
+            var pe = c.players.find(function(p) { return p.username === sessionUsername; });
+            if (pe) list.push({ campaign: c, playerEntry: pe });
         });
+        return list;
+    }
+
+    function buildCampaignSelector() {
+        var sel = document.getElementById('campaignSelector');
+        sel.innerHTML = '';
+        var list = getPlayerCampaigns();
+        if (list.length === 0) {
+            var opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = 'No campaigns available';
+            sel.appendChild(opt);
+            return;
+        }
+        list.forEach(function(item) {
+            var opt = document.createElement('option');
+            opt.value = item.campaign.id;
+            opt.textContent = item.campaign.name;
+            sel.appendChild(opt);
+        });
+        sel.addEventListener('change', function() {
+            var c = getCampaignData(sel.value);
+            if (c) {
+                sessionStorage.setItem('campaignId', sel.value);
+                loadCampaignPage(c);
+            }
+        });
+    }
+
+    // ── GET CAMPAIGN (localStorage overlay + base data) ──────────
+    function getCampaignData(id) {
+        var base = CAMPAIGNS.find(function(c) { return c.id === id; });
+        if (!base) return null;
+
+        // Deep-clone base data
+        var data = JSON.parse(JSON.stringify(base));
+
+        // Overlay localStorage HP / encounter data saved by overseer or players
+        var saved = localStorage.getItem(lsKey(id));
+        if (saved) {
+            try {
+                var overlay = JSON.parse(saved);
+                // Merge players HP from localStorage
+                if (overlay.players) {
+                    overlay.players.forEach(function(savedP) {
+                        var p = data.players.find(function(x) { return x.username === savedP.username; });
+                        if (p) {
+                            p.currentHp   = savedP.currentHp;
+                            p.inInitiative = savedP.inInitiative || false;
+                            p.initiative  = savedP.initiative   || 0;
+                            p.status      = savedP.status       || 'alive';
+                        }
+                    });
+                }
+                // Merge encounter
+                if (overlay.activeEncounter) {
+                    data.activeEncounter = overlay.activeEncounter;
+                }
+                // Merge messages (append overseer messages)
+                if (overlay.messages) {
+                    data.messages = overlay.messages;
+                }
+            } catch(e) { /* ignore malformed */ }
+        }
+        return data;
+    }
+
+    // ── SAVE CAMPAIGN DATA TO LOCALSTORAGE ───────────────────────
+    function saveCampaignData(campaign) {
+        var toSave = {
+            players: campaign.players.map(function(p) {
+                return {
+                    username:     p.username,
+                    currentHp:    p.currentHp,
+                    inInitiative: p.inInitiative || false,
+                    initiative:   p.initiative   || 0,
+                    status:       p.status       || 'alive'
+                };
+            }),
+            activeEncounter: campaign.activeEncounter,
+            messages: campaign.messages
+        };
+        localStorage.setItem(lsKey(campaign.id), JSON.stringify(toSave));
+    }
+
+    // ── LOAD CAMPAIGN PAGE ───────────────────────────────────────
+    function loadCampaignPage(campaign) {
+        activeCampaign = campaign;
+        sessionStorage.setItem('campaignId', campaign.id);
+        sessionStorage.setItem('campaignName', campaign.name);
+
+        document.getElementById('pageTitle').textContent    = campaign.name.toUpperCase();
+        document.getElementById('pageSubtitle').textContent = 'VAULT 215 • ' + campaign.status.toUpperCase();
+
+        renderCharacterInfo(campaign);
+        renderPartyStatus(campaign);
+        renderCombatStatus(campaign);
+        renderMessages(campaign);
+        renderInventory(campaign);
+        renderQuestLog(campaign);
+        renderAbilities(campaign);
+
+        // Auto-refresh every 5 seconds
+        if (refreshInterval) clearInterval(refreshInterval);
+        refreshInterval = setInterval(refreshAll, 5000);
+
+        updateHpTimestamp();
+    }
+
+    // ── REFRESH ─────────────────────────────────────────────────
+    function refreshAll() {
+        if (!activeCampaign) return;
+        var fresh = getCampaignData(activeCampaign.id);
+        if (!fresh) return;
+        activeCampaign = fresh;
+        renderPartyStatus(fresh);
+        renderCombatStatus(fresh);
+        renderMessages(fresh);
+
+        // Re-sync own HP display in case overseer changed it
+        var myEntry = fresh.players.find(function(p) { return p.username === sessionUsername; });
+        if (myEntry) {
+            document.getElementById('hpCurrent').textContent = myEntry.currentHp;
+            document.getElementById('hpMax').textContent     = myEntry.maxHp;
+            updateHpBar(myEntry.currentHp, myEntry.maxHp);
+        }
+    }
+
+    // ── CHARACTER INFO (LEFT) ────────────────────────────────────
+    function renderCharacterInfo(campaign) {
+        var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
+        if (!myEntry) return;
+
+        // Name + color
+        document.getElementById('charNameDisplay').textContent = myEntry.characterName || sessionUsername;
+        document.getElementById('charUsername').textContent    = '[ ' + sessionUsername + ' ]';
+
+        var color = '#4ade80';
+        if (currentAccount && currentAccount.characters) {
+            var ch = currentAccount.characters.find(function(c) { return c.campaignId === campaign.id; });
+            if (ch && ch.displayColor) color = ch.displayColor;
+        }
+        document.getElementById('charColorDot').style.background = color;
+        document.getElementById('charColorDot').style.boxShadow  = '0 0 6px ' + color;
+        document.getElementById('charNameDisplay').style.color   = color;
+        document.getElementById('charNameDisplay').style.textShadow = '0 0 8px ' + color;
+
+        // HP
+        document.getElementById('hpCurrent').textContent = myEntry.currentHp;
+        document.getElementById('hpMax').textContent     = myEntry.maxHp;
+        updateHpBar(myEntry.currentHp, myEntry.maxHp);
+
+        // Stats
+        renderStats(myEntry);
+
+        // AC / Prof
+        document.getElementById('charAc').textContent   = myEntry.ac   !== undefined ? myEntry.ac   : '—';
+        document.getElementById('charProf').textContent = myEntry.proficiencyBonus !== undefined ? '+' + myEntry.proficiencyBonus : '—';
+
+        // Skills
+        var skillsList = document.getElementById('skillsList');
+        if (myEntry.skills && myEntry.skills.length > 0) {
+            skillsList.innerHTML = myEntry.skills.map(function(s) {
+                return '<li>' + escHtml(s) + '</li>';
+            }).join('');
+        } else {
+            skillsList.innerHTML = '<li class="empty-state" style="list-style:none;">No skills listed</li>';
+        }
+    }
+
+    function renderStats(playerEntry) {
+        var grid = document.getElementById('statsGrid');
+        var statsOrder = [
+            { key: 'str', label: 'STR' },
+            { key: 'dex', label: 'DEX' },
+            { key: 'con', label: 'CON' },
+            { key: 'int', label: 'INT' },
+            { key: 'wis', label: 'WIS' },
+            { key: 'cha', label: 'CHA' }
+        ];
+
+        if (!playerEntry.stats) {
+            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">No stats available</div>';
+            return;
+        }
+
+        grid.innerHTML = statsOrder.map(function(s) {
+            var val = playerEntry.stats[s.key] || 0;
+            var mod = Math.floor((val - 10) / 2);
+            var modStr = mod >= 0 ? '+' + mod : String(mod);
+            return '<div class="stat-box">' +
+                '<span class="stat-box-label">' + s.label + '</span>' +
+                '<span class="stat-box-value">' + val + '</span>' +
+                '<span class="stat-box-mod">(' + modStr + ')</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    // ── HP BAR ────────────────────────────────────────────────────
+    function updateHpBar(current, max) {
+        var pct  = max > 0 ? Math.min(100, Math.max(0, Math.round((current / max) * 100))) : 0;
+        var fill = document.getElementById('hpBarFill');
+        fill.style.width = pct + '%';
+        fill.className   = 'hp-bar-fill ' + (pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low');
+    }
+
+    // ── HP ADJUSTMENT ────────────────────────────────────────────
+    function adjustHp(delta) {
+        if (!activeCampaign) return;
+        var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+        if (!myEntry) return;
+
+        myEntry.currentHp = Math.min(myEntry.maxHp, Math.max(0, myEntry.currentHp + delta));
+        commitHpUpdate(myEntry);
+    }
+
+    function setHpManual() {
+        if (!activeCampaign) return;
+        var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+        if (!myEntry) return;
+
+        var raw = parseInt(document.getElementById('hpManualInput').value, 10);
+        if (isNaN(raw)) return;
+        myEntry.currentHp = Math.min(myEntry.maxHp, Math.max(0, raw));
+        document.getElementById('hpManualInput').value = '';
+        commitHpUpdate(myEntry);
+    }
+
+    function commitHpUpdate(myEntry) {
+        document.getElementById('hpCurrent').textContent = myEntry.currentHp;
+        updateHpBar(myEntry.currentHp, myEntry.maxHp);
+
+        // Persist to localStorage
+        saveCampaignData(activeCampaign);
+        hpLastUpdated = new Date();
+        updateHpTimestamp();
+
+        // Flash success message
+        var msg = document.getElementById('hpSuccessMsg');
+        msg.style.display = 'block';
+        msg.style.animation = 'none';
+        void msg.offsetWidth; // Force DOM reflow so the browser registers the animation reset — intentional no-op
+        msg.style.animation = 'fadeMsg 3s ease forwards';
+        setTimeout(function() { msg.style.display = 'none'; }, 3200);
+    }
+
+    function updateHpTimestamp() {
+        var el = document.getElementById('hpTimestamp');
+        if (!hpLastUpdated) {
+            el.textContent = 'Last updated: —';
+            return;
+        }
+        var secs = Math.floor((Date.now() - hpLastUpdated.getTime()) / 1000);
+        el.textContent = 'Last updated: ' + (secs < 60 ? secs + 's ago' : Math.floor(secs/60) + 'm ago');
+    }
+
+    // Update the timestamp text every second
+    setInterval(updateHpTimestamp, 1000);
+
+    // ── PARTY STATUS (MIDDLE) ────────────────────────────────────
+    function renderPartyStatus(campaign) {
+        var div = document.getElementById('partyStatusList');
+        var players = campaign.players;
+
+        if (!players || players.length === 0) {
+            div.innerHTML = '<div class="empty-state">No players in this campaign.</div>';
+            return;
+        }
+
+        div.innerHTML = players.map(function(p) {
+            var pct  = p.maxHp > 0 ? Math.min(100, Math.round((p.currentHp / p.maxHp) * 100)) : 0;
+            var cls  = pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low';
+
+            var pAcc   = ACCOUNTS.find(function(a) { return a.username === p.username; });
+            var color  = '#4ade80';
+            if (pAcc && pAcc.characters) {
+                var pCh = pAcc.characters.find(function(c) { return c.campaignId === campaign.id; });
+                if (pCh && pCh.displayColor) color = pCh.displayColor;
+            }
+
+            var isSelf     = (p.username === sessionUsername);
+            var status     = p.status || 'alive';
+            var badgeCls   = status === 'alive' ? 'badge-alive' : status === 'unconscious' ? 'badge-unconscious' : 'badge-dead';
+            var nameStyle  = isSelf ? 'color:' + color + ';' : '';
+            var inCombat   = p.inInitiative ? '⚔' : '';
+
+            return '<div class="player-row">' +
+                '<div class="player-color-dot" style="background:' + escHtml(color) + ';box-shadow:0 0 4px ' + escHtml(color) + ';"></div>' +
+                '<span class="player-name" style="' + nameStyle + '">' + escHtml(p.characterName) + (isSelf ? ' ★' : '') + inCombat + '</span>' +
+                '<div class="player-hp-bar-wrap">' +
+                    '<div class="player-hp-bar-bg"><div class="player-hp-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
+                '</div>' +
+                '<span class="player-hp-text">' + p.currentHp + '/' + p.maxHp + '</span>' +
+                '<span class="player-status-badge ' + badgeCls + '">' + escHtml(status) + '</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    // ── COMBAT STATUS (MIDDLE) ───────────────────────────────────
+    function renderCombatStatus(campaign) {
+        var sec = document.getElementById('combatStatusSection');
+        var enc = campaign.activeEncounter;
+
+        if (!enc || enc.status !== 'active') {
+            sec.innerHTML = '<div class="combat-indicator combat-inactive-badge">○ NO ACTIVE COMBAT</div>';
+            return;
+        }
+
+        // Find current turn
+        var combatants  = enc.combatants || [];
+        var currentTurn = null;
+        var currentIdx  = null;
+        if (combatants.length > 0) {
+            // Find the combatant with isCurrent flag, fallback to first
+            currentIdx  = combatants.findIndex(function(c) { return c.isCurrent; });
+            if (currentIdx === -1) currentIdx = 0;
+            currentTurn = combatants[currentIdx];
+        }
+
+        // Find MY initiative
+        var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
+        var myInitiative = (myEntry && myEntry.inInitiative) ? myEntry.initiative : null;
+
+        var currentTurnText = currentTurn ? escHtml(currentTurn.name || currentTurn.id) : '—';
+
+        sec.innerHTML =
+            '<div class="combat-indicator combat-active-badge">⚔ COMBAT ACTIVE</div>' +
+            '<div class="combat-detail-row"><span class="stat-label">Round</span><span class="stat-value">' + (enc.round || 1) + '</span></div>' +
+            '<div class="combat-detail-row"><span class="stat-label">Current Turn</span><span class="stat-value" style="color:var(--vault-gold);">' + currentTurnText + '</span></div>' +
+            '<div class="combat-detail-row"><span class="stat-label">Your Initiative</span><span class="stat-value">' + (myInitiative !== null ? myInitiative : '—') + '</span></div>' +
+            '<div class="combat-detail-row"><span class="stat-label">In Initiative</span><span class="stat-value">' + (myEntry && myEntry.inInitiative ? '<span style="color:var(--vault-green);">YES</span>' : '<span style="color:rgba(74,222,128,0.4);">NO</span>') + '</span></div>';
+    }
+
+    // ── MESSAGES (RIGHT) ─────────────────────────────────────────
+    function renderMessages(campaign) {
+        var list     = document.getElementById('messagesList');
+        var messages = campaign.messages || [];
+
+        // Check for locally-cleared messages
+        var cleared  = sessionStorage.getItem('clearedMessages_' + campaign.id);
+        var clearedTs = cleared ? (parseInt(cleared, 10) || 0) : 0;
+
+        var visible = messages.filter(function(m) {
+            var ts = new Date(m.timestamp).getTime();
+            return ts > clearedTs;
+        });
+
+        if (visible.length === 0) {
+            list.innerHTML = '<div class="empty-state">No messages from the Overseer.</div>';
+            return;
+        }
+
+        // Sort chronologically (oldest first)
+        var sorted = visible.slice().sort(function(a, b) {
+            return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+        });
+
+        list.innerHTML = sorted.map(function(m) {
+            var cls   = m.type === 'important' ? 'message-important' : 'message-normal';
+            var time  = formatTimestamp(m.timestamp);
+            return '<div class="message-item ' + cls + '">' +
+                '<div class="message-time">' + escHtml(time) + ' — FROM: ' + escHtml((m.from || 'overseer').toUpperCase()) + '</div>' +
+                '<div class="message-text">' + escHtml(m.text) + '</div>' +
+                '</div>';
+        }).join('');
+
+        // Auto-scroll to latest
+        list.scrollTop = list.scrollHeight;
+    }
+
+    function clearMessages() {
+        if (!activeCampaign) return;
+        sessionStorage.setItem('clearedMessages_' + activeCampaign.id, Date.now().toString());
+        renderMessages(activeCampaign);
+    }
+
+    // ── INVENTORY TAB ────────────────────────────────────────────
+    function renderInventory(campaign) {
+        var grid   = document.getElementById('inventoryGrid');
+        var footer = document.getElementById('inventoryFooter');
+        var items  = campaign.inventory || [];
+
+        if (items.length === 0) {
+            grid.innerHTML = '<div class="empty-state">No items in inventory.</div>';
+            footer.innerHTML = '';
+            return;
+        }
+
+        grid.innerHTML = items.map(function(item) {
+            var typeCls = 'type-' + escHtml(item.type || 'misc');
+            return '<div class="inventory-item" data-type="' + escHtml(item.type || 'misc') + '">' +
+                '<span class="item-type-badge ' + typeCls + '">' + escHtml(item.type || 'misc') + '</span>' +
+                '<div class="item-name">' + escHtml(item.name) + '</div>' +
+                '<div class="item-desc">' + escHtml(item.description || '') + '</div>' +
+                '<div class="item-stats">' +
+                    '<span class="item-stat">QTY: <span>' + (item.quantity || 1) + '</span></span>' +
+                    '<span class="item-stat">WT: <span>' + (item.weight || 0) + ' lbs</span></span>' +
+                    '<span class="item-stat">VAL: <span>' + (item.value || 0) + ' ¢</span></span>' +
+                '</div>' +
+                '</div>';
+        }).join('');
+
+        // Total weight
+        var totalWt = items.reduce(function(acc, i) { return acc + (i.weight || 0) * (i.quantity || 1); }, 0);
+        footer.innerHTML = '<span class="stat-label">Total Weight:</span> <span class="stat-value">' + totalWt.toFixed(1) + ' lbs</span>';
+    }
+
+    var currentFilter = 'all';
+
+    function filterInventory(type, btn) {
+        currentFilter = type;
+        document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+
+        document.querySelectorAll('.inventory-item').forEach(function(el) {
+            if (type === 'all' || el.dataset.type === type) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        });
+    }
+
+    // ── QUEST LOG TAB ────────────────────────────────────────────
+    function renderQuestLog(campaign) {
+        var div    = document.getElementById('questLogContent');
+        var quests = campaign.quests || [];
+
+        if (quests.length === 0) {
+            div.innerHTML = '<div class="empty-state">No quests available.</div>';
+            return;
+        }
+
+        var active    = quests.filter(function(q) { return q.status === 'active'; });
+        var completed = quests.filter(function(q) { return q.status === 'completed'; });
+        var failed    = quests.filter(function(q) { return q.status === 'failed'; });
+
+        var html = '';
+
+        if (active.length > 0) {
+            html += '<div class="quest-section-header">▶ Active Quests (' + active.length + ')</div>';
+            html += active.map(renderQuestCard).join('');
+        }
+
+        if (completed.length > 0) {
+            html += '<div class="quest-section-header">✓ Completed Quests (' + completed.length + ')</div>';
+            html += completed.map(renderQuestCard).join('');
+        }
+
+        if (failed.length > 0) {
+            html += '<div class="quest-section-header">✗ Failed Quests (' + failed.length + ')</div>';
+            html += failed.map(renderQuestCard).join('');
+        }
+
+        div.innerHTML = html;
+    }
+
+    function renderQuestCard(q) {
+        var statusCls  = 'quest-' + q.status;
+        var cardCls    = q.status !== 'active' ? q.status : '';
+        var objectives = (q.objectives || []).map(function(obj) {
+            var done   = typeof obj === 'object' ? obj.completed : false;
+            var text   = typeof obj === 'object' ? obj.text : obj;
+            var liCls  = done ? 'done' : '';
+            var check  = done ? '<span class="obj-check">✓</span>' : '<span class="obj-check obj-pending">○</span>';
+            return '<li class="' + liCls + '">' + check + escHtml(text) + '</li>';
+        }).join('');
+
+        var reward   = q.reward || {};
+        var rewardParts = [];
+        if (reward.xp)   rewardParts.push(reward.xp + ' XP');
+        if (reward.caps) rewardParts.push(reward.caps + ' Caps');
+        if (reward.items && reward.items.length > 0) rewardParts.push(reward.items.length + ' item(s)');
+
+        return '<div class="quest-card ' + cardCls + '">' +
+            '<div class="quest-header">' +
+                '<div class="quest-title">' + escHtml(q.title) + '</div>' +
+                '<span class="quest-status-badge ' + statusCls + '">' + escHtml(q.status) + '</span>' +
+            '</div>' +
+            '<div class="quest-desc">' + escHtml(q.description) + '</div>' +
+            '<div class="quest-progress-wrap">' +
+                '<div class="quest-progress-label">Progress: ' + (q.progress || 0) + '%</div>' +
+                '<div class="quest-progress-bg"><div class="quest-progress-fill" style="width:' + (q.progress || 0) + '%"></div></div>' +
+            '</div>' +
+            (objectives ? '<ul class="objectives-list">' + objectives + '</ul>' : '') +
+            (rewardParts.length > 0 ? '<div class="quest-reward">⭐ Reward: ' + escHtml(rewardParts.join(' · ')) + '</div>' : '') +
+            '</div>';
+    }
+
+    // ── ABILITIES TAB ────────────────────────────────────────────
+    function renderAbilities(campaign) {
+        var div     = document.getElementById('abilitiesContent');
+        var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
+
+        if (!myEntry) {
+            div.innerHTML = '<div class="empty-state">Character not found in campaign.</div>';
+            return;
+        }
+
+        var abilities = myEntry.abilities || [];
+        var skills    = myEntry.skills    || [];
+
+        // Known skills for proficiency display
+        var allSkills = [
+            'Acrobatics','Animal Handling','Arcana','Athletics','Deception',
+            'History','Insight','Intimidation','Investigation','Medicine',
+            'Nature','Perception','Performance','Persuasion','Religion',
+            'Sleight of Hand','Stealth','Survival'
+        ];
+
+        var html = '<div class="panel-title">Special Abilities</div>';
+
+        if (abilities.length > 0) {
+            html += abilities.map(function(ab) {
+                return '<div class="ability-card">' +
+                    '<div class="ability-name">✦ ' + escHtml(ab) + '</div>' +
+                    '<div class="ability-desc">Special class or character ability.</div>' +
+                    '</div>';
+            }).join('');
+        } else {
+            html += '<div class="empty-state">No special abilities listed.</div>';
+        }
+
+        html += '<div class="skills-section"><div class="panel-title" style="margin-top:16px;">All Skills</div>';
+        html += allSkills.map(function(sk) {
+            var isProficient = skills.indexOf(sk) !== -1;
+            var badgeCls = isProficient ? 'skill-proficient' : 'skill-standard';
+            var badgeText = isProficient ? 'Proficient' : 'Standard';
+            return '<div class="skill-row">' +
+                '<span class="skill-name">' + escHtml(sk) + '</span>' +
+                '<span class="skill-badge ' + badgeCls + '">' + badgeText + '</span>' +
+                '</div>';
+        }).join('');
+        html += '</div>';
+
+        div.innerHTML = html;
+    }
+
+    // ── TAB SWITCHING ────────────────────────────────────────────
+    function switchTab(tabId, btn) {
+        document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+        document.querySelectorAll('.tab-btn').forEach(function(el) { el.classList.remove('active'); });
+        document.getElementById('tab-' + tabId).classList.add('active');
+        btn.classList.add('active');
+    }
+
+    // ── UTILITIES ────────────────────────────────────────────────
+    function escHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatTimestamp(iso) {
+        try {
+            var d = new Date(iso);
+            var h = String(d.getHours()).padStart(2, '0');
+            var m = String(d.getMinutes()).padStart(2, '0');
+            var s = String(d.getSeconds()).padStart(2, '0');
+            return h + ':' + m + ':' + s;
+        } catch(e) { return iso || '—'; }
+    }
+
+    function logout() {
+        if (refreshInterval) clearInterval(refreshInterval);
+        sessionStorage.clear();
+        window.location.replace('index.html');
+    }
     </script>
-    <script src="../assets/navigation.js"></script>
 </body>
 </html>
