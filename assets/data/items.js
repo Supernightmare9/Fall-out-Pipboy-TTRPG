@@ -13,6 +13,7 @@ const ITEMS = [
     rarity: "common",
     weight: 2.5,
     value: 75,
+    damage: "1d8",
     description: "A reliable semi-automatic pistol chambered in 10mm. A staple sidearm of the wasteland.",
     properties: ["Ranged", "Semi-Auto", "10mm Ammo"]
   },
@@ -23,6 +24,7 @@ const ITEMS = [
     rarity: "uncommon",
     weight: 8,
     value: 350,
+    damage: "2d8+1",
     description: "A versatile, select-fire rifle designed for mid-range combat. Reliable and easy to maintain.",
     properties: ["Ranged", "Semi-Auto", "Full-Auto", ".45 Ammo"]
   },
@@ -33,6 +35,7 @@ const ITEMS = [
     rarity: "uncommon",
     weight: 20,
     value: 400,
+    damage: "2d10+3",
     description: "A massive two-handed sledgehammer with a kinetic energy store that amplifies the impact of each swing.",
     properties: ["Melee", "Two-Handed", "Kinetic Amplifier"]
   },
@@ -43,6 +46,7 @@ const ITEMS = [
     rarity: "rare",
     weight: 27,
     value: 1200,
+    damage: "4d6",
     description: "A six-barreled rotary cannon capable of firing thousands of rounds per minute. Devastating against unarmored targets.",
     properties: ["Ranged", "Full-Auto", "Heavy Weapon", "5mm Ammo"]
   },
@@ -53,6 +57,7 @@ const ITEMS = [
     rarity: "common",
     weight: 1,
     value: 30,
+    damage: "1d4+1",
     description: "A sharp, single-edged blade. Lightweight and easily concealed, favored by scouts and wastelanders alike.",
     properties: ["Melee", "One-Handed", "Concealable"]
   },
@@ -64,6 +69,7 @@ const ITEMS = [
     rarity: "common",
     weight: 10,
     value: 100,
+    armorClass: 1,
     description: "Panels of hardened leather stitched together for basic protection. Light enough to allow free movement.",
     properties: ["Light Armor", "DR 10"]
   },
@@ -74,6 +80,7 @@ const ITEMS = [
     rarity: "uncommon",
     weight: 22,
     value: 600,
+    armorClass: 2,
     description: "Military-grade modular armor plating. Offers solid ballistic protection without sacrificing mobility.",
     properties: ["Medium Armor", "DR 20", "Modular"]
   },
@@ -84,6 +91,7 @@ const ITEMS = [
     rarity: "rare",
     weight: 60,
     value: 5000,
+    armorClass: 4,
     description: "Pre-war military-issue power armor. Hydraulic joints multiply the wearer's strength and a sealed suit provides environmental protection.",
     properties: ["Heavy Armor", "DR 40", "Strength Boost", "Sealed Environment", "Fusion Core Required"]
   },
@@ -96,6 +104,7 @@ const ITEMS = [
     weight: 0.1,
     value: 60,
     description: "A syringer filled with healing compounds and Med-X. Immediately restores a moderate amount of hit points.",
+    effects: { healing: 30 },
     properties: ["Heal 30 HP", "Instant"]
   },
   {
@@ -106,6 +115,7 @@ const ITEMS = [
     weight: 0.1,
     value: 50,
     description: "An intravenous chemical solution that bonds with radioactive particles and flushes them from the body.",
+    effects: { cureRadiation: 50 },
     properties: ["Remove 50 Rads", "Instant"]
   },
   {
@@ -116,6 +126,7 @@ const ITEMS = [
     weight: 1,
     value: 20,
     description: "The most popular soft drink of the pre-war era, still found stashed away across the wasteland. Refreshing, if mildly irradiated.",
+    effects: { healing: 10, cureRadiation: -5 },
     properties: ["Restore 10 HP", "+5 Rads"]
   },
   {
@@ -126,6 +137,7 @@ const ITEMS = [
     weight: 0.1,
     value: 120,
     description: "A powerful combat stimulant developed during the Resource Wars. Grants bursts of aggression and pain resistance at the cost of perception.",
+    effects: {},
     properties: ["Damage Resistance +25%", "Damage Dealt +25%", "Duration: 3 rounds", "Addiction Risk"]
   },
   // ── MISC ──────────────────────────────────────────────────────────────────
