@@ -721,6 +721,11 @@
         .type-gear     { border-color: var(--vault-gold);   color: var(--vault-gold); }
         .type-misc     { border-color: rgba(74,222,128,0.4); color: rgba(74,222,128,0.6); }
 
+        .inventory-item.equipped-item {
+            border-color: var(--vault-gold);
+            background: rgba(251,191,36,0.04);
+        }
+
         .inventory-footer {
             padding: 10px 0 0;
             border-top: 1px solid rgba(74,222,128,0.2);
@@ -729,6 +734,123 @@
 
         .inventory-footer .stat-label { color: var(--vault-gold); }
         .inventory-footer .stat-value { color: var(--vault-green); }
+
+        /* ===== EQUIPMENT PANEL ===== */
+        .equipment-panel {
+            background: var(--vault-darker);
+            border: 1px solid rgba(74,222,128,0.25);
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+
+        .equipment-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 6px;
+        }
+
+        .equip-slot {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 6px 8px;
+            font-size: 9px;
+        }
+
+        .equip-slot-label {
+            color: rgba(74,222,128,0.5);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .equip-slot-item {
+            color: var(--vault-gold);
+            font-weight: bold;
+            font-size: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .equip-slot-item.empty {
+            color: rgba(74,222,128,0.3);
+            font-weight: normal;
+            font-style: italic;
+        }
+
+        /* ===== ITEM ACTION BUTTONS ===== */
+        .item-actions {
+            display: flex;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .item-action-btn {
+            background: transparent;
+            border: 1px solid rgba(74,222,128,0.3);
+            color: rgba(74,222,128,0.7);
+            font-family: 'Courier New', monospace;
+            font-size: 8px;
+            padding: 2px 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.15s;
+        }
+
+        .item-action-btn:hover {
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+        }
+
+        .item-action-btn.equipped {
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            background: rgba(251,191,36,0.08);
+        }
+
+        .item-action-btn.use-btn {
+            border-color: rgba(74,222,128,0.4);
+            color: var(--vault-success);
+        }
+
+        .item-action-btn.use-btn:hover {
+            border-color: var(--vault-success);
+            background: rgba(74,222,128,0.1);
+        }
+
+        /* ===== RARITY LABEL ===== */
+        .item-rarity {
+            font-size: 8px;
+            margin-bottom: 4px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ===== ENCUMBRANCE BAR ===== */
+        .carry-bar-wrap {
+            margin-top: 4px;
+        }
+
+        .carry-bar-bg {
+            background: rgba(74,222,128,0.1);
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 3px;
+        }
+
+        .carry-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        .carry-light    { background: #4ade80; }
+        .carry-moderate { background: #fbbf24; }
+        .carry-heavy    { background: #f97316; }
+        .carry-over     { background: #ff6b6b; }
 
         /* ===== QUEST LOG TAB ===== */
         .quest-card {
@@ -1108,6 +1230,19 @@
 
             <!-- TAB 1: INVENTORY -->
             <div class="tab-content active" id="tab-inventory">
+
+                <!-- Equipment Slots Panel -->
+                <div class="equipment-panel" id="equipmentPanelWrap">
+                    <div class="panel-title" style="margin-bottom:8px;">⚔ Equipment Slots</div>
+                    <div class="equipment-slots" id="equipmentPanel">
+                        <div class="empty-state">Load a campaign to view equipment.</div>
+                    </div>
+                    <div class="equip-stats-row" id="equipStatsRow" style="margin-top:8px;display:flex;gap:16px;font-size:10px;">
+                        <span class="stat-label">AC: <span class="stat-value" id="acDisplay">—</span></span>
+                        <span class="stat-label">Carry: <span class="stat-value" id="carryDisplay">—</span></span>
+                    </div>
+                </div>
+
                 <div class="filter-bar" id="inventoryFilters">
                     <button class="filter-btn active" onclick="filterInventory('all', this)">All</button>
                     <button class="filter-btn" onclick="filterInventory('weapon', this)">Weapons</button>
@@ -1140,7 +1275,9 @@
     </div><!-- end .container -->
 
     <script src="../assets/data/accounts.js"></script>
+    <script src="../assets/data/items.js"></script>
     <script src="../assets/data/campaigns.js"></script>
+    <script src="../assets/helpers/inventoryManager.js"></script>
     <script src="../assets/helpers/settingsManager.js"></script>
     <script src="../assets/helpers/storageManager.js"></script>
     <script src="../assets/helpers/diceRoller.js"></script>
@@ -1296,15 +1433,16 @@
         if (saved) {
             try {
                 var overlay = JSON.parse(saved);
-                // Merge players HP from localStorage
+                // Merge players HP and equipment from localStorage
                 if (overlay.players) {
                     overlay.players.forEach(function(savedP) {
                         var p = data.players.find(function(x) { return x.username === savedP.username; });
                         if (p) {
-                            p.currentHp   = savedP.currentHp;
+                            p.currentHp    = savedP.currentHp;
                             p.inInitiative = savedP.inInitiative || false;
-                            p.initiative  = savedP.initiative   || 0;
-                            p.status      = savedP.status       || 'alive';
+                            p.initiative   = savedP.initiative   || 0;
+                            p.status       = savedP.status       || 'alive';
+                            p.equipment    = savedP.equipment    || {};
                         }
                     });
                 }
@@ -1315,6 +1453,10 @@
                 // Merge messages (append overseer messages)
                 if (overlay.messages) {
                     data.messages = overlay.messages;
+                }
+                // Merge inventory (loot awarded by overseer)
+                if (overlay.inventory) {
+                    data.inventory = overlay.inventory;
                 }
             } catch(e) { /* ignore malformed */ }
         }
@@ -1334,11 +1476,13 @@
                     maxHp:         p.maxHp,
                     inInitiative:  p.inInitiative || false,
                     initiative:    p.initiative   || 0,
-                    status:        p.status       || 'alive'
+                    status:        p.status       || 'alive',
+                    equipment:     p.equipment    || {}
                 };
             }),
             activeEncounter: campaign.activeEncounter,
-            messages: campaign.messages
+            messages: campaign.messages,
+            inventory: campaign.inventory
         };
         localStorage.setItem(lsKey(campaign.id), JSON.stringify(toSave));
     }
@@ -1360,6 +1504,8 @@
         renderQuestLog(campaign);
         renderAbilities(campaign);
 
+        // Equipment panel and AC are updated inside renderInventory()
+
         // Auto-refresh every 5 seconds
         if (refreshInterval) clearInterval(refreshInterval);
         refreshInterval = setInterval(refreshAll, 5000);
@@ -1376,6 +1522,7 @@
         renderPartyStatus(fresh);
         renderCombatStatus(fresh);
         renderMessages(fresh);
+        renderInventory(fresh);
 
         // Re-sync own HP display in case overseer changed it
         var myEntry = fresh.players.find(function(p) { return p.username === sessionUsername; });
@@ -1660,26 +1807,182 @@
         if (items.length === 0) {
             grid.innerHTML = '<div class="empty-state">No items in inventory.</div>';
             footer.innerHTML = '';
+            updateEquipmentPanel(campaign);
+            updateACDisplay(campaign);
             return;
         }
 
+        var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
+        var equipped = myEntry ? InventoryManager.getEquippedItems(myEntry) : {};
+        var equippedIds = Object.values ? Object.values(equipped).filter(Boolean) : Object.keys(equipped).map(function(k) { return equipped[k]; }).filter(Boolean);
+
         grid.innerHTML = items.map(function(item) {
-            var typeCls = 'type-' + escHtml(item.type || 'misc');
-            return '<div class="inventory-item" data-type="' + escHtml(item.type || 'misc') + '">' +
+            var typeCls     = 'type-' + escHtml(item.type || 'misc');
+            var rarityColor = InventoryManager.getRarityColor(item.rarity);
+            var rarityLabel = InventoryManager.getRarityLabel(item.rarity);
+            var isEquipped  = equippedIds.indexOf(item.id) !== -1;
+
+            var actionBtns = '';
+            if (item.type === 'consumable') {
+                actionBtns += '<button class="item-action-btn use-btn" onclick="useItem(' + escHtml(JSON.stringify(item.id)) + ', event)">USE</button>';
+            }
+            if (item.type === 'weapon' || item.type === 'armor') {
+                var equipLabel = isEquipped ? 'UNEQUIP' : 'EQUIP';
+                var equipCls   = isEquipped ? 'item-action-btn equipped' : 'item-action-btn';
+                actionBtns += '<button class="' + equipCls + '" onclick="toggleEquip(' + escHtml(JSON.stringify(item.id)) + ', event)">' + equipLabel + '</button>';
+            }
+
+            var damageStr = item.damage ? '<span class="item-stat">DMG: <span>' + escHtml(item.damage) + '</span></span>' : '';
+            var acStr     = item.armorClass ? '<span class="item-stat">AC +<span>' + item.armorClass + '</span></span>' : '';
+
+            return '<div class="inventory-item' + (isEquipped ? ' equipped-item' : '') + '" data-type="' + escHtml(item.type || 'misc') + '">' +
                 '<span class="item-type-badge ' + typeCls + '">' + escHtml(item.type || 'misc') + '</span>' +
-                '<div class="item-name">' + escHtml(item.name) + '</div>' +
+                '<div class="item-rarity" style="color:' + rarityColor + '">' + escHtml(rarityLabel) + '</div>' +
+                '<div class="item-name">' + escHtml(item.name) + (isEquipped ? ' ✓' : '') + '</div>' +
                 '<div class="item-desc">' + escHtml(item.description || '') + '</div>' +
                 '<div class="item-stats">' +
                     '<span class="item-stat">QTY: <span>' + (item.quantity || 1) + '</span></span>' +
                     '<span class="item-stat">WT: <span>' + (item.weight || 0) + ' lbs</span></span>' +
                     '<span class="item-stat">VAL: <span>' + (item.value || 0) + ' ¢</span></span>' +
+                    damageStr + acStr +
                 '</div>' +
+                (actionBtns ? '<div class="item-actions">' + actionBtns + '</div>' : '') +
                 '</div>';
         }).join('');
 
-        // Total weight
-        var totalWt = items.reduce(function(acc, i) { return acc + (i.weight || 0) * (i.quantity || 1); }, 0);
-        footer.innerHTML = '<span class="stat-label">Total Weight:</span> <span class="stat-value">' + totalWt.toFixed(1) + ' lbs</span>';
+        // Footer: weight and value summary
+        var strStat    = myEntry ? (myEntry.stats && myEntry.stats.str || 10) : 10;
+        var totalWt    = InventoryManager.calculateTotalWeight(items);
+        var capacity   = InventoryManager.getCarryingCapacity(strStat);
+        var encStatus  = InventoryManager.getEncumbranceStatus(totalWt, capacity);
+        var wtPct      = Math.min(100, Math.round((totalWt / capacity) * 100));
+        var barCls     = 'carry-' + encStatus;
+        var totalVal   = InventoryManager.getTotalInventoryValue(items);
+
+        footer.innerHTML =
+            '<span class="stat-label">Weight:</span> <span class="stat-value">' + totalWt.toFixed(1) + ' / ' + capacity + ' lbs</span>' +
+            ' &nbsp; <span class="stat-label">Value:</span> <span class="stat-value">' + totalVal + ' ¢</span>' +
+            ' &nbsp; <span class="stat-label">Encumbrance:</span> <span class="stat-value">' + escHtml(encStatus) + '</span>' +
+            '<div class="carry-bar-wrap"><div class="carry-bar-bg"><div class="carry-bar-fill ' + barCls + '" style="width:' + wtPct + '%"></div></div></div>';
+
+        updateEquipmentPanel(campaign);
+        updateACDisplay(campaign);
+    }
+
+    // ── ITEM: USE CONSUMABLE ─────────────────────────────────────
+    window.useItem = function(itemId, event) {
+        event.stopPropagation();
+        if (!activeCampaign) return;
+
+        var item    = activeCampaign.inventory.find(function(i) { return i.id === itemId; });
+        var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+
+        if (!item || !myEntry) return;
+
+        var result = InventoryManager.useConsumable(item, myEntry);
+
+        if (result.success) {
+            InventoryManager.removeItemFromInventory(activeCampaign.inventory, itemId, 1);
+
+            // Update HP display immediately
+            document.getElementById('hpCurrent').textContent = myEntry.currentHp;
+            updateHpBar(myEntry.currentHp, myEntry.maxHp);
+
+            // Broadcast to messages
+            if (!activeCampaign.messages) activeCampaign.messages = [];
+            activeCampaign.messages.push({
+                text: sessionUsername + ' used ' + item.name + '. ' + result.message,
+                type: 'normal',
+                from: sessionUsername,
+                timestamp: new Date().toISOString()
+            });
+
+            saveCampaignData(activeCampaign);
+            renderInventory(activeCampaign);
+            renderMessages(activeCampaign);
+        }
+    };
+
+    // ── ITEM: EQUIP / UNEQUIP ────────────────────────────────────
+    window.toggleEquip = function(itemId, event) {
+        event.stopPropagation();
+        if (!activeCampaign) return;
+
+        var item    = activeCampaign.inventory.find(function(i) { return i.id === itemId; });
+        var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+
+        if (!item || !myEntry) return;
+        if (!myEntry.equipment) myEntry.equipment = {};
+
+        // Check if already equipped in any slot
+        var equippedSlot = null;
+        Object.keys(myEntry.equipment).forEach(function(slot) {
+            if (myEntry.equipment[slot] === itemId) equippedSlot = slot;
+        });
+
+        if (equippedSlot) {
+            InventoryManager.unequipItem(myEntry, equippedSlot);
+        } else {
+            var validSlots = InventoryManager.getValidSlotsForItem(item);
+            if (validSlots.length > 0) {
+                InventoryManager.equipItem(myEntry, itemId, validSlots[0], activeCampaign.inventory);
+            }
+        }
+
+        saveCampaignData(activeCampaign);
+        renderInventory(activeCampaign);
+    };
+
+    // ── UPDATE EQUIPMENT PANEL ───────────────────────────────────
+    function updateEquipmentPanel(campaign) {
+        var panel = document.getElementById('equipmentPanel');
+        if (!panel) return;
+
+        var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
+        if (!myEntry) {
+            panel.innerHTML = '<div class="empty-state">Character not found.</div>';
+            return;
+        }
+
+        var equipped = InventoryManager.getEquippedItems(myEntry);
+        var html = '';
+
+        InventoryManager.EQUIPMENT_SLOTS.forEach(function(slot) {
+            var itemId   = equipped[slot];
+            var item     = itemId ? campaign.inventory.find(function(i) { return i.id === itemId; }) : null;
+            var itemName = item ? item.name : '—';
+            var isEmpty  = !item;
+
+            html += '<div class="equip-slot">' +
+                '<div class="equip-slot-label">' + escHtml(InventoryManager.getSlotLabel(slot)) + '</div>' +
+                '<div class="equip-slot-item' + (isEmpty ? ' empty' : '') + '">' + escHtml(itemName) + '</div>' +
+                '</div>';
+        });
+
+        panel.innerHTML = html;
+    }
+
+    // ── UPDATE AC DISPLAY ────────────────────────────────────────
+    function updateACDisplay(campaign) {
+        var acDisplay = document.getElementById('acDisplay');
+        var myEntry   = campaign.players.find(function(p) { return p.username === sessionUsername; });
+        if (!myEntry) return;
+
+        var ac = InventoryManager.calculateArmorClass(myEntry, campaign.inventory || []);
+        if (acDisplay) acDisplay.textContent = ac;
+
+        // Also update the charAc display in the stats panel
+        var charAcEl = document.getElementById('charAc');
+        if (charAcEl) charAcEl.textContent = ac;
+
+        // Update carry display
+        var carryDisplay = document.getElementById('carryDisplay');
+        if (carryDisplay) {
+            var strStat   = myEntry.stats && myEntry.stats.str || 10;
+            var totalWt   = InventoryManager.calculateTotalWeight(campaign.inventory || []);
+            var capacity  = InventoryManager.getCarryingCapacity(strStat);
+            carryDisplay.textContent = totalWt.toFixed(1) + ' / ' + capacity + ' lbs';
+        }
     }
 
     var currentFilter = 'all';
@@ -1865,6 +2168,40 @@
             if (Array.isArray(data.messages)) {
                 activeCampaign.messages = data.messages;
                 renderMessages(activeCampaign);
+            }
+            // Sync inventory loot awarded by overseer
+            if (data.inventory) {
+                var oldLength = activeCampaign.inventory ? activeCampaign.inventory.length : 0;
+                activeCampaign.inventory = data.inventory;
+                renderInventory(activeCampaign);
+                if (data.inventory.length > oldLength) {
+                    // New items were added — notify the player
+                    if (!activeCampaign.messages) activeCampaign.messages = [];
+                    activeCampaign.messages.push({
+                        text: '\uD83C\uDF81 New items added to party inventory!',
+                        type: 'important',
+                        from: 'system',
+                        timestamp: new Date().toISOString()
+                    });
+                    renderMessages(activeCampaign);
+                }
+            }
+            // Sync player equipment/HP changes from other tabs
+            if (data.players) {
+                data.players.forEach(function(savedP) {
+                    var p = activeCampaign.players.find(function(x) { return x.username === savedP.username; });
+                    if (p) {
+                        p.currentHp  = savedP.currentHp;
+                        p.status     = savedP.status     || 'alive';
+                        p.equipment  = savedP.equipment  || {};
+                    }
+                });
+                var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+                if (myEntry) {
+                    document.getElementById('hpCurrent').textContent = myEntry.currentHp;
+                    document.getElementById('hpMax').textContent     = myEntry.maxHp;
+                    updateHpBar(myEntry.currentHp, myEntry.maxHp);
+                }
             }
         } catch (ex) { /* ignore malformed */ }
     });
