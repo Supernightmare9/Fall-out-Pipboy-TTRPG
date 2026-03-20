@@ -176,6 +176,53 @@
         ::-webkit-scrollbar{width:6px;}
         ::-webkit-scrollbar-track{background:var(--overseer-dark);}
         ::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+
+        /* ── ENEMY MANAGEMENT ─────────────────────────────────────── */
+        .enemy-mgmt-list{max-height:220px;overflow-y:auto;border:1px solid var(--overseer-border);}
+        .custom-enemy-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(42,82,152,.3);gap:8px;}
+        .custom-enemy-item:last-child{border-bottom:none;}
+        .custom-enemy-item:hover{background:rgba(212,160,23,.05);}
+        .custom-enemy-item-info{flex:1;min-width:0;}
+        .custom-enemy-name{font-size:12px;font-weight:bold;color:var(--overseer-gold);text-transform:uppercase;letter-spacing:1px;}
+        .custom-enemy-meta{font-size:9px;color:rgba(232,232,232,.5);margin-top:2px;}
+        .custom-enemy-actions{display:flex;gap:4px;flex-shrink:0;}
+
+        /* ── TEMPLATE GRID ─────────────────────────────────────────── */
+        .template-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+        .template-card{background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:12px;cursor:pointer;transition:all .2s;text-align:center;}
+        .template-card:hover{border-color:var(--overseer-gold);background:rgba(212,160,23,.08);}
+        .template-card.selected{border-color:var(--overseer-gold-bright);background:rgba(212,160,23,.14);box-shadow:0 0 12px rgba(212,160,23,.3);}
+        .template-card-icon{font-size:22px;margin-bottom:6px;}
+        .template-card-name{font-size:12px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:1px;text-transform:uppercase;}
+        .template-card-desc{font-size:9px;color:rgba(232,232,232,.5);margin-top:4px;line-height:1.4;}
+
+        /* ── ENCOUNTER PREVIEW ────────────────────────────────────── */
+        .encounter-preview{background:var(--overseer-dark);border:1px solid var(--overseer-border);padding:12px;margin:10px 0;}
+        .encounter-preview-title{font-size:10px;color:var(--overseer-gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+        .encounter-preview-enemy{font-size:11px;padding:3px 0;border-bottom:1px solid rgba(42,82,152,.2);display:flex;gap:8px;align-items:center;}
+        .encounter-preview-enemy:last-child{border-bottom:none;}
+        .difficulty-rating{padding:8px 12px;font-size:11px;font-weight:bold;letter-spacing:1px;text-align:center;margin:8px 0;}
+        .diff-trivial{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3);}
+        .diff-easy{background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.3);}
+        .diff-balanced{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.3);}
+        .diff-hard{background:rgba(251,146,60,.1);color:#fb923c;border:1px solid rgba(251,146,60,.3);}
+        .diff-deadly{background:rgba(239,68,68,.12);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+
+        /* ── ENEMY FORM ───────────────────────────────────────────── */
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+        .form-field{display:flex;flex-direction:column;gap:4px;}
+        .form-field.full-width{grid-column:1/-1;}
+        .form-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;}
+        .form-input,.form-select,.form-textarea{background:var(--overseer-blue);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;padding:6px 8px;width:100%;}
+        .form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--overseer-gold);}
+        .form-textarea{min-height:60px;resize:vertical;}
+
+        /* ── LOOT DISTRIBUTION ────────────────────────────────────── */
+        .loot-list{max-height:220px;overflow-y:auto;border:1px solid var(--overseer-border);margin-bottom:14px;}
+        .loot-item{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(42,82,152,.3);}
+        .loot-item:last-child{border-bottom:none;}
+        .loot-item-id{font-size:11px;color:var(--overseer-gold-bright);font-weight:bold;}
+        .loot-item-source{font-size:9px;color:rgba(232,232,232,.5);}
     </style>
 
     <script src="../assets/data/accounts.js"></script>
@@ -183,6 +230,7 @@
     <script src="../assets/data/enemies.js"></script>
     <script src="../assets/helpers/storageManager.js"></script>
     <script src="../assets/helpers/diceRoller.js"></script>
+    <script src="../assets/helpers/encounterBuilder.js"></script>
 </head>
 <body>
 
@@ -268,6 +316,23 @@
 
     </div>
 
+    <!-- ENEMY MANAGEMENT PANEL -->
+    <div class="panel" style="margin-bottom:16px;">
+        <div class="panel-header">
+            <span class="panel-title">&#x1F9BE; Enemy Management</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="cmd-btn success" onclick="openCustomEnemyForm(null)">[+ CUSTOM ENEMY]</button>
+                <button class="cmd-btn" onclick="openEncounterBuilder()">[ENCOUNTER BUILDER]</button>
+                <button class="cmd-btn" onclick="showLootDistribution()">[DISTRIBUTE LOOT]</button>
+            </div>
+        </div>
+        <div class="panel-body">
+            <div id="customEnemyList" class="enemy-mgmt-list">
+                <div class="empty-state">No custom enemies &#8212; create one to expand your bestiary</div>
+            </div>
+        </div>
+    </div>
+
     <!-- FULL-WIDTH COMBAT LOG -->
     <div class="panel combat-log-panel">
         <div class="panel-header">
@@ -339,9 +404,99 @@
 
 <div id="exportToast">&#x2714; Campaign exported successfully!</div>
 
+<!-- CUSTOM ENEMY FORM MODAL -->
+<div id="customEnemyModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:660px;">
+        <div class="modal-title" id="customEnemyModalTitle">Create Custom Enemy</div>
+        <div class="form-grid">
+            <div class="form-field">
+                <label class="form-label">Name *</label>
+                <input type="text" id="ceFormName" class="form-input" placeholder="e.g. Radscorpion Queen">
+            </div>
+            <div class="form-field">
+                <label class="form-label">Type</label>
+                <input type="text" id="ceFormType" class="form-input" placeholder="e.g. insect, human, robot">
+            </div>
+            <div class="form-field">
+                <label class="form-label">Difficulty</label>
+                <select id="ceFormDifficulty" class="form-select">
+                    <option value="common">Common</option>
+                    <option value="uncommon">Uncommon</option>
+                    <option value="rare">Rare</option>
+                    <option value="legendary">Legendary</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label class="form-label">HP</label>
+                <input type="number" id="ceFormHp" class="form-input" placeholder="20" min="1">
+            </div>
+            <div class="form-field">
+                <label class="form-label">AC</label>
+                <input type="number" id="ceFormAc" class="form-input" placeholder="10" min="1">
+            </div>
+            <div class="form-field">
+                <label class="form-label">Initiative</label>
+                <input type="number" id="ceFormInit" class="form-input" placeholder="5">
+            </div>
+            <div class="form-field full-width">
+                <label class="form-label">Abilities (comma-separated)</label>
+                <input type="text" id="ceFormAbilities" class="form-input" placeholder="e.g. Poison Sting, Burrow, Armored Shell">
+            </div>
+            <div class="form-field full-width">
+                <label class="form-label">Description</label>
+                <textarea id="ceFormDesc" class="form-textarea" placeholder="Describe this enemy..."></textarea>
+            </div>
+            <div class="form-field full-width">
+                <label class="form-label">Notes (Overseer only)</label>
+                <textarea id="ceFormNotes" class="form-textarea" style="min-height:40px;" placeholder="Private overseer notes..."></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="cmd-btn" onclick="closeCustomEnemyForm()">[CANCEL]</button>
+            <button class="cmd-btn success" onclick="saveCustomEnemy()">[SAVE ENEMY]</button>
+        </div>
+    </div>
+</div>
+
+<!-- ENCOUNTER BUILDER MODAL -->
+<div id="encounterBuilderModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:700px;">
+        <div class="modal-title">&#x2694; Encounter Builder</div>
+        <div style="font-size:10px;color:rgba(232,232,232,.5);margin-bottom:14px;letter-spacing:1px;">Select a template to generate a balanced encounter roster.</div>
+        <div class="template-grid" id="templateGrid"></div>
+        <div id="encounterPreviewPanel" style="display:none;">
+            <div class="encounter-preview">
+                <div class="encounter-preview-title">&#x2694; Encounter Preview</div>
+                <div id="encounterPreviewList"></div>
+            </div>
+            <div id="encounterDifficultyBadge"></div>
+            <div id="encounterXpInfo" style="font-size:10px;color:rgba(232,232,232,.5);text-align:center;padding:4px 0;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="cmd-btn" onclick="closeEncounterBuilder()">[CANCEL]</button>
+            <button class="cmd-btn success" id="confirmEncounterBtn" style="display:none;" onclick="confirmEncounterBuild()">[BUILD ENCOUNTER]</button>
+        </div>
+    </div>
+</div>
+
+<!-- LOOT DISTRIBUTION MODAL -->
+<div id="lootDistributionModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:500px;">
+        <div class="modal-title">&#x1F381; Loot Distribution</div>
+        <div style="font-size:10px;color:rgba(232,232,232,.5);margin-bottom:12px;letter-spacing:1px;">Items recovered from defeated enemies. Award all to the party inventory.</div>
+        <div id="lootList" class="loot-list"></div>
+        <div id="lootEmptyState" style="display:none;padding:20px;text-align:center;color:rgba(232,232,232,.3);font-size:11px;letter-spacing:1px;">NO LOOT AVAILABLE &#8212; DEFEAT ENEMIES FIRST</div>
+        <div class="modal-footer">
+            <button class="cmd-btn" onclick="closeLootDistribution()">[CLOSE]</button>
+            <button class="cmd-btn success" id="awardLootBtn" onclick="awardLootToParty()">[AWARD ALL TO PARTY]</button>
+        </div>
+    </div>
+</div>
+
 <script>
 (function(){
     var _campaign=null,_campaignId=null,_selEnemyId=null,_combatLog=[],_messages=[];
+    var _editingEnemyId=null,_encounterPreview=[],_pendingLoot=[];
     var LS='vault215_overseer_';
 
     function lsGet(k){try{return JSON.parse(localStorage.getItem(LS+k));}catch(e){return null;}}
@@ -428,6 +583,7 @@
         renderEnemyTracker();
         renderLog();
         addLog('Campaign loaded: '+_campaign.name,'blue');
+        renderCustomEnemyList();
     }
 
     function mergePlayerHp(){
@@ -643,21 +799,27 @@
 
     function buildEnemySelectList(){
         var cont=document.getElementById('enemySelectList');if(!cont)return;cont.innerHTML='';
-        if(typeof ENEMIES==='undefined'||ENEMIES.length===0){cont.innerHTML='<div style="padding:20px;text-align:center;color:rgba(232,232,232,.4);">No enemy data found</div>';return;}
-        ENEMIES.forEach(function(e){
+        var allEnemies=(typeof ENEMIES!=='undefined'?ENEMIES.slice():[]);
+        if(_campaignId&&typeof EncounterBuilder!=='undefined'){
+            var custom=EncounterBuilder.getCustomEnemies(_campaignId);
+            if(custom.length>0){allEnemies=allEnemies.concat(custom);}
+        }
+        if(allEnemies.length===0){cont.innerHTML='<div style="padding:20px;text-align:center;color:rgba(232,232,232,.4);">No enemy data found</div>';return;}
+        allEnemies.forEach(function(e){
             var row=document.createElement('div');row.className='enemy-select-row';row.id='esr-'+e.id;
+            var customTag=e.isCustom?'<span style="font-size:9px;color:var(--overseer-green);margin-left:4px;">[CUSTOM]</span>':'';
             row.innerHTML=
                 '<div>'+
-                    '<div class="enemy-select-name">'+esc(e.name)+'</div>'+
-                    '<div class="enemy-select-meta">HP: '+e.maxHp+' | AC: '+e.ac+' | Initiative: '+e.initiative+'</div>'+
+                    '<div class="enemy-select-name">'+esc(e.name)+customTag+'</div>'+
+                    '<div class="enemy-select-meta">HP: '+(e.maxHp||e.hp)+' | AC: '+e.ac+' | Initiative: '+e.initiative+'</div>'+
                     '<div class="enemy-select-meta" style="font-style:italic;font-size:9px;">'+(e.description?esc(e.description.substring(0,80))+'&hellip;':'')+'</div>'+
                 '</div>'+
-                '<span class="difficulty-badge diff-'+e.difficulty+'">'+esc(e.difficulty)+'</span>';
+                '<span class="difficulty-badge diff-'+esc(e.difficulty)+'">'+esc(e.difficulty)+'</span>';
             row.onclick=function(){
                 _selEnemyId=e.id;
                 document.querySelectorAll('.enemy-select-row').forEach(function(r){r.classList.remove('selected');});
                 row.classList.add('selected');
-                document.getElementById('hpOverrideInput').value=e.maxHp;
+                document.getElementById('hpOverrideInput').value=(e.maxHp||e.hp);
             };
             cont.appendChild(row);
         });
@@ -665,7 +827,12 @@
 
     window.confirmAddEnemy=function(){
         if(!_selEnemyId){addLog('Select an enemy first','red');return;}
-        var tmpl=(typeof ENEMIES!=='undefined')?ENEMIES.find(function(e){return e.id===_selEnemyId;}):null;if(!tmpl)return;
+        var tmpl=(typeof ENEMIES!=='undefined')?ENEMIES.find(function(e){return e.id===_selEnemyId;}):null;
+        if(!tmpl&&_campaignId&&typeof EncounterBuilder!=='undefined'){
+            var custom=EncounterBuilder.getCustomEnemies(_campaignId);
+            tmpl=custom.find(function(e){return e.id===_selEnemyId;})||null;
+        }
+        if(!tmpl)return;
         var hp=parseInt(document.getElementById('hpOverrideInput').value,10);if(isNaN(hp)||hp<=0)hp=tmpl.maxHp;
         var iid=uid();
         var inst={id:iid,templateId:tmpl.id,name:tmpl.name,currentHp:hp,maxHp:hp,ac:tmpl.ac,initiative:tmpl.initiative||10,abilities:tmpl.abilities||[],loot:tmpl.loot||[]};
@@ -879,6 +1046,290 @@
         var panel = document.getElementById('questManagerPanel');
         if (panel) { panel.style.display = 'none'; }
         toggleQuestManager();
+    };
+
+    // ── ENEMY MANAGEMENT ────────────────────────────────────────────
+
+    function renderCustomEnemyList() {
+        var el = document.getElementById('customEnemyList');
+        if (!el) return;
+        if (!_campaignId || typeof EncounterBuilder === 'undefined') {
+            el.innerHTML = '<div class="empty-state">Load a campaign to manage custom enemies</div>';
+            return;
+        }
+        var enemies = EncounterBuilder.getCustomEnemies(_campaignId);
+        if (enemies.length === 0) {
+            el.innerHTML = '<div class="empty-state">No custom enemies \u2014 create one to expand your bestiary</div>';
+            return;
+        }
+        el.innerHTML = '';
+        enemies.forEach(function(e) {
+            var item = document.createElement('div');
+            item.className = 'custom-enemy-item';
+            item.innerHTML =
+                '<div class="custom-enemy-item-info">' +
+                    '<div class="custom-enemy-name">' + esc(e.name) + '</div>' +
+                    '<div class="custom-enemy-meta">HP: ' + (e.maxHp||e.hp) + ' | AC: ' + e.ac + ' | Init: ' + e.initiative +
+                        ' | <span class="difficulty-badge diff-' + esc(e.difficulty) + '">' + esc(e.difficulty) + '</span></div>' +
+                '</div>' +
+                '<div class="custom-enemy-actions">' +
+                    '<button class="cmd-btn" style="font-size:9px;padding:4px 8px;" onclick="addCustomEnemyToEncounter(\'' + esc(e.id) + '\')">[+ENC]</button>' +
+                    '<button class="cmd-btn" style="font-size:9px;padding:4px 8px;" onclick="openCustomEnemyForm(\'' + esc(e.id) + '\')">[EDIT]</button>' +
+                    '<button class="cmd-btn danger" style="font-size:9px;padding:4px 8px;" onclick="deleteCustomEnemyById(\'' + esc(e.id) + '\')">[DEL]</button>' +
+                '</div>';
+            el.appendChild(item);
+        });
+    }
+
+    window.openCustomEnemyForm = function(enemyId) {
+        if (!_campaignId) { addLog('Load a campaign first', 'red'); return; }
+        _editingEnemyId = enemyId || null;
+        var titleEl = document.getElementById('customEnemyModalTitle');
+        if (titleEl) titleEl.textContent = enemyId ? 'Edit Custom Enemy' : 'Create Custom Enemy';
+        ['ceFormName','ceFormType','ceFormHp','ceFormAc','ceFormInit','ceFormAbilities','ceFormDesc','ceFormNotes'].forEach(function(id) {
+            var el = document.getElementById(id); if (el) el.value = '';
+        });
+        var diffEl = document.getElementById('ceFormDifficulty');
+        if (diffEl) diffEl.value = 'common';
+        if (enemyId && typeof EncounterBuilder !== 'undefined') {
+            var all = EncounterBuilder.getCustomEnemies(_campaignId);
+            var found = null;
+            for (var i = 0; i < all.length; i++) { if (all[i].id === enemyId) { found = all[i]; break; } }
+            if (found) {
+                var setVal = function(id, val) { var el = document.getElementById(id); if (el) el.value = val || ''; };
+                setVal('ceFormName', found.name);
+                setVal('ceFormType', found.type);
+                setVal('ceFormHp', found.maxHp || found.hp);
+                setVal('ceFormAc', found.ac);
+                setVal('ceFormInit', found.initiative);
+                setVal('ceFormAbilities', Array.isArray(found.abilities) ? found.abilities.join(', ') : (found.abilities || ''));
+                setVal('ceFormDesc', found.description);
+                setVal('ceFormNotes', found.notes);
+                if (diffEl) diffEl.value = found.difficulty || 'common';
+            }
+        }
+        document.getElementById('customEnemyModal').classList.remove('hidden');
+    };
+
+    window.closeCustomEnemyForm = function() {
+        document.getElementById('customEnemyModal').classList.add('hidden');
+        _editingEnemyId = null;
+    };
+
+    window.saveCustomEnemy = function() {
+        if (typeof EncounterBuilder === 'undefined') { addLog('EncounterBuilder not loaded', 'red'); return; }
+        var nameEl = document.getElementById('ceFormName');
+        if (!nameEl || !nameEl.value.trim()) { addLog('Enemy name is required', 'red'); return; }
+        var data = {
+            name:        (document.getElementById('ceFormName') || {}).value,
+            type:        (document.getElementById('ceFormType') || {}).value,
+            difficulty:  (document.getElementById('ceFormDifficulty') || {}).value || 'common',
+            hp:          (document.getElementById('ceFormHp') || {}).value,
+            ac:          (document.getElementById('ceFormAc') || {}).value,
+            initiative:  (document.getElementById('ceFormInit') || {}).value,
+            abilities:   (document.getElementById('ceFormAbilities') || {}).value,
+            description: (document.getElementById('ceFormDesc') || {}).value,
+            notes:       (document.getElementById('ceFormNotes') || {}).value
+        };
+        if (_editingEnemyId) {
+            var updated = EncounterBuilder.updateCustomEnemy(_campaignId, _editingEnemyId, data);
+            if (updated) { addLog('Custom enemy updated: ' + updated.name, 'green'); }
+            else { addLog('Failed to update enemy', 'red'); }
+        } else {
+            var created = EncounterBuilder.createCustomEnemy(_campaignId, data);
+            if (created) { addLog('Custom enemy created: ' + created.name, 'green'); }
+            else { addLog('Failed to create enemy', 'red'); }
+        }
+        closeCustomEnemyForm();
+        renderCustomEnemyList();
+    };
+
+    window.deleteCustomEnemyById = function(enemyId) {
+        if (!_campaignId || typeof EncounterBuilder === 'undefined') return;
+        var all = EncounterBuilder.getCustomEnemies(_campaignId);
+        var target = null;
+        for (var i = 0; i < all.length; i++) { if (all[i].id === enemyId) { target = all[i]; break; } }
+        if (!target) return;
+        if (!confirm('Delete "' + target.name + '"? This cannot be undone.')) return;
+        EncounterBuilder.deleteCustomEnemy(_campaignId, enemyId);
+        addLog('Custom enemy deleted: ' + target.name, 'yellow');
+        renderCustomEnemyList();
+    };
+
+    window.addCustomEnemyToEncounter = function(enemyId) {
+        if (!_campaign || typeof EncounterBuilder === 'undefined') { addLog('Load a campaign first', 'red'); return; }
+        var all = EncounterBuilder.getCustomEnemies(_campaignId);
+        var tmpl = null;
+        for (var i = 0; i < all.length; i++) { if (all[i].id === enemyId) { tmpl = all[i]; break; } }
+        if (!tmpl) { addLog('Custom enemy not found', 'red'); return; }
+        var hp = tmpl.maxHp || tmpl.hp;
+        var iid = uid();
+        var inst = { id: iid, templateId: tmpl.id, name: tmpl.name, currentHp: hp, maxHp: hp, ac: tmpl.ac, initiative: tmpl.initiative || 10, abilities: tmpl.abilities || [], loot: tmpl.loot || [] };
+        var ae = _campaign.activeEncounter;
+        ae.enemies.push(inst);
+        if (ae.combatants.length === 0) {
+            (_campaign.players || []).forEach(function(p, i) { ae.combatants.push({ id: 'comb_p' + i, type: 'player', characterId: p.characterId, name: p.characterName, initiative: 10, currentTurn: false }); });
+        }
+        ae.combatants.push({ id: 'comb_' + iid, type: 'enemy', enemyInstanceId: iid, name: tmpl.name, initiative: tmpl.initiative || 10, currentTurn: false, currentHp: hp, maxHp: hp });
+        ae.combatants.sort(function(a, b) { return b.initiative - a.initiative; });
+        var hc = ae.combatants.some(function(c) { return c.currentTurn; });
+        if (!hc && ae.combatants.length > 0) ae.combatants[0].currentTurn = true;
+        if (ae.status === 'inactive') ae.status = 'active';
+        addLog(tmpl.name + ' (custom) added to encounter with ' + hp + ' HP', 'blue');
+        renderEnemyTracker(); renderInitiativeTracker(); save();
+    };
+
+    // ── ENCOUNTER BUILDER ────────────────────────────────────────────
+
+    window.openEncounterBuilder = function() {
+        if (!_campaign) { addLog('Load a campaign first', 'red'); return; }
+        if (typeof EncounterBuilder === 'undefined') { addLog('EncounterBuilder not loaded', 'red'); return; }
+        _encounterPreview = [];
+        var grid = document.getElementById('templateGrid');
+        if (grid) {
+            grid.innerHTML = '';
+            EncounterBuilder.getTemplates().forEach(function(t) {
+                var card = document.createElement('div');
+                card.className = 'template-card';
+                card.id = 'tcard-' + t.id;
+                card.innerHTML =
+                    '<div class="template-card-icon">' + t.icon + '</div>' +
+                    '<div class="template-card-name">' + esc(t.name) + '</div>' +
+                    '<div class="template-card-desc">' + esc(t.description) + '</div>';
+                card.onclick = (function(tid) { return function() { selectEncounterTemplate(tid); }; })(t.id);
+                grid.appendChild(card);
+            });
+        }
+        var previewPanel = document.getElementById('encounterPreviewPanel');
+        var confirmBtn = document.getElementById('confirmEncounterBtn');
+        if (previewPanel) previewPanel.style.display = 'none';
+        if (confirmBtn) confirmBtn.style.display = 'none';
+        document.getElementById('encounterBuilderModal').classList.remove('hidden');
+    };
+
+    window.closeEncounterBuilder = function() {
+        document.getElementById('encounterBuilderModal').classList.add('hidden');
+        _encounterPreview = [];
+    };
+
+    window.selectEncounterTemplate = function(templateId) {
+        if (typeof EncounterBuilder === 'undefined') return;
+        document.querySelectorAll('.template-card').forEach(function(c) { c.classList.remove('selected'); });
+        var card = document.getElementById('tcard-' + templateId);
+        if (card) card.classList.add('selected');
+        var allEnemies = (typeof ENEMIES !== 'undefined' ? ENEMIES.slice() : []).concat(
+            _campaignId ? EncounterBuilder.getCustomEnemies(_campaignId) : []
+        );
+        _encounterPreview = EncounterBuilder.buildEncounterFromTemplate(templateId, allEnemies);
+        var previewList = document.getElementById('encounterPreviewList');
+        var previewPanel = document.getElementById('encounterPreviewPanel');
+        if (!previewList || !previewPanel) return;
+        previewList.innerHTML = '';
+        _encounterPreview.forEach(function(e) {
+            var row = document.createElement('div');
+            row.className = 'encounter-preview-enemy';
+            row.innerHTML =
+                '<span class="difficulty-badge diff-' + esc(e.difficulty) + '">' + esc(e.difficulty) + '</span>' +
+                '<span style="flex:1;">' + esc(e.name) + '</span>' +
+                '<span style="color:rgba(232,232,232,.5);font-size:10px;">HP:' + (e.maxHp || e.hp) + ' AC:' + e.ac + '</span>';
+            previewList.appendChild(row);
+        });
+        var partySize = (_campaign && _campaign.players) ? _campaign.players.length : 4;
+        var diff = EncounterBuilder.calculateEncounterDifficulty(_encounterPreview, partySize, 1);
+        var badge = document.getElementById('encounterDifficultyBadge');
+        if (badge) { badge.innerHTML = '<div class="difficulty-rating diff-' + esc(diff.rating) + '">' + esc(diff.label) + '</div>'; }
+        var xpInfo = document.getElementById('encounterXpInfo');
+        if (xpInfo) { xpInfo.textContent = 'XP Reward: ' + diff.xp.total + ' total (' + diff.xp.perPlayer + ' per player)'; }
+        previewPanel.style.display = 'block';
+        document.getElementById('confirmEncounterBtn').style.display = 'inline-block';
+    };
+
+    window.confirmEncounterBuild = function() {
+        if (!_campaign || _encounterPreview.length === 0) { addLog('Select a template first', 'red'); return; }
+        var ae = _campaign.activeEncounter;
+        if (ae.combatants.length === 0) {
+            (_campaign.players || []).forEach(function(p, i) {
+                ae.combatants.push({ id: 'comb_p' + i, type: 'player', characterId: p.characterId, name: p.characterName, initiative: 10, currentTurn: false });
+            });
+        }
+        var added = 0;
+        _encounterPreview.forEach(function(tmpl) {
+            var hp = tmpl.maxHp || tmpl.hp;
+            var iid = uid();
+            ae.enemies.push({ id: iid, templateId: tmpl.id, name: tmpl.name, currentHp: hp, maxHp: hp, ac: tmpl.ac, initiative: tmpl.initiative || 10, abilities: tmpl.abilities || [], loot: tmpl.loot || [] });
+            ae.combatants.push({ id: 'comb_' + iid, type: 'enemy', enemyInstanceId: iid, name: tmpl.name, initiative: tmpl.initiative || 10, currentTurn: false, currentHp: hp, maxHp: hp });
+            added++;
+        });
+        ae.combatants.sort(function(a, b) { return b.initiative - a.initiative; });
+        var hc = ae.combatants.some(function(c) { return c.currentTurn; });
+        if (!hc && ae.combatants.length > 0) ae.combatants[0].currentTurn = true;
+        if (ae.status === 'inactive') ae.status = 'active';
+        var partySize = (_campaign.players || []).length || 4;
+        var diff = EncounterBuilder.calculateEncounterDifficulty(_encounterPreview, partySize, 1);
+        addLog('Encounter built: ' + added + ' enemies | Difficulty: ' + diff.rating.toUpperCase() + ' | XP: ' + diff.xp.total, 'blue');
+        closeEncounterBuilder();
+        renderEnemyTracker();
+        renderInitiativeTracker();
+        save();
+    };
+
+    // ── LOOT DISTRIBUTION ────────────────────────────────────────────
+
+    window.showLootDistribution = function() {
+        if (!_campaign) { addLog('Load a campaign first', 'red'); return; }
+        if (typeof EncounterBuilder === 'undefined') { addLog('EncounterBuilder not loaded', 'red'); return; }
+        var defeated = (_campaign.activeEncounter.enemies || []).filter(function(e) { return e.currentHp <= 0; });
+        _pendingLoot = EncounterBuilder.collectEncounterLoot(defeated);
+        var lootList = document.getElementById('lootList');
+        var emptyState = document.getElementById('lootEmptyState');
+        var awardBtn = document.getElementById('awardLootBtn');
+        if (lootList) lootList.innerHTML = '';
+        if (_pendingLoot.length === 0) {
+            if (emptyState) emptyState.style.display = 'block';
+            if (lootList) lootList.style.display = 'none';
+            if (awardBtn) awardBtn.style.display = 'none';
+        } else {
+            if (emptyState) emptyState.style.display = 'none';
+            if (lootList) lootList.style.display = 'block';
+            if (awardBtn) awardBtn.style.display = 'inline-block';
+            _pendingLoot.forEach(function(drop) {
+                var row = document.createElement('div');
+                row.className = 'loot-item';
+                row.innerHTML =
+                    '<div><div class="loot-item-id">' + esc(drop.itemId) + '</div>' +
+                    '<div class="loot-item-source">From: ' + esc(drop.enemyName) + '</div></div>' +
+                    '<span class="difficulty-badge diff-uncommon">ITEM</span>';
+                lootList.appendChild(row);
+            });
+        }
+        document.getElementById('lootDistributionModal').classList.remove('hidden');
+    };
+
+    window.closeLootDistribution = function() {
+        document.getElementById('lootDistributionModal').classList.add('hidden');
+        _pendingLoot = [];
+    };
+
+    window.awardLootToParty = function() {
+        if (!_campaign || _pendingLoot.length === 0) return;
+        if (!Array.isArray(_campaign.inventory)) _campaign.inventory = [];
+        var itemNames = [];
+        _pendingLoot.forEach(function(drop) {
+            var name = drop.itemId.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+            _campaign.inventory.push({
+                id: drop.itemId + '_drop_' + Date.now(),
+                name: name,
+                quantity: 1,
+                weight: 0.5,
+                value: 10,
+                type: 'misc',
+                description: 'Looted from ' + drop.enemyName + '.'
+            });
+            itemNames.push(name);
+        });
+        addLog('Loot awarded to party: ' + itemNames.join(', '), 'green');
+        save();
+        closeLootDistribution();
     };
 
 })();
