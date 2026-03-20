@@ -312,6 +312,9 @@
                     <span class="btn-icon">&#x1F4BE;</span> localStorage
                     <span class="sidebar-count" id="count-ls">0</span>
                 </button>
+                <button class="sidebar-btn" onclick="showSection('backup')" id="btn-backup">
+                    <span class="btn-icon">&#x1F4BE;</span> Backup &amp; Export
+                </button>
                 <button class="sidebar-btn" onclick="showSection('settings')" id="btn-settings">
                     <span class="btn-icon">&#x2699;&#xFE0F;</span> Settings
                 </button>
@@ -489,6 +492,85 @@
                 <div class="ls-grid" id="ls-grid"></div>
             </div>
 
+            <!-- BACKUP & EXPORT -->
+            <div class="section-panel" id="section-backup">
+                <div class="section-header">
+                    <div class="section-title-row">
+                        <span class="section-icon">&#x1F4BE;</span>
+                        <span class="section-title">Backup &amp; Export</span>
+                    </div>
+                </div>
+
+                <!-- Campaign Selector -->
+                <div class="char-section">
+                    <div class="char-section-title">&#x1F4CB; Select Campaign</div>
+                    <div class="info-field">
+                        <div class="info-label">Campaign</div>
+                        <select class="info-input" id="backupCampaignSelect" onchange="onBackupCampaignChange()" style="cursor:pointer;">
+                            <option value="">Select a campaign...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Backup Controls -->
+                <div class="char-section">
+                    <div class="char-section-title">&#x1F4F8; Manual Backups</div>
+                    <div class="btn-group">
+                        <button class="action-btn" onclick="createManualBackup()">&#x2795; Create Backup</button>
+                        <button class="action-btn" onclick="showBackupList()">&#x1F4C4; View Backups</button>
+                    </div>
+                    <div class="status-message" id="backupMsg"></div>
+                    <div id="backupListContainer" style="margin-top:14px;"></div>
+                </div>
+
+                <!-- Export Controls -->
+                <div class="char-section">
+                    <div class="char-section-title">&#x2B07;&#xFE0F; Export</div>
+                    <div class="btn-group">
+                        <button class="action-btn" onclick="exportCampaignAsJson()">&#x1F4BE; Export JSON</button>
+                        <button class="action-btn" onclick="exportCampaignAsCSV()">&#x1F4CA; Export CSV Stats</button>
+                    </div>
+                    <div class="status-message" id="exportMsg"></div>
+                </div>
+
+                <!-- Import Controls -->
+                <div class="char-section">
+                    <div class="char-section-title">&#x2B06;&#xFE0F; Import</div>
+                    <div class="info-field">
+                        <div class="info-label">Campaign JSON File</div>
+                        <input type="file" id="backupImportFileInput" accept=".json" style="display:none;" onchange="importCampaignFromFile(event)">
+                        <button class="upload-btn" onclick="document.getElementById('backupImportFileInput').click()">&#x1F4C2; Choose JSON File to Import</button>
+                    </div>
+                    <div class="status-message" id="importMsg"></div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="char-section">
+                    <div class="char-section-title">&#x1F4CA; Campaign Statistics</div>
+                    <div class="btn-group">
+                        <button class="action-btn" onclick="showCampaignStats()">&#x1F50D; Show Statistics</button>
+                    </div>
+                    <div id="statsDisplay" style="margin-top:14px;display:none;">
+                        <pre id="statsContent" style="font-family:'Courier New',monospace;font-size:12px;line-height:1.7;white-space:pre-wrap;border:1px solid rgba(74,222,128,0.3);padding:14px;background:rgba(0,0,0,0.4);"></pre>
+                    </div>
+                </div>
+
+                <!-- Character Sheet Export -->
+                <div class="char-section">
+                    <div class="char-section-title">&#x1F464; Character Sheet Export</div>
+                    <div class="info-field">
+                        <div class="info-label">Select Player</div>
+                        <select class="info-input" id="charSheetPlayerSelect" style="cursor:pointer;">
+                            <option value="">Select a player...</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button class="action-btn" onclick="exportCharacterSheet()">&#x2B07;&#xFE0F; Download Character Sheet</button>
+                    </div>
+                    <div class="status-message" id="charSheetMsg"></div>
+                </div>
+            </div>
+
             <!-- SETTINGS -->
             <div class="section-panel" id="section-settings">
                 <div class="section-header">
@@ -523,7 +605,7 @@
     // ═══════════════════════════════════════════
     // SIDEBAR NAVIGATION
     // ═══════════════════════════════════════════
-    var SECTIONS = ['campaigns','character','enemies','items','npcs','localstorage','settings'];
+    var SECTIONS = ['campaigns','character','enemies','items','npcs','localstorage','backup','settings'];
 
     function showSection(name) {
         SECTIONS.forEach(function(s) {
@@ -1107,6 +1189,166 @@
     }
 
     // ═══════════════════════════════════════════
+    // BACKUP & EXPORT PANEL
+    // ═══════════════════════════════════════════
+
+    /** Active campaign object selected in the Backup panel */
+    var _backupActiveCampaign = null;
+
+    /** Populate the campaign dropdown from the CAMPAIGNS global */
+    function populateBackupCampaignSelect() {
+        var sel = document.getElementById('backupCampaignSelect');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">Select a campaign...</option>';
+        if (typeof CAMPAIGNS !== 'undefined' && CAMPAIGNS.length) {
+            CAMPAIGNS.forEach(function (c) {
+                var opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = c.name + ' (' + c.id + ')';
+                sel.appendChild(opt);
+            });
+        }
+    }
+
+    function onBackupCampaignChange() {
+        var sel = document.getElementById('backupCampaignSelect');
+        if (!sel || !sel.value) { _backupActiveCampaign = null; return; }
+        var id = sel.value;
+        _backupActiveCampaign = null;
+        if (typeof CAMPAIGNS !== 'undefined') {
+            _backupActiveCampaign = CAMPAIGNS.find(function (c) { return c.id === id; }) || null;
+        }
+        if (!_backupActiveCampaign) _backupActiveCampaign = { id: id, name: id };
+
+        // Populate character sheet player dropdown
+        var playerSel = document.getElementById('charSheetPlayerSelect');
+        if (playerSel) {
+            playerSel.innerHTML = '<option value="">Select a player...</option>';
+            var players = (_backupActiveCampaign && _backupActiveCampaign.players) || [];
+            players.forEach(function (p, idx) {
+                var opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = p.characterName || p.username || ('Player ' + (idx + 1));
+                playerSel.appendChild(opt);
+            });
+        }
+
+        // Clear any displayed backups / stats
+        document.getElementById('backupListContainer').innerHTML = '';
+        var statsDiv = document.getElementById('statsDisplay');
+        if (statsDiv) statsDiv.style.display = 'none';
+    }
+
+    function createManualBackup() {
+        if (!_backupActiveCampaign) { setMsg('backupMsg', '\u26a0 Please select a campaign first.', 'error'); return; }
+        if (typeof BackupManager === 'undefined') { setMsg('backupMsg', '\u26a0 BackupManager not loaded.', 'error'); return; }
+        var backup = BackupManager.createBackup(_backupActiveCampaign);
+        if (backup) {
+            setMsg('backupMsg', '\u2713 Backup created: ' + backup.label, 'success');
+            showBackupList();
+        } else {
+            setMsg('backupMsg', '\u2715 Backup failed.', 'error');
+        }
+    }
+
+    function showBackupList() {
+        if (!_backupActiveCampaign) { setMsg('backupMsg', '\u26a0 Please select a campaign first.', 'error'); return; }
+        if (typeof BackupManager === 'undefined') { setMsg('backupMsg', '\u26a0 BackupManager not loaded.', 'error'); return; }
+
+        var list      = BackupManager.getBackupList(_backupActiveCampaign.id);
+        var container = document.getElementById('backupListContainer');
+        if (!container) return;
+
+        if (!list.length) {
+            container.innerHTML = '<div style="opacity:0.5;font-size:11px;padding:8px 0;">No backups found for this campaign.</div>';
+            return;
+        }
+
+        container.innerHTML = list.map(function (b) {
+            var ts   = new Date(b.timestamp).toLocaleString();
+            var size = b.data ? Math.round(JSON.stringify(b.data).length / 1024 * 10) / 10 : 0;
+            var storeKey = storeCopy(b.id);
+            return '<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(74,222,128,0.25);padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;">' +
+                '<div>' +
+                    '<div style="font-size:12px;font-weight:bold;letter-spacing:1px;">' + escapeHtml(b.label) + '</div>' +
+                    '<div style="font-size:10px;opacity:0.5;margin-top:3px;">' + escapeHtml(ts) + ' &mdash; ' + size + ' KB</div>' +
+                '</div>' +
+                '<button class="action-btn" style="font-size:10px;padding:5px 10px;" onclick="restoreBackup(' + storeKey + ')">Restore</button>' +
+            '</div>';
+        }).join('');
+    }
+
+    function restoreBackup(storeKey) {
+        if (!_backupActiveCampaign) return;
+        if (typeof BackupManager === 'undefined') return;
+        var backupId = _copyStore[storeKey];
+        if (!backupId) return;
+        if (!confirm('Restore this backup? Current data will be overwritten.')) return;
+        var ok = BackupManager.restoreFromBackup(backupId, _backupActiveCampaign.id);
+        setMsg('backupMsg', ok ? '\u2713 Backup restored successfully.' : '\u2715 Restore failed.', ok ? 'success' : 'error');
+    }
+
+    function exportCampaignAsJson() {
+        if (!_backupActiveCampaign) { setMsg('exportMsg', '\u26a0 Please select a campaign first.', 'error'); return; }
+        if (typeof BackupManager === 'undefined') { setMsg('exportMsg', '\u26a0 BackupManager not loaded.', 'error'); return; }
+        BackupManager.downloadCampaignJson(_backupActiveCampaign);
+        setMsg('exportMsg', '\u2713 JSON export downloaded.', 'success');
+    }
+
+    function exportCampaignAsCSV() {
+        if (!_backupActiveCampaign) { setMsg('exportMsg', '\u26a0 Please select a campaign first.', 'error'); return; }
+        if (typeof BackupManager === 'undefined') { setMsg('exportMsg', '\u26a0 BackupManager not loaded.', 'error'); return; }
+        BackupManager.exportCampaignCSV(_backupActiveCampaign);
+        setMsg('exportMsg', '\u2713 CSV stats export downloaded.', 'success');
+    }
+
+    function importCampaignFromFile(event) {
+        var file = event && event.target && event.target.files && event.target.files[0];
+        if (!file) return;
+        if (typeof BackupManager === 'undefined') { setMsg('importMsg', '\u26a0 BackupManager not loaded.', 'error'); return; }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            try {
+                var jsonData = JSON.parse(e.target.result);
+                BackupManager.importCampaignJson(jsonData, function (err, newId) {
+                    if (err) {
+                        setMsg('importMsg', '\u2715 Import failed: ' + err.message, 'error');
+                    } else {
+                        setMsg('importMsg', '\u2713 Campaign imported with ID: ' + newId, 'success');
+                    }
+                });
+            } catch (parseErr) {
+                setMsg('importMsg', '\u2715 Invalid JSON file.', 'error');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
+    }
+
+    function showCampaignStats() {
+        if (!_backupActiveCampaign) { setMsg('backupMsg', '\u26a0 Please select a campaign first.', 'error'); return; }
+        if (typeof BackupManager === 'undefined') { setMsg('backupMsg', '\u26a0 BackupManager not loaded.', 'error'); return; }
+        var summary    = BackupManager.getStatsSummary(_backupActiveCampaign);
+        var statsDiv   = document.getElementById('statsDisplay');
+        var statsEl    = document.getElementById('statsContent');
+        if (statsEl) statsEl.textContent = summary;
+        if (statsDiv) statsDiv.style.display = 'block';
+    }
+
+    function exportCharacterSheet() {
+        if (!_backupActiveCampaign) { setMsg('charSheetMsg', '\u26a0 Please select a campaign first.', 'error'); return; }
+        if (typeof BackupManager === 'undefined') { setMsg('charSheetMsg', '\u26a0 BackupManager not loaded.', 'error'); return; }
+        var sel = document.getElementById('charSheetPlayerSelect');
+        if (!sel || sel.value === '') { setMsg('charSheetMsg', '\u26a0 Please select a player.', 'error'); return; }
+        var idx     = parseInt(sel.value, 10);
+        var players = (_backupActiveCampaign && _backupActiveCampaign.players) || [];
+        var player  = players[idx];
+        if (!player) { setMsg('charSheetMsg', '\u26a0 Player not found.', 'error'); return; }
+        BackupManager.downloadCharacterSheetPdf(player);
+        setMsg('charSheetMsg', '\u2713 Character sheet downloaded.', 'success');
+    }
+
+    // ═══════════════════════════════════════════
     // INIT
     // ═══════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', function() {
@@ -1156,6 +1398,9 @@
 
         if (typeof NPCS !== 'undefined') renderNPCTemplates(NPCS);
         else document.getElementById('npcs-grid').innerHTML = '<div class="empty-state">[ npcs.js not loaded ]</div>';
+
+        // Populate backup campaign dropdown
+        populateBackupCampaignSelect();
     });
 </script>
 
@@ -1166,6 +1411,7 @@
 <script src="../assets/data/npcs.js"></script>
 
 <!-- Navigation & Settings -->
+<script src="../assets/helpers/backupManager.js"></script>
 <script src="../assets/helpers/settingsManager.js"></script>
 <script src="../assets/helpers/navigation.js"></script>
 </body>
