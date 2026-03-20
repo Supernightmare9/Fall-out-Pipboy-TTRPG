@@ -1150,6 +1150,22 @@
         StorageManager.disableAutoSave();
     });
 
+    // Sync settings when another tab updates localStorage
+    window.addEventListener('storage', function(e) {
+        if (e.key && e.key.startsWith('vaultPrefs_')) {
+            if (typeof SettingsManager !== 'undefined' && sessionStorage.getItem('username')) {
+                SettingsManager.applySettingsToPage(SettingsManager.getAllSettings());
+            }
+            // Re-apply character color if a campaign is active
+            if (activeCampaign && typeof SettingsManager !== 'undefined') {
+                var updatedColor = SettingsManager.getCharacterColor(activeCampaign.id);
+                if (updatedColor) {
+                    applyCharacterColor(updatedColor);
+                }
+            }
+        }
+    });
+
     // ── CAMPAIGN SELECTOR ────────────────────────────────────────
     function getPlayerCampaigns() {
         var list = [];
@@ -1286,6 +1302,19 @@
     }
 
     // ── CHARACTER INFO (LEFT) ────────────────────────────────────
+    function applyCharacterColor(color) {
+        var dot      = document.getElementById('charColorDot');
+        var nameDisp = document.getElementById('charNameDisplay');
+        if (dot) {
+            dot.style.background  = color;
+            dot.style.boxShadow   = '0 0 6px ' + color;
+        }
+        if (nameDisp) {
+            nameDisp.style.color      = color;
+            nameDisp.style.textShadow = '0 0 8px ' + color;
+        }
+    }
+
     function renderCharacterInfo(campaign) {
         var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
         if (!myEntry) return;
@@ -1295,14 +1324,13 @@
         document.getElementById('charUsername').textContent    = '[ ' + sessionUsername + ' ]';
 
         var color = '#4ade80';
-        if (currentAccount && currentAccount.characters) {
+        if (typeof SettingsManager !== 'undefined') {
+            color = SettingsManager.getCharacterColor(campaign.id) || color;
+        } else if (currentAccount && currentAccount.characters) {
             var ch = currentAccount.characters.find(function(c) { return c.campaignId === campaign.id; });
             if (ch && ch.displayColor) color = ch.displayColor;
         }
-        document.getElementById('charColorDot').style.background = color;
-        document.getElementById('charColorDot').style.boxShadow  = '0 0 6px ' + color;
-        document.getElementById('charNameDisplay').style.color   = color;
-        document.getElementById('charNameDisplay').style.textShadow = '0 0 8px ' + color;
+        applyCharacterColor(color);
 
         // HP
         document.getElementById('hpCurrent').textContent = myEntry.currentHp;
