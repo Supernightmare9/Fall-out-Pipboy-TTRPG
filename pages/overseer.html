@@ -347,7 +347,7 @@
         if(!ae.round)ae.round=1;
         if(!ae.status)ae.status='inactive';
         if(ae.startTime===undefined)ae.startTime=null;
-        var saved=lsGet('campaign_'+id);
+        var saved;try{saved=JSON.parse(localStorage.getItem('vault215_campaign_'+id));}catch(e){saved=null;}
         if(saved&&saved.activeEncounter)_campaign.activeEncounter=saved.activeEncounter;
         if(saved&&saved._combatLog)_combatLog=saved._combatLog;
         mergePlayerHp();
@@ -383,7 +383,14 @@
         }
     }
 
-    function save(){if(!_campaign)return;lsSet('campaign_'+_campaignId,{activeEncounter:_campaign.activeEncounter,_combatLog:_combatLog});}
+    function save(){
+        if(!_campaign)return;
+        var sharedKey='vault215_campaign_'+_campaignId;
+        var existing;try{existing=JSON.parse(localStorage.getItem(sharedKey));}catch(e){existing={};}
+        var merged=Object.assign({},existing||{},{activeEncounter:_campaign.activeEncounter,_combatLog:_combatLog,lastUpdated:new Date().toISOString()});
+        try{localStorage.setItem(sharedKey,JSON.stringify(merged));}catch(e){}
+        try{window.dispatchEvent(new CustomEvent('campaignCombatUpdated',{detail:{campaignId:_campaignId,encounter:_campaign.activeEncounter}}));}catch(e){}
+    }
 
     function renderPlayerStatus(){
         var el=document.getElementById('playerStatusBody');if(!el)return;

@@ -668,6 +668,60 @@ var StorageManager = {
             // May already be plain JSON
             try { return JSON.parse(compressed); } catch (e2) { return null; }
         }
+    },
+
+    // ═════════════════════════════════════════════════════════
+    // REAL-TIME COMBAT SYNC HELPERS
+    // ═════════════════════════════════════════════════════════
+
+    /**
+     * Return the shared localStorage key used by both overseer and character pages.
+     * @param {string} campaignId
+     * @returns {string}
+     */
+    getCampaignKey: function(campaignId) {
+        return 'vault215_campaign_' + campaignId;
+    },
+
+    /**
+     * Merge an updated activeEncounter into the shared campaign key and dispatch
+     * a 'campaignCombatUpdated' CustomEvent so same-tab listeners can react.
+     * @param {string} campaignId
+     * @param {Object} encounterData  - the updated activeEncounter object
+     */
+    updateCombatEncounter: function(campaignId, encounterData) {
+        if (!campaignId || !encounterData) return false;
+        var key = this.getCampaignKey(campaignId);
+        var existing = this._get(key) || {};
+        existing.activeEncounter = encounterData;
+        existing.lastUpdated = new Date().toISOString();
+        var ok = this._set(key, existing);
+        if (ok) {
+            try {
+                window.dispatchEvent(new CustomEvent('campaignCombatUpdated', {
+                    detail: { campaignId: campaignId, encounter: encounterData }
+                }));
+            } catch (e) { /* non-fatal */ }
+        }
+        return ok;
+    },
+
+    /**
+     * Register a callback that fires whenever the given campaign's data changes
+     * in another browser tab/window (via the native 'storage' event).
+     * @param {string}   campaignId
+     * @param {Function} callback  - called with the updated campaign data object
+     */
+    onCampaignUpdate: function(campaignId, callback) {
+        if (!campaignId || typeof callback !== 'function') return;
+        var key = this.getCampaignKey(campaignId);
+        window.addEventListener('storage', function(e) {
+            if (e.key === key && e.newValue) {
+                try {
+                    callback(JSON.parse(e.newValue));
+                } catch (ex) { /* ignore malformed data */ }
+            }
+        });
     }
 
 };

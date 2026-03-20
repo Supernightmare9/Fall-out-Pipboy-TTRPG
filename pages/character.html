@@ -1503,8 +1503,8 @@
         var currentTurn = null;
         var currentIdx  = null;
         if (combatants.length > 0) {
-            // Find the combatant with isCurrent flag, fallback to first
-            currentIdx  = combatants.findIndex(function(c) { return c.isCurrent; });
+            // Find the combatant with currentTurn flag, fallback to first
+            currentIdx  = combatants.findIndex(function(c) { return c.currentTurn; });
             if (currentIdx === -1) currentIdx = 0;
             currentTurn = combatants[currentIdx];
         }
@@ -1762,6 +1762,30 @@
         sessionStorage.clear();
         window.location.replace('index.html');
     }
+
+    // ── CROSS-TAB COMBAT SYNC (overseer in separate tab) ─────────
+    window.addEventListener('storage', function(e) {
+        if (!e.key || e.key.indexOf('vault215_campaign_') !== 0 || !e.newValue) return;
+        var campaignId = e.key.replace('vault215_campaign_', '');
+        if (!activeCampaign || campaignId !== activeCampaign.id) return;
+        try {
+            var data = JSON.parse(e.newValue);
+            if (data.activeEncounter) {
+                activeCampaign.activeEncounter = data.activeEncounter;
+                renderCombatStatus(activeCampaign);
+                renderPartyStatus(activeCampaign);
+            }
+        } catch (ex) { /* ignore malformed */ }
+    });
+
+    // ── SAME-TAB COMBAT SYNC (overseer on same page context) ─────
+    window.addEventListener('campaignCombatUpdated', function(e) {
+        if (!e.detail || !activeCampaign) return;
+        if (e.detail.campaignId !== activeCampaign.id) return;
+        activeCampaign.activeEncounter = e.detail.encounter;
+        renderCombatStatus(activeCampaign);
+        renderPartyStatus(activeCampaign);
+    });
     </script>
 </body>
 </html>
