@@ -1779,6 +1779,10 @@
                 renderCombatStatus(activeCampaign);
                 renderPartyStatus(activeCampaign);
             }
+            if (Array.isArray(data.messages)) {
+                activeCampaign.messages = data.messages;
+                renderMessages(activeCampaign);
+            }
         } catch (ex) { /* ignore malformed */ }
     });
 

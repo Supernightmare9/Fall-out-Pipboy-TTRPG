@@ -572,6 +572,67 @@ var StorageManager = {
     },
 
     // ═════════════════════════════════════════════════════════
+    // MESSAGING & COMBAT LOG
+    // ═════════════════════════════════════════════════════════
+
+    /**
+     * Append a message to the campaign's message list in localStorage
+     * and dispatch a 'messageAdded' window event so same-tab listeners
+     * (character page) can react immediately.
+     * @param {string} campaignId
+     * @param {string} text       Message body
+     * @param {string} type       'normal' | 'important' | 'alert'
+     * @param {string} from       Sender label, e.g. 'overseer' or a username
+     * @returns {Object|null}     The new message object, or null on failure
+     */
+    addMessage: function(campaignId, text, type, from) {
+        if (!campaignId || !text) return null;
+        var key  = this._keys.campaign(campaignId);
+        var data = this._get(key) || {};
+        if (!Array.isArray(data.messages)) data.messages = [];
+        var msg = {
+            id:        'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9),
+            text:      text,
+            type:      type || 'normal',
+            from:      from || 'overseer',
+            timestamp: new Date().toISOString()
+        };
+        data.messages.push(msg);
+        data.timestamp = Date.now();
+        this._set(key, data);
+        this._log('addMessage', 'campaign=' + campaignId + ' type=' + msg.type);
+        try {
+            window.dispatchEvent(new CustomEvent('messageAdded', {
+                detail: { campaignId: campaignId, message: msg }
+            }));
+        } catch (e) { /* ignore */ }
+        return msg;
+    },
+
+    /**
+     * Retrieve all messages for a campaign from localStorage.
+     * @param {string} campaignId
+     * @returns {Array}
+     */
+    getMessages: function(campaignId) {
+        if (!campaignId) return [];
+        var data = this._get(this._keys.campaign(campaignId));
+        return (data && Array.isArray(data.messages)) ? data.messages : [];
+    },
+
+    /**
+     * Retrieve the combat log for a campaign from localStorage.
+     * The log is stored under the `_combatLog` key by the overseer page.
+     * @param {string} campaignId
+     * @returns {Array}
+     */
+    getCombatLog: function(campaignId) {
+        if (!campaignId) return [];
+        var data = this._get(this._keys.campaign(campaignId));
+        return (data && Array.isArray(data._combatLog)) ? data._combatLog : [];
+    },
+
+    // ═════════════════════════════════════════════════════════
     // CLEANUP & MAINTENANCE
     // ═════════════════════════════════════════════════════════
 
