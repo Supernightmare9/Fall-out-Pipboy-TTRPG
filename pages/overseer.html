@@ -223,6 +223,17 @@
         .loot-item:last-child{border-bottom:none;}
         .loot-item-id{font-size:11px;color:var(--overseer-gold-bright);font-weight:bold;}
         .loot-item-source{font-size:9px;color:rgba(232,232,232,.5);}
+
+        /* ── CONDITION MANAGER ────────────────────────────────────── */
+        .condition-mgr-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px;}
+        .condition-mgr-field{display:flex;flex-direction:column;gap:4px;}
+        .condition-mgr-label{font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;}
+        .condition-active-list{max-height:160px;overflow-y:auto;border:1px solid var(--overseer-border);margin-top:10px;}
+        .condition-active-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-bottom:1px solid rgba(42,82,152,.3);font-size:11px;gap:8px;}
+        .condition-active-row:last-child{border-bottom:none;}
+        .condition-active-name{color:var(--overseer-red-bright);font-weight:bold;font-size:10px;text-transform:uppercase;}
+        .condition-active-target{color:var(--overseer-gold);font-size:10px;}
+        .condition-active-dur{color:rgba(232,232,232,.5);font-size:10px;}
     </style>
 
     <script src="../assets/data/accounts.js"></script>
@@ -233,6 +244,7 @@
     <script src="../assets/helpers/encounterBuilder.js"></script>
     <script src="../assets/logic/xp.js"></script>
     <script src="../assets/helpers/progressionManager.js"></script>
+    <script src="../assets/helpers/combatSystem.js"></script>
 </head>
 <body>
 
@@ -415,6 +427,48 @@
                 <button class="cmd-btn success" onclick="awardXpFromOverseer()" style="align-self:flex-end;">[AWARD XP]</button>
             </div>
             <div id="xpAwardLog" style="margin-top:10px;max-height:100px;overflow-y:auto;font-size:10px;font-family:'Share Tech Mono',monospace;"></div>
+        </div>
+    </div>
+
+    <!-- CONDITION MANAGER PANEL -->
+    <div class="panel" style="margin-top:12px;">
+        <div class="panel-header">
+            <span class="panel-title">&#x2697; Condition Manager</span>
+            <button class="cmd-btn" style="font-size:10px;padding:5px 10px;" onclick="toggleConditionManager()">[MANAGE CONDITIONS]</button>
+        </div>
+        <div id="conditionManagerBody" style="display:none;padding:14px;">
+            <div class="condition-mgr-row">
+                <div class="condition-mgr-field">
+                    <span class="condition-mgr-label">Condition</span>
+                    <select id="conditionTypeSelect" class="form-select" style="min-width:150px;">
+                        <option value="poisoned">&#x2620; Poisoned</option>
+                        <option value="stunned">&#x26A1; Stunned</option>
+                        <option value="paralyzed">&#x1F512; Paralyzed</option>
+                        <option value="blinded">&#x1F441; Blinded</option>
+                        <option value="restrained">&#x26D3; Restrained</option>
+                        <option value="unconscious">&#x1F4AB; Unconscious</option>
+                        <option value="frightened">&#x1F631; Frightened</option>
+                        <option value="prone">&#x2B07; Prone</option>
+                    </select>
+                </div>
+                <div class="condition-mgr-field">
+                    <span class="condition-mgr-label">Duration (rounds)</span>
+                    <input type="number" id="conditionDuration" class="form-input" value="3" min="1" style="width:80px;">
+                </div>
+                <div class="condition-mgr-field">
+                    <span class="condition-mgr-label">Target</span>
+                    <select id="conditionTarget" class="form-select" style="min-width:180px;">
+                        <option value="">&#x2014; Select target &#x2014;</option>
+                    </select>
+                </div>
+                <button class="cmd-btn danger" onclick="applyConditionToTarget()" style="align-self:flex-end;">[APPLY CONDITION]</button>
+                <button class="cmd-btn" onclick="advanceRound()" style="align-self:flex-end;">[ADVANCE ROUND]</button>
+            </div>
+            <div id="conditionLog" style="font-size:10px;color:rgba(232,232,232,.5);max-height:80px;overflow-y:auto;border:1px solid var(--overseer-border);padding:6px;margin-bottom:10px;display:none;"></div>
+            <div style="font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Active Conditions</div>
+            <div class="condition-active-list" id="activeConditionsList">
+                <div class="empty-state" style="padding:10px;">No active conditions. Apply a condition above.</div>
+            </div>
         </div>
     </div>
 
@@ -687,6 +741,7 @@
         addLog('Campaign loaded: '+_campaign.name,'blue');
         renderCustomEnemyList();
         populateXpTargetDropdown();
+        renderConditionTargets();
     }
 
     function mergePlayerHp(){
@@ -708,6 +763,7 @@
                     p.currentHp=sp.currentHp;
                     if(typeof sp.maxHp==='number')p.maxHp=sp.maxHp;
                     if(sp.displayColor)p.displayColor=sp.displayColor;
+                    p.conditions=sp.conditions||[];
                     return;
                 }
             }
@@ -749,6 +805,11 @@
             var color=p.displayColor||'#4ade80';
             var cur=typeof p.currentHp==='number'?p.currentHp:100;
             var max=typeof p.maxHp==='number'&&p.maxHp>0?p.maxHp:100;
+            var condText='';
+            if(typeof CombatSystem!=='undefined'&&Array.isArray(p.conditions)&&p.conditions.length>0){
+                condText='<div style="font-size:9px;color:#fbbf24;margin-top:4px;letter-spacing:0.5px;">'+
+                    p.conditions.map(function(c){var d=CombatSystem.CONDITIONS[c.type];return d?d.icon+' '+d.name+'('+c.duration+'r)':c.type;}).join(' ')+'</div>';
+            }
             var card=document.createElement('div');card.className='player-card';
             card.innerHTML=
                 '<div class="player-card-header">'+
@@ -757,7 +818,7 @@
                     '<span class="player-hp-text">'+cur+' / '+max+'</span>'+
                 '</div>'+
                 '<div class="hp-bar-container"><div class="hp-bar-fill '+hpClass(cur,max)+'" style="width:'+hpW(cur,max)+'"></div></div>'+
-                '<div class="player-last-updated">'+Math.round((cur/max)*100)+'% HP</div>';
+                '<div class="player-last-updated">'+Math.round((cur/max)*100)+'% HP</div>'+condText;
             el.appendChild(card);
         });
     }
@@ -807,7 +868,7 @@
         var cur=ae.combatants.findIndex(function(c){return c.currentTurn;});
         ae.combatants.forEach(function(c){c.currentTurn=false;});
         var nxt=cur+1;
-        if(nxt>=ae.combatants.length){nxt=0;ae.round=(ae.round||1)+1;addLog('Round '+ae.round+' started','blue');}
+        if(nxt>=ae.combatants.length){nxt=0;ae.round=(ae.round||1)+1;addLog('Round '+ae.round+' started','blue');advanceRound();}
         ae.combatants[nxt].currentTurn=true;
         addLog('Turn: '+ae.combatants[nxt].name+' (Initiative '+ae.combatants[nxt].initiative+')','blue');
         renderInitiativeTracker();save();
@@ -1022,10 +1083,13 @@
         if(!_campaign||campaignId!==_campaignId)return;
         try{
             var data=JSON.parse(e.newValue);
-            // Update player HP from live character-page writes
+            // Update player HP and conditions from live character-page writes
             if(Array.isArray(data.players)&&Array.isArray(_campaign.players)){
                 applyPlayerHpFromSaved(data);
                 renderPlayerStatus();
+                // Refresh active conditions list if panel is visible
+                var body=document.getElementById('conditionManagerBody');
+                if(body&&body.style.display!=='none'){renderActiveConditions();}
             }
             // Also apply combat encounter updates arriving from character tabs
             if(data.activeEncounter){
@@ -1150,6 +1214,273 @@
         if (panel) { panel.style.display = 'none'; }
         toggleQuestManager();
     };
+
+    // ── CONDITION MANAGER ─────────────────────────────────────────────
+
+    window.toggleConditionManager = function () {
+        var body = document.getElementById('conditionManagerBody');
+        if (!body) return;
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            renderConditionTargets();
+            renderActiveConditions();
+        } else {
+            body.style.display = 'none';
+        }
+    };
+
+    function renderConditionTargets() {
+        var sel = document.getElementById('conditionTarget');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">&#x2014; Select target &#x2014;</option>';
+        if (!_campaign) return;
+
+        // Add players
+        (_campaign.players || []).forEach(function (p) {
+            var opt = document.createElement('option');
+            opt.value = 'player:' + p.username;
+            opt.textContent = '\uD83D\uDC64 ' + esc(p.characterName || p.username);
+            sel.appendChild(opt);
+        });
+
+        // Add active enemies
+        var enemies = (_campaign.activeEncounter && _campaign.activeEncounter.enemies) || [];
+        enemies.forEach(function (e) {
+            if (e.currentHp > 0) {
+                var opt = document.createElement('option');
+                opt.value = 'enemy:' + e.id;
+                opt.textContent = '\uD83D\uDC80 ' + esc(e.name);
+                sel.appendChild(opt);
+            }
+        });
+    }
+
+    window.applyConditionToTarget = function () {
+        if (!_campaign || typeof CombatSystem === 'undefined') {
+            addLog('Load a campaign first', 'red'); return;
+        }
+        var condType = (document.getElementById('conditionTypeSelect') || {}).value;
+        var duration = parseInt((document.getElementById('conditionDuration') || {}).value, 10) || 3;
+        var target   = (document.getElementById('conditionTarget') || {}).value;
+        if (!condType || !target) { addLog('Select a condition and target', 'red'); return; }
+
+        var def = CombatSystem.CONDITIONS[condType];
+        if (!def) { addLog('Unknown condition type', 'red'); return; }
+
+        var added = false;
+        var targetName = '';
+
+        if (target.indexOf('player:') === 0) {
+            var username = target.slice(7);
+            var player = _campaign.players.find(function (p) { return p.username === username; });
+            if (!player) { addLog('Player not found', 'red'); return; }
+            added = CombatSystem.addCondition(player, condType, duration, 'overseer');
+            targetName = player.characterName || player.username;
+            // Write player conditions to shared localStorage so character page syncs
+            _savePlayerConditions();
+        } else if (target.indexOf('enemy:') === 0) {
+            var enemyId = target.slice(6);
+            var enemy = (_campaign.activeEncounter.enemies || []).find(function (e) { return e.id === enemyId; });
+            if (!enemy) { addLog('Enemy not found', 'red'); return; }
+            added = CombatSystem.addCondition(enemy, condType, duration, 'overseer');
+            targetName = enemy.name;
+            save();
+        }
+
+        if (added) {
+            addLog(def.icon + ' ' + def.name + ' applied to ' + targetName + ' (' + duration + ' rounds)', 'yellow');
+        } else {
+            addLog(def.name + ' already on ' + targetName + ' (duration updated)', 'blue');
+        }
+
+        renderActiveConditions();
+        renderPlayerStatus();
+        _addConditionLog((added ? 'Applied' : 'Refreshed') + ': ' + def.icon + ' ' + def.name + ' on ' + targetName + ' (' + duration + ' rnd)');
+    };
+
+    window.advanceRound = function () {
+        if (!_campaign || typeof CombatSystem === 'undefined') {
+            addLog('Load a campaign first', 'red'); return;
+        }
+        var messages = [];
+
+        // Advance conditions for all players
+        (_campaign.players || []).forEach(function (p) {
+            if (!Array.isArray(p.conditions) || p.conditions.length === 0) return;
+            var result = CombatSystem.advanceConditionRound(p);
+
+            if (result.poisonDamage > 0) {
+                var before = p.currentHp;
+                p.currentHp = Math.max(0, (p.currentHp || 0) - result.poisonDamage);
+                messages.push((p.characterName || p.username) + ' took ' + result.poisonDamage + ' poison damage (' + before + ' → ' + p.currentHp + ')');
+            }
+            result.expired.forEach(function (t) {
+                var def = CombatSystem.CONDITIONS[t];
+                messages.push((p.characterName || p.username) + ': ' + (def ? def.name : t) + ' expired');
+            });
+        });
+
+        // Advance conditions for all active enemies
+        var enemies = (_campaign.activeEncounter && _campaign.activeEncounter.enemies) || [];
+        enemies.forEach(function (e) {
+            if (!Array.isArray(e.conditions) || e.conditions.length === 0) return;
+            var result = CombatSystem.advanceConditionRound(e);
+
+            if (result.poisonDamage > 0) {
+                var before = e.currentHp;
+                e.currentHp = Math.max(0, (e.currentHp || 0) - result.poisonDamage);
+                var combatant = (_campaign.activeEncounter.combatants || []).find(function (c) { return c.enemyInstanceId === e.id; });
+                if (combatant) combatant.currentHp = e.currentHp;
+                messages.push(e.name + ' took ' + result.poisonDamage + ' poison damage (' + before + ' → ' + e.currentHp + ')');
+                if (e.currentHp === 0) messages.push(e.name + ' has been defeated!');
+            }
+            result.expired.forEach(function (t) {
+                var def = CombatSystem.CONDITIONS[t];
+                messages.push(e.name + ': ' + (def ? def.name : t) + ' expired');
+            });
+        });
+
+        // Persist changes
+        _savePlayerConditions();
+        save();
+
+        if (messages.length === 0) {
+            addLog('Round advanced — no condition effects this round', 'blue');
+        } else {
+            messages.forEach(function (m) { addLog(m, 'yellow'); });
+        }
+
+        renderActiveConditions();
+        renderPlayerStatus();
+        renderEnemyTracker();
+        renderInitiativeTracker();
+        _addConditionLog('Round advanced: ' + (messages.length || 0) + ' effect(s) applied');
+    };
+
+    // Save only the conditions fields to shared localStorage (without overwriting HP set by character page)
+    function _savePlayerConditions() {
+        if (!_campaign || !_campaignId) return;
+        var sharedKey = 'vault215_campaign_' + _campaignId;
+        var existing;
+        try { existing = JSON.parse(localStorage.getItem(sharedKey)); } catch (e) { existing = {}; }
+        if (!existing) existing = {};
+
+        var existingPlayers = Array.isArray(existing.players) ? existing.players : [];
+        var updatedPlayers = (_campaign.players || []).map(function (p) {
+            var ep = existingPlayers.find(function (x) { return x.username === p.username; });
+            if (ep) {
+                ep.conditions = p.conditions || [];
+                ep.currentHp  = p.currentHp;
+                return ep;
+            }
+            return {
+                username:      p.username,
+                characterId:   p.characterId,
+                characterName: p.characterName,
+                displayColor:  p.displayColor,
+                currentHp:     p.currentHp,
+                maxHp:         p.maxHp,
+                inInitiative:  p.inInitiative || false,
+                initiative:    p.initiative   || 0,
+                status:        p.status       || 'alive',
+                equipment:     p.equipment    || {},
+                conditions:    p.conditions   || []
+            };
+        });
+        existing.players = updatedPlayers;
+        try { localStorage.setItem(sharedKey, JSON.stringify(existing)); } catch (e) {}
+    }
+
+    function renderActiveConditions() {
+        var el = document.getElementById('activeConditionsList');
+        if (!el || typeof CombatSystem === 'undefined') return;
+        var rows = [];
+
+        // Collect player conditions
+        (_campaign && _campaign.players || []).forEach(function (p) {
+            (p.conditions || []).forEach(function (c) {
+                var def = CombatSystem.CONDITIONS[c.type];
+                rows.push({
+                    icon:     def ? def.icon : '?',
+                    name:     def ? def.name : c.type,
+                    target:   p.characterName || p.username,
+                    duration: c.duration,
+                    key:      'player:' + p.username + ':' + c.type
+                });
+            });
+        });
+
+        // Collect enemy conditions
+        var enemies = (_campaign && _campaign.activeEncounter && _campaign.activeEncounter.enemies) || [];
+        enemies.forEach(function (e) {
+            (e.conditions || []).forEach(function (c) {
+                var def = CombatSystem.CONDITIONS[c.type];
+                rows.push({
+                    icon:     def ? def.icon : '?',
+                    name:     def ? def.name : c.type,
+                    target:   e.name,
+                    duration: c.duration,
+                    key:      'enemy:' + e.id + ':' + c.type
+                });
+            });
+        });
+
+        if (rows.length === 0) {
+            el.innerHTML = '<div class="empty-state" style="padding:10px;">No active conditions.</div>';
+            return;
+        }
+
+        el.innerHTML = '';
+        rows.forEach(function (r) {
+            var row = document.createElement('div');
+            row.className = 'condition-active-row';
+            row.innerHTML =
+                '<span style="font-size:14px;">' + r.icon + '</span>' +
+                '<span class="condition-active-name">' + esc(r.name) + '</span>' +
+                '<span class="condition-active-target">' + esc(r.target) + '</span>' +
+                '<span class="condition-active-dur">' + r.duration + ' rnd</span>' +
+                '<button class="dmg-btn remove" onclick="removeConditionFromTarget(\'' + esc(r.key) + '\')">[X]</button>';
+            el.appendChild(row);
+        });
+    }
+
+    window.removeConditionFromTarget = function (key) {
+        if (!_campaign || typeof CombatSystem === 'undefined') return;
+        var parts = key.split(':');
+        if (parts.length < 3) return;
+        var targetType = parts[0];
+        var targetId   = parts[1];
+        var condType   = parts[2];
+
+        if (targetType === 'player') {
+            var player = _campaign.players.find(function (p) { return p.username === targetId; });
+            if (player) {
+                CombatSystem.removeCondition(player, condType);
+                _savePlayerConditions();
+                addLog('Removed ' + condType + ' from ' + (player.characterName || player.username), 'blue');
+            }
+        } else if (targetType === 'enemy') {
+            var enemy = (_campaign.activeEncounter.enemies || []).find(function (e) { return e.id === targetId; });
+            if (enemy) {
+                CombatSystem.removeCondition(enemy, condType);
+                save();
+                addLog('Removed ' + condType + ' from ' + enemy.name, 'blue');
+            }
+        }
+        renderActiveConditions();
+        renderPlayerStatus();
+    };
+
+    function _addConditionLog(text) {
+        var el = document.getElementById('conditionLog');
+        if (!el) return;
+        el.style.display = 'block';
+        var entry = document.createElement('div');
+        entry.style.cssText = 'padding:2px 0;border-bottom:1px solid rgba(42,82,152,.2);';
+        entry.textContent = text;
+        el.insertBefore(entry, el.firstChild);
+        while (el.children.length > 10) { el.removeChild(el.lastChild); }
+    }
 
     // ── ENEMY MANAGEMENT ────────────────────────────────────────────
 
