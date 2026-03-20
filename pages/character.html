@@ -890,6 +890,60 @@
         .skill-proficient { background: rgba(74,222,128,0.12); color: var(--vault-green); border: 1px solid rgba(74,222,128,0.3); }
         .skill-standard   { background: rgba(74,222,128,0.04); color: rgba(74,222,128,0.4); border: 1px solid rgba(74,222,128,0.1); }
 
+        /* ===== DICE ROLLER ===== */
+        .dice-quick-row { display: flex; gap: 4px; flex-wrap: wrap; }
+        .dice-btn {
+            background: rgba(74,222,128,0.08);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: var(--vault-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            padding: 5px 8px;
+            cursor: pointer;
+            border-radius: 2px;
+            flex: 1;
+            min-width: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: background 0.15s;
+        }
+        .dice-btn:hover { background: rgba(74,222,128,0.2); }
+        .dice-btn-d20 { background: rgba(74,222,128,0.15); color: #a7f3c0; font-weight: bold; }
+        .dice-skill-select {
+            flex: 1;
+            background: rgba(74,222,128,0.05);
+            border: 1px solid rgba(74,222,128,0.2);
+            color: var(--vault-green);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            padding: 4px 6px;
+        }
+        .dice-skill-row { display: flex; gap: 4px; align-items: center; }
+        .roll-result-entry {
+            padding: 4px 6px;
+            border-left: 2px solid rgba(74,222,128,0.4);
+            margin-bottom: 3px;
+            color: rgba(74,222,128,0.85);
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .roll-result-entry.roll-hit  { border-left-color: #4ade80; color: #4ade80; }
+        .roll-result-entry.roll-miss { border-left-color: #f87171; color: #f87171; }
+        .roll-result-entry.roll-crit { border-left-color: #fbbf24; color: #fbbf24; }
+
+        /* ===== QUEST OBJECTIVES (interactive) ===== */
+        .obj-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0 4px 0 0;
+            color: inherit;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: 1;
+        }
+        .obj-toggle-btn:hover { opacity: 0.7; }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             body { padding: 10px; }
@@ -987,6 +1041,30 @@
                 <ul class="skills-list" id="skillsList">
                     <li class="empty-state" style="list-style:none;">No skills loaded</li>
                 </ul>
+
+                <!-- DICE ROLLER -->
+                <div class="panel-title" style="margin-top:18px;">🎲 Dice Roller</div>
+                <div id="diceRollerPanel">
+                    <div class="dice-quick-row">
+                        <button class="dice-btn" onclick="quickRoll(4)">d4</button>
+                        <button class="dice-btn" onclick="quickRoll(6)">d6</button>
+                        <button class="dice-btn" onclick="quickRoll(8)">d8</button>
+                        <button class="dice-btn" onclick="quickRoll(10)">d10</button>
+                        <button class="dice-btn" onclick="quickRoll(12)">d12</button>
+                        <button class="dice-btn dice-btn-d20" onclick="quickRoll(20)">d20</button>
+                    </div>
+                    <div class="dice-skill-row" style="margin-top:8px;">
+                        <select id="skillSelector" class="dice-skill-select">
+                            <option value="">-- Select Skill --</option>
+                        </select>
+                        <button class="vault-btn" style="padding:4px 10px;font-size:10px;" onclick="rollSkillCheck()">Roll Check</button>
+                    </div>
+                    <div class="dice-generic-row" style="margin-top:6px;display:flex;gap:4px;">
+                        <input type="text" id="genericDiceInput" class="hp-manual-input" placeholder="e.g. 2d6+3" style="flex:1;font-size:11px;">
+                        <button class="vault-btn" style="padding:4px 10px;font-size:10px;" onclick="rollGenericDice()">Roll</button>
+                    </div>
+                    <div id="rollResults" style="margin-top:8px;max-height:120px;overflow-y:auto;font-size:10px;"></div>
+                </div>
             </div>
 
             <!-- MIDDLE: PARTY STATUS & COMBAT -->
@@ -1065,6 +1143,7 @@
     <script src="../assets/data/campaigns.js"></script>
     <script src="../assets/helpers/settingsManager.js"></script>
     <script src="../assets/helpers/storageManager.js"></script>
+    <script src="../assets/helpers/diceRoller.js"></script>
     <!-- Navigation (hamburger injected by navigation.js) -->
     <script src="../assets/helpers/navigation.js"></script>
     <script>
@@ -1143,6 +1222,8 @@
                 timestamp:       Date.now()
             });
         });
+
+        initSkillSelector();
     });
 
     // Final save on page unload
@@ -1654,11 +1735,13 @@
     function renderQuestCard(q) {
         var statusCls  = 'quest-' + q.status;
         var cardCls    = q.status !== 'active' ? q.status : '';
-        var objectives = (q.objectives || []).map(function(obj) {
+        var objectives = (q.objectives || []).map(function(obj, idx) {
             var done   = typeof obj === 'object' ? obj.completed : false;
             var text   = typeof obj === 'object' ? obj.text : obj;
             var liCls  = done ? 'done' : '';
-            var check  = done ? '<span class="obj-check">✓</span>' : '<span class="obj-check obj-pending">○</span>';
+            var check  = done
+                ? '<button class="obj-toggle-btn" onclick="toggleObjective(' + escHtml(JSON.stringify(q.id)) + ',' + idx + ')" title="Mark incomplete"><span class="obj-check">\u2713</span></button>'
+                : '<button class="obj-toggle-btn" onclick="toggleObjective(' + escHtml(JSON.stringify(q.id)) + ',' + idx + ')" title="Mark complete"><span class="obj-check obj-pending">\u25cb</span></button>';
             return '<li class="' + liCls + '">' + check + escHtml(text) + '</li>';
         }).join('');
 
@@ -1794,6 +1877,131 @@
         renderCombatStatus(activeCampaign);
         renderPartyStatus(activeCampaign);
     });
+
+    // ── DICE ROLLER ──────────────────────────────────────────────
+
+    function addRollResult(text, cssClass) {
+        var resultsDiv = document.getElementById('rollResults');
+        if (!resultsDiv) return;
+        var entry = document.createElement('div');
+        entry.className = 'roll-result-entry' + (cssClass ? ' ' + cssClass : '');
+        entry.textContent = text;
+        resultsDiv.insertBefore(entry, resultsDiv.firstChild);
+        // Keep at most 10 results visible
+        while (resultsDiv.children.length > 10) {
+            resultsDiv.removeChild(resultsDiv.lastChild);
+        }
+    }
+
+    function broadcastRoll(text, type) {
+        if (!activeCampaign) return;
+        if (!activeCampaign.messages) activeCampaign.messages = [];
+        activeCampaign.messages.push({
+            text: text,
+            type: type || 'normal',
+            from: sessionUsername,
+            timestamp: new Date().toISOString()
+        });
+        saveCampaignData(activeCampaign);
+        renderMessages(activeCampaign);
+    }
+
+    window.quickRoll = function(sides) {
+        if (typeof DiceRoller === 'undefined') { addRollResult('Dice roller not available.'); return; }
+        var result = DiceRoller.roll(sides);
+        var text = 'd' + sides + ' \u2192 ' + result;
+        addRollResult(text);
+        broadcastRoll(sessionUsername + ' rolled d' + sides + ': ' + result, 'normal');
+    };
+
+    window.rollSkillCheck = function() {
+        if (typeof DiceRoller === 'undefined') { addRollResult('Dice roller not available.'); return; }
+        var skillSel = document.getElementById('skillSelector');
+        if (!skillSel || !skillSel.value) { addRollResult('Select a skill first.'); return; }
+        var skillName = skillSel.options[skillSel.selectedIndex].text;
+        if (!activeCampaign) { addRollResult('Load a campaign first.'); return; }
+
+        var myEntry = activeCampaign.players.find(function(p) {
+            return p.username === sessionUsername;
+        });
+        if (!myEntry) { addRollResult('Character not found in campaign.'); return; }
+
+        var skillToStat = {
+            'Acrobatics': 'dex', 'Animal Handling': 'wis', 'Arcana': 'int',
+            'Athletics': 'str', 'Deception': 'cha', 'History': 'int',
+            'Insight': 'wis', 'Intimidation': 'cha', 'Investigation': 'int',
+            'Medicine': 'wis', 'Nature': 'int', 'Perception': 'wis',
+            'Performance': 'cha', 'Persuasion': 'cha', 'Religion': 'int',
+            'Sleight of Hand': 'dex', 'Stealth': 'dex', 'Survival': 'wis'
+        };
+
+        var statKey = skillToStat[skillName] || 'wis';
+        var stats = myEntry.stats || {};
+        var statValue = stats[statKey] || 10;
+        var statMod = Math.floor((statValue - 10) / 2);
+        var isProficient = Array.isArray(myEntry.skills) && myEntry.skills.indexOf(skillName) !== -1;
+        var profBonus = myEntry.proficiencyBonus || 2;
+
+        var rollResult = DiceRoller.skillCheck(skillName, statMod, profBonus, isProficient);
+        addRollResult(rollResult.description + (isProficient ? ' (prof)' : ''));
+        broadcastRoll(sessionUsername + ' rolled ' + rollResult.description + (isProficient ? ' (proficient)' : ''), 'important');
+    };
+
+    window.rollGenericDice = function() {
+        if (typeof DiceRoller === 'undefined') { addRollResult('Dice roller not available.'); return; }
+        var input = document.getElementById('genericDiceInput');
+        if (!input || !input.value.trim()) { addRollResult('Enter a dice expression (e.g. 2d6+3).'); return; }
+        var expr = input.value.trim();
+        var result = DiceRoller.genericRoll('roll', expr);
+        if (!result) { addRollResult('Invalid format. Use: 2d6, 3d8+2, d20, etc.'); return; }
+        var text = expr + ' \u2192 [' + result.rolls.join(', ') + ']' +
+                   (result.modifier > 0 ? ' + ' + result.modifier : result.modifier < 0 ? ' - ' + Math.abs(result.modifier) : '') + ' = ' + result.total;
+        addRollResult(text);
+        broadcastRoll(sessionUsername + ' rolled ' + expr + ' = ' + result.total + ' (' + text + ')', 'normal');
+    };
+
+    function initSkillSelector() {
+        var sel = document.getElementById('skillSelector');
+        if (!sel) return;
+        var allSkills = [
+            'Acrobatics','Animal Handling','Arcana','Athletics','Deception',
+            'History','Insight','Intimidation','Investigation','Medicine',
+            'Nature','Perception','Performance','Persuasion','Religion',
+            'Sleight of Hand','Stealth','Survival'
+        ];
+        allSkills.forEach(function(skill) {
+            var opt = document.createElement('option');
+            opt.value = skill;
+            opt.textContent = skill;
+            sel.appendChild(opt);
+        });
+    }
+
+    // ── QUEST OBJECTIVE TOGGLE ───────────────────────────────────
+
+    window.toggleObjective = function(questId, objIndex) {
+        if (!activeCampaign) return;
+        var quest = (activeCampaign.quests || []).find(function(q) { return q.id === questId; });
+        if (!quest || !quest.objectives || !quest.objectives[objIndex]) return;
+
+        var obj = quest.objectives[objIndex];
+        if (typeof obj === 'object') {
+            obj.completed = !obj.completed;
+        } else {
+            // Convert string objective to object
+            quest.objectives[objIndex] = { text: obj, completed: true };
+        }
+
+        // Recalculate progress
+        var total = quest.objectives.length;
+        var done  = quest.objectives.filter(function(o) {
+            return typeof o === 'object' ? o.completed : false;
+        }).length;
+        quest.progress = total > 0 ? Math.round((done / total) * 100) : 0;
+
+        saveCampaignData(activeCampaign);
+        renderQuestLog(activeCampaign);
+    };
     </script>
 </body>
 </html>
