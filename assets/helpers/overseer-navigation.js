@@ -22,21 +22,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div id="navCampaignName" class="nav-campaign-display"></div>
             </div>
             <ul class="nav-list">
-                <li><a href="overseer-player-overview.html" class="nav-link" data-page="player-overview">👥 PLAYER OVERVIEW</a></li>
-                <li><a href="overseer-campaign-overview.html" class="nav-link" data-page="campaign-overview">🗺️ CAMPAIGN OVERVIEW</a></li>
-                <li><a href="overseer-enemies.html" class="nav-link" data-page="enemies">👹 ENEMIES</a></li>
-                <li><a href="overseer-npcs.html" class="nav-link" data-page="npcs">🗣️ NPCs</a></li>
-                <li><a href="overseer.html" class="nav-link" data-page="overseer">📋 OVERSEER CONSOLE</a></li>
-                <li><a href="overseer-items.html" class="nav-link" data-page="items">📦 ITEMS</a></li>
+                <li><a href="overseer.html" class="nav-link" data-page="overseer">🖥️ OVERSEER CONSOLE</a></li>
+                <li><a href="settings.html" class="nav-link" data-page="settings">⚙️ SETTINGS</a></li>
             </ul>
             <div class="logout-container">
-                <button id="switchCampaignBtn" class="switch-campaign-button">⚑ SWITCH CAMPAIGN</button>
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
             </div>
         </nav>
 
         <!-- OVERLAY BACKDROP -->
         <div id="navOverlay" class="nav-overlay"></div>
+
+        <!-- TERMINAL BUTTON (top-right) -->
+        <div id="overseerTerminal" class="overseer-terminal-access">
+            <a href="terminal.html" class="overseer-terminal-btn">🖥️ TERMINAL</a>
+        </div>
     `;
 
     // Insert menu at start of body
@@ -382,6 +382,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 font-size: 11px;
             }
         }
+
+        /* TERMINAL ACCESS BUTTON (top-right) */
+        .overseer-terminal-access {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .overseer-terminal-btn {
+            background-color: var(--overseer-blue-mid);
+            border: 2px solid var(--overseer-gold);
+            color: var(--overseer-gold);
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px var(--overseer-gold);
+            box-shadow: 0 0 10px rgba(212, 160, 23, 0.2);
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .overseer-terminal-btn:hover {
+            background-color: var(--overseer-dark);
+            border-color: var(--overseer-gold-bright);
+            color: var(--overseer-gold-bright);
+            text-shadow: 0 0 10px var(--overseer-gold-bright);
+            box-shadow: 0 0 20px rgba(212, 160, 23, 0.4);
+        }
     `;
     document.head.appendChild(styleSheet);
 
@@ -398,11 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Determine current page
     function getCurrentPage() {
         const path = window.location.pathname;
-        if (path.includes('overseer-player-overview')) return 'player-overview';
-        if (path.includes('overseer-campaign-overview')) return 'campaign-overview';
-        if (path.includes('overseer-enemies')) return 'enemies';
-        if (path.includes('overseer-npcs')) return 'npcs';
-        if (path.includes('overseer-items')) return 'items';
+        if (path.includes('settings')) return 'settings';
         if (path.includes('overseer')) return 'overseer';
         return null;
     }
@@ -438,7 +467,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Logout functionality
     const logoutBtn = document.getElementById('logoutBtn');
-    const switchCampaignBtn = document.getElementById('switchCampaignBtn');
 
     function logout() {
         closeMenu();
@@ -446,21 +474,8 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'index.html';
     }
 
-    function switchCampaign() {
-        closeMenu();
-        if (typeof showCampaignModal === 'function') {
-            showCampaignModal();
-        } else {
-            window.location.href = 'overseer.html';
-        }
-    }
-
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
-    }
-
-    if (switchCampaignBtn) {
-        switchCampaignBtn.addEventListener('click', switchCampaign);
     }
 
     // Show current campaign name
