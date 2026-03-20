@@ -1119,7 +1119,10 @@
         }
 
         account.characters.forEach((char, idx) => {
-            const savedColor = getCharacterColor(char.id) || char.displayColor || '#4ade80';
+            var savedColor = (char.displayColor || '#4ade80');
+            if (typeof SettingsManager !== 'undefined') {
+                savedColor = SettingsManager.getCharacterColor(char.campaignId) || savedColor;
+            }
             const charId = 'char_color_' + idx;
             const card = document.createElement('div');
             card.className = 'character-card';
@@ -1237,13 +1240,16 @@
 
     function saveCharacterColors(account) {
         if (!account || !account.characters) return;
-        const store = {};
         account.characters.forEach((char, idx) => {
             const charId = 'char_color_' + idx;
             const hexEl = document.getElementById(charId + '_hex');
-            if (hexEl) store[char.id] = hexEl.value.startsWith('#') ? hexEl.value : '#' + hexEl.value;
+            if (hexEl && char.campaignId) {
+                const color = hexEl.value.startsWith('#') ? hexEl.value : '#' + hexEl.value;
+                if (typeof SettingsManager !== 'undefined') {
+                    SettingsManager.saveCharacterColor(char.campaignId, color);
+                }
+            }
         });
-        localStorage.setItem('vaultCharColors', JSON.stringify(store));
     }
 
     // ─── Load settings into form ───────────────────────────────────
@@ -1537,6 +1543,15 @@
             const storedOs = getStoredOverseerSettings();
             const baseOs = (typeof gameSettings !== 'undefined') ? gameSettings.overseerSettings : OVERSEER_DEFAULTS;
             loadOverseerSettingsToForm(storedOs || baseOs);
+        }
+    });
+
+    // Sync settings display when another tab updates localStorage
+    window.addEventListener('storage', function(e) {
+        if (e.key && e.key.startsWith('vaultPrefs_')) {
+            if (typeof SettingsManager !== 'undefined' && sessionStorage.getItem('username')) {
+                SettingsManager.applySettingsToPage(SettingsManager.getAllSettings());
+            }
         }
     });
     </script>

@@ -131,6 +131,31 @@ const SettingsManager = {
     },
 
     /**
+     * Get the display color for a specific campaign.
+     * @param {string} campaignId
+     * @returns {string|null} hex color string or null if not set
+     */
+    getCharacterColor: function(campaignId) {
+        if (!campaignId) return null;
+        var all = this.getAllSettings();
+        var colors = all.characterColors || {};
+        return colors[campaignId] || null;
+    },
+
+    /**
+     * Save the display color for a specific campaign.
+     * @param {string} campaignId
+     * @param {string} hexColor
+     */
+    saveCharacterColor: function(campaignId, hexColor) {
+        if (!campaignId) return;
+        var all = this.getAllSettings();
+        if (!all.characterColors) all.characterColors = {};
+        all.characterColors[campaignId] = hexColor;
+        this.saveAllSettings(all);
+    },
+
+    /**
      * Remove all stored preferences for the current user (reset to defaults).
      */
     clearAllSettings: function() {
@@ -154,5 +179,14 @@ const SettingsManager = {
 document.addEventListener('DOMContentLoaded', function() {
     if (sessionStorage.getItem('username')) {
         SettingsManager.applySettingsToPage(SettingsManager.getAllSettings());
+    }
+});
+
+// Sync settings across tabs/windows when localStorage changes
+window.addEventListener('storage', function(e) {
+    if (e.key && e.key.startsWith('vaultPrefs_')) {
+        if (sessionStorage.getItem('username')) {
+            SettingsManager.applySettingsToPage(SettingsManager.getAllSettings());
+        }
     }
 });
