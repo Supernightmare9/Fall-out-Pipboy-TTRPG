@@ -231,6 +231,8 @@
     <script src="../assets/helpers/storageManager.js"></script>
     <script src="../assets/helpers/diceRoller.js"></script>
     <script src="../assets/helpers/encounterBuilder.js"></script>
+    <script src="../assets/logic/xp.js"></script>
+    <script src="../assets/helpers/progressionManager.js"></script>
 </head>
 <body>
 
@@ -380,6 +382,39 @@
             <div class="message-compose-footer">
                 <button class="cmd-btn success" onclick="sendOverseerMessage()">[BROADCAST TO PLAYERS]</button>
             </div>
+        </div>
+    </div>
+
+    <!-- XP AWARD PANEL -->
+    <div class="panel" style="margin-top:12px;" id="xpAwardPanel">
+        <div class="panel-header">
+            <span class="panel-title">&#x2B50; Award Experience Points</span>
+        </div>
+        <div class="panel-body">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <label style="font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;">XP Amount</label>
+                    <input type="number" id="xpAwardAmount" class="form-input" placeholder="e.g. 200" min="1" style="width:110px;">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <label style="font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;">Recipient</label>
+                    <select id="xpAwardTarget" class="form-select" style="min-width:160px;">
+                        <option value="all">All Players</option>
+                    </select>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                    <label style="font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;">Source</label>
+                    <select id="xpAwardSource" class="form-select" style="min-width:120px;">
+                        <option value="Combat">Combat</option>
+                        <option value="Quest">Quest</option>
+                        <option value="Exploration">Exploration</option>
+                        <option value="Learning">Learning</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button class="cmd-btn success" onclick="awardXpFromOverseer()" style="align-self:flex-end;">[AWARD XP]</button>
+            </div>
+            <div id="xpAwardLog" style="margin-top:10px;max-height:100px;overflow-y:auto;font-size:10px;font-family:'Share Tech Mono',monospace;"></div>
         </div>
     </div>
 
@@ -544,6 +579,73 @@
         save();
     };
 
+    function populateXpTargetDropdown(){
+        var sel=document.getElementById('xpAwardTarget');if(!sel)return;
+        sel.innerHTML='<option value="all">All Players</option>';
+        if(!_campaign||!Array.isArray(_campaign.players))return;
+        _campaign.players.forEach(function(p){
+            var opt=document.createElement('option');
+            opt.value=p.username;
+            opt.textContent=esc(p.characterName||p.username)+' ('+esc(p.username)+')';
+            sel.appendChild(opt);
+        });
+    }
+
+    function addXpAwardLog(text,isSuccess){
+        var div=document.getElementById('xpAwardLog');if(!div)return;
+        var entry=document.createElement('div');
+        entry.style.cssText='padding:2px 4px;border-left:2px solid '+(isSuccess?'var(--overseer-green)':'var(--overseer-red-bright)')+';color:'+(isSuccess?'var(--overseer-green-bright)':'var(--overseer-red-bright)')+';margin-bottom:2px;';
+        entry.textContent=text;
+        div.insertBefore(entry,div.firstChild);
+        while(div.children.length>8){div.removeChild(div.lastChild);}
+    }
+
+    window.awardXpFromOverseer=function(){
+        if(!_campaign){addLog('Load a campaign first','red');return;}
+        if(typeof ProgressionManager==='undefined'){addLog('ProgressionManager not loaded','red');return;}
+        var amountEl=document.getElementById('xpAwardAmount');
+        var targetEl=document.getElementById('xpAwardTarget');
+        var sourceEl=document.getElementById('xpAwardSource');
+        if(!amountEl||!targetEl||!sourceEl)return;
+        var amount=parseInt(amountEl.value,10);
+        if(isNaN(amount)||amount<=0){addLog('Enter a valid XP amount','red');return;}
+        var target=targetEl.value;
+        var source=sourceEl.value||'Combat';
+        var recipients=[];
+        if(target==='all'){
+            recipients=(_campaign.players||[]).map(function(p){return p.username;});
+        }else{
+            recipients=[target];
+        }
+        if(recipients.length===0){addLog('No players found in campaign','red');return;}
+        var results=ProgressionManager.awardXpToAll(_campaignId,recipients,amount,source);
+        var levelUps=[];
+        recipients.forEach(function(username){
+            var r=results[username];
+            if(r&&r.levelsGained&&r.levelsGained.length>0){
+                levelUps.push(username+' \u2192 Lvl '+r.levelsGained[r.levelsGained.length-1]);
+            }
+        });
+        var targetLabel=target==='all'?'all players':target;
+        var logMsg='\u2B50 Awarded '+amount+' XP ('+source+') to '+targetLabel;
+        addLog(logMsg+(levelUps.length>0?' | LEVEL UP: '+levelUps.join(', '):''),'green');
+        addXpAwardLog(logMsg,true);
+        if(levelUps.length>0){
+            addXpAwardLog('\uD83C\uDF1F Level Up! '+levelUps.join(', '),true);
+        }
+        // Broadcast a message to players about the XP award
+        var broadcastText='\u2B50 XP Awarded: +'+amount+' XP ('+(source||'Combat')+') to '+targetLabel+'.'+(levelUps.length>0?' LEVEL UP: '+levelUps.join(', '):'');
+        _messages.push({
+            id:'msg_xp_'+Date.now(),
+            text:broadcastText,
+            type:'important',
+            from:'overseer',
+            timestamp:new Date().toISOString()
+        });
+        amountEl.value='';
+        save();
+    };
+
     function populateCampaignDropdown(){
         var sel=document.getElementById('campaignSelector');if(!sel||typeof CAMPAIGNS==='undefined')return;
         while(sel.options.length>1)sel.remove(1);
@@ -584,6 +686,7 @@
         renderLog();
         addLog('Campaign loaded: '+_campaign.name,'blue');
         renderCustomEnemyList();
+        populateXpTargetDropdown();
     }
 
     function mergePlayerHp(){

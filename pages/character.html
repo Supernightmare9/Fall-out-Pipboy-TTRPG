@@ -1035,6 +1035,156 @@
         }
         .obj-toggle-btn:hover { opacity: 0.7; }
 
+        /* ===== PROGRESSION PANEL ===== */
+        .progression-panel {
+            background: rgba(0,0,0,0.35);
+            border: 1px solid rgba(74,222,128,0.25);
+            padding: 10px 12px;
+            margin-top: 14px;
+        }
+        .progression-panel-title {
+            font-size: 10px;
+            color: var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .progression-level-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .progression-level-badge {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px rgba(251,191,36,0.6);
+            line-height: 1;
+            min-width: 40px;
+            text-align: center;
+        }
+        .progression-level-label {
+            font-size: 9px;
+            color: rgba(251,191,36,0.6);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .progression-xp-label {
+            font-size: 9px;
+            color: rgba(74,222,128,0.5);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+        .progression-xp-bar-bg {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(74,222,128,0.2);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        .progression-xp-bar-fill {
+            height: 100%;
+            background: var(--vault-gold);
+            box-shadow: 0 0 4px rgba(251,191,36,0.6);
+            border-radius: 3px;
+            transition: width 0.4s;
+        }
+        .progression-xp-text {
+            font-size: 10px;
+            color: rgba(74,222,128,0.7);
+            display: flex;
+            justify-content: space-between;
+        }
+        .progression-stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            margin-top: 5px;
+        }
+        .progression-history {
+            margin-top: 8px;
+            border-top: 1px solid rgba(74,222,128,0.15);
+            padding-top: 6px;
+        }
+        .progression-history-title {
+            font-size: 9px;
+            color: rgba(74,222,128,0.4);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .progression-history-entry {
+            font-size: 9px;
+            color: rgba(74,222,128,0.6);
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(74,222,128,0.08);
+        }
+        .progression-history-entry:last-child { border-bottom: none; }
+
+        /* ===== LEVEL-UP NOTIFICATION ===== */
+        #levelUpNotification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10,10,10,0.97);
+            border: 2px solid var(--vault-gold);
+            box-shadow: 0 0 40px rgba(251,191,36,0.6), inset 0 0 20px rgba(251,191,36,0.05);
+            padding: 30px 40px;
+            z-index: 9999;
+            text-align: center;
+            display: none;
+            min-width: 260px;
+            animation: levelUpPulse 2s ease-in-out infinite;
+        }
+        @keyframes levelUpPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(251,191,36,0.5), inset 0 0 20px rgba(251,191,36,0.05); }
+            50%       { box-shadow: 0 0 60px rgba(251,191,36,0.9), inset 0 0 30px rgba(251,191,36,0.1); }
+        }
+        .level-up-title {
+            font-size: 11px;
+            color: var(--vault-gold);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .level-up-number {
+            font-size: 52px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            text-shadow: 0 0 20px rgba(251,191,36,0.8);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .level-up-sub {
+            font-size: 10px;
+            color: rgba(74,222,128,0.8);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .level-up-details {
+            font-size: 10px;
+            color: rgba(74,222,128,0.7);
+            line-height: 1.6;
+            margin-bottom: 14px;
+        }
+        .level-up-close-btn {
+            background: rgba(251,191,36,0.12);
+            border: 1px solid var(--vault-gold);
+            color: var(--vault-gold);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            letter-spacing: 2px;
+            padding: 7px 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .level-up-close-btn:hover { background: rgba(251,191,36,0.25); }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             body { padding: 10px; }
@@ -1132,6 +1282,41 @@
                 <ul class="skills-list" id="skillsList">
                     <li class="empty-state" style="list-style:none;">No skills loaded</li>
                 </ul>
+
+                <!-- PROGRESSION PANEL -->
+                <div class="progression-panel" id="progressionPanel">
+                    <div class="progression-panel-title">⭐ Progression</div>
+                    <div class="progression-level-display">
+                        <div>
+                            <div class="progression-level-badge" id="progLevelBadge">1</div>
+                            <div class="progression-level-label">Level</div>
+                        </div>
+                        <div style="flex:1;">
+                            <div class="progression-xp-label">Experience Points</div>
+                            <div class="progression-xp-bar-bg">
+                                <div class="progression-xp-bar-fill" id="progXpBarFill" style="width:0%"></div>
+                            </div>
+                            <div class="progression-xp-text">
+                                <span id="progXpCurrent">0 XP</span>
+                                <span id="progXpNext">— to next</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="progression-stat-row">
+                        <span class="stat-label">Ability Score Bonus</span>
+                        <span class="stat-value" id="progAbilityBonus">+0</span>
+                    </div>
+                    <div class="progression-stat-row">
+                        <span class="stat-label">Unlocked Abilities</span>
+                        <span class="stat-value" id="progUnlockedCount">0</span>
+                    </div>
+                    <div class="progression-history" id="progHistorySection">
+                        <div class="progression-history-title">Level-Up History</div>
+                        <div id="progHistoryList">
+                            <div class="empty-state" style="padding:8px 0;font-size:9px;">No level-ups yet</div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- DICE ROLLER -->
                 <div class="panel-title" style="margin-top:18px;">🎲 Dice Roller</div>
@@ -1237,6 +1422,15 @@
 
     </div><!-- end .container -->
 
+    <!-- LEVEL-UP NOTIFICATION OVERLAY -->
+    <div id="levelUpNotification">
+        <div class="level-up-title">⭐ Level Up! ⭐</div>
+        <div class="level-up-number" id="levelUpNumber">2</div>
+        <div class="level-up-sub">VAULT DWELLER ADVANCES</div>
+        <div class="level-up-details" id="levelUpDetails"></div>
+        <button class="level-up-close-btn" onclick="closeLevelUpNotification()">[ Acknowledge ]</button>
+    </div>
+
     <script src="../assets/data/accounts.js"></script>
     <script src="../assets/data/campaigns.js"></script>
     <script src="../assets/data/items.js"></script>
@@ -1244,6 +1438,8 @@
     <script src="../assets/helpers/storageManager.js"></script>
     <script src="../assets/helpers/inventoryManager.js"></script>
     <script src="../assets/helpers/diceRoller.js"></script>
+    <script src="../assets/logic/xp.js"></script>
+    <script src="../assets/helpers/progressionManager.js"></script>
     <!-- Navigation (hamburger injected by navigation.js) -->
     <script src="../assets/helpers/navigation.js"></script>
     <script>
@@ -1468,6 +1664,7 @@
         renderAbilities(campaign);
         updateEquipmentPanel(campaign);
         updateACDisplay(campaign);
+        updateProgressionDisplay();
 
         // Auto-refresh every 5 seconds
         if (refreshInterval) clearInterval(refreshInterval);
@@ -1493,6 +1690,7 @@
             document.getElementById('hpMax').textContent     = myEntry.maxHp;
             updateHpBar(myEntry.currentHp, myEntry.maxHp);
         }
+        updateProgressionDisplay();
     }
 
     // ── CHARACTER INFO (LEFT) ────────────────────────────────────
@@ -2099,6 +2297,109 @@
         div.innerHTML = html;
     }
 
+    // ── PROGRESSION DISPLAY ──────────────────────────────────────
+    function updateProgressionDisplay() {
+        if (!activeCampaign) return;
+        var cid  = activeCampaign.id;
+        var user = sessionUsername;
+        if (typeof ProgressionManager === 'undefined') return;
+
+        var prog = ProgressionManager.getPlayerProgression(cid, user);
+        var info = ProgressionManager.getLevelInfo(prog.totalXp);
+
+        // Level badge
+        var levelBadge = document.getElementById('progLevelBadge');
+        if (levelBadge) levelBadge.textContent = info.level;
+
+        // XP bar
+        var xpFill = document.getElementById('progXpBarFill');
+        if (xpFill) xpFill.style.width = Math.min(100, info.progressPct) + '%';
+
+        // XP text
+        var xpCurrent = document.getElementById('progXpCurrent');
+        if (xpCurrent) xpCurrent.textContent = ProgressionManager.formatXpNumber(info.totalXp) + ' XP';
+
+        var xpNext = document.getElementById('progXpNext');
+        if (xpNext) {
+            xpNext.textContent = info.level >= 100
+                ? 'Max level'
+                : ProgressionManager.formatXpNumber(info.xpForNext) + ' to next';
+        }
+
+        // Ability score bonus
+        var abilityBonus = document.getElementById('progAbilityBonus');
+        if (abilityBonus) {
+            abilityBonus.textContent = info.abilityBonus > 0 ? '+' + info.abilityBonus : '+0';
+        }
+
+        // Unlocked abilities count
+        var unlockedCount = document.getElementById('progUnlockedCount');
+        if (unlockedCount) unlockedCount.textContent = info.unlockedAbilities.length;
+
+        // Level-up history
+        var historyList = document.getElementById('progHistoryList');
+        if (historyList) {
+            var history = ProgressionManager.getLevelHistory(cid, user);
+            if (history.length === 0) {
+                historyList.innerHTML = '<div class="empty-state" style="padding:8px 0;font-size:9px;">No level-ups yet</div>';
+            } else {
+                historyList.innerHTML = history.map(function (h) {
+                    var ts  = h.timestamp ? new Date(h.timestamp).toLocaleDateString() : '—';
+                    var src = h.source || 'Combat';
+                    return '<div class="progression-history-entry">Lvl ' + h.level + ' — ' + escHtml(ts) + ' (' + escHtml(src) + ')</div>';
+                }).join('');
+            }
+        }
+    }
+
+    function awardXpToCharacter(xpAmount, source) {
+        if (!activeCampaign || typeof ProgressionManager === 'undefined') return;
+        var amount = Number(xpAmount);
+        if (!(amount > 0)) return;
+
+        var cid  = activeCampaign.id;
+        var user = sessionUsername;
+
+        var result = ProgressionManager.awardXp(cid, user, amount, source || 'Combat');
+        if (!result) return;
+
+        updateProgressionDisplay();
+        addRollResult('+ ' + ProgressionManager.formatXpNumber(amount) + ' XP earned! (' + ProgressionManager.formatXpNumber(result.newXp) + ' total)', 'roll-hit');
+
+        // Show level-up notification if character leveled up
+        if (result.levelsGained && result.levelsGained.length > 0) {
+            showLevelUpNotification(result.levelsGained[result.levelsGained.length - 1], result.newXp);
+        }
+    }
+
+    function showLevelUpNotification(newLevel, totalXp) {
+        if (typeof ProgressionManager === 'undefined') return;
+        var overlay = document.getElementById('levelUpNotification');
+        if (!overlay) return;
+
+        var info = ProgressionManager.getLevelInfo(totalXp || 0);
+        var abilities = ProgressionManager.getUnlockedAbilitiesUpToLevel(newLevel);
+        var newAbility = abilities.find(function (a) { return a.level === newLevel; });
+
+        document.getElementById('levelUpNumber').textContent = newLevel;
+
+        var details = 'Total XP: ' + ProgressionManager.formatXpNumber(totalXp || 0);
+        if (info.abilityBonus > 0) {
+            details += '\nAbility Score Bonus: +' + info.abilityBonus + ' to all stats';
+        }
+        if (newAbility) {
+            details += '\nNew Ability Unlocked: ' + newAbility.name;
+        }
+        document.getElementById('levelUpDetails').textContent = details;
+
+        overlay.style.display = 'block';
+    }
+
+    window.closeLevelUpNotification = function () {
+        var overlay = document.getElementById('levelUpNotification');
+        if (overlay) overlay.style.display = 'none';
+    };
+
     // ── TAB SWITCHING ────────────────────────────────────────────
     function switchTab(tabId, btn) {
         document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
@@ -2157,6 +2458,34 @@
                 updateEquipmentPanel(activeCampaign);
                 updateACDisplay(activeCampaign);
                 addRollResult('📦 Inventory updated', '');
+            }
+        } catch (ex) { /* ignore malformed */ }
+    });
+
+    // ── XP PROGRESSION SYNC (overseer awards XP) ──────────────────
+    window.addEventListener('storage', function(e) {
+        if (!e.key || e.key.indexOf('vault215_progression_') !== 0 || !e.newValue) return;
+        if (!activeCampaign) return;
+        var progressionCampaignId = e.key.replace('vault215_progression_', '');
+        if (progressionCampaignId !== activeCampaign.id) return;
+        try {
+            var progressionData = JSON.parse(e.newValue);
+            var myProg = progressionData[sessionUsername];
+            if (!myProg) return;
+            // Derive old XP from previous value
+            var oldData = e.oldValue ? JSON.parse(e.oldValue) : {};
+            var oldMyProg = oldData[sessionUsername] || { totalXp: 0 };
+            var oldXp = Number(oldMyProg.totalXp) || 0;
+            var newXp = Number(myProg.totalXp) || 0;
+            var oldLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(oldXp) : 1;
+            var newLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(newXp) : 1;
+            updateProgressionDisplay();
+            if (newLevel > oldLevel) {
+                showLevelUpNotification(newLevel, newXp);
+            }
+            if (newXp > oldXp) {
+                var gained = newXp - oldXp;
+                addRollResult('⭐ +' + ProgressionManager.formatXpNumber(gained) + ' XP awarded by Overseer!', 'roll-hit');
             }
         } catch (ex) { /* ignore malformed */ }
     });
