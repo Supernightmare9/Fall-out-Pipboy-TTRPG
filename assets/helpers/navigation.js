@@ -35,6 +35,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <!-- OVERLAY BACKDROP -->
         <div id="navOverlay" class="nav-overlay"></div>
+
+        <!-- TERMINAL BUTTON (top-right) -->
+        <div id="terminalAccess" class="terminal-access">
+            <a href="terminal.html" class="terminal-btn">🖥️ TERMINAL</a>
+        </div>
     `;
 
     // Insert menu at start of body
@@ -339,6 +344,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 padding: 12px 10px;
                 font-size: 11px;
             }
+        }
+
+        /* TERMINAL ACCESS BUTTON (top-right) */
+        .terminal-access {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .terminal-btn {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            padding: 8px 14px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px var(--vault-green);
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .terminal-btn:hover {
+            background-color: var(--vault-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 10px var(--vault-gold);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
         }
     `;
     document.head.appendChild(styleSheet);
