@@ -207,6 +207,55 @@ var StorageManager = {
     },
 
     // ═════════════════════════════════════════════════════════
+    // PLAYER HP SYNC
+    // ═════════════════════════════════════════════════════════
+
+    /**
+     * Update a specific player's HP in the campaign snapshot and broadcast
+     * the change via a storage write so other tabs (e.g. overseer) are notified.
+     * @param {string} campaignId
+     * @param {string} username
+     * @param {number} newHp
+     * @param {number} maxHp
+     * @returns {Object|null}  updated campaign snapshot, or null on failure
+     */
+    updatePlayerHp: function(campaignId, username, newHp, maxHp) {
+        if (!campaignId || !username) return null;
+        var key  = this._keys.campaign(campaignId);
+        var data = this._get(key) || {};
+        if (!Array.isArray(data.players)) data.players = [];
+        var player = null;
+        for (var i = 0; i < data.players.length; i++) {
+            if (data.players[i].username === username) { player = data.players[i]; break; }
+        }
+        if (player) {
+            player.currentHp = newHp;
+            if (typeof maxHp === 'number') player.maxHp = maxHp;
+        } else {
+            data.players.push({ username: username, currentHp: newHp, maxHp: maxHp });
+        }
+        data.timestamp = Date.now();
+        this._set(key, data);
+        this._log('updatePlayerHp', 'campaign=' + campaignId + ' user=' + username + ' hp=' + newHp + '/' + maxHp);
+        return data;
+    },
+
+    /**
+     * Read the latest player HP values for every player in a campaign directly
+     * from localStorage (bypassing any in-memory cache).
+     * @param {string} campaignId
+     * @returns {Array}  array of { username, currentHp, maxHp } objects
+     */
+    getLatestPlayerHp: function(campaignId) {
+        if (!campaignId) return [];
+        var data = this._get(this._keys.campaign(campaignId));
+        if (!data || !Array.isArray(data.players)) return [];
+        return data.players.map(function(p) {
+            return { username: p.username, currentHp: p.currentHp, maxHp: p.maxHp };
+        });
+    },
+
+    // ═════════════════════════════════════════════════════════
     // AUTO-SAVE SYSTEM
     // ═════════════════════════════════════════════════════════
 

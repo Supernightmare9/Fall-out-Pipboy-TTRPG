@@ -1245,11 +1245,15 @@
         var toSave = {
             players: campaign.players.map(function(p) {
                 return {
-                    username:     p.username,
-                    currentHp:    p.currentHp,
-                    inInitiative: p.inInitiative || false,
-                    initiative:   p.initiative   || 0,
-                    status:       p.status       || 'alive'
+                    username:      p.username,
+                    characterId:   p.characterId,
+                    characterName: p.characterName,
+                    displayColor:  p.displayColor,
+                    currentHp:     p.currentHp,
+                    maxHp:         p.maxHp,
+                    inInitiative:  p.inInitiative || false,
+                    initiative:    p.initiative   || 0,
+                    status:        p.status       || 'alive'
                 };
             }),
             activeEncounter: campaign.activeEncounter,
@@ -1417,7 +1421,7 @@
         document.getElementById('hpCurrent').textContent = myEntry.currentHp;
         updateHpBar(myEntry.currentHp, myEntry.maxHp);
 
-        // Persist to localStorage
+        // Persist to localStorage (full campaign snapshot, triggers storage event in other tabs)
         saveCampaignData(activeCampaign);
         hpLastUpdated = new Date();
         updateHpTimestamp();

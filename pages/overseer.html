@@ -362,8 +362,28 @@
 
     function mergePlayerHp(){
         if(!_campaign||!Array.isArray(_campaign.players))return;
-        if(typeof ACCOUNTS==='undefined')return;
+        // Prefer live HP values written by the character page over the static ACCOUNTS snapshot
+        var saved;try{saved=JSON.parse(localStorage.getItem('vault215_campaign_'+_campaignId));}catch(e){saved=null;}
+        applyPlayerHpFromSaved(saved);
+    }
+
+    // Apply player HP (and display color) from a saved campaign snapshot.
+    // Falls back to ACCOUNTS static data for any player not found in the snapshot.
+    function applyPlayerHpFromSaved(saved){
+        if(!_campaign||!Array.isArray(_campaign.players))return;
         _campaign.players.forEach(function(p){
+            // 1. Try localStorage (live HP from character page)
+            if(saved&&Array.isArray(saved.players)){
+                var sp=saved.players.find(function(x){return x.username===p.username;});
+                if(sp){
+                    p.currentHp=sp.currentHp;
+                    if(typeof sp.maxHp==='number')p.maxHp=sp.maxHp;
+                    if(sp.displayColor)p.displayColor=sp.displayColor;
+                    return;
+                }
+            }
+            // 2. Fall back to ACCOUNTS static data
+            if(typeof ACCOUNTS==='undefined')return;
             var a=ACCOUNTS.find(function(x){return x.username===p.username;});
             if(a&&Array.isArray(a.characters)){
                 var ch=a.characters.find(function(c){return c.id===p.characterId;});
@@ -654,6 +674,28 @@
             input.value='';
         });
     };
+
+    // ── CROSS-TAB PLAYER HP SYNC (character page → overseer) ─────
+    window.addEventListener('storage',function(e){
+        if(!e.key||e.key.indexOf('vault215_campaign_')!==0||!e.newValue)return;
+        var campaignId=e.key.replace('vault215_campaign_','');
+        if(!_campaign||campaignId!==_campaignId)return;
+        try{
+            var data=JSON.parse(e.newValue);
+            // Update player HP from live character-page writes
+            if(Array.isArray(data.players)&&Array.isArray(_campaign.players)){
+                applyPlayerHpFromSaved(data);
+                renderPlayerStatus();
+            }
+            // Also apply combat encounter updates arriving from character tabs
+            if(data.activeEncounter){
+                _campaign.activeEncounter=data.activeEncounter;
+                renderCombatStatus(_campaign);
+                renderInitiativeTracker();
+                renderEnemyTracker();
+            }
+        }catch(ex){/*ignore malformed*/}
+    });
 })();
 </script>
 </body>
