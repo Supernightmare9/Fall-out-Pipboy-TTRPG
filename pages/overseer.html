@@ -182,6 +182,7 @@
     <script src="../assets/data/campaigns.js"></script>
     <script src="../assets/data/enemies.js"></script>
     <script src="../assets/helpers/storageManager.js"></script>
+    <script src="../assets/helpers/diceRoller.js"></script>
 </head>
 <body>
 
@@ -279,6 +280,21 @@
                 <span class="log-msg log-blue">Overseer Console loaded. Awaiting campaign selection.</span>
             </div>
         </div>
+    </div>
+
+    <!-- ROLL TOOLS PANEL -->
+    <div class="panel" style="margin-top:12px;">
+        <div class="panel-header">
+            <span class="panel-title">&#x1F3B2; Roll Tools</span>
+            <button class="cmd-btn" style="font-size:10px;padding:5px 10px;" onclick="toggleQuestManager()">[QUEST MANAGER]</button>
+        </div>
+        <div style="padding:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;">
+            <button class="cmd-btn success" onclick="resolveAttackRoll()">[ATTACK ROLL]</button>
+            <button class="cmd-btn danger"  onclick="resolveDamageRoll()">[DAMAGE ROLL]</button>
+            <button class="cmd-btn"         onclick="resolveInitiative()">[INITIATIVE ROLL]</button>
+            <button class="cmd-btn"         onclick="resolveGenericRoll()">[GENERIC ROLL]</button>
+        </div>
+        <div id="rollToolResults" style="padding:0 10px 10px;max-height:120px;overflow-y:auto;font-size:10px;font-family:'Share Tech Mono',monospace;"></div>
     </div>
 
     <!-- MESSAGE BROADCAST TO PLAYERS -->
@@ -750,6 +766,121 @@
             }
         }catch(ex){/*ignore malformed*/}
     });
+
+    // ── ROLL TOOLS ───────────────────────────────────────────────
+
+    function addRollToolResult(text, cssColor) {
+        var div = document.getElementById('rollToolResults');
+        if (!div) return;
+        var entry = document.createElement('div');
+        entry.style.cssText = 'padding:3px 6px;border-left:2px solid ' + (cssColor || 'rgba(74,222,128,0.4)') + ';margin-bottom:3px;color:' + (cssColor || 'rgba(74,222,128,0.85)') + ';';
+        entry.textContent = text;
+        div.insertBefore(entry, div.firstChild);
+        while (div.children.length > 10) { div.removeChild(div.lastChild); }
+    }
+
+    window.resolveAttackRoll = function() {
+        if (typeof DiceRoller === 'undefined') { addLog('DiceRoller not loaded', 'red'); return; }
+        var ac = prompt('Target AC:');
+        if (ac === null) return;
+        ac = parseInt(ac, 10);
+        if (isNaN(ac)) { addLog('Invalid AC value', 'red'); return; }
+        var mod = prompt('Attack Modifier (e.g. +5, -2):');
+        if (mod === null) return;
+        mod = parseInt(mod, 10) || 0;
+        var result = DiceRoller.attackRoll('Overseer Roll', mod, ac);
+        addLog(result.description, result.isHit ? 'green' : 'red');
+        addRollToolResult(result.description, result.isCritical ? '#fbbf24' : result.isHit ? '#4ade80' : '#f87171');
+    };
+
+    window.resolveDamageRoll = function() {
+        if (typeof DiceRoller === 'undefined') { addLog('DiceRoller not loaded', 'red'); return; }
+        var dice = prompt('Damage dice (e.g. 2d6, 3d8+2):');
+        if (!dice) return;
+        var result = DiceRoller.genericRoll('damage', dice.trim());
+        if (!result) { addLog('Invalid dice format. Use: 2d6, 3d8+2, etc.', 'red'); return; }
+        var msg = 'Damage: ' + dice + ' = [' + result.rolls.join(', ') + ']' +
+                  (result.modifier > 0 ? ' + ' + result.modifier : result.modifier < 0 ? ' - ' + Math.abs(result.modifier) : '') + ' = ' + result.total;
+        addLog(msg, 'red');
+        addRollToolResult(msg, '#f87171');
+    };
+
+    window.resolveInitiative = function() {
+        if (typeof DiceRoller === 'undefined') { addLog('DiceRoller not loaded', 'red'); return; }
+        var name = prompt('Name (NPC/Enemy):');
+        if (!name) return;
+        var mod = prompt('Initiative Modifier (DEX mod):');
+        if (mod === null) return;
+        mod = parseInt(mod, 10) || 0;
+        var result = DiceRoller.initiativeRoll(name, mod);
+        addLog(result.description, 'blue');
+        addRollToolResult(result.description, '#60a5fa');
+    };
+
+    window.resolveGenericRoll = function() {
+        if (typeof DiceRoller === 'undefined') { addLog('DiceRoller not loaded', 'red'); return; }
+        var dice = prompt('Dice expression (e.g. d20, 2d6+3):');
+        if (!dice) return;
+        var result = DiceRoller.genericRoll('roll', dice.trim());
+        if (!result) { addLog('Invalid dice format. Use: d20, 2d6+3, etc.', 'red'); return; }
+        var msg = dice + ' \u2192 [' + result.rolls.join(', ') + ']' +
+                  (result.modifier > 0 ? ' + ' + result.modifier : result.modifier < 0 ? ' - ' + Math.abs(result.modifier) : '') + ' = ' + result.total;
+        addLog(msg, 'white');
+        addRollToolResult(msg);
+    };
+
+    // ── QUEST MANAGER ────────────────────────────────────────────
+
+    window.toggleQuestManager = function() {
+        var div = document.getElementById('questManagerPanel');
+        if (!div) {
+            div = document.createElement('div');
+            div.id = 'questManagerPanel';
+            div.style.cssText = 'position:fixed;top:80px;right:20px;width:320px;background:var(--overseer-dark);border:1px solid rgba(232,168,0,0.3);padding:14px;z-index:1000;max-height:480px;overflow-y:auto;font-family:"Share Tech Mono",monospace;font-size:11px;';
+            document.body.appendChild(div);
+        }
+        if (div.style.display === 'none' || div.style.display === '') {
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+            return;
+        }
+        if (!_campaign || !Array.isArray(_campaign.quests) || _campaign.quests.length === 0) {
+            div.innerHTML = '<div style="color:rgba(232,232,232,0.4);padding:8px;">No quests in this campaign.</div>' +
+                '<button class="cmd-btn" style="margin-top:8px;" onclick="toggleQuestManager()">[CLOSE]</button>';
+            return;
+        }
+        var html = '<div style="color:var(--overseer-gold);font-size:12px;letter-spacing:1px;margin-bottom:10px;">&#x1F4CB; QUEST MANAGER</div>';
+        _campaign.quests.forEach(function(q) {
+            var statusColor = q.status === 'completed' ? '#4ade80' : q.status === 'failed' ? '#f87171' : '#fbbf24';
+            var escapedId = esc(JSON.stringify(q.id));
+            html += '<div style="border:1px solid rgba(232,168,0,0.2);padding:8px;margin-bottom:6px;border-radius:2px;">' +
+                '<div style="color:' + statusColor + ';font-size:11px;margin-bottom:4px;">' + esc(q.title) + ' [' + esc(q.status) + ']</div>' +
+                '<div style="display:flex;gap:4px;flex-wrap:wrap;">' +
+                    '<button class="cmd-btn success" style="font-size:9px;padding:3px 7px;" onclick="changeQuestStatus(' + escapedId + ',\'active\')">[ACTIVE]</button>' +
+                    '<button class="cmd-btn success" style="font-size:9px;padding:3px 7px;" onclick="changeQuestStatus(' + escapedId + ',\'completed\')">[COMPLETE]</button>' +
+                    '<button class="cmd-btn danger"  style="font-size:9px;padding:3px 7px;" onclick="changeQuestStatus(' + escapedId + ',\'failed\')">[FAIL]</button>' +
+                '</div>' +
+            '</div>';
+        });
+        html += '<button class="cmd-btn" style="margin-top:6px;" onclick="toggleQuestManager()">[CLOSE]</button>';
+        div.innerHTML = html;
+    };
+
+    window.changeQuestStatus = function(questId, newStatus) {
+        if (!_campaign || !Array.isArray(_campaign.quests)) return;
+        var quest = _campaign.quests.find(function(q) { return q.id === questId; });
+        if (!quest) return;
+        var old = quest.status;
+        quest.status = newStatus;
+        save();
+        addLog('Quest "' + quest.title + '": ' + old + ' \u2192 ' + newStatus, 'blue');
+        // Refresh panel
+        var panel = document.getElementById('questManagerPanel');
+        if (panel) { panel.style.display = 'none'; }
+        toggleQuestManager();
+    };
+
 })();
 </script>
 </body>
