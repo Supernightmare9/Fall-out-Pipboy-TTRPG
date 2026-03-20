@@ -127,7 +127,7 @@ const ITEMS = [
     value: 20,
     description: "The most popular soft drink of the pre-war era, still found stashed away across the wasteland. Refreshing, if mildly irradiated.",
     properties: ["Restore 10 HP", "+5 Rads"],
-    effects: { healing: 10, cureRadiation: -5 }
+    effects: { healing: 10 }
   },
   {
     id: "item_psycho_1",
