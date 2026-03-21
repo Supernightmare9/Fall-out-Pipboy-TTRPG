@@ -568,7 +568,7 @@
                   'Explosives','Lockpick','Medicine','Science','Repair',
                   'Sneak','Speech','Unarmed','Survival'];
 
-    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, skillsLocked:false, skillsLockBaseline:{} };
+    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false };
     var debuffs    = [];
     var boosts     = [];
     var hpLastUpdated = null;
@@ -603,6 +603,10 @@
         // Backward compat: ensure skillsLockBaseline exists
         if (!playerData.skillsLockBaseline || typeof playerData.skillsLockBaseline !== 'object') {
             playerData.skillsLockBaseline = deepCopy(playerData.skills || {});
+        }
+        // Migration: initialize skillsAllocationActive for existing saves
+        if (playerData.skillsAllocationActive === undefined) {
+            playerData.skillsAllocationActive = ((playerData.skillPointsAvailable || 0) > 0 && !playerData.skillsLocked);
         }
         var sH = localStorage.getItem('pipboyHealth');
         var sAP = localStorage.getItem('pipboyActionPoints');
@@ -1094,18 +1098,14 @@
         }
 
         // Update Lock In button visibility/label
+        var allocationActive = !!playerData.skillsAllocationActive;
         var lockBtn = document.getElementById('lockInBtn');
         if (lockBtn) {
-            if (locked) {
-                lockBtn.style.display = '';
-                lockBtn.textContent  = '🔒 Skills Locked';
-                lockBtn.disabled     = true;
-                lockBtn.style.opacity = '0.5';
-            } else if (pts > 0) {
+            if (allocationActive && !locked) {
                 lockBtn.style.display = '';
                 lockBtn.textContent  = 'Lock In Skills';
-                lockBtn.disabled     = false;
-                lockBtn.style.opacity = '1';
+                lockBtn.disabled     = (pts !== 0);
+                lockBtn.style.opacity = (pts === 0) ? '1' : '0.5';
             } else {
                 lockBtn.style.display = 'none';
             }
@@ -1142,8 +1142,9 @@
 
     // ---- LOCK IN SKILLS ----
     function lockInSkills() {
+        if ((playerData.skillPointsAvailable || 0) > 0) return;
         playerData.skillsLocked = true;
-        playerData.skillPointsAvailable = 0;
+        playerData.skillsAllocationActive = false;
         playerData.skillsLockBaseline = deepCopy(playerData.skills);
         savePlayerData();
         updateDisplay();
@@ -1192,6 +1193,7 @@
             playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + gained.length * SKILL_POINTS_PER_LEVEL;
             // Unlock skill allocation for the new level-up window and snapshot baseline
             playerData.skillsLocked = false;
+            playerData.skillsAllocationActive = true;
             playerData.skillsLockBaseline = deepCopy(playerData.skills);
             savePlayerData();
         }
