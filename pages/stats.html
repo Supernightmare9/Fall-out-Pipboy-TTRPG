@@ -1047,26 +1047,21 @@
     function updateSkill(skillName, amount) {
         if (amount > 0) {
             if ((playerData.skillPointsAvailable || 0) <= 0) return;
-            playerData.skillPointsAvailable = Math.max(0, (playerData.skillPointsAvailable || 0) - 1);
-        } else if (amount < 0) {
-            // Block decrement when skills are locked in
             if (playerData.skillsLocked) return;
-            if ((playerData.skills[skillName] || 0) <= 0) return;
-            playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + 1;
+            playerData.skillPointsAvailable = Math.max(0, (playerData.skillPointsAvailable || 0) - 1);
         }
         playerData.skills[skillName] = Math.max(0, Math.min(100, (playerData.skills[skillName]||0) + amount));
         savePlayerData(); updateDisplay();
     }
 
-    function toggleTagSkill(skill) {
+    function toggleTagSkill(skill, checkbox) {
         var idx = playerData.tagSkills.indexOf(skill);
         if (idx > -1) {
             playerData.tagSkills.splice(idx,1);
         } else {
             if (playerData.tagSkills.length >= MAX_TAG_SKILLS) {
-                alert('Maximum tag skills reached (' + MAX_TAG_SKILLS + ')');
-                // Revert visual state – re-render so checkbox goes back to unchecked
-                updateDisplay();
+                // Hard revert – do not save, do not allow 4th tag
+                if (checkbox) checkbox.checked = false;
                 return;
             }
             playerData.tagSkills.push(skill);
@@ -1089,30 +1084,33 @@
         // Update Lock In button visibility/label
         var lockBtn = document.getElementById('lockInBtn');
         if (lockBtn) {
-            lockBtn.style.display = '';
             if (locked) {
+                lockBtn.style.display = '';
                 lockBtn.textContent  = '🔒 Skills Locked';
                 lockBtn.disabled     = true;
                 lockBtn.style.opacity = '0.5';
-            } else {
+            } else if (pts > 0) {
+                lockBtn.style.display = '';
                 lockBtn.textContent  = 'Lock In Skills';
                 lockBtn.disabled     = false;
                 lockBtn.style.opacity = '1';
+            } else {
+                lockBtn.style.display = 'none';
             }
         }
 
+        var atMax = playerData.tagSkills.length >= MAX_TAG_SKILLS;
         document.getElementById('skillsGrid').innerHTML = SKILLS.map(function(skill){
             var sp     = getSpecialForSkill(skill);
             var val    = playerData.skills[skill] || 0;
             var tagged = playerData.tagSkills.indexOf(skill) !== -1;
             var bonus  = calculateSkillBonus(val, tagged);
-            var canInc = pts > 0;
-            // Decrement blocked when skill is at 0 OR skills are locked in
-            var canDec = val > 0 && !locked;
+            var canInc = pts > 0 && !locked;
             var displayVal = tagged ? val + TAG_SKILL_BONUS : val;
+            var cbDisabled = (atMax && !tagged) ? ' disabled' : '';
             return '<div class="skill-item">' +
                 '<div class="skill-left">' +
-                    '<input type="checkbox" class="skill-checkbox" ' + (tagged?'checked':'') + ' onchange="toggleTagSkill(\''+skill+'\')">'  +
+                    '<input type="checkbox" class="skill-checkbox" ' + (tagged?'checked':'') + cbDisabled + ' onchange="toggleTagSkill(\''+skill+'\', this)">'  +
                     '<div class="skill-info">' +
                         '<div class="skill-name">'+skill+'</div>' +
                         '<div class="skill-special">'+sp+'</div>' +
@@ -1120,9 +1118,8 @@
                     '</div>' +
                 '</div>' +
                 '<div class="skill-controls">' +
-                    '<button class="skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',-1)" ' + (!canDec ? 'disabled title="'+(locked?'Skills are locked in':'Already at 0')+'"' : 'title="Decrease skill"') + '>&minus;</button>' +
                     '<span class="skill-value">'+displayVal+'</span>' +
-                    '<button class="skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',1)" ' + (!canInc ? 'disabled title="No skill points available"' : 'title="Increase skill (costs 1 point)"') + '>+</button>' +
+                    '<button class="skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',1)" ' + (!canInc ? 'disabled title="'+(locked?'Skills are locked in':'No skill points available')+'"' : 'title="Increase skill (costs 1 point)"') + '>+</button>' +
                 '</div>' +
                 '</div>';
         }).join('');
@@ -1131,6 +1128,7 @@
     // ---- LOCK IN SKILLS ----
     function lockInSkills() {
         playerData.skillsLocked = true;
+        playerData.skillPointsAvailable = 0;
         savePlayerData();
         updateDisplay();
     }
