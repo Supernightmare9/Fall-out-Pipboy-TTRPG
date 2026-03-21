@@ -498,6 +498,7 @@
                 <span style="font-size:9px;color:rgba(74,222,128,0.5);">(earn points by leveling up)</span>
                 <button id="lockInBtn" class="update-btn" onclick="lockInSkills()" style="margin-left:12px;display:none;">Lock In Skills</button>
             </div>
+            <div class="msg-box" id="skillPointsMessage"></div>
             <div class="skills-grid" id="skillsGrid"></div>
         </div>
 
@@ -568,7 +569,7 @@
                   'Explosives','Lockpick','Medicine','Science','Repair',
                   'Sneak','Speech','Unarmed','Survival'];
 
-    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, skillsLocked:false, skillsLockBaseline:{} };
+    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, skillsLocked:false, skillsAllocationActive:false, skillsLockBaseline:{} };
     var debuffs    = [];
     var boosts     = [];
     var hpLastUpdated = null;
@@ -603,6 +604,12 @@
         // Backward compat: ensure skillsLockBaseline exists
         if (!playerData.skillsLockBaseline || typeof playerData.skillsLockBaseline !== 'object') {
             playerData.skillsLockBaseline = deepCopy(playerData.skills || {});
+        }
+        // Backward compat: ensure skillsAllocationActive exists
+        if (playerData.skillsAllocationActive === undefined) playerData.skillsAllocationActive = false;
+        // If mid-allocation (has unspent points and not locked), restore allocation window
+        if (!playerData.skillsLocked && (playerData.skillPointsAvailable || 0) > 0) {
+            playerData.skillsAllocationActive = true;
         }
         var sH = localStorage.getItem('pipboyHealth');
         var sAP = localStorage.getItem('pipboyActionPoints');
@@ -1054,10 +1061,12 @@
         if (amount > 0) {
             if ((playerData.skillPointsAvailable || 0) <= 0) return;
             if (playerData.skillsLocked) return;
+            if (!playerData.skillsAllocationActive) return;
             playerData.skillPointsAvailable = Math.max(0, (playerData.skillPointsAvailable || 0) - 1);
         } else if (amount < 0) {
             // Decrement: only allowed during allocation window and never below baseline
             if (playerData.skillsLocked) return;
+            if (!playerData.skillsAllocationActive) return;
             var baseline = (playerData.skillsLockBaseline || {})[skillName] || 0;
             if ((playerData.skills[skillName] || 0) <= baseline) return;
             playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + 1;
@@ -1096,16 +1105,12 @@
         // Update Lock In button visibility/label
         var lockBtn = document.getElementById('lockInBtn');
         if (lockBtn) {
-            if (locked) {
-                lockBtn.style.display = '';
-                lockBtn.textContent  = '🔒 Skills Locked';
-                lockBtn.disabled     = true;
-                lockBtn.style.opacity = '0.5';
-            } else if (pts > 0) {
+            var allocActive = !!playerData.skillsAllocationActive;
+            if (allocActive && !locked) {
                 lockBtn.style.display = '';
                 lockBtn.textContent  = 'Lock In Skills';
-                lockBtn.disabled     = false;
-                lockBtn.style.opacity = '1';
+                lockBtn.disabled     = pts > 0;
+                lockBtn.style.opacity = pts > 0 ? '0.5' : '1';
             } else {
                 lockBtn.style.display = 'none';
             }
@@ -1117,9 +1122,9 @@
             var val    = playerData.skills[skill] || 0;
             var tagged = playerData.tagSkills.indexOf(skill) !== -1;
             var bonus  = calculateSkillBonus(val, tagged);
-            var canInc = pts > 0 && !locked;
+            var canInc = pts > 0 && !locked && !!playerData.skillsAllocationActive;
             var baseline = (playerData.skillsLockBaseline || {})[skill] || 0;
-            var canDec = !locked && (val > baseline);
+            var canDec = !locked && !!playerData.skillsAllocationActive && (val > baseline);
             var displayVal = tagged ? val + TAG_SKILL_BONUS : val;
             var cbDisabled = (atMax && !tagged) ? ' disabled' : '';
             return '<div class="skill-item">' +
@@ -1142,8 +1147,13 @@
 
     // ---- LOCK IN SKILLS ----
     function lockInSkills() {
+        var sp = parseInt(playerData.skillPointsAvailable || 0);
+        if (sp !== 0) {
+            showMsg('skillPointsMessage', '⚠ Spend all skill points before locking in.', false);
+            return;
+        }
         playerData.skillsLocked = true;
-        playerData.skillPointsAvailable = 0;
+        playerData.skillsAllocationActive = false;
         playerData.skillsLockBaseline = deepCopy(playerData.skills);
         savePlayerData();
         updateDisplay();
@@ -1192,6 +1202,7 @@
             playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + gained.length * SKILL_POINTS_PER_LEVEL;
             // Unlock skill allocation for the new level-up window and snapshot baseline
             playerData.skillsLocked = false;
+            playerData.skillsAllocationActive = true;
             playerData.skillsLockBaseline = deepCopy(playerData.skills);
             savePlayerData();
         }
