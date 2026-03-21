@@ -477,6 +477,7 @@
                         <div class="input-row">
                             <input type="number" id="critChanceInput" class="compact-input" placeholder="0-100" min="0" max="100">
                             <button class="update-btn" onclick="updateCritChance()">Update Crit</button>
+                            <button class="update-btn" id="useCritBtn" onclick="useCrit()" style="display:none;background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.5);color:#ff6b6b;">USE CRIT</button>
                         </div>
                         <div class="msg-box" id="critChanceMessage"></div>
                     </div>
@@ -495,6 +496,7 @@
                 <span class="skill-points-label">Skill Points Available:</span>
                 <span class="skill-points-value" id="skillPointsCount">0</span>
                 <span style="font-size:9px;color:rgba(74,222,128,0.5);">(earn points by leveling up)</span>
+                <button id="lockInBtn" class="update-btn" onclick="lockInSkills()" style="margin-left:12px;display:none;">Lock In Skills</button>
             </div>
             <div class="skills-grid" id="skillsGrid"></div>
         </div>
@@ -564,7 +566,7 @@
                   'Explosives','Lockpick','Medicine','Science','Repair',
                   'Sneak','Speech','Unarmed','Survival'];
 
-    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0 };
+    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, skillsLocked:false };
     var debuffs    = [];
     var boosts     = [];
     var hpLastUpdated = null;
@@ -591,6 +593,11 @@
     function loadPlayerData() {
         var saved = localStorage.getItem('pipboyPlayerData');
         if (saved) { try { playerData = JSON.parse(saved); } catch(e){} }
+        // Sanitize: never more than MAX_TAG_SKILLS tags
+        if (!Array.isArray(playerData.tagSkills)) playerData.tagSkills = [];
+        if (playerData.tagSkills.length > MAX_TAG_SKILLS) playerData.tagSkills = playerData.tagSkills.slice(0, MAX_TAG_SKILLS);
+        // Ensure skillsLocked is defined
+        if (playerData.skillsLocked === undefined) playerData.skillsLocked = false;
         var sH = localStorage.getItem('pipboyHealth');
         var sAP = localStorage.getItem('pipboyActionPoints');
         if (sH)  document.getElementById('health').textContent        = sH;
@@ -914,8 +921,10 @@
     function refreshCritDisplay(val) {
         var dispEl = document.getElementById('critChanceDisplay');
         var fill   = document.getElementById('critChanceBar');
-        dispEl.textContent = val + '%';
-        fill.style.width   = val + '%';
+        // Clamp display at 100
+        var displayVal = Math.min(100, val);
+        dispEl.textContent = displayVal + '%';
+        fill.style.width   = displayVal + '%';
         if (val <= 25) {
             fill.className      = 'bar-fill bar-crit-green';
             dispEl.style.color  = '#4ade80';
@@ -926,6 +935,17 @@
             fill.className      = 'bar-fill bar-crit-red';
             dispEl.style.color  = '#ff6b6b';
         }
+        // Show "USE CRIT" button when gauge reaches 100
+        var useBtn = document.getElementById('useCritBtn');
+        if (useBtn) useBtn.style.display = val >= 100 ? 'inline-block' : 'none';
+    }
+
+    function useCrit() {
+        var val = parseInt(localStorage.getItem('pipboyCriticalChance') || '0');
+        if (val < 100) { showMsg('critChanceMessage', '⚠ Critical gauge is not at 100 yet.', false); return; }
+        localStorage.setItem('pipboyCriticalChance', 0);
+        refreshCritDisplay(0);
+        showMsg('critChanceMessage', '✓ Critical used! Gauge reset to 0.', true);
     }
 
     function loadCritChance() {
@@ -1029,6 +1049,8 @@
             if ((playerData.skillPointsAvailable || 0) <= 0) return;
             playerData.skillPointsAvailable = Math.max(0, (playerData.skillPointsAvailable || 0) - 1);
         } else if (amount < 0) {
+            // Block decrement when skills are locked in
+            if (playerData.skillsLocked) return;
             if ((playerData.skills[skillName] || 0) <= 0) return;
             playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + 1;
         }
@@ -1041,14 +1063,20 @@
         if (idx > -1) {
             playerData.tagSkills.splice(idx,1);
         } else {
-            if (playerData.tagSkills.length >= MAX_TAG_SKILLS) { alert('Maximum tag skills reached ('+MAX_TAG_SKILLS+')'); return; }
+            if (playerData.tagSkills.length >= MAX_TAG_SKILLS) {
+                alert('Maximum tag skills reached (' + MAX_TAG_SKILLS + ')');
+                // Revert visual state – re-render so checkbox goes back to unchecked
+                updateDisplay();
+                return;
+            }
             playerData.tagSkills.push(skill);
         }
         savePlayerData(); updateDisplay();
     }
 
     function updateDisplay() {
-        var pts = playerData.skillPointsAvailable || 0;
+        var pts    = playerData.skillPointsAvailable || 0;
+        var locked = !!playerData.skillsLocked;
         document.getElementById('tagBadge').textContent = playerData.tagSkills.length + '/' + MAX_TAG_SKILLS;
 
         // Update skill points display
@@ -1058,13 +1086,30 @@
             spEl.className = 'skill-points-value' + (pts <= 0 ? ' skill-points-zero' : '');
         }
 
+        // Update Lock In button visibility/label
+        var lockBtn = document.getElementById('lockInBtn');
+        if (lockBtn) {
+            lockBtn.style.display = '';
+            if (locked) {
+                lockBtn.textContent  = '🔒 Skills Locked';
+                lockBtn.disabled     = true;
+                lockBtn.style.opacity = '0.5';
+            } else {
+                lockBtn.textContent  = 'Lock In Skills';
+                lockBtn.disabled     = false;
+                lockBtn.style.opacity = '1';
+            }
+        }
+
         document.getElementById('skillsGrid').innerHTML = SKILLS.map(function(skill){
             var sp     = getSpecialForSkill(skill);
             var val    = playerData.skills[skill] || 0;
             var tagged = playerData.tagSkills.indexOf(skill) !== -1;
             var bonus  = calculateSkillBonus(val, tagged);
             var canInc = pts > 0;
-            var canDec = val > 0;
+            // Decrement blocked when skill is at 0 OR skills are locked in
+            var canDec = val > 0 && !locked;
+            var displayVal = tagged ? val + TAG_SKILL_BONUS : val;
             return '<div class="skill-item">' +
                 '<div class="skill-left">' +
                     '<input type="checkbox" class="skill-checkbox" ' + (tagged?'checked':'') + ' onchange="toggleTagSkill(\''+skill+'\')">'  +
@@ -1075,12 +1120,19 @@
                     '</div>' +
                 '</div>' +
                 '<div class="skill-controls">' +
-                    '<button class="skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',-1)" ' + (!canDec ? 'disabled title="Already at 0"' : 'title="Decrease skill"') + '>&minus;</button>' +
-                    '<span class="skill-value">'+(tagged ? val+' (+'+TAG_SKILL_BONUS+')' : val)+'</span>' +
+                    '<button class="skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',-1)" ' + (!canDec ? 'disabled title="'+(locked?'Skills are locked in':'Already at 0')+'"' : 'title="Decrease skill"') + '>&minus;</button>' +
+                    '<span class="skill-value">'+displayVal+'</span>' +
                     '<button class="skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',1)" ' + (!canInc ? 'disabled title="No skill points available"' : 'title="Increase skill (costs 1 point)"') + '>+</button>' +
                 '</div>' +
                 '</div>';
         }).join('');
+    }
+
+    // ---- LOCK IN SKILLS ----
+    function lockInSkills() {
+        playerData.skillsLocked = true;
+        savePlayerData();
+        updateDisplay();
     }
 
     // ---- PERKS ----
@@ -1124,6 +1176,8 @@
         var gained = checkLevelUp(cur, nv);
         if (gained.length > 0) {
             playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + gained.length * SKILL_POINTS_PER_LEVEL;
+            // Unlock skill allocation for the new level-up window
+            playerData.skillsLocked = false;
             savePlayerData();
         }
         updateXPDisplay(nv);
