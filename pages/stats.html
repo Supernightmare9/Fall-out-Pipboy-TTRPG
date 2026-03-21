@@ -547,7 +547,7 @@
     var MAX_ACTION_POINTS = 20;
     var MAX_RAD           = 1000;
     var MAX_TAG_SKILLS    = 3;
-    var TAG_SKILL_BONUS   = 10;
+    var TAG_SKILL_BONUS   = 15;
     var SKILL_POINTS_PER_LEVEL = 13;
 
     var SKILLS_BY_SPECIAL = {
@@ -1076,7 +1076,7 @@
                 '</div>' +
                 '<div class="skill-controls">' +
                     '<button class="skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',-1)" ' + (!canDec ? 'disabled title="Already at 0"' : 'title="Decrease skill"') + '>&minus;</button>' +
-                    '<span class="skill-value">'+val+'</span>' +
+                    '<span class="skill-value">'+(tagged ? val+' (+'+TAG_SKILL_BONUS+')' : val)+'</span>' +
                     '<button class="skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',1)" ' + (!canInc ? 'disabled title="No skill points available"' : 'title="Increase skill (costs 1 point)"') + '>+</button>' +
                 '</div>' +
                 '</div>';
