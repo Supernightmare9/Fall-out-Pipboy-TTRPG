@@ -6,8 +6,420 @@
     <title>Vault 215 — Overseer Messages</title>
     <link rel="stylesheet" href="../../css/branding.css">
     <link rel="stylesheet" href="../../css/overseer/overseerstyle.css">
+    <style>
+        :root {
+            --overseer-blue:        #0a1628;
+            --overseer-blue-mid:    #0d2045;
+            --overseer-blue-bright: #1a3a6e;
+            --overseer-gold:        #d4a017;
+            --overseer-gold-bright: #f0c040;
+            --overseer-gold-dim:    #8b6914;
+            --overseer-white:       #e8e8e8;
+            --overseer-red:         #cc2200;
+            --overseer-red-bright:  #ff3300;
+            --overseer-green:       #00cc66;
+            --overseer-green-bright:#00ff80;
+            --overseer-dark:        #04080f;
+            --overseer-border:      #2a5298;
+            --overseer-glow-gold:   rgba(212,160,23,0.6);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        html,body{height:100%;overflow:hidden;}
+        body{
+            width:100%;
+            background-color:var(--overseer-dark);
+            color:var(--overseer-white);
+            font-family:'Courier New',monospace;
+            display:flex;flex-direction:column;
+        }
+        body::before{
+            content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+            background:repeating-linear-gradient(0deg,rgba(0,0,0,.18),rgba(0,0,0,.18) 1px,transparent 1px,transparent 3px);
+            pointer-events:none;z-index:9999;
+        }
+
+        /* ── COMMAND BAR ─────────────────────────────────────────────── */
+        .command-bar{
+            background:var(--overseer-blue-mid);
+            border-bottom:2px solid var(--overseer-gold);
+            box-shadow:0 2px 20px var(--overseer-glow-gold);
+            padding:14px 24px 14px 80px;
+            display:flex;align-items:center;justify-content:space-between;
+            flex-wrap:wrap;gap:10px;flex-shrink:0;z-index:100;position:relative;
+        }
+        .command-bar-left{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+        .overseer-title-bar{font-size:18px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:3px;text-shadow:0 0 10px var(--overseer-glow-gold);}
+        .overseer-badge{font-size:9px;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;}
+        .cmd-btn{
+            background:transparent;border:1px solid var(--overseer-gold);color:var(--overseer-gold);
+            font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;
+            padding:7px 14px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+        }
+        .cmd-btn:hover{background:rgba(212,160,23,.15);box-shadow:0 0 10px rgba(212,160,23,.3);}
+        .cmd-btn.success{border-color:var(--overseer-green);color:var(--overseer-green-bright);}
+        .cmd-btn.success:hover{background:rgba(0,204,102,.15);}
+
+        /* ── LAYOUT ──────────────────────────────────────────────────── */
+        #msgLayout{display:flex;flex:1;overflow:hidden;}
+
+        /* ── SIDEBAR ─────────────────────────────────────────────────── */
+        #msgSidebar{
+            width:300px;min-width:300px;flex-shrink:0;
+            border-right:1px solid var(--overseer-border);
+            background:var(--overseer-blue-mid);
+            display:flex;flex-direction:column;
+            overflow:hidden;
+        }
+        #sidebarTop{
+            padding:10px;border-bottom:1px solid var(--overseer-border);
+            background:var(--overseer-blue-bright);
+            flex-shrink:0;
+        }
+        #newConvBtn{
+            width:100%;background:transparent;border:1px solid var(--overseer-gold);
+            color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:11px;
+            letter-spacing:1px;padding:7px 12px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+            margin-bottom:8px;text-align:left;
+        }
+        #newConvBtn:hover{background:rgba(212,160,23,.12);box-shadow:0 0 8px rgba(212,160,23,.3);}
+        #convSearch{
+            width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;
+            padding:6px 9px;outline:none;
+        }
+        #convSearch:focus{border-color:var(--overseer-gold);}
+        #convSearch::placeholder{color:rgba(232,232,232,.3);}
+        #convList{flex:1;overflow-y:auto;}
+        #convList::-webkit-scrollbar{width:4px;}
+        #convList::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        #convList::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);}
+
+        .conv-section-label{
+            padding:5px 10px;font-size:9px;color:rgba(232,232,232,.4);
+            letter-spacing:2px;border-bottom:1px solid rgba(42,82,152,.3);
+            text-transform:uppercase;
+        }
+        .conv-item{
+            padding:10px 12px;cursor:pointer;
+            border-bottom:1px solid rgba(42,82,152,.3);
+            display:flex;flex-direction:column;gap:3px;transition:background .15s;
+        }
+        .conv-item:hover{background:rgba(212,160,23,.05);}
+        .conv-item.active{background:rgba(212,160,23,.1);border-left:3px solid var(--overseer-gold);}
+        .conv-top{display:flex;justify-content:space-between;align-items:center;}
+        .conv-name{font-size:12px;font-weight:bold;color:var(--overseer-gold-bright);text-transform:uppercase;letter-spacing:.5px;}
+        .conv-time{font-size:9px;color:rgba(232,232,232,.4);}
+        .conv-preview{font-size:10px;color:rgba(232,232,232,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .unread-dot{width:8px;height:8px;border-radius:50%;background:var(--overseer-gold);flex-shrink:0;}
+
+        /* ── MESSAGE THREAD ──────────────────────────────────────────── */
+        #msgDetail{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+        #detailEmpty{flex:1;display:flex;align-items:center;justify-content:center;color:rgba(212,160,23,.25);font-size:14px;letter-spacing:3px;text-transform:uppercase;}
+        #threadHeader{
+            padding:10px 16px;border-bottom:1px solid var(--overseer-border);
+            background:var(--overseer-blue-bright);flex-shrink:0;
+            display:flex;justify-content:space-between;align-items:center;
+        }
+        #threadHeaderLeft h2{font-size:13px;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;}
+        #threadHeaderLeft p{font-size:9px;color:rgba(232,232,232,.5);}
+        #threadHeaderActions{display:flex;gap:6px;}
+        .hdr-btn{
+            background:transparent;border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;
+            font-size:10px;padding:5px 10px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+        }
+        .hdr-btn:hover{border-color:var(--overseer-gold);color:var(--overseer-gold-bright);}
+
+        #messageThread{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+        #messageThread::-webkit-scrollbar{width:5px;}
+        #messageThread::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        #messageThread::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+
+        .msg-bubble{max-width:75%;display:flex;flex-direction:column;gap:3px;}
+        .msg-bubble.sent{align-self:flex-end;align-items:flex-end;}
+        .msg-bubble.received{align-self:flex-start;align-items:flex-start;}
+        .msg-sender{font-size:9px;color:rgba(232,232,232,.45);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+        .msg-body{
+            padding:9px 13px;font-size:11px;line-height:1.5;
+            border-radius:2px;
+        }
+        .msg-bubble.sent .msg-body{
+            background:var(--overseer-blue-bright);border:1px solid var(--overseer-gold-dim);
+            color:var(--overseer-white);
+        }
+        .msg-bubble.received .msg-body{
+            background:rgba(42,82,152,.35);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);
+        }
+        .msg-npc .msg-body{
+            background:rgba(204,34,0,.12);border-color:rgba(204,34,0,.4);
+        }
+        .msg-time{font-size:9px;color:rgba(232,232,232,.3);}
+
+        /* ── COMPOSE AREA ────────────────────────────────────────────── */
+        #composeArea{
+            border-top:2px solid var(--overseer-gold);
+            background:var(--overseer-blue-mid);
+            padding:12px 16px;flex-shrink:0;
+        }
+        #senderRow{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+        #senderLabel{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+        #senderSelect{
+            background:var(--overseer-dark);border:1px solid var(--overseer-gold);
+            color:var(--overseer-gold-bright);font-family:'Courier New',monospace;font-size:11px;
+            padding:5px 9px;cursor:pointer;outline:none;flex:1;max-width:280px;
+        }
+        #senderSelect:focus{border-color:var(--overseer-gold-bright);}
+        #composeRow{display:flex;gap:8px;align-items:flex-end;}
+        #msgTextarea{
+            flex:1;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;
+            padding:8px 10px;resize:none;height:60px;outline:none;line-height:1.5;
+            transition:border-color .2s;
+        }
+        #msgTextarea:focus{border-color:var(--overseer-gold);}
+        #msgTextarea::placeholder{color:rgba(232,232,232,.3);}
+        #sendBtn{
+            background:var(--overseer-blue-bright);border:2px solid var(--overseer-gold);
+            color:var(--overseer-gold-bright);font-family:'Courier New',monospace;font-size:12px;
+            font-weight:bold;letter-spacing:1px;padding:0 20px;height:60px;
+            cursor:pointer;text-transform:uppercase;transition:all .2s;
+        }
+        #sendBtn:hover{background:rgba(212,160,23,.2);box-shadow:0 0 15px rgba(212,160,23,.4);}
+
+        /* ── STATUS TOAST ────────────────────────────────────────────── */
+        #statusToast{position:fixed;bottom:30px;right:30px;background:var(--overseer-blue-mid);border:2px solid var(--overseer-green);color:var(--overseer-green-bright);font-family:'Courier New',monospace;font-size:12px;padding:12px 20px;z-index:9000;box-shadow:0 0 20px rgba(0,204,102,.4);opacity:0;transition:opacity .3s;pointer-events:none;}
+        #statusToast.visible{opacity:1;}
+        #statusToast.error{border-color:var(--overseer-red-bright);color:var(--overseer-red-bright);}
+
+        ::-webkit-scrollbar{width:6px;}
+        ::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        ::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+
+        @media(max-width:768px){
+            .command-bar{padding-left:70px;}
+            #msgSidebar{width:220px;min-width:220px;}
+        }
+        @media(max-width:600px){
+            #msgLayout{flex-direction:column;}
+            #msgSidebar{width:100%;min-width:0;max-height:260px;border-right:none;border-bottom:1px solid var(--overseer-border);}
+        }
+    </style>
 </head>
 <body>
 <script src="../../assets/helpers/navigation/overseer-navigation.js"></script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     COMMAND BAR
+══════════════════════════════════════════════════════════════════ -->
+<div class="command-bar">
+    <div class="command-bar-left">
+        <div>
+            <div class="overseer-title-bar">📻 OVERSEER MESSAGES</div>
+            <div class="overseer-badge">⬡ VAULT 215 AUTHORITY CONSOLE — MESSAGING MODULE</div>
+        </div>
+        <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
+    </div>
+    <button class="cmd-btn success" onclick="newConversation()">+ NEW CONVERSATION</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MESSAGING LAYOUT
+══════════════════════════════════════════════════════════════════ -->
+<div id="msgLayout">
+
+    <!-- LEFT: Conversation List -->
+    <div id="msgSidebar">
+        <div id="sidebarTop">
+            <button id="newConvBtn" onclick="newConversation()">+ NEW CONVERSATION</button>
+            <input type="text" id="convSearch" placeholder="Search conversations…" oninput="filterConvs()">
+        </div>
+        <div id="convList">
+            <div class="conv-section-label">ACTIVE CONVERSATIONS</div>
+
+            <div class="conv-item active" onclick="openConv(this,'Vault_Runner_01','Player Message','10:42 AM')">
+                <div class="conv-top">
+                    <span class="conv-name">Vault_Runner_01</span>
+                    <span class="conv-time">10:42 AM</span>
+                </div>
+                <div class="conv-preview">We need stimpaks before the next area…</div>
+            </div>
+
+            <div class="conv-item" onclick="openConv(this,'GhoulSlayer99','Unread','09:15 AM')">
+                <div class="conv-top">
+                    <span class="conv-name">GhoulSlayer99</span>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <div class="unread-dot"></div>
+                        <span class="conv-time">09:15 AM</span>
+                    </div>
+                </div>
+                <div class="conv-preview" style="color:rgba(232,232,232,.7);">Can I pick the lock on the vault door?</div>
+            </div>
+
+            <div class="conv-item" onclick="openConv(this,'WastelandWanderer','Player Message','Yesterday')">
+                <div class="conv-top">
+                    <span class="conv-name">WastelandWanderer</span>
+                    <span class="conv-time">Yesterday</span>
+                </div>
+                <div class="conv-preview">Thanks for the XP boost!</div>
+            </div>
+
+            <div class="conv-section-label" style="margin-top:8px;">NPC CHANNELS</div>
+
+            <div class="conv-item" onclick="openConv(this,'Merchant Benny','NPC Channel','11:00 AM')">
+                <div class="conv-top">
+                    <span class="conv-name" style="color:#60a5fa;">Merchant Benny</span>
+                    <span class="conv-time">11:00 AM</span>
+                </div>
+                <div class="conv-preview">I have a proposition for you…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: Message Thread -->
+    <div id="msgDetail">
+        <div id="detailEmpty">[ SELECT A CONVERSATION ]</div>
+
+        <!-- Thread (hidden until conversation selected) -->
+        <div id="threadContent" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+            <div id="threadHeader">
+                <div id="threadHeaderLeft">
+                    <h2 id="threadTitle">VAULT_RUNNER_01</h2>
+                    <p id="threadSub">Direct message · Player</p>
+                </div>
+                <div id="threadHeaderActions">
+                    <button class="hdr-btn" onclick="markAllRead()">✓ MARK READ</button>
+                    <button class="hdr-btn" onclick="archiveConv()">🗄 ARCHIVE</button>
+                </div>
+            </div>
+
+            <div id="messageThread">
+                <!-- Placeholder message history -->
+                <div class="msg-bubble received">
+                    <div class="msg-sender">VAULT_RUNNER_01 · Player</div>
+                    <div class="msg-body">Overseer, we've reached the irradiated zone. We need stimpaks and possibly a rad suit before proceeding.</div>
+                    <div class="msg-time">10:30 AM</div>
+                </div>
+                <div class="msg-bubble sent">
+                    <div class="msg-sender">OVERSEER (You)</div>
+                    <div class="msg-body">Understood. I'm arranging a supply drop at waypoint Charlie. Proceed with caution — rad levels are elevated near the reactor.</div>
+                    <div class="msg-time">10:35 AM</div>
+                </div>
+                <div class="msg-bubble received">
+                    <div class="msg-sender">VAULT_RUNNER_01 · Player</div>
+                    <div class="msg-body">Copy that. We need stimpaks before the next area. Any chance of backup?</div>
+                    <div class="msg-time">10:42 AM</div>
+                </div>
+            </div>
+
+            <!-- Compose Area -->
+            <div id="composeArea">
+                <div id="senderRow">
+                    <span id="senderLabel">SEND AS:</span>
+                    <select id="senderSelect">
+                        <option value="overseer">⬡ OVERSEER (Official)</option>
+                        <option value="npc_benny">Merchant Benny (NPC)</option>
+                        <option value="npc_doc">Doc Mitchell (NPC)</option>
+                        <option value="npc_commander">Commander Hayes (NPC)</option>
+                        <option value="npc_custom">[ Custom NPC… ]</option>
+                    </select>
+                </div>
+                <div id="composeRow">
+                    <textarea id="msgTextarea" placeholder="Type your message as Overseer or NPC…"></textarea>
+                    <button id="sendBtn" onclick="sendMessage()">► SEND</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- STATUS TOAST -->
+<div id="statusToast"></div>
+
+<script>
+(function() {
+    var cname = sessionStorage.getItem('campaignName') || sessionStorage.getItem('campaignId') || '';
+    if (cname) { var el = document.getElementById('campaignDisplay'); if (el) el.textContent = '⚑ ' + cname; }
+
+    var _activeConv = null;
+
+    window.openConv = function(el, name, sub, time) {
+        document.querySelectorAll('.conv-item').forEach(function(i){ i.classList.remove('active'); });
+        el.classList.add('active');
+        _activeConv = name;
+
+        document.getElementById('detailEmpty').style.display = 'none';
+        document.getElementById('threadContent').style.display = 'flex';
+
+        document.getElementById('threadTitle').textContent = name.toUpperCase();
+        document.getElementById('threadSub').textContent = sub + ' · ' + time;
+
+        // Remove unread dot when opened
+        var dot = el.querySelector('.unread-dot');
+        if (dot) dot.remove();
+    };
+
+    window.filterConvs = function() {
+        var q = document.getElementById('convSearch').value.toLowerCase();
+        document.querySelectorAll('.conv-item').forEach(function(item) {
+            var nm = (item.querySelector('.conv-name') || {}).textContent || '';
+            item.style.display = nm.toLowerCase().includes(q) ? '' : 'none';
+        });
+    };
+
+    window.newConversation = function() {
+        showToast('New conversation — will connect to player list. (Placeholder)');
+    };
+
+    window.sendMessage = function() {
+        var text = document.getElementById('msgTextarea').value.trim();
+        if (!text) { showToast('Cannot send an empty message.', true); return; }
+        if (!_activeConv) { showToast('Select a conversation first.', true); return; }
+
+        var sender = document.getElementById('senderSelect');
+        var senderText = sender.options[sender.selectedIndex].text;
+        var thread = document.getElementById('messageThread');
+
+        var bubble = document.createElement('div');
+        bubble.className = 'msg-bubble sent';
+        var now = new Date();
+        var timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+        bubble.innerHTML = '<div class="msg-sender">' + senderText.replace(/[<>]/g,'') + '</div>' +
+            '<div class="msg-body">' + text.replace(/[<>]/g,'') + '</div>' +
+            '<div class="msg-time">' + timeStr + '</div>';
+        thread.appendChild(bubble);
+        thread.scrollTop = thread.scrollHeight;
+
+        document.getElementById('msgTextarea').value = '';
+        showToast('Message sent as "' + senderText.replace(/[<>]/g,'') + '". (Placeholder — not wired to backend yet)');
+    };
+
+    window.markAllRead = function() { showToast('Messages marked as read. (Placeholder)'); };
+    window.archiveConv = function() { showToast('Conversation archived. (Placeholder)'); };
+
+    // Allow Enter to send (Shift+Enter = newline)
+    document.getElementById('msgTextarea').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    function showToast(msg, isError) {
+        var t = document.getElementById('statusToast');
+        t.textContent = msg;
+        t.className = isError ? 'error visible' : 'visible';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+    }
+
+    // Auto-open first conversation
+    var firstConv = document.querySelector('.conv-item.active');
+    if (firstConv) {
+        openConv(firstConv, 'Vault_Runner_01', 'Direct message · Player', '10:42 AM');
+    }
+})();
+</script>
 </body>
 </html>

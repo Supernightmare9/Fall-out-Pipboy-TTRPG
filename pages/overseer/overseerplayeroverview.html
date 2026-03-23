@@ -3,11 +3,816 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault 215 — Overseer Player Overview</title>
+    <title>Vault 215 — Player Overview — Admin Console</title>
     <link rel="stylesheet" href="../../css/branding.css">
     <link rel="stylesheet" href="../../css/overseer/overseerstyle.css">
+    <style>
+        :root {
+            --overseer-blue:        #0a1628;
+            --overseer-blue-mid:    #0d2045;
+            --overseer-blue-bright: #1a3a6e;
+            --overseer-gold:        #d4a017;
+            --overseer-gold-bright: #f0c040;
+            --overseer-gold-dim:    #8b6914;
+            --overseer-white:       #e8e8e8;
+            --overseer-red:         #cc2200;
+            --overseer-red-bright:  #ff3300;
+            --overseer-green:       #00cc66;
+            --overseer-green-bright:#00ff80;
+            --overseer-dark:        #04080f;
+            --overseer-border:      #2a5298;
+            --overseer-glow-gold:   rgba(212,160,23,0.6);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            width:100%;min-height:100vh;
+            background-color:var(--overseer-dark);
+            color:var(--overseer-white);
+            font-family:'Courier New',monospace;
+            background-image:
+                radial-gradient(circle at 15% 30%,rgba(42,82,152,.12) 0%,transparent 55%),
+                radial-gradient(circle at 85% 70%,rgba(212,160,23,.08) 0%,transparent 55%);
+        }
+        body::before{
+            content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+            background:repeating-linear-gradient(0deg,rgba(0,0,0,.18),rgba(0,0,0,.18) 1px,transparent 1px,transparent 3px);
+            pointer-events:none;z-index:9999;
+        }
+
+        /* ── COMMAND BAR ─────────────────────────────────────────────── */
+        .command-bar{
+            background:var(--overseer-blue-mid);
+            border-bottom:2px solid var(--overseer-gold);
+            box-shadow:0 2px 20px var(--overseer-glow-gold);
+            padding:14px 24px 14px 80px;
+            display:flex;align-items:center;justify-content:space-between;
+            flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;
+        }
+        .command-bar-left{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+        .overseer-title-bar{font-size:18px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:3px;text-shadow:0 0 10px var(--overseer-glow-gold);}
+        .overseer-badge{font-size:9px;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;}
+        .cmd-btn{
+            background:transparent;border:1px solid var(--overseer-gold);color:var(--overseer-gold);
+            font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;
+            padding:7px 14px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+        }
+        .cmd-btn:hover{background:rgba(212,160,23,.15);box-shadow:0 0 10px rgba(212,160,23,.3);}
+        .cmd-btn.success{border-color:var(--overseer-green);color:var(--overseer-green-bright);}
+        .cmd-btn.success:hover{background:rgba(0,204,102,.15);}
+        .cmd-btn.danger{border-color:var(--overseer-red-bright);color:var(--overseer-red-bright);}
+        .cmd-btn.danger:hover{background:rgba(255,51,0,.15);}
+
+        /* ── LAYOUT ──────────────────────────────────────────────────── */
+        .page-content{padding:20px 24px;max-width:1400px;margin:0 auto;}
+
+        /* ── PLAYER SELECTOR BAR ─────────────────────────────────────── */
+        .player-selector-bar{
+            background:var(--overseer-blue-mid);border:1px solid var(--overseer-border);
+            padding:14px 18px;margin-bottom:20px;
+            display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+        }
+        .player-selector-label{font-size:10px;color:var(--overseer-gold);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+        .player-select{
+            background:var(--overseer-dark);border:2px solid var(--overseer-gold);
+            color:var(--overseer-gold-bright);font-family:'Courier New',monospace;font-size:13px;
+            font-weight:bold;padding:8px 14px;cursor:pointer;outline:none;flex:1;max-width:360px;
+        }
+        .player-select:focus{border-color:var(--overseer-gold-bright);}
+        .player-status-badge{
+            font-size:10px;padding:4px 10px;letter-spacing:1px;text-transform:uppercase;border-radius:2px;
+            background:rgba(0,204,102,.15);border:1px solid rgba(0,204,102,.4);color:var(--overseer-green-bright);
+        }
+
+        /* ── ACCORDION ───────────────────────────────────────────────── */
+        .accordion-section{background:var(--overseer-blue-mid);border:1px solid var(--overseer-border);margin-bottom:10px;}
+        .accordion-header{
+            background:var(--overseer-blue-bright);border-bottom:1px solid var(--overseer-border);
+            padding:10px 16px;display:flex;align-items:center;justify-content:space-between;
+            cursor:pointer;user-select:none;transition:background .15s;
+        }
+        .accordion-header:hover{background:rgba(42,82,152,.8);}
+        .accordion-header.open{border-bottom:2px solid var(--overseer-gold);}
+        .accordion-title{font-size:12px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 6px var(--overseer-glow-gold);}
+        .accordion-toggle{color:var(--overseer-gold);font-size:14px;font-weight:bold;transition:transform .2s;}
+        .accordion-header.open .accordion-toggle{transform:rotate(180deg);}
+        .accordion-body{padding:16px;display:none;}
+        .accordion-body.open{display:block;}
+
+        /* ── FORM ELEMENTS ───────────────────────────────────────────── */
+        .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+        .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+        .form-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+        .form-grid-7{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+        @media(max-width:900px){.form-grid-7{grid-template-columns:repeat(4,1fr);}.form-grid-4{grid-template-columns:1fr 1fr;}.form-grid-3{grid-template-columns:1fr 1fr;}}
+        @media(max-width:600px){.form-grid-7,.form-grid-4,.form-grid-3,.form-grid-2{grid-template-columns:1fr;}.command-bar{padding-left:70px;}}
+
+        .form-group{margin-bottom:0;}
+        .form-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:block;}
+        .form-input{
+            width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:12px;
+            padding:7px 10px;outline:none;
+        }
+        .form-input:focus{border-color:var(--overseer-gold);}
+        .form-input::placeholder{color:rgba(232,232,232,.3);}
+        .form-input[readonly]{color:rgba(232,232,232,.45);cursor:not-allowed;}
+        .form-select{
+            width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:12px;
+            padding:7px 10px;cursor:pointer;outline:none;
+        }
+        .form-select:focus{border-color:var(--overseer-gold);}
+
+        /* SPECIAL stat box (for SPECIAL attributes) */
+        .special-box{background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:10px 8px;text-align:center;}
+        .special-label{font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+        .special-input{
+            width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold-bright);font-family:'Courier New',monospace;
+            font-size:20px;font-weight:bold;text-align:center;padding:6px 4px;outline:none;
+        }
+        .special-input:focus{border-color:var(--overseer-gold);}
+
+        /* Skills grid */
+        .skill-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(42,82,152,.25);}
+        .skill-item:last-child{border-bottom:none;}
+        .skill-name{flex:1;font-size:11px;color:var(--overseer-white);}
+        .skill-input{
+            width:55px;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold-bright);font-family:'Courier New',monospace;font-size:12px;
+            font-weight:bold;text-align:center;padding:4px 6px;outline:none;
+        }
+        .skill-input:focus{border-color:var(--overseer-gold);}
+        .skill-tag{font-size:9px;color:rgba(232,232,232,.4);min-width:50px;text-transform:uppercase;}
+
+        /* Inventory table */
+        .inv-table{width:100%;border-collapse:collapse;margin-top:8px;}
+        .inv-table th{
+            background:var(--overseer-blue-bright);color:var(--overseer-gold);
+            font-size:9px;letter-spacing:1px;text-transform:uppercase;
+            padding:7px 10px;text-align:left;border-bottom:2px solid var(--overseer-gold);
+        }
+        .inv-table td{
+            padding:7px 10px;border-bottom:1px solid rgba(42,82,152,.3);
+            font-size:11px;color:var(--overseer-white);
+        }
+        .inv-table tr:hover td{background:rgba(212,160,23,.04);}
+        .inv-table .td-action{display:flex;gap:4px;}
+
+        /* Perk / condition tags */
+        .tag-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+        .tag{background:rgba(42,82,152,.5);border:1px solid var(--overseer-border);color:var(--overseer-white);font-size:10px;padding:4px 10px;display:flex;align-items:center;gap:6px;}
+        .tag .tag-remove{background:none;border:none;color:var(--overseer-red-bright);cursor:pointer;font-size:12px;padding:0;line-height:1;}
+        .tag-input-row{display:flex;gap:8px;margin-top:8px;}
+        .tag-input{
+            flex:1;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;
+            padding:6px 9px;outline:none;
+        }
+        .tag-input:focus{border-color:var(--overseer-gold);}
+
+        /* Section actions */
+        .section-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(42,82,152,.4);}
+
+        /* HP / stat bar */
+        .bar-wrapper{margin-top:4px;}
+        .bar-track{width:100%;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+        .bar-fill{height:100%;border-radius:4px;transition:width .4s;}
+        .bar-hp{background:var(--overseer-green);box-shadow:0 0 6px var(--overseer-green);}
+        .bar-ap{background:#60a5fa;box-shadow:0 0 6px #60a5fa;}
+        .bar-rad{background:var(--overseer-red-bright);box-shadow:0 0 6px var(--overseer-red-bright);}
+        .bar-xp{background:var(--overseer-gold);box-shadow:0 0 6px var(--overseer-gold);}
+
+        /* Global save footer */
+        .save-footer{
+            position:sticky;bottom:0;z-index:50;
+            background:var(--overseer-blue-mid);border-top:2px solid var(--overseer-gold);
+            padding:12px 24px;display:flex;align-items:center;justify-content:space-between;
+            box-shadow:0 -4px 20px rgba(212,160,23,.2);
+        }
+        .save-footer-info{font-size:10px;color:rgba(232,232,232,.45);letter-spacing:1px;}
+
+        /* ── STATUS TOAST ────────────────────────────────────────────── */
+        #statusToast{position:fixed;bottom:80px;right:30px;background:var(--overseer-blue-mid);border:2px solid var(--overseer-green);color:var(--overseer-green-bright);font-family:'Courier New',monospace;font-size:12px;padding:12px 20px;z-index:9000;box-shadow:0 0 20px rgba(0,204,102,.4);opacity:0;transition:opacity .3s;pointer-events:none;}
+        #statusToast.visible{opacity:1;}
+        #statusToast.error{border-color:var(--overseer-red-bright);color:var(--overseer-red-bright);box-shadow:0 0 20px rgba(255,51,0,.4);}
+
+        ::-webkit-scrollbar{width:6px;}
+        ::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        ::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+    </style>
 </head>
 <body>
 <script src="../../assets/helpers/navigation/overseer-navigation.js"></script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     COMMAND BAR
+══════════════════════════════════════════════════════════════════ -->
+<div class="command-bar">
+    <div class="command-bar-left">
+        <div>
+            <div class="overseer-title-bar">👥 PLAYER OVERVIEW — ADMIN</div>
+            <div class="overseer-badge">⬡ VAULT 215 AUTHORITY CONSOLE — FULL CHARACTER ACCESS</div>
+        </div>
+        <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <button class="cmd-btn success" onclick="giftItems()">🎁 GIFT ITEMS</button>
+        <button class="cmd-btn danger" onclick="confirmReset()">↺ RESET SECTION</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     PAGE CONTENT
+══════════════════════════════════════════════════════════════════ -->
+<div class="page-content">
+
+    <!-- PLAYER SELECTOR -->
+    <div class="player-selector-bar">
+        <span class="player-selector-label">SELECT PLAYER:</span>
+        <select class="player-select" id="playerSelect" onchange="loadPlayer()">
+            <option value="">— Choose a Player —</option>
+            <option value="vault_runner_01">Vault_Runner_01 (Marcus Cole)</option>
+            <option value="ghoul_slayer">GhoulSlayer99 (Dex "Deadeye" Walsh)</option>
+            <option value="wasteland_wanderer">WastelandWanderer (Sera Voss)</option>
+        </select>
+        <span class="player-status-badge" id="playerStatusBadge" style="display:none;">● ONLINE</span>
+        <span style="font-size:10px;color:rgba(232,232,232,.4);margin-left:auto;">Placeholder — will connect to player data later</span>
+    </div>
+
+    <!-- ══ 1. BASIC INFO ════════════════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header open" onclick="toggleAccordion(this)">
+            <span class="accordion-title">🪪 BASIC INFORMATION</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body open">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Character Name</label>
+                    <input class="form-input" type="text" id="charName" value="Marcus Cole">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Player Username</label>
+                    <input class="form-input" type="text" id="playerUsername" value="Vault_Runner_01" readonly>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Class</label>
+                    <select class="form-select" id="charClass">
+                        <option selected>Scavenger</option>
+                        <option>Soldier</option>
+                        <option>Medic</option>
+                        <option>Technician</option>
+                        <option>Rogue</option>
+                        <option>Ghoul</option>
+                        <option>Super Mutant</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Race</label>
+                    <select class="form-select" id="charRace">
+                        <option selected>Human</option>
+                        <option>Ghoul</option>
+                        <option>Super Mutant</option>
+                        <option>Synth</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Alignment</label>
+                    <select class="form-select" id="charAlignment">
+                        <option>Lawful Good</option>
+                        <option selected>Neutral Good</option>
+                        <option>Chaotic Good</option>
+                        <option>Lawful Neutral</option>
+                        <option>True Neutral</option>
+                        <option>Chaotic Neutral</option>
+                        <option>Lawful Evil</option>
+                        <option>Neutral Evil</option>
+                        <option>Chaotic Evil</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Background</label>
+                    <input class="form-input" type="text" id="charBackground" value="Former Vault Security Guard">
+                </div>
+            </div>
+            <div class="section-actions">
+                <button class="cmd-btn" onclick="resetSection('basic')">↺ RESET</button>
+                <button class="cmd-btn success" onclick="saveSection('basic')">💾 SAVE BASIC INFO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 2. LEVEL & XP ════════════════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header open" onclick="toggleAccordion(this)">
+            <span class="accordion-title">⭐ LEVEL &amp; EXPERIENCE</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body open">
+            <div class="form-grid-4">
+                <div class="form-group">
+                    <label class="form-label">Level</label>
+                    <input class="form-input" type="number" id="charLevel" value="5" min="1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current XP</label>
+                    <input class="form-input" type="number" id="charXP" value="4200" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">XP to Next Level</label>
+                    <input class="form-input" type="number" id="charXPNext" value="5000" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Perk Points Available</label>
+                    <input class="form-input" type="number" id="charPerkPts" value="2" min="0">
+                </div>
+            </div>
+            <div class="bar-wrapper" style="margin-top:10px;">
+                <div style="font-size:9px;color:var(--overseer-gold);margin-bottom:4px;letter-spacing:1px;">XP PROGRESS — 4200 / 5000</div>
+                <div class="bar-track"><div class="bar-fill bar-xp" style="width:84%;"></div></div>
+            </div>
+            <div class="section-actions">
+                <button class="cmd-btn" onclick="addXP()">+ ADD XP</button>
+                <button class="cmd-btn" onclick="resetSection('level')">↺ RESET</button>
+                <button class="cmd-btn success" onclick="saveSection('level')">💾 SAVE LEVEL/XP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 3. VITALS ════════════════════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header open" onclick="toggleAccordion(this)">
+            <span class="accordion-title">❤️ VITALS — HP / AP / RADIATION</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body open">
+            <div class="form-grid-3">
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Current HP</label>
+                        <input class="form-input" type="number" id="charHP" value="72" min="0">
+                    </div>
+                    <div class="form-group" style="margin-top:8px;">
+                        <label class="form-label">Max HP</label>
+                        <input class="form-input" type="number" id="charMaxHP" value="90" min="1">
+                    </div>
+                    <div class="bar-wrapper" style="margin-top:8px;">
+                        <div style="font-size:9px;color:var(--overseer-green);margin-bottom:3px;">HP — 72/90</div>
+                        <div class="bar-track"><div class="bar-fill bar-hp" style="width:80%;"></div></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Action Points (AP)</label>
+                        <input class="form-input" type="number" id="charAP" value="7" min="0">
+                    </div>
+                    <div class="form-group" style="margin-top:8px;">
+                        <label class="form-label">Max AP</label>
+                        <input class="form-input" type="number" id="charMaxAP" value="10" min="1">
+                    </div>
+                    <div class="bar-wrapper" style="margin-top:8px;">
+                        <div style="font-size:9px;color:#60a5fa;margin-bottom:3px;">AP — 7/10</div>
+                        <div class="bar-track"><div class="bar-fill bar-ap" style="width:70%;"></div></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label class="form-label">Radiation (rads)</label>
+                        <input class="form-input" type="number" id="charRad" value="120" min="0">
+                    </div>
+                    <div class="form-group" style="margin-top:8px;">
+                        <label class="form-label">Max Rads (lethal)</label>
+                        <input class="form-input" type="number" id="charMaxRad" value="1000" min="1">
+                    </div>
+                    <div class="bar-wrapper" style="margin-top:8px;">
+                        <div style="font-size:9px;color:var(--overseer-red-bright);margin-bottom:3px;">RADIATION — 120/1000</div>
+                        <div class="bar-track"><div class="bar-fill bar-rad" style="width:12%;"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="section-actions">
+                <button class="cmd-btn" onclick="healFull()">💉 FULL HEAL</button>
+                <button class="cmd-btn" onclick="clearRads()">☢ CLEAR RADS</button>
+                <button class="cmd-btn success" onclick="saveSection('vitals')">💾 SAVE VITALS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 4. S.P.E.C.I.A.L. ════════════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header open" onclick="toggleAccordion(this)">
+            <span class="accordion-title">📊 S.P.E.C.I.A.L. ATTRIBUTES</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body open">
+            <div class="form-grid-7">
+                <div class="special-box">
+                    <div class="special-label">STR</div>
+                    <input class="special-input" type="number" id="sStr" value="6" min="1" max="10">
+                </div>
+                <div class="special-box">
+                    <div class="special-label">PER</div>
+                    <input class="special-input" type="number" id="sPer" value="7" min="1" max="10">
+                </div>
+                <div class="special-box">
+                    <div class="special-label">END</div>
+                    <input class="special-input" type="number" id="sEnd" value="5" min="1" max="10">
+                </div>
+                <div class="special-box">
+                    <div class="special-label">CHA</div>
+                    <input class="special-input" type="number" id="sCha" value="4" min="1" max="10">
+                </div>
+                <div class="special-box">
+                    <div class="special-label">INT</div>
+                    <input class="special-input" type="number" id="sInt" value="8" min="1" max="10">
+                </div>
+                <div class="special-box">
+                    <div class="special-label">AGI</div>
+                    <input class="special-input" type="number" id="sAgi" value="7" min="1" max="10">
+                </div>
+                <div class="special-box">
+                    <div class="special-label">LCK</div>
+                    <input class="special-input" type="number" id="sLck" value="3" min="1" max="10">
+                </div>
+            </div>
+            <div style="font-size:9px;color:rgba(232,232,232,.35);margin-top:8px;letter-spacing:1px;">Range: 1–10 per attribute. Modifiers calculated automatically when wired to data.</div>
+            <div class="section-actions">
+                <button class="cmd-btn" onclick="resetSection('special')">↺ RESET</button>
+                <button class="cmd-btn success" onclick="saveSection('special')">💾 SAVE S.P.E.C.I.A.L.</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 5. SKILLS ════════════════════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span class="accordion-title">🎯 SKILLS</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+            <div class="form-grid-2">
+                <div>
+                    <div class="skill-item"><span class="skill-name">Barter</span><span class="skill-tag">CHA</span><input class="skill-input" type="number" value="35" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Big Guns</span><span class="skill-tag">STR</span><input class="skill-input" type="number" value="20" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Energy Weapons</span><span class="skill-tag">PER</span><input class="skill-input" type="number" value="40" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Explosives</span><span class="skill-tag">PER</span><input class="skill-input" type="number" value="25" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Lockpick</span><span class="skill-tag">PER</span><input class="skill-input" type="number" value="55" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Medicine</span><span class="skill-tag">INT</span><input class="skill-input" type="number" value="60" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Melee Weapons</span><span class="skill-tag">STR</span><input class="skill-input" type="number" value="30" min="0" max="100"></div>
+                </div>
+                <div>
+                    <div class="skill-item"><span class="skill-name">Repair</span><span class="skill-tag">INT</span><input class="skill-input" type="number" value="45" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Science</span><span class="skill-tag">INT</span><input class="skill-input" type="number" value="70" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Small Guns</span><span class="skill-tag">AGI</span><input class="skill-input" type="number" value="65" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Sneak</span><span class="skill-tag">AGI</span><input class="skill-input" type="number" value="50" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Speech</span><span class="skill-tag">CHA</span><input class="skill-input" type="number" value="40" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Survival</span><span class="skill-tag">END</span><input class="skill-input" type="number" value="55" min="0" max="100"></div>
+                    <div class="skill-item"><span class="skill-name">Unarmed</span><span class="skill-tag">STR</span><input class="skill-input" type="number" value="20" min="0" max="100"></div>
+                </div>
+            </div>
+            <div class="section-actions">
+                <button class="cmd-btn" onclick="resetSection('skills')">↺ RESET</button>
+                <button class="cmd-btn success" onclick="saveSection('skills')">💾 SAVE SKILLS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 6. INVENTORY ═════════════════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span class="accordion-title">🎒 INVENTORY</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+            <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="cmd-btn success" onclick="addInventoryItem()">+ ADD ITEM</button>
+                <button class="cmd-btn" onclick="giftItems()">🎁 GIFT FROM POOL</button>
+                <span style="margin-left:auto;font-size:10px;color:rgba(232,232,232,.4);align-self:center;">Carry Weight: 87 / 150 lbs</span>
+            </div>
+            <table class="inv-table" id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Type</th>
+                        <th>Qty</th>
+                        <th>Weight</th>
+                        <th>Value</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="inventoryBody">
+                    <tr>
+                        <td>10mm Pistol</td>
+                        <td>Weapon</td>
+                        <td><input class="skill-input" type="number" value="1" min="0" style="width:45px;"></td>
+                        <td>2.5</td>
+                        <td>75 caps</td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="equipItem(this)">⚔ EQUIP</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="removeItem(this)">✕</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Stimpak</td>
+                        <td>Consumable</td>
+                        <td><input class="skill-input" type="number" value="3" min="0" style="width:45px;"></td>
+                        <td>0.3</td>
+                        <td>75 caps</td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="equipItem(this)">⚔ EQUIP</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="removeItem(this)">✕</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Rad-Away</td>
+                        <td>Consumable</td>
+                        <td><input class="skill-input" type="number" value="2" min="0" style="width:45px;"></td>
+                        <td>0.5</td>
+                        <td>40 caps</td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="equipItem(this)">⚔ EQUIP</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="removeItem(this)">✕</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="section-actions">
+                <button class="cmd-btn success" onclick="saveSection('inventory')">💾 SAVE INVENTORY</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 7. EQUIPMENT (EQUIPPED SLOTS) ════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span class="accordion-title">⚔ EQUIPPED ITEMS</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+            <div class="form-grid-2">
+                <div class="form-group"><label class="form-label">Main Hand</label><input class="form-input" type="text" id="equip_mainHand" value="10mm Pistol"></div>
+                <div class="form-group"><label class="form-label">Off Hand</label><input class="form-input" type="text" id="equip_offHand" placeholder="Empty"></div>
+                <div class="form-group"><label class="form-label">Head</label><input class="form-input" type="text" id="equip_head" placeholder="Empty"></div>
+                <div class="form-group"><label class="form-label">Chest Armor</label><input class="form-input" type="text" id="equip_chest" value="Leather Chest Piece"></div>
+                <div class="form-group"><label class="form-label">Legs</label><input class="form-input" type="text" id="equip_legs" placeholder="Empty"></div>
+                <div class="form-group"><label class="form-label">Accessory</label><input class="form-input" type="text" id="equip_access" placeholder="Empty"></div>
+            </div>
+            <div class="section-actions">
+                <button class="cmd-btn" onclick="clearEquipment()">✕ CLEAR ALL</button>
+                <button class="cmd-btn success" onclick="saveSection('equipment')">💾 SAVE EQUIPMENT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 8. PERKS & ABILITIES ══════════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span class="accordion-title">✨ PERKS &amp; ABILITIES</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+            <div class="tag-grid" id="perksContainer">
+                <span class="tag">Pack Rat <button class="tag-remove" onclick="removeTag(this)">✕</button></span>
+                <span class="tag">Scrounger <button class="tag-remove" onclick="removeTag(this)">✕</button></span>
+                <span class="tag">Gun Nut <button class="tag-remove" onclick="removeTag(this)">✕</button></span>
+                <span class="tag">Science! <button class="tag-remove" onclick="removeTag(this)">✕</button></span>
+            </div>
+            <div class="tag-input-row">
+                <input class="tag-input" type="text" id="perkInput" placeholder="Add perk or ability…">
+                <button class="cmd-btn success" onclick="addPerk()">+ ADD PERK</button>
+            </div>
+            <div class="section-actions">
+                <button class="cmd-btn success" onclick="saveSection('perks')">💾 SAVE PERKS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 9. CONDITIONS & EFFECTS ══════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span class="accordion-title">⚠ CONDITIONS &amp; ACTIVE EFFECTS</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+            <div class="tag-grid" id="conditionsContainer">
+                <span class="tag" style="border-color:rgba(255,51,0,.4);color:var(--overseer-red-bright);">Fatigued <button class="tag-remove" onclick="removeTag(this)">✕</button></span>
+                <span class="tag" style="border-color:rgba(96,165,250,.4);color:#60a5fa;">Rad Sick (Mild) <button class="tag-remove" onclick="removeTag(this)">✕</button></span>
+            </div>
+            <div class="tag-input-row">
+                <input class="tag-input" type="text" id="conditionInput" placeholder="Add condition or effect…">
+                <button class="cmd-btn success" onclick="addCondition()">+ ADD</button>
+            </div>
+            <div class="section-actions">
+                <button class="cmd-btn danger" onclick="clearAllConditions()">✕ CLEAR ALL CONDITIONS</button>
+                <button class="cmd-btn success" onclick="saveSection('conditions')">💾 SAVE CONDITIONS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ 10. QUEST PROGRESS ════════════════════════════════════════ -->
+    <div class="accordion-section">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+            <span class="accordion-title">📜 QUEST PROGRESS</span>
+            <span class="accordion-toggle">▼</span>
+        </div>
+        <div class="accordion-body">
+            <table class="inv-table" id="questTable">
+                <thead>
+                    <tr>
+                        <th>Quest Name</th>
+                        <th>Status</th>
+                        <th>Stage</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Into the Wastes</td>
+                        <td><span style="color:var(--overseer-green-bright);font-size:10px;">ACTIVE</span></td>
+                        <td><input class="skill-input" type="text" value="Stage 2" style="width:80px;font-size:10px;"></td>
+                        <td><input class="form-input" type="text" value="Reached the outpost." style="font-size:10px;padding:3px 6px;"></td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="completeQuest(this)">✓ COMPLETE</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="removeItem(this)">✕</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>The Merchant's Debt</td>
+                        <td><span style="color:rgba(232,232,232,.4);font-size:10px;">INACTIVE</span></td>
+                        <td><input class="skill-input" type="text" value="Stage 0" style="width:80px;font-size:10px;"></td>
+                        <td><input class="form-input" type="text" placeholder="Notes…" style="font-size:10px;padding:3px 6px;"></td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="activateQuest(this)">▶ ACTIVATE</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="removeItem(this)">✕</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top:8px;">
+                <button class="cmd-btn success" onclick="addQuest()">+ ADD QUEST</button>
+            </div>
+            <div class="section-actions">
+                <button class="cmd-btn success" onclick="saveSection('quests')">💾 SAVE QUESTS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM SPACER for sticky footer -->
+    <div style="height:20px;"></div>
+</div>
+
+<!-- GLOBAL SAVE FOOTER -->
+<div class="save-footer">
+    <span class="save-footer-info" id="lastSavedInfo">All changes are placeholder. Logic will be wired in a subsequent PR.</span>
+    <div style="display:flex;gap:8px;">
+        <button class="cmd-btn danger" onclick="confirmReset()">↺ RESET ALL SECTIONS</button>
+        <button class="cmd-btn success" onclick="saveAllSections()">💾 SAVE ALL CHANGES</button>
+    </div>
+</div>
+
+<!-- STATUS TOAST -->
+<div id="statusToast"></div>
+
+<script>
+(function() {
+    var cname = sessionStorage.getItem('campaignName') || sessionStorage.getItem('campaignId') || '';
+    if (cname) { var el = document.getElementById('campaignDisplay'); if (el) el.textContent = '⚑ ' + cname; }
+
+    // ── Accordion ──────────────────────────────────────────────────
+    window.toggleAccordion = function(header) {
+        header.classList.toggle('open');
+        var body = header.nextElementSibling;
+        body.classList.toggle('open');
+    };
+
+    // ── Player Selector ────────────────────────────────────────────
+    window.loadPlayer = function() {
+        var val = document.getElementById('playerSelect').value;
+        if (!val) {
+            document.getElementById('playerStatusBadge').style.display = 'none';
+            return;
+        }
+        document.getElementById('playerStatusBadge').style.display = '';
+        showToast('Loaded player "' + document.getElementById('playerSelect').options[document.getElementById('playerSelect').selectedIndex].text + '". (Placeholder — data to wire later)');
+    };
+
+    // ── Sections ───────────────────────────────────────────────────
+    window.saveSection = function(section) {
+        showToast('Section "' + section.toUpperCase() + '" saved. (Placeholder — logic to wire later)');
+        document.getElementById('lastSavedInfo').textContent = 'Last placeholder save: ' + section.toUpperCase() + ' — ' + new Date().toLocaleTimeString();
+    };
+
+    window.resetSection = function(section) {
+        if (confirm('Reset "' + section + '" to last saved state? (Placeholder — not wired yet)')) {
+            showToast('"' + section.toUpperCase() + '" reset. (Placeholder)');
+        }
+    };
+
+    window.saveAllSections = function() {
+        showToast('All sections saved. (Placeholder — logic to wire later)');
+        document.getElementById('lastSavedInfo').textContent = 'All placeholder save — ' + new Date().toLocaleTimeString();
+    };
+
+    window.confirmReset = function() {
+        if (confirm('Reset ALL sections to last saved state? (Placeholder — not wired yet)')) {
+            showToast('All sections reset. (Placeholder)');
+        }
+    };
+
+    // ── Vitals helpers ─────────────────────────────────────────────
+    window.healFull = function() {
+        document.getElementById('charHP').value = document.getElementById('charMaxHP').value;
+        showToast('Player fully healed to ' + document.getElementById('charMaxHP').value + ' HP. (Placeholder)');
+    };
+    window.clearRads = function() {
+        document.getElementById('charRad').value = 0;
+        showToast('Radiation cleared to 0. (Placeholder)');
+    };
+
+    // ── XP helper ──────────────────────────────────────────────────
+    window.addXP = function() {
+        var amt = parseInt(prompt('Add how much XP?') || '0', 10);
+        if (isNaN(amt) || amt <= 0) return;
+        var cur = parseInt(document.getElementById('charXP').value, 10) || 0;
+        document.getElementById('charXP').value = cur + amt;
+        showToast('Added ' + amt + ' XP. (Placeholder)');
+    };
+
+    // ── Inventory helpers ──────────────────────────────────────────
+    window.addInventoryItem = function() { showToast('Add item dialog — will connect to items pool. (Placeholder)'); };
+    window.giftItems = function() { showToast('Gift items — will connect to items pool. (Placeholder)'); };
+    window.equipItem = function(btn) { showToast('Item equipped. (Placeholder)'); };
+    window.removeItem = function(btn) {
+        if (confirm('Remove this item? (Placeholder)')) {
+            btn.closest('tr').remove();
+            showToast('Item removed. (Placeholder)');
+        }
+    };
+
+    // ── Equipment helpers ──────────────────────────────────────────
+    window.clearEquipment = function() {
+        ['equip_mainHand','equip_offHand','equip_head','equip_chest','equip_legs','equip_access'].forEach(function(id){
+            document.getElementById(id).value = '';
+        });
+        showToast('All equipment slots cleared. (Placeholder)');
+    };
+
+    // ── Perks ──────────────────────────────────────────────────────
+    window.addPerk = function() {
+        var val = document.getElementById('perkInput').value.trim();
+        if (!val) return;
+        var span = document.createElement('span');
+        span.className = 'tag';
+        span.innerHTML = val.replace(/[<>]/g,'') + ' <button class="tag-remove" onclick="removeTag(this)">✕</button>';
+        document.getElementById('perksContainer').appendChild(span);
+        document.getElementById('perkInput').value = '';
+    };
+
+    // ── Conditions ─────────────────────────────────────────────────
+    window.addCondition = function() {
+        var val = document.getElementById('conditionInput').value.trim();
+        if (!val) return;
+        var span = document.createElement('span');
+        span.className = 'tag';
+        span.style.borderColor = 'rgba(255,51,0,.4)';
+        span.style.color = 'var(--overseer-red-bright)';
+        span.innerHTML = val.replace(/[<>]/g,'') + ' <button class="tag-remove" onclick="removeTag(this)">✕</button>';
+        document.getElementById('conditionsContainer').appendChild(span);
+        document.getElementById('conditionInput').value = '';
+    };
+    window.clearAllConditions = function() {
+        document.getElementById('conditionsContainer').innerHTML = '';
+        showToast('All conditions cleared. (Placeholder)');
+    };
+
+    // ── Quests ─────────────────────────────────────────────────────
+    window.addQuest = function() { showToast('Add quest — will connect to campaign quest list. (Placeholder)'); };
+    window.completeQuest = function(btn) {
+        var td = btn.closest('tr').querySelectorAll('td');
+        if (td[1]) td[1].innerHTML = '<span style="color:var(--overseer-gold-bright);font-size:10px;">COMPLETED</span>';
+        showToast('Quest marked complete. (Placeholder)');
+    };
+    window.activateQuest = function(btn) {
+        var td = btn.closest('tr').querySelectorAll('td');
+        if (td[1]) td[1].innerHTML = '<span style="color:var(--overseer-green-bright);font-size:10px;">ACTIVE</span>';
+        showToast('Quest activated. (Placeholder)');
+    };
+
+    // ── Tags ───────────────────────────────────────────────────────
+    window.removeTag = function(btn) { btn.closest('.tag').remove(); };
+
+    // ── Toast ──────────────────────────────────────────────────────
+    function showToast(msg, isError) {
+        var t = document.getElementById('statusToast');
+        t.textContent = msg;
+        t.className = isError ? 'error visible' : 'visible';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+    }
+})();
+</script>
 </body>
 </html>

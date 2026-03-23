@@ -3,11 +3,436 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vault 215 — Overseer Items Pool</title>
+    <title>Vault 215 — Item Pokédex &amp; Builder</title>
     <link rel="stylesheet" href="../../css/branding.css">
     <link rel="stylesheet" href="../../css/overseer/overseerstyle.css">
+    <style>
+        :root {
+            --overseer-blue:        #0a1628;
+            --overseer-blue-mid:    #0d2045;
+            --overseer-blue-bright: #1a3a6e;
+            --overseer-gold:        #d4a017;
+            --overseer-gold-bright: #f0c040;
+            --overseer-gold-dim:    #8b6914;
+            --overseer-white:       #e8e8e8;
+            --overseer-red:         #cc2200;
+            --overseer-red-bright:  #ff3300;
+            --overseer-green:       #00cc66;
+            --overseer-green-bright:#00ff80;
+            --overseer-dark:        #04080f;
+            --overseer-border:      #2a5298;
+            --overseer-glow-gold:   rgba(212,160,23,0.6);
+        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{
+            width:100%;min-height:100vh;
+            background-color:var(--overseer-dark);
+            color:var(--overseer-white);
+            font-family:'Courier New',monospace;
+            background-image:
+                radial-gradient(circle at 15% 30%,rgba(42,82,152,.12) 0%,transparent 55%),
+                radial-gradient(circle at 85% 70%,rgba(212,160,23,.08) 0%,transparent 55%);
+        }
+        body::before{
+            content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+            background:repeating-linear-gradient(0deg,rgba(0,0,0,.18),rgba(0,0,0,.18) 1px,transparent 1px,transparent 3px);
+            pointer-events:none;z-index:9999;
+        }
+        .hidden{display:none!important;}
+
+        /* ── COMMAND BAR ─────────────────────────────────────────────── */
+        .command-bar{
+            background:var(--overseer-blue-mid);
+            border-bottom:2px solid var(--overseer-gold);
+            box-shadow:0 2px 20px var(--overseer-glow-gold);
+            padding:14px 24px 14px 80px;
+            display:flex;align-items:center;justify-content:space-between;
+            flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;
+        }
+        .command-bar-left{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+        .overseer-title-bar{font-size:18px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:3px;text-shadow:0 0 10px var(--overseer-glow-gold);}
+        .overseer-badge{font-size:9px;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;}
+        .cmd-btn{
+            background:transparent;border:1px solid var(--overseer-gold);color:var(--overseer-gold);
+            font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;
+            padding:7px 14px;cursor:pointer;transition:all .2s;text-transform:uppercase;
+        }
+        .cmd-btn:hover{background:rgba(212,160,23,.15);box-shadow:0 0 10px rgba(212,160,23,.3);}
+        .cmd-btn.success{border-color:var(--overseer-green);color:var(--overseer-green-bright);}
+        .cmd-btn.success:hover{background:rgba(0,204,102,.15);}
+        .cmd-btn.danger{border-color:var(--overseer-red-bright);color:var(--overseer-red-bright);}
+        .cmd-btn.danger:hover{background:rgba(255,51,0,.15);}
+
+        /* ── THREE-COLUMN LAYOUT ─────────────────────────────────────── */
+        .page-content{padding:20px 24px;max-width:1800px;margin:0 auto;}
+        .three-col{display:grid;grid-template-columns:300px 1fr 340px;gap:16px;align-items:start;}
+        @media(max-width:1400px){.three-col{grid-template-columns:260px 1fr 300px;}}
+        @media(max-width:1100px){.three-col{grid-template-columns:1fr 1fr;}}
+        @media(max-width:768px){.three-col{grid-template-columns:1fr;}.command-bar{padding-left:70px;}}
+
+        /* ── PANEL ───────────────────────────────────────────────────── */
+        .panel{background:var(--overseer-blue-mid);border:1px solid var(--overseer-border);box-shadow:0 0 20px rgba(42,82,152,.2);margin-bottom:16px;}
+        .panel-header{
+            background:var(--overseer-blue-bright);border-bottom:2px solid var(--overseer-gold);
+            padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;
+        }
+        .panel-title{font-size:12px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 8px var(--overseer-glow-gold);}
+        .panel-body{padding:14px;}
+
+        /* ── FILTER BAR ──────────────────────────────────────────────── */
+        .filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+        .filter-input{
+            flex:1;min-width:80px;
+            background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;
+            padding:5px 8px;outline:none;
+        }
+        .filter-input:focus{border-color:var(--overseer-gold);}
+        .filter-input::placeholder{color:rgba(232,232,232,.35);}
+        .filter-select{
+            background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:11px;
+            padding:5px 7px;cursor:pointer;outline:none;
+        }
+
+        /* ── ITEM LIST ───────────────────────────────────────────────── */
+        .item-list{max-height:600px;overflow-y:auto;}
+        .item-list::-webkit-scrollbar{width:5px;}
+        .item-list::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        .item-list::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+
+        .item-list-row{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:9px 12px;border-bottom:1px solid rgba(42,82,152,.35);
+            cursor:pointer;gap:8px;transition:background .15s;
+        }
+        .item-list-row:last-child{border-bottom:none;}
+        .item-list-row:hover{background:rgba(212,160,23,.06);}
+        .item-list-row.active{background:rgba(212,160,23,.12);border-left:3px solid var(--overseer-gold);}
+        .item-list-name{font-size:12px;font-weight:bold;color:var(--overseer-white);text-transform:uppercase;letter-spacing:.5px;}
+        .item-list-sub{font-size:9px;color:rgba(232,232,232,.45);margin-top:1px;}
+
+        .rarity-badge{font-size:9px;padding:2px 6px;border-radius:2px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0;}
+        .rarity-common{background:rgba(232,232,232,.12);color:var(--overseer-white);}
+        .rarity-uncommon{background:rgba(96,165,250,.2);color:#60a5fa;}
+        .rarity-rare{background:rgba(212,160,23,.2);color:var(--overseer-gold-bright);}
+        .rarity-legendary{background:rgba(204,34,0,.25);color:var(--overseer-red-bright);}
+
+        /* ── DETAIL PANEL ─────────────────────────────────────────────── */
+        .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+        .stat-box{background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:8px 10px;text-align:center;}
+        .stat-box-label{font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+        .stat-box-val{font-size:15px;font-weight:bold;color:var(--overseer-white);}
+
+        .detail-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+        .detail-value{font-size:12px;color:var(--overseer-white);line-height:1.5;}
+        .detail-section{margin-bottom:14px;}
+        .tag-list{display:flex;flex-wrap:wrap;gap:5px;}
+        .tag{background:rgba(42,82,152,.5);border:1px solid var(--overseer-border);color:var(--overseer-white);font-size:10px;padding:3px 8px;}
+        .tag.effect{background:rgba(212,160,23,.12);border-color:var(--overseer-gold-dim);color:var(--overseer-gold-bright);}
+
+        /* ── EDITOR FORM ─────────────────────────────────────────────── */
+        .form-group{margin-bottom:10px;}
+        .form-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:block;}
+        .form-input{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;outline:none;}
+        .form-input:focus{border-color:var(--overseer-gold);}
+        .form-input::placeholder{color:rgba(232,232,232,.3);}
+        .form-select{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;cursor:pointer;outline:none;}
+        .form-textarea{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;resize:vertical;min-height:55px;outline:none;line-height:1.5;}
+        .form-textarea:focus{border-color:var(--overseer-gold);}
+        .form-textarea::placeholder{color:rgba(232,232,232,.3);}
+        .two-col-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap;}
+
+        /* ── STATUS TOAST ────────────────────────────────────────────── */
+        #statusToast{position:fixed;bottom:30px;right:30px;background:var(--overseer-blue-mid);border:2px solid var(--overseer-green);color:var(--overseer-green-bright);font-family:'Courier New',monospace;font-size:12px;padding:12px 20px;z-index:9000;box-shadow:0 0 20px rgba(0,204,102,.4);opacity:0;transition:opacity .3s;pointer-events:none;}
+        #statusToast.visible{opacity:1;}
+        #statusToast.error{border-color:var(--overseer-red-bright);color:var(--overseer-red-bright);box-shadow:0 0 20px rgba(255,51,0,.4);}
+
+        ::-webkit-scrollbar{width:6px;}
+        ::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        ::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+    </style>
 </head>
 <body>
 <script src="../../assets/helpers/navigation/overseer-navigation.js"></script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     COMMAND BAR
+══════════════════════════════════════════════════════════════════ -->
+<div class="command-bar">
+    <div class="command-bar-left">
+        <div>
+            <div class="overseer-title-bar">📦 ITEM POKÉDEX &amp; BUILDER</div>
+            <div class="overseer-badge">⬡ VAULT 215 AUTHORITY CONSOLE — ITEMS MODULE</div>
+        </div>
+        <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <button class="cmd-btn success" onclick="showNewItemForm()">+ NEW ITEM</button>
+        <button class="cmd-btn" onclick="exportPool()">⬇ EXPORT POOL</button>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MAIN CONTENT — THREE COLUMNS
+══════════════════════════════════════════════════════════════════ -->
+<div class="page-content">
+    <div class="three-col">
+
+        <!-- COL 1: Item List -->
+        <div>
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">📋 ITEM DATABASE</span>
+                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="itemCount">4 entries</span>
+                </div>
+                <div class="panel-body">
+                    <div class="filter-row">
+                        <input class="filter-input" type="text" id="itemSearch" placeholder="Search items…" oninput="filterItems()">
+                    </div>
+                    <div class="filter-row">
+                        <select class="filter-select" id="typeFilter" onchange="filterItems()" style="flex:1;">
+                            <option value="">All Types</option>
+                            <option value="weapon">Weapon</option>
+                            <option value="armor">Armor</option>
+                            <option value="consumable">Consumable</option>
+                            <option value="misc">Misc</option>
+                            <option value="ammo">Ammo</option>
+                        </select>
+                        <select class="filter-select" id="rarityFilter" onchange="filterItems()" style="flex:1;">
+                            <option value="">All Rarity</option>
+                            <option value="common">Common</option>
+                            <option value="uncommon">Uncommon</option>
+                            <option value="rare">Rare</option>
+                            <option value="legendary">Legendary</option>
+                        </select>
+                    </div>
+                    <div class="item-list" id="itemList">
+                        <div class="item-list-row active" onclick="selectItem(this)" data-type="weapon" data-rarity="common">
+                            <div>
+                                <div class="item-list-name">10mm Pistol</div>
+                                <div class="item-list-sub">WEAPON · Wt 2.5 · Val 75</div>
+                            </div>
+                            <span class="rarity-badge rarity-common">COMMON</span>
+                        </div>
+                        <div class="item-list-row" onclick="selectItem(this)" data-type="weapon" data-rarity="uncommon">
+                            <div>
+                                <div class="item-list-name">Combat Rifle</div>
+                                <div class="item-list-sub">WEAPON · Wt 8 · Val 350</div>
+                            </div>
+                            <span class="rarity-badge rarity-uncommon">UNCOMMON</span>
+                        </div>
+                        <div class="item-list-row" onclick="selectItem(this)" data-type="consumable" data-rarity="common">
+                            <div>
+                                <div class="item-list-name">Stimpak</div>
+                                <div class="item-list-sub">CONSUMABLE · Wt 0.1 · Val 75</div>
+                            </div>
+                            <span class="rarity-badge rarity-common">COMMON</span>
+                        </div>
+                        <div class="item-list-row" onclick="selectItem(this)" data-type="weapon" data-rarity="rare">
+                            <div>
+                                <div class="item-list-name">Minigun</div>
+                                <div class="item-list-sub">WEAPON · Wt 27 · Val 1200</div>
+                            </div>
+                            <span class="rarity-badge rarity-rare">RARE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 2: Item Detail -->
+        <div>
+            <div class="panel" id="itemDetailPanel">
+                <div class="panel-header">
+                    <span class="panel-title">🔎 ITEM DETAILS — <span id="detailItemName">10MM PISTOL</span></span>
+                    <div style="display:flex;gap:6px;">
+                        <button class="cmd-btn" onclick="editItem()">✏ EDIT</button>
+                        <button class="cmd-btn danger" onclick="deleteItem()">🗑 DELETE</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="stat-grid">
+                        <div class="stat-box"><div class="stat-box-label">Weight</div><div class="stat-box-val" id="dWeight">2.5</div></div>
+                        <div class="stat-box"><div class="stat-box-label">Value</div><div class="stat-box-val" id="dValue">75</div></div>
+                        <div class="stat-box"><div class="stat-box-label">Damage</div><div class="stat-box-val" id="dDmg">1d8</div></div>
+                        <div class="stat-box"><div class="stat-box-label">Type</div><div class="stat-box-val" style="font-size:11px;" id="dType">WEAPON</div></div>
+                        <div class="stat-box"><div class="stat-box-label">Rarity</div><div class="stat-box-val" style="font-size:11px;" id="dRarity">COMMON</div></div>
+                        <div class="stat-box"><div class="stat-box-label">ID</div><div class="stat-box-val" style="font-size:9px;color:rgba(232,232,232,.5);" id="dID">item_10mm_pistol_1</div></div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Description</div>
+                        <div class="detail-value" id="dDesc">A reliable semi-automatic pistol chambered in 10mm. A staple sidearm of the wasteland.</div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Properties / Tags</div>
+                        <div class="tag-list" id="dProperties">
+                            <span class="tag">Ranged</span>
+                            <span class="tag">Semi-Auto</span>
+                            <span class="tag">10mm Ammo</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Special Effects</div>
+                        <div class="detail-value" id="dEffects" style="color:rgba(232,232,232,.5);font-style:italic;">None. Will connect to item databases later.</div>
+                    </div>
+
+                    <div class="detail-section">
+                        <div class="detail-label">Notes</div>
+                        <div class="detail-value" id="dNotes" style="color:rgba(232,232,232,.5);font-style:italic;">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 3: Item Editor -->
+        <div>
+            <div class="panel" id="itemEditorPanel">
+                <div class="panel-header">
+                    <span class="panel-title" id="editorTitle">✏ EDIT ITEM</span>
+                    <button class="cmd-btn" onclick="cancelEdit()">✕</button>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="form-label">Item Name *</label>
+                        <input class="form-input" type="text" id="editName" placeholder="e.g. 10mm Pistol" value="10mm Pistol">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Item ID</label>
+                        <input class="form-input" type="text" id="editID" placeholder="e.g. item_10mm_pistol_1" value="item_10mm_pistol_1">
+                    </div>
+                    <div class="two-col-form">
+                        <div class="form-group">
+                            <label class="form-label">Type</label>
+                            <select class="form-select" id="editType">
+                                <option value="weapon" selected>Weapon</option>
+                                <option value="armor">Armor</option>
+                                <option value="consumable">Consumable</option>
+                                <option value="misc">Misc</option>
+                                <option value="ammo">Ammo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rarity</label>
+                            <select class="form-select" id="editRarity">
+                                <option value="common" selected>Common</option>
+                                <option value="uncommon">Uncommon</option>
+                                <option value="rare">Rare</option>
+                                <option value="legendary">Legendary</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="two-col-form">
+                        <div class="form-group">
+                            <label class="form-label">Weight</label>
+                            <input class="form-input" type="number" id="editWeight" value="2.5" min="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Value (caps)</label>
+                            <input class="form-input" type="number" id="editValue" value="75" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Damage (weapons only)</label>
+                        <input class="form-input" type="text" id="editDmg" placeholder="e.g. 1d8" value="1d8">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Properties (comma-separated)</label>
+                        <input class="form-input" type="text" id="editProps" placeholder="e.g. Ranged, Semi-Auto, 10mm Ammo" value="Ranged, Semi-Auto, 10mm Ammo">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Special Effects</label>
+                        <input class="form-input" type="text" id="editEffects" placeholder="e.g. +2 Perception while equipped">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="editDesc" placeholder="Item description…">A reliable semi-automatic pistol chambered in 10mm.</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-textarea" id="editNotes" placeholder="Overseer notes…"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="cmd-btn danger" onclick="cancelEdit()">CANCEL</button>
+                        <button class="cmd-btn success" onclick="saveItem()">💾 SAVE ITEM</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- STATUS TOAST -->
+<div id="statusToast"></div>
+
+<script>
+(function() {
+    var cname = sessionStorage.getItem('campaignName') || sessionStorage.getItem('campaignId') || '';
+    if (cname) { var el = document.getElementById('campaignDisplay'); if (el) el.textContent = '⚑ ' + cname; }
+
+    window.selectItem = function(el) {
+        document.querySelectorAll('.item-list-row').forEach(function(i){ i.classList.remove('active'); });
+        el.classList.add('active');
+        var name = el.querySelector('.item-list-name').textContent;
+        document.getElementById('detailItemName').textContent = name.toUpperCase();
+        document.getElementById('editName').value = name;
+    };
+
+    window.filterItems = function() {
+        var q = document.getElementById('itemSearch').value.toLowerCase();
+        var t = document.getElementById('typeFilter').value;
+        var r = document.getElementById('rarityFilter').value;
+        document.querySelectorAll('.item-list-row').forEach(function(item) {
+            var nm = item.querySelector('.item-list-name').textContent.toLowerCase();
+            var tp = item.getAttribute('data-type') || '';
+            var ry = item.getAttribute('data-rarity') || '';
+            var show = nm.includes(q) && (t === '' || tp === t) && (r === '' || ry === r);
+            item.style.display = show ? '' : 'none';
+        });
+    };
+
+    window.showNewItemForm = function() {
+        document.getElementById('editorTitle').textContent = '+ NEW ITEM';
+        ['editName','editID','editDmg','editProps','editEffects','editDesc','editNotes'].forEach(function(id){ document.getElementById(id).value = ''; });
+        document.getElementById('editWeight').value = '0';
+        document.getElementById('editValue').value = '0';
+    };
+
+    window.editItem = function() {
+        var name = document.getElementById('detailItemName').textContent;
+        document.getElementById('editorTitle').textContent = '✏ EDIT — ' + name;
+    };
+
+    window.cancelEdit = function() { /* both panels visible */ };
+
+    window.saveItem = function() {
+        var name = document.getElementById('editName').value.trim();
+        if (!name) { showToast('Item name is required.', true); return; }
+        showToast('Item "' + name + '" saved. (Placeholder — logic to wire later)');
+    };
+
+    window.deleteItem = function() {
+        var name = document.getElementById('detailItemName').textContent;
+        if (confirm('Delete "' + name + '"? (Placeholder — not wired yet)')) {
+            showToast('"' + name + '" deleted. (Placeholder)');
+        }
+    };
+
+    window.exportPool = function() { showToast('Export not yet wired. Data connection coming soon.'); };
+
+    function showToast(msg, isError) {
+        var t = document.getElementById('statusToast');
+        t.textContent = msg;
+        t.className = isError ? 'error visible' : 'visible';
+        clearTimeout(t._timer);
+        t._timer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+    }
+})();
+</script>
 </body>
 </html>
