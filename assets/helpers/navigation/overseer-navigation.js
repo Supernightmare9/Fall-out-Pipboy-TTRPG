@@ -22,8 +22,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div id="navCampaignName" class="nav-campaign-display"></div>
             </div>
             <ul class="nav-list">
-                <li><a href="overseer.html" class="nav-link" data-page="overseer">🖥️ OVERSEER CONSOLE</a></li>
-                <li><a href="settings.html" class="nav-link" data-page="settings">⚙️ SETTINGS</a></li>
+                <li><a href="overseerhub.html" class="nav-link" data-page="overseerhub">🖥️ OVERSEER HUB</a></li>
+                <li><a href="overseercrafting.html" class="nav-link" data-page="overseercrafting">🛠️ CRAFTING</a></li>
+                <li><a href="overseerenemypool.html" class="nav-link" data-page="overseerenemypool">👹 ENEMY POOL</a></li>
+                <li><a href="overseeritemspool.html" class="nav-link" data-page="overseeritemspool">📦 ITEMS POOL</a></li>
+                <li><a href="overseermessages.html" class="nav-link" data-page="overseermessages">📻 MESSAGES</a></li>
+                <li><a href="overseerplayeroverview.html" class="nav-link" data-page="overseerplayeroverview">👥 PLAYER OVERVIEW</a></li>
+                <li><a href="overseersetting.html" class="nav-link" data-page="overseersetting">⚙️ SETTINGS</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -276,36 +281,6 @@ document.addEventListener('DOMContentLoaded', function() {
             gap: 8px;
         }
 
-        .switch-campaign-button {
-            display: block;
-            width: 100%;
-            padding: 15px 15px;
-            background-color: var(--overseer-blue-mid);
-            border: 2px solid var(--overseer-gold);
-            color: var(--overseer-gold);
-            text-decoration: none;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            font-weight: bold;
-            text-shadow: 0 0 5px var(--overseer-gold);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-radius: 3px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(212, 160, 23, 0.2);
-            text-align: left;
-        }
-
-        .switch-campaign-button:hover {
-            background-color: var(--overseer-dark);
-            border-color: var(--overseer-gold-bright);
-            color: var(--overseer-gold-bright);
-            text-shadow: 0 0 12px var(--overseer-gold-bright);
-            box-shadow: 0 0 20px rgba(212, 160, 23, 0.5);
-            transform: translateX(5px);
-        }
-
         .logout-button {
             display: block;
             width: 100%;
@@ -431,8 +406,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Determine current page
     function getCurrentPage() {
         const path = window.location.pathname;
-        if (path.includes('settings')) return 'settings';
-        if (path.includes('overseer')) return 'overseer';
+        if (path.includes('overseerplayeroverview')) return 'overseerplayeroverview';
+        if (path.includes('overseercrafting')) return 'overseercrafting';
+        if (path.includes('overseerenemypool')) return 'overseerenemypool';
+        if (path.includes('overseeritemspool')) return 'overseeritemspool';
+        if (path.includes('overseermessages')) return 'overseermessages';
+        if (path.includes('overseersetting')) return 'overseersetting';
+        if (path.includes('overseerhub')) return 'overseerhub';
         return null;
     }
 
