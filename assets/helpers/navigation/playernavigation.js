@@ -20,15 +20,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div id="navCampaignName" class="nav-campaign-display"></div>
             </div>
             <ul class="nav-list">
-                <li><a href="character.html" class="nav-link" data-page="character">⚔ CHARACTER</a></li>
+                <li><a href="combat.html" class="nav-link" data-page="combat">⚔ CHARACTER</a></li>
                 <li><a href="stats.html" class="nav-link" data-page="stats">📊 STATS</a></li>
                 <li><a href="inventory.html" class="nav-link" data-page="inventory">🎒 INVENTORY</a></li>
                 <li><a href="data.html" class="nav-link" data-page="data">📋 DATA</a></li>
                 <li><a href="messages.html" class="nav-link" data-page="messages">📻 MESSAGES</a></li>
                 <li><a href="settings.html" class="nav-link" data-page="settings">⚙ SETTINGS</a></li>
+                <li><a href="../terminal.html" class="nav-link" data-page="terminal">🖥️ TERMINAL</a></li>
             </ul>
             <div class="logout-container">
-                <button id="switchCampaignBtn" class="switch-campaign-button">⚑ SWITCH CAMPAIGN</button>
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
             </div>
         </nav>
@@ -241,36 +241,6 @@ document.addEventListener('DOMContentLoaded', function() {
             gap: 8px;
         }
 
-        .switch-campaign-button {
-            display: block;
-            width: 100%;
-            padding: 15px 15px;
-            background-color: var(--vault-dark);
-            border: 2px solid var(--vault-gold);
-            color: var(--vault-gold);
-            text-decoration: none;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            font-weight: bold;
-            text-shadow: 0 0 5px var(--vault-gold);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-radius: 3px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
-            text-align: left;
-        }
-
-        .switch-campaign-button:hover {
-            background-color: var(--vault-darker);
-            border-color: var(--vault-green);
-            color: var(--vault-green);
-            text-shadow: 0 0 10px var(--vault-green);
-            box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-            transform: translateX(5px);
-        }
-
         .logout-button {
             display: block;
             width: 100%;
@@ -394,12 +364,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Determine current page
     function getCurrentPage() {
         const path = window.location.pathname;
-        if (path.includes('character')) return 'character';
+        if (path.includes('combat')) return 'combat';
         if (path.includes('stats')) return 'stats';
         if (path.includes('inventory')) return 'inventory';
         if (path.includes('data')) return 'data';
         if (path.includes('messages')) return 'messages';
         if (path.includes('settings')) return 'settings';
+        if (path.includes('terminal')) return 'terminal';
         return null;
     }
 
@@ -434,7 +405,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Logout functionality
     const logoutBtn = document.getElementById('logoutBtn');
-    const switchCampaignBtn = document.getElementById('switchCampaignBtn');
 
     function logout() {
         closeMenu();
@@ -442,22 +412,8 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = '../login.html';
     }
 
-    function switchCampaign() {
-        closeMenu();
-        // Show campaign selector if available on the page
-        if (typeof showCampaignModal === 'function') {
-            showCampaignModal();
-        } else {
-            window.location.href = 'combat.html';
-        }
-    }
-
     if (logoutBtn) {
         logoutBtn.addEventListener('click', logout);
-    }
-
-    if (switchCampaignBtn) {
-        switchCampaignBtn.addEventListener('click', switchCampaign);
     }
 
     // Show current campaign name
