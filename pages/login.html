@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vault 215 — Access Terminal</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/branding.css">
     <style>
         /* PIN PAD STYLES */
         .pin-display {
@@ -210,7 +210,7 @@
     </div>
 
     <script src="../assets/data/accounts.js"></script>
-    <script src="../assets/helpers/storageManager.js"></script>
+    <script src="../assets/helpers/Managers/storageManager.js"></script>
     <script>
         // ═══════════════════════════════════════════════════════
         // CLEAR SESSION ON LOGIN PAGE LOAD (force fresh login)
@@ -239,9 +239,9 @@
             }
 
             if (account.role === 'admin') {
-                window.location.href = 'overseer.html';
+                window.location.href = 'overseer/overseerhub.html';
             } else {
-                window.location.href = 'character.html';
+                window.location.href = 'player/combat.html';
             }
         }
 
@@ -323,7 +323,7 @@
             if (overseer && overseer.pin === pinEntry) {
                 sessionStorage.setItem('username', overseer.username);
                 sessionStorage.setItem('role', overseer.role);
-                window.location.href = 'overseer.html';
+                window.location.href = 'overseer/overseerhub.html';
             } else {
                 document.getElementById('pinError').textContent = '⚠ INCORRECT PIN. ACCESS DENIED.';
                 pinEntry = '';

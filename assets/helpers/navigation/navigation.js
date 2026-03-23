@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function logout() {
         closeMenu();
         sessionStorage.clear();
-        window.location.href = 'index.html';
+        window.location.href = '../login.html';
     }
 
     function switchCampaign() {
@@ -448,7 +448,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof showCampaignModal === 'function') {
             showCampaignModal();
         } else {
-            window.location.href = 'character.html';
+            window.location.href = 'combat.html';
         }
     }
 
