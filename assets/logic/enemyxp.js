@@ -27,15 +27,13 @@ const rarityPercentages = {
 
 // Function to get XP for defeating an enemy
 function getEnemyXP(playerLevel, enemyRarity) {
-  // Find closest player level in table
+  // Find highest level in table that is <= playerLevel (never round up)
   const validLevels = Object.keys(enemyXPTable).map(Number).sort((a, b) => a - b);
   let closestLevel = validLevels[0];
   
   for (let level of validLevels) {
     if (level <= playerLevel) {
       closestLevel = level;
-    } else {
-      break;
     }
   }
   
@@ -44,4 +42,4 @@ function getEnemyXP(playerLevel, enemyRarity) {
   return xpReward || 0;
 }
 
-// Example usage: const xp = getEnemyXP(25, 'rare'); // Gets XP for level 20 (closest below 25), rare enemy
+// Example usage: const xp = getEnemyXP(45, 'rare'); // Gets XP for level 40 (highest <= 45), rare enemy
