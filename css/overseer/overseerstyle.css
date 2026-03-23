@@ -1,1 +1,383 @@
+/* ═══════════════════════════════════════════════════════════════
+   VAULT 215 - OVERSEER PAGE STYLES
+   ═══════════════════════════════════════════════════════════════ */
 
+/* CSS Variables needed by overseer styles */
+:root {
+  --overseer-primary: #60a5fa;    /* Blue */
+  --overseer-accent: #fbbf24;     /* Gold */
+
+  --dark-bg: #0a0a0a;
+  --dark-surface: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #e5e5e5;
+
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #ff6b6b;
+  --info: #60a5fa;
+
+  --font-primary: 'Courier New', monospace;
+
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+
+  --shadow-lg: 0 8px 16px rgba(0,0,0,0.5);
+
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   OVERSEER CONTAINER & BUTTONS
+   ═══════════════════════════════════════════════════════════════ */
+
+.overseer-container {
+  background-color: var(--dark-bg);
+  color: var(--overseer-primary);
+  border: 2px solid var(--overseer-primary);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md);
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
+}
+
+.overseer-btn {
+  background-color: var(--overseer-primary);
+  color: var(--dark-bg);
+  border: none;
+  font-weight: bold;
+}
+
+.overseer-btn:hover {
+  background-color: #3b82f6;
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.5);
+}
+
+.accent-btn {
+  background-color: var(--overseer-accent);
+  color: var(--dark-bg);
+}
+
+.accent-btn:hover {
+  background-color: #eab308;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMMAND BAR
+   ═══════════════════════════════════════════════════════════════ */
+
+.command-bar {
+  background-color: var(--dark-surface);
+  border: 2px solid var(--overseer-accent);
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+  border-radius: 8px;
+  display: flex;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.command-bar button {
+  background-color: var(--overseer-accent);
+  color: var(--dark-bg);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-weight: bold;
+  transition: all var(--transition-fast);
+}
+
+.command-bar button:hover {
+  background-color: #eab308;
+  transform: scale(1.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMBAT GRID
+   ═══════════════════════════════════════════════════════════════ */
+
+.combat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--spacing-lg);
+  margin: var(--spacing-lg) 0;
+}
+
+.combat-column {
+  background-color: var(--dark-surface);
+  border: 1px solid var(--overseer-primary);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+}
+
+.combat-column h3 {
+  color: var(--overseer-accent);
+  margin-bottom: var(--spacing-md);
+  text-transform: uppercase;
+  letter-spacing: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INITIATIVE & COMBATANTS
+   ═══════════════════════════════════════════════════════════════ */
+
+.initiative-list {
+  list-style: none;
+}
+
+.combatant {
+  background-color: var(--dark-bg);
+  border: 1px solid var(--text-secondary);
+  padding: var(--spacing-md);
+  margin: var(--spacing-sm) 0;
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+
+.combatant.current-turn {
+  border: 2px solid var(--overseer-accent);
+  background-color: rgba(251, 191, 36, 0.1);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+}
+
+.combatant-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.combatant-name {
+  font-weight: bold;
+  color: var(--overseer-primary);
+}
+
+.combatant-initiative {
+  background-color: var(--overseer-accent);
+  color: var(--dark-bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   COMBAT LOG
+   ═══════════════════════════════════════════════════════════════ */
+
+.combat-log {
+  background-color: var(--dark-surface);
+  border: 1px solid var(--overseer-primary);
+  border-radius: 8px;
+  padding: var(--spacing-md);
+  height: 200px;
+  overflow-y: auto;
+  margin: var(--spacing-lg) 0;
+}
+
+.log-entry {
+  padding: var(--spacing-sm);
+  margin: var(--spacing-sm) 0;
+  border-left: 3px solid var(--info);
+  padding-left: var(--spacing-md);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.log-entry.success {
+  border-left-color: var(--success);
+  color: var(--success);
+}
+
+.log-entry.warning {
+  border-left-color: var(--warning);
+  color: var(--warning);
+}
+
+.log-entry.danger {
+  border-left-color: var(--danger);
+  color: var(--danger);
+}
+
+.log-timestamp {
+  color: var(--overseer-accent);
+  font-weight: bold;
+  margin-right: var(--spacing-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MODAL STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  animation: fadeIn var(--transition-normal);
+}
+
+.modal.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: var(--dark-surface);
+  padding: var(--spacing-lg);
+  border: 2px solid var(--overseer-primary);
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  color: var(--overseer-accent);
+  font-size: 20px;
+  margin-bottom: var(--spacing-lg);
+  text-transform: uppercase;
+}
+
+.modal-body {
+  margin-bottom: var(--spacing-lg);
+}
+
+.modal-footer {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION BAR
+   ═══════════════════════════════════════════════════════════════ */
+
+.navbar {
+  background-color: var(--dark-surface);
+  border-bottom: 2px solid var(--overseer-accent);
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-title {
+  font-size: 24px;
+  color: var(--overseer-accent);
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: var(--spacing-lg);
+  list-style: none;
+}
+
+.navbar-menu a {
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 4px;
+  transition: all var(--transition-fast);
+}
+
+.navbar-menu a:hover {
+  background-color: var(--overseer-primary);
+  color: var(--dark-bg);
+}
+
+.logout-btn {
+  background-color: var(--danger);
+  color: white;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all var(--transition-fast);
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+  transform: scale(1.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN - OVERSEER PAGES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Tablet - 1200px and below */
+@media (max-width: 1200px) {
+  .combat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .navbar {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .navbar-menu {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+/* Mobile - 768px and below */
+@media (max-width: 768px) {
+  .combat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-height: 70vh;
+  }
+
+  .command-bar {
+    flex-direction: column;
+  }
+
+  .command-bar button {
+    width: 100%;
+  }
+
+  .navbar-menu {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+}
+
+/* Small Mobile - 480px and below */
+@media (max-width: 480px) {
+  .overseer-container,
+  .combat-column {
+    padding: var(--spacing-md);
+  }
+
+  .modal-content {
+    padding: var(--spacing-md);
+  }
+}
