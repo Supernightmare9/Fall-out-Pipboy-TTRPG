@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function logout() {
         closeMenu();
         sessionStorage.clear();
-        window.location.href = 'index.html';
+        window.location.href = '../login.html';
     }
 
     if (logoutBtn) {

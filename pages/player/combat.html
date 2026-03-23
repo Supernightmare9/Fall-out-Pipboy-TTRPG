@@ -1503,18 +1503,18 @@
         <button class="level-up-close-btn" onclick="closeLevelUpNotification()">[ Acknowledge ]</button>
     </div>
 
-    <script src="../assets/data/accounts.js"></script>
-    <script src="../assets/data/campaigns.js"></script>
-    <script src="../assets/data/items.js"></script>
-    <script src="../assets/helpers/settingsManager.js"></script>
-    <script src="../assets/helpers/storageManager.js"></script>
-    <script src="../assets/helpers/inventoryManager.js"></script>
-    <script src="../assets/helpers/diceRoller.js"></script>
-    <script src="../assets/logic/xp.js"></script>
-    <script src="../assets/helpers/progressionManager.js"></script>
-    <script src="../assets/helpers/combatSystem.js"></script>
+    <script src="../../assets/data/accounts.js"></script>
+    <script src="../../assets/data/campaigns.js"></script>
+    <script src="../../assets/data/pools/items.js"></script>
+    <script src="../../assets/helpers/Managers/settingsManager.js"></script>
+    <script src="../../assets/helpers/Managers/storageManager.js"></script>
+    <script src="../../assets/helpers/Managers/inventoryManager.js"></script>
+    <script src="../../assets/helpers/mechanics/diceRoller.js"></script>
+    <script src="../../assets/logic/xp.js"></script>
+    <script src="../../assets/helpers/Managers/progressionManager.js"></script>
+    <script src="../../assets/helpers/mechanics/combatSystem.js"></script>
     <!-- Navigation (hamburger injected by navigation.js) -->
-    <script src="../assets/helpers/navigation.js"></script>
+    <script src="../../assets/helpers/navigation/navigation.js"></script>
     <script>
     // ════════════════════════════════════════════════════════════
     //  VAULT 215 — CHARACTER PAGE (PHASE 4)
@@ -1523,14 +1523,14 @@
 
     // ── AUTH CHECK ──────────────────────────────────────────────
     var sessionUsername = sessionStorage.getItem('username');
-    if (!sessionUsername) { window.location.replace('index.html'); }
+    if (!sessionUsername) { window.location.replace('../login.html'); }
 
     var currentAccount = ACCOUNTS.find(function(a) { return a.username === sessionUsername; });
     if (!currentAccount) {
         sessionStorage.clear();
-        window.location.replace('index.html');
+        window.location.replace('../login.html');
     } else if (currentAccount.role === 'admin') {
-        window.location.replace('overseer.html');
+        window.location.replace('../overseer/overseerhub.html');
     }
 
     document.getElementById('sessionUser').textContent = sessionUsername.toUpperCase();
@@ -2560,7 +2560,7 @@
     function logout() {
         if (refreshInterval) clearInterval(refreshInterval);
         sessionStorage.clear();
-        window.location.replace('index.html');
+        window.location.replace('../login.html');
     }
 
     // ── CROSS-TAB COMBAT SYNC (overseer in separate tab) ─────────

@@ -236,15 +236,15 @@
         .condition-active-dur{color:rgba(232,232,232,.5);font-size:10px;}
     </style>
 
-    <script src="../assets/data/accounts.js"></script>
-    <script src="../assets/data/campaigns.js"></script>
-    <script src="../assets/data/enemies.js"></script>
-    <script src="../assets/helpers/storageManager.js"></script>
-    <script src="../assets/helpers/diceRoller.js"></script>
-    <script src="../assets/helpers/encounterBuilder.js"></script>
-    <script src="../assets/logic/xp.js"></script>
-    <script src="../assets/helpers/progressionManager.js"></script>
-    <script src="../assets/helpers/combatSystem.js"></script>
+    <script src="../../assets/data/accounts.js"></script>
+    <script src="../../assets/data/campaigns.js"></script>
+    <script src="../../assets/data/pools/enemies.js"></script>
+    <script src="../../assets/helpers/Managers/storageManager.js"></script>
+    <script src="../../assets/helpers/mechanics/diceRoller.js"></script>
+    <script src="../../assets/helpers/mechanics/encounterBuilder.js"></script>
+    <script src="../../assets/logic/xp.js"></script>
+    <script src="../../assets/helpers/Managers/progressionManager.js"></script>
+    <script src="../../assets/helpers/mechanics/combatSystem.js"></script>
 </head>
 <body>
 
@@ -252,13 +252,13 @@
 <script>
 (function(){
     var role=sessionStorage.getItem('role');
-    if(role!=='admin'){window.location.replace('index.html');}
+    if(role!=='admin'){window.location.replace('../login.html');}
 })();
 </script>
 
 <!-- HAMBURGER NAV -->
-<script src="../assets/helpers/settingsManager.js"></script>
-<script src="../assets/helpers/overseer-navigation.js"></script>
+<script src="../../assets/helpers/Managers/settingsManager.js"></script>
+<script src="../../assets/helpers/navigation/overseer-navigation.js"></script>
 
 <!-- COMMAND BAR -->
 <div class="command-bar">
@@ -1030,7 +1030,7 @@
         var t=document.getElementById('exportToast');if(t){t.classList.add('visible');setTimeout(function(){t.classList.remove('visible');},3000);}
     };
 
-    window.logoutOverseer=function(){StorageManager.disableAutoSave();sessionStorage.clear();window.location.replace('index.html');};
+    window.logoutOverseer=function(){StorageManager.disableAutoSave();sessionStorage.clear();window.location.replace('../login.html');};
 
     document.addEventListener('DOMContentLoaded',function(){
         populateCampaignDropdown();
