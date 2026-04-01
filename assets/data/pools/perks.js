@@ -696,4 +696,7 @@ const perks = [
 // prereqs: [ { type: "skill", code: "Guns", value: 45 }, { type: "skill", code: "Energy Weapons", value: 45, orGroup: true }]
 // And update selection logic accordingly.
 
-export default perks;
+// Make available globally for script tag loading
+if (typeof window !== 'undefined') { window.PERKS_POOL = perks; }
+// CommonJS fallback (non-browser environments like Node.js)
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') { module.exports = perks; }

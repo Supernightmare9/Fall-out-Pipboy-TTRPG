@@ -282,6 +282,74 @@
             transition: background 0.2s;
         }
         .back-to-char-btn:hover { background: rgba(251,191,36,0.12); }
+
+        @keyframes blinkBorder { 0%,100%{border-color:rgba(251,191,36,0.4);} 50%{border-color:rgba(251,191,36,0.9);box-shadow:0 0 8px rgba(251,191,36,0.4);} }
+        @keyframes blinkText { 0%,100%{text-shadow:none;} 50%{text-shadow:0 0 10px #fbbf24;} }
+        .tab-btn.level-up-tab-btn.active { border-color:var(--vault-gold);color:var(--vault-gold); }
+
+        /* VAULT OVERLAY / DIALOG */
+        .vault-overlay {
+            position: fixed; inset: 0; z-index: 9000;
+            background: rgba(0,0,0,0.85);
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .vault-dialog {
+            background: var(--vault-darker);
+            border: 2px solid var(--vault-gold);
+            box-shadow: 0 0 30px rgba(251,191,36,0.3);
+            padding: 24px;
+            width: 100%; max-width: 480px;
+            font-family: 'Courier New', monospace;
+            animation: vault-slideIn 0.2s ease;
+        }
+        @keyframes vault-slideIn { from{opacity:0;transform:translateY(-20px);} to{opacity:1;transform:none;} }
+        .vault-dialog-title {
+            font-size: 13px; font-weight: bold; letter-spacing: 2px;
+            color: var(--vault-gold); text-transform: uppercase;
+            border-bottom: 1px solid rgba(251,191,36,0.3);
+            padding-bottom: 10px; margin-bottom: 14px;
+        }
+        .vault-dialog-body { font-size: 11px; color: rgba(74,222,128,0.85); line-height: 1.6; margin-bottom: 16px; }
+        .vault-dialog-footer { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+        /* GLOW for level-up active state */
+        @keyframes levelUpGlow {
+            0%,100% { box-shadow: 0 0 4px rgba(251,191,36,0.2); border-color: rgba(251,191,36,0.3); }
+            50%      { box-shadow: 0 0 12px rgba(251,191,36,0.6); border-color: rgba(251,191,36,0.8); }
+        }
+        .lu-glow { animation: levelUpGlow 1.5s ease-in-out infinite !important; }
+
+        /* PERK SELECTION UI */
+        .perk-box.perk-eligible   { border-color: rgba(74,222,128,0.7); box-shadow: 0 0 8px rgba(74,222,128,0.25); cursor:pointer; }
+        .perk-box.perk-eligible:hover { box-shadow: 0 0 16px rgba(74,222,128,0.5); }
+        .perk-box.perk-locked     { opacity: 0.5; border-color: rgba(255,107,107,0.3); cursor: not-allowed; }
+        .perk-box.perk-selected   { border-color: var(--vault-gold); box-shadow: 0 0 10px rgba(251,191,36,0.4); background: rgba(251,191,36,0.06); }
+        .perk-box.perk-maxed      { opacity: 0.55; border-color: rgba(74,222,128,0.2); cursor: not-allowed; }
+        .perk-missing-prereqs { font-size:9px;color:rgba(255,107,107,0.8);margin-top:5px;line-height:1.4; }
+        .perk-select-rank-row { display:flex;gap:4px;flex-wrap:wrap;margin-top:8px; }
+
+        /* VAULT-TEC BRANDING */
+        .vt-decorative-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--vault-gold), var(--vault-green), var(--vault-gold), transparent);
+            margin: 8px 0;
+            opacity: 0.6;
+        }
+        .vt-approved-badge {
+            display: inline-block;
+            border: 2px solid var(--vault-gold);
+            color: var(--vault-gold);
+            font-size: 8px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            padding: 2px 8px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            transform: rotate(-5deg);
+            margin-left: 10px;
+            vertical-align: middle;
+        }
     </style>
 </head>
 <body>
@@ -296,6 +364,16 @@
             <div style="margin-top:10px;">
                 <a href="combat.html" class="back-to-char-btn" aria-label="Back to Character Status page">&larr; Back to Character</a>
             </div>
+            <svg width="60" height="60" viewBox="0 0 60 60" style="margin:12px auto 4px;display:block;opacity:0.85;" aria-label="Vault-Tec Logo" role="img">
+              <circle cx="30" cy="30" r="28" fill="none" stroke="#fbbf24" stroke-width="2"/>
+              <circle cx="30" cy="30" r="18" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+              <circle cx="30" cy="30" r="8" fill="#fbbf24" opacity="0.6"/>
+              <line x1="30" y1="2" x2="30" y2="58" stroke="#fbbf24" stroke-width="1" opacity="0.4"/>
+              <line x1="2" y1="30" x2="58" y2="30" stroke="#fbbf24" stroke-width="1" opacity="0.4"/>
+              <path d="M30 12 L34 22 L30 18 L26 22 Z" fill="#fbbf24" opacity="0.8"/>
+            </svg>
+            <div class="vt-decorative-line"></div>
+            <div style="font-size:9px;letter-spacing:1px;color:rgba(251,191,36,0.6);">VAULT-TEC CORPORATION &bull; APPROVED <span class="vt-approved-badge">APPROVED</span></div>
         </div>
 
         <!-- TABS NAV -->
@@ -304,6 +382,7 @@
             <button class="tab-btn"        onclick="switchTab('skills', this)">&#127919; SKILLS</button>
             <button class="tab-btn"        onclick="switchTab('perks', this)">&#11088; PERKS</button>
             <button class="tab-btn"        onclick="switchTab('effects', this)">&#10022; EFFECTS</button>
+            <button class="tab-btn level-up-tab-btn" id="levelUpTabBtn" onclick="switchTab('levelup', this)" style="display:none;border-color:rgba(251,191,36,0.6);color:#fbbf24;animation:blinkText 1s ease-in-out infinite;">&#11014; LEVEL UP</button>
         </div>
 
         <!-- TAB 1: STATS - Three Column Dashboard -->
@@ -453,6 +532,12 @@
                         </div>
                     </div>
 
+                    <!-- Proficiencies Placeholder (Future) -->
+                    <div class="tracker-box" style="margin-top:14px;border-color:rgba(96,165,250,0.3);">
+                      <div class="tracker-title" style="color:rgba(96,165,250,0.7);">&#128203; Proficiencies <span style="font-size:8px;opacity:0.6;">[FUTURE]</span></div>
+                      <div style="font-size:9px;color:rgba(96,165,250,0.5);font-style:italic;">Weapon and tool proficiency bonuses from your SPECIAL stats will appear here in a future update. Stub reserved for Overseer configuration.</div>
+                    </div>
+
                     <!-- XP Section -->
                     <div class="panel-title" style="margin-top:16px;">&#11088; Experience</div>
                     <div class="stat-help-text">XP is awarded for quests, combat, exploration, and learning. Earn enough to level up and gain skill points to spend in the Skills tab.</div>
@@ -463,24 +548,7 @@
                         <div class="bar-bg"><div class="bar-fill bar-high" id="xpBar" style="width:0%"></div></div>
                     </div>
                     <div style="font-size:9px;color:rgba(74,222,128,0.5);text-align:right;margin-bottom:8px;" id="xpPercent">0%</div>
-                    <div class="input-row">
-                        <select id="xpSource" class="compact-input flex">
-                            <option value="Quest">Quest</option>
-                            <option value="Combat">Combat</option>
-                            <option value="Exploration">Exploration</option>
-                            <option value="Learning">Learning</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="input-row">
-                        <input type="text"   id="xpDescription" class="compact-input flex" placeholder="Description (optional)">
-                    </div>
-                    <div class="input-row">
-                        <input type="number" id="xpInput" class="compact-input" placeholder="XP amount" min="1">
-                        <button class="update-btn" onclick="addXP()">Add XP</button>
-                        <button class="update-btn btn-danger" onclick="removeXP()">Remove</button>
-                    </div>
-                    <div class="msg-box" id="xpMessage"></div>
+                    <div id="levelUpMessage" style="display:none;font-size:10px;letter-spacing:1px;margin-top:4px;padding:4px 8px;border:1px solid rgba(251,191,36,0.4);background:rgba(251,191,36,0.05);color:#fbbf24;animation:blinkBorder 1.5s ease-in-out infinite;" aria-live="polite"></div>
                 </div><!-- /MIDDLE -->
 
                 <!-- RIGHT: EFFECTS & STATUS -->
@@ -576,9 +644,91 @@
 
         </div><!-- /tab-effects -->
 
+        <!-- TAB 5: LEVEL UP -->
+        <div class="tab-content" id="tab-levelup">
+          <div id="levelUpBanner" style="text-align:center;padding:10px;margin-bottom:14px;border:2px solid rgba(251,191,36,0.5);background:rgba(251,191,36,0.05);">
+            <div style="font-size:13px;font-weight:bold;color:#fbbf24;letter-spacing:3px;text-transform:uppercase;">&#11014; LEVEL UP PROTOCOL INITIATED</div>
+            <div style="font-size:10px;color:rgba(251,191,36,0.7);margin-top:4px;">Vault-Tec congratulates you on your advancement</div>
+          </div>
+
+          <!-- Skill Points Section -->
+          <div id="luSkillSection" style="margin-bottom:20px;">
+            <div class="panel-title">&#127919; Skill Points Allocation</div>
+            <div class="skill-points-pool" id="luSkillPool">
+              <span class="skill-points-label">Skill Points Available:</span>
+              <span class="skill-points-value" id="luSkillPointsCount">0</span>
+            </div>
+            <div class="skills-grid" id="luSkillsGrid"></div>
+            <div id="luSkillMsg" class="msg-box"></div>
+          </div>
+
+          <!-- Perk Points Section -->
+          <div id="luPerkSection" style="margin-bottom:20px;">
+            <div class="panel-title">&#11088; Perk Selection</div>
+            <div class="skill-points-pool" id="luPerkPool">
+              <span class="skill-points-label">Perk Points Available:</span>
+              <span class="skill-points-value" id="luPerkPointsCount">0</span>
+            </div>
+            <div id="luPerkGrid" class="perks-grid" style="margin-top:10px;"></div>
+            <div id="luPerkMsg" class="msg-box"></div>
+          </div>
+
+          <!-- Level-Up Action Buttons -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;">
+            <button id="luSaveBtn" class="update-btn" style="border-color:rgba(251,191,36,0.8);color:#fbbf24;background:rgba(251,191,36,0.1);" onclick="saveLevelUp()">&#128190; Save Level Up</button>
+            <button id="luUndoBtn" class="update-btn btn-temp" onclick="undoLevelUp()">&#8617; Undo Last Change</button>
+            <button id="luResetBtn" class="update-btn btn-danger" onclick="resetLevelUp()">&#8635; Reset All Changes</button>
+          </div>
+        </div><!-- /tab-levelup -->
+
     </div><!-- /container -->
 
-    <script src="../../assets/logic/xp.js"></script>
+    <!-- ONBOARDING MODAL -->
+    <div id="onboardingModal" class="vault-overlay" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle" style="display:none;">
+      <div class="vault-dialog" style="max-width:560px;">
+        <div class="vault-dialog-title" id="onboardingTitle">&#127968; Welcome to Your Pip-Boy Stats Module</div>
+        <div class="vault-dialog-body" style="font-size:11px;line-height:1.7;color:rgba(74,222,128,0.85);">
+          <p><strong style="color:#fbbf24;">STATS TAB:</strong> View and manage your HP, AP, AC, SPECIAL attributes, radiation, and active effects.</p>
+          <p style="margin-top:6px;"><strong style="color:#fbbf24;">SKILLS TAB:</strong> View your 14 skills. Tag up to 3 skills for +15 bonus. Spend skill points here after leveling up.</p>
+          <p style="margin-top:6px;"><strong style="color:#fbbf24;">PERKS TAB:</strong> View all perks you have earned so far.</p>
+          <p style="margin-top:6px;"><strong style="color:#fbbf24;">LEVEL UP TAB:</strong> Appears when you gain a level. Allocate skill points and choose a new perk from the available pool.</p>
+          <p style="margin-top:6px;"><strong style="color:#fbbf24;">XP:</strong> Experience is tracked by the Overseer &mdash; you cannot edit it directly.</p>
+          <p style="margin-top:10px;font-size:9px;opacity:0.6;">This message will not appear again. You can re-read it from the Settings page.</p>
+        </div>
+        <div class="vault-dialog-footer">
+          <button class="update-btn" onclick="closeOnboarding()" style="border-color:var(--vault-gold);color:var(--vault-gold);">Understood &mdash; Let's Play!</button>
+          <label style="font-size:9px;color:rgba(74,222,128,0.5);margin-left:10px;cursor:pointer;">
+            <input type="checkbox" id="onboardDontShow" style="accent-color:var(--vault-gold);"> Don't show again
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM MODAL -->
+    <div id="confirmModal" class="vault-overlay" role="dialog" aria-modal="true" style="display:none;">
+      <div class="vault-dialog">
+        <div class="vault-dialog-title" id="confirmTitle">Confirm Action</div>
+        <div class="vault-dialog-body" id="confirmBody"></div>
+        <div class="vault-dialog-footer">
+          <button class="update-btn btn-danger" id="confirmYesBtn">Yes, Proceed</button>
+          <button class="update-btn" id="confirmNoBtn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFO MODAL -->
+    <div id="infoModal" class="vault-overlay" role="dialog" aria-modal="true" style="display:none;">
+      <div class="vault-dialog">
+        <div class="vault-dialog-title" id="infoTitle">Notice</div>
+        <div class="vault-dialog-body" id="infoBody"></div>
+        <div class="vault-dialog-footer">
+          <button class="update-btn" onclick="closeInfoModal()">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../../assets/logic/xp/xpprogression.js"></script>
+    <script src="../../assets/data/pools/perks.js"></script>
     <script>
     // ================================================================
     //  VAULT 215 - STATS PAGE (Redesigned with character.html style)
@@ -607,7 +757,7 @@
                   'Explosives','Lockpick','Medicine','Science','Repair',
                   'Sneak','Speech','Unarmed','Survival'];
 
-    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false };
+    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, perkPointsAvailable:0, selectedPerks:[], perkSelectionActive:false, skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false };
     var debuffs    = [];
     var boosts     = [];
     var hpLastUpdated = null;
@@ -819,19 +969,21 @@
     }
 
     function addTempHealth() {
-        var v = prompt('Temporary health amount:');
-        if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
-            playerData.tempHealth = (playerData.tempHealth||0) + parseInt(v);
-            updateTempDisplays(); savePlayerData();
-        }
+        showInputModal('Add Temporary HP','Temporary health amount:', '', function(v) {
+            if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
+                playerData.tempHealth = (playerData.tempHealth||0) + parseInt(v);
+                updateTempDisplays(); savePlayerData();
+            }
+        });
     }
 
     function removeTempHealth() {
-        var v = prompt('Temporary health to remove:');
-        if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
-            playerData.tempHealth = Math.max(0, (playerData.tempHealth||0) - parseInt(v));
-            updateTempDisplays(); savePlayerData();
-        }
+        showInputModal('Remove Temporary HP','Temporary health to remove:', '', function(v) {
+            if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
+                playerData.tempHealth = Math.max(0, (playerData.tempHealth||0) - parseInt(v));
+                updateTempDisplays(); savePlayerData();
+            }
+        });
     }
 
     // ---- ACTION POINTS ----
@@ -848,19 +1000,21 @@
     }
 
     function addTempAP() {
-        var v = prompt('Temporary AP amount:');
-        if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
-            playerData.tempActionPoints = (playerData.tempActionPoints||0) + parseInt(v);
-            updateTempDisplays(); savePlayerData();
-        }
+        showInputModal('Add Temporary AP','Temporary AP amount:', '', function(v) {
+            if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
+                playerData.tempActionPoints = (playerData.tempActionPoints||0) + parseInt(v);
+                updateTempDisplays(); savePlayerData();
+            }
+        });
     }
 
     function removeTempAP() {
-        var v = prompt('Temporary AP to remove:');
-        if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
-            playerData.tempActionPoints = Math.max(0, (playerData.tempActionPoints||0) - parseInt(v));
-            updateTempDisplays(); savePlayerData();
-        }
+        showInputModal('Remove Temporary AP','Temporary AP to remove:', '', function(v) {
+            if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
+                playerData.tempActionPoints = Math.max(0, (playerData.tempActionPoints||0) - parseInt(v));
+                updateTempDisplays(); savePlayerData();
+            }
+        });
     }
 
     function updateTempDisplays() {
@@ -924,12 +1078,14 @@
     function editSpecial(statName) {
         var el  = document.getElementById('special-' + statName);
         var cur = parseInt(el.textContent) || 0;
-        var nv  = prompt('Set ' + statName.charAt(0).toUpperCase() + statName.slice(1) + ' (1-10):', cur);
-        if (nv === null || nv === '') return;
-        var parsed = parseInt(nv);
-        if (isNaN(parsed)) return;
-        el.textContent = Math.max(1, Math.min(10, parsed));
-        saveSpecialStats();
+        showInputModal('Edit ' + statName.charAt(0).toUpperCase() + statName.slice(1),
+            'Set ' + statName.charAt(0).toUpperCase() + statName.slice(1) + ' (1-10):', cur,
+            function(nv) {
+                var parsed = parseInt(nv);
+                if (isNaN(parsed)) return;
+                el.textContent = Math.max(1, Math.min(10, parsed));
+                saveSpecialStats();
+            });
     }
 
     // ---- RADIATION TRACKER ----
@@ -1195,15 +1351,16 @@
 
     // ---- PERKS ----
     function updatePerksDisplay() {
-        var perks = [];
-        try { perks = JSON.parse(localStorage.getItem('pipboyPerks') || '[]'); } catch(e){}
+        var perks = playerData.selectedPerks || [];
         document.getElementById('perksGrid').innerHTML = perks.length === 0
             ? '<div class="perks-empty">No perks earned yet. Keep adventuring!</div>'
             : perks.map(function(p){
-                return '<div class="perk-box">' +
-                    '<div class="perk-title">' + escHtml(p.name||'Unknown') + '</div>' +
-                    '<div class="perk-description">' + escHtml(p.description||'No description') + '</div>' +
-                    (p.rank ? '<div class="perk-rank">Rank: '+p.rank+'</div>' : '') +
+                var maxRank = p.rank || 1;
+                var rankDisplay = maxRank > 1 ? ' (Rank '+(p.currentRank||1)+'/'+maxRank+')' : '';
+                var desc = p.description || p.benefit || 'No description';
+                return '<div class="perk-box" tabindex="0" title="'+escHtml(desc)+'">' +
+                    '<div class="perk-title">' + escHtml(p.name||'Unknown') + escHtml(rankDisplay) + '</div>' +
+                    '<div class="perk-description">' + escHtml(desc) + '</div>' +
                     '</div>';
             }).join('');
     }
@@ -1224,8 +1381,11 @@
 
     function addXP() {
         var inp    = document.getElementById('xpInput');
-        var src    = document.getElementById('xpSource').value;
-        var desc   = document.getElementById('xpDescription').value.trim();
+        if (!inp) return;
+        var srcEl  = document.getElementById('xpSource');
+        var descEl = document.getElementById('xpDescription');
+        var src    = srcEl ? srcEl.value : 'Other';
+        var desc   = descEl ? descEl.value.trim() : '';
         var amount = parseInt(inp.value);
         if (!inp.value || isNaN(amount) || amount <= 0) { showMsg('xpMessage', '⚠ Enter a valid positive XP amount', false); return; }
         var cur    = parseInt(localStorage.getItem('pipboyXP')||'0');
@@ -1234,30 +1394,387 @@
         var gained = checkLevelUp(cur, nv);
         if (gained.length > 0) {
             playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + gained.length * SKILL_POINTS_PER_LEVEL;
+            playerData.perkPointsAvailable = (playerData.perkPointsAvailable || 0) + gained.length;
             // Unlock skill allocation for the new level-up window and snapshot baseline
             playerData.skillsLocked = false;
             playerData.skillsAllocationActive = true;
+            playerData.perkSelectionActive = true;
             playerData.skillsLockBaseline = deepCopy(playerData.skills);
             savePlayerData();
         }
         updateXPDisplay(nv);
-        showMsg('xpMessage', gained.length > 0 ? '✓ LEVEL UP! Level '+getLevelFromXP(nv)+'! (+'+amount+' XP, +'+gained.length * SKILL_POINTS_PER_LEVEL+' skill pts)' : '✓ +'+amount+' XP. Total: '+formatXP(nv), true);
-        inp.value = ''; document.getElementById('xpDescription').value = '';
-        if (gained.length > 0) updateDisplay();
+        var xpMsgEl = document.getElementById('xpMessage');
+        if (xpMsgEl) showMsg('xpMessage', gained.length > 0 ? '✓ LEVEL UP! Level '+getLevelFromXP(nv)+'! (+'+amount+' XP, +'+gained.length * SKILL_POINTS_PER_LEVEL+' skill pts)' : '✓ +'+amount+' XP. Total: '+formatXP(nv), true);
+        inp.value = '';
+        if (descEl) descEl.value = '';
+        if (gained.length > 0) { updateDisplay(); refreshLevelUpTabVisibility(); updateLevelUpTab(); }
     }
 
     function removeXP() {
         var inp    = document.getElementById('xpInput');
-        var src    = document.getElementById('xpSource').value;
-        var desc   = document.getElementById('xpDescription').value.trim();
+        if (!inp) return;
+        var srcEl  = document.getElementById('xpSource');
+        var descEl = document.getElementById('xpDescription');
+        var src    = srcEl ? srcEl.value : 'Other';
+        var desc   = descEl ? descEl.value.trim() : '';
         var amount = parseInt(inp.value);
         if (!inp.value || isNaN(amount) || amount <= 0) { showMsg('xpMessage', '⚠ Enter a valid positive XP amount', false); return; }
         var cur = parseInt(localStorage.getItem('pipboyXP')||'0');
         var nv  = Math.max(0, cur - amount);
         addXPToHistory(-amount, src, desc, nv);
         updateXPDisplay(nv);
-        showMsg('xpMessage', '✓ Removed '+amount+' XP. Total: '+formatXP(nv), true);
-        inp.value = ''; document.getElementById('xpDescription').value = '';
+        var xpMsgEl = document.getElementById('xpMessage');
+        if (xpMsgEl) showMsg('xpMessage', '✓ Removed '+amount+' XP. Total: '+formatXP(nv), true);
+        inp.value = '';
+        if (descEl) descEl.value = '';
+    }
+
+    // ---- ONBOARDING ----
+    function showOnboarding() {
+        var skipped = localStorage.getItem('pipboyOnboarded');
+        if (skipped) return;
+        document.getElementById('onboardingModal').style.display = 'flex';
+        document.getElementById('onboardingModal').querySelector('button').focus();
+    }
+    function closeOnboarding() {
+        var skip = document.getElementById('onboardDontShow').checked;
+        if (skip) localStorage.setItem('pipboyOnboarded', '1');
+        document.getElementById('onboardingModal').style.display = 'none';
+    }
+
+    // ---- MODAL DIALOGS ----
+    function showInfoModal(title, body) {
+        document.getElementById('infoTitle').textContent = title;
+        document.getElementById('infoBody').innerHTML = escHtml(body).replace(/\n/g,'<br>');
+        var m = document.getElementById('infoModal');
+        m.style.display = 'flex';
+        m.querySelector('button').focus();
+    }
+    function closeInfoModal() {
+        document.getElementById('infoModal').style.display = 'none';
+    }
+    function showConfirmModal(title, body, onYes) {
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmBody').innerHTML = escHtml(body).replace(/\n/g,'<br>');
+        var m = document.getElementById('confirmModal');
+        m.style.display = 'flex';
+        var yesBtn = document.getElementById('confirmYesBtn');
+        var noBtn  = document.getElementById('confirmNoBtn');
+        yesBtn.onclick = function() { m.style.display = 'none'; onYes(); };
+        noBtn.onclick  = function() { m.style.display = 'none'; };
+        yesBtn.focus();
+    }
+    function showInputModal(title, prompt, defaultVal, onOk) {
+        var m = document.getElementById('infoModal');
+        document.getElementById('infoTitle').textContent = title;
+        // Build input field via DOM for safety
+        var body = document.getElementById('infoBody');
+        body.textContent = '';
+        var label = document.createElement('span');
+        label.textContent = prompt;
+        var input = document.createElement('input');
+        input.type = 'number';
+        input.id = 'modalInputField';
+        input.style.cssText = 'display:block;margin-top:8px;background:var(--vault-dark);border:1px solid var(--vault-gold);color:var(--vault-green);font-family:\'Courier New\',monospace;padding:6px 10px;width:100%;font-size:13px;';
+        input.value = defaultVal !== undefined && defaultVal !== null ? String(defaultVal) : '';
+        body.appendChild(label);
+        body.appendChild(input);
+        m.style.display = 'flex';
+        var okBtn = m.querySelector('button');
+        okBtn.textContent = 'OK';
+        // Replace handler (always reset to closeInfoModal after use)
+        okBtn.onclick = function() {
+            var val = input.value;
+            m.style.display = 'none';
+            okBtn.onclick = closeInfoModal;
+            okBtn.textContent = 'OK';
+            onOk(val);
+        };
+        setTimeout(function(){ input.focus(); }, 50);
+    }
+
+    // ---- LEVEL-UP TAB ----
+    var _levelUpUndoStack = [];
+    var _levelUpBaseline  = null; // snapshot of playerData at the start of level-up, used for Reset
+
+    function refreshLevelUpTabVisibility() {
+        var active = !!(playerData.skillPointsAvailable > 0 || playerData.perkPointsAvailable > 0);
+        var btn = document.getElementById('levelUpTabBtn');
+        if (btn) btn.style.display = active ? '' : 'none';
+        var msgEl = document.getElementById('levelUpMessage');
+        if (msgEl) {
+            if (active) {
+                var parts = [];
+                if (playerData.skillPointsAvailable > 0) parts.push(playerData.skillPointsAvailable + ' skill point(s) to spend');
+                if (playerData.perkPointsAvailable > 0) parts.push(playerData.perkPointsAvailable + ' perk point(s) to choose');
+                msgEl.textContent = '⬆ Level up: ' + parts.join(' and ') + ' — see LEVEL UP tab';
+                msgEl.style.display = '';
+            } else {
+                msgEl.style.display = 'none';
+            }
+        }
+        var skillsTab = document.querySelector('.tab-btn[onclick*="skills"]');
+        if (skillsTab) {
+            if (playerData.skillPointsAvailable > 0) skillsTab.classList.add('lu-glow');
+            else skillsTab.classList.remove('lu-glow');
+        }
+        var perksTab = document.querySelector('.tab-btn[onclick*="perks"]');
+        if (perksTab) {
+            if ((playerData.perkPointsAvailable||0) > 0) perksTab.classList.add('lu-glow');
+            else perksTab.classList.remove('lu-glow');
+        }
+    }
+
+    function getSpecialValue(code) {
+        var map = { ST:'strength', PE:'perception', EN:'endurance', CH:'charisma', IN:'intelligence', AG:'agility', LK:'luck' };
+        var domName = map[code];
+        if (!domName) return 0;
+        return parseInt(document.getElementById('special-' + domName).textContent) || 0;
+    }
+
+    function checkPerkPrereqs(perk) {
+        var missing = [];
+        (perk.prereqs || []).forEach(function(req) {
+            if (req.type === 'attribute') {
+                var val = getSpecialValue(req.code);
+                if (val < req.value) missing.push(req.code + ' ' + req.value + ' (have ' + val + ')');
+            } else if (req.type === 'skill') {
+                var sval = playerData.skills[req.code] || 0;
+                if (sval < req.value) missing.push(req.code + ' ' + req.value + ' (have ' + sval + ')');
+            } else if (req.type === 'perk') {
+                var hasPerk = (playerData.selectedPerks || []).filter(function(p){ return p.id === req.code; });
+                var rank = hasPerk.length > 0 ? (hasPerk[0].currentRank || 1) : 0;
+                if (rank < req.value) missing.push('Perk: ' + req.code + ' rank ' + req.value);
+            }
+        });
+        return missing;
+    }
+
+    function getPlayerPerkRank(perkId) {
+        var found = (playerData.selectedPerks || []).filter(function(p){ return p.id === perkId; });
+        return found.length > 0 ? (found[0].currentRank || 1) : 0;
+    }
+
+    function renderLevelUpPerks() {
+        var currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+        var perkPts = playerData.perkPointsAvailable || 0;
+        var grid = document.getElementById('luPerkGrid');
+        if (!grid) return;
+        var pool = window.PERKS_POOL || [];
+        var available = pool.filter(function(p){ return p.levelReq <= currentLevel; });
+        if (available.length === 0) {
+            grid.innerHTML = '<div class="perks-empty">No perks available at your current level.</div>';
+            return;
+        }
+        grid.innerHTML = available.map(function(perk) {
+            var maxRank = perk.rank || 1;
+            var currentRank = getPlayerPerkRank(perk.id);
+            var missing = checkPerkPrereqs(perk);
+            var isMaxed = currentRank >= maxRank;
+            var isEligible = missing.length === 0 && !isMaxed;
+            var cssClass = isMaxed ? 'perk-maxed' : (isEligible ? 'perk-eligible' : 'perk-locked');
+            var rankDisplay = maxRank > 1 ? ' (Rank ' + currentRank + '/' + maxRank + ')' : '';
+            var missingHtml = missing.length > 0 ? '<div class="perk-missing-prereqs">Missing: ' + missing.map(function(m){return escHtml(m);}).join(', ') + '</div>' : '';
+            var btnHtml = '';
+            if (perkPts > 0 && isEligible) {
+                var rankLabel = maxRank > 1 ? ' (Rank ' + (currentRank+1) + ')' : '';
+                // Use data attribute; click handled by delegation below
+                btnHtml = '<button class="update-btn lu-perk-select-btn" data-perk-id="' + escHtml(perk.id) + '" style="margin-top:8px;font-size:9px;padding:4px 10px;" tabindex="0" title="Select this perk (costs 1 perk point)">Select' + escHtml(rankLabel) + '</button>';
+            } else if (isMaxed) {
+                btnHtml = '<div style="font-size:9px;color:rgba(74,222,128,0.5);margin-top:5px;">Max rank reached</div>';
+            }
+            return '<div class="perk-box ' + cssClass + '" tabindex="' + (isEligible && perkPts > 0 ? '0' : '-1') + '" ' +
+                'data-perk-id="' + escHtml(perk.id) + '" ' +
+                'title="' + escHtml(perk.benefit) + '">' +
+                '<div class="perk-title">' + escHtml(perk.name) + escHtml(rankDisplay) + '</div>' +
+                '<div class="perk-description">' + escHtml(perk.benefit) + '</div>' +
+                missingHtml + btnHtml +
+                '</div>';
+        }).join('');
+        // Delegated event listener for Select buttons and keyboard on perk boxes
+        grid.onclick = function(e) {
+            var btn = e.target.closest('.lu-perk-select-btn');
+            if (btn) { selectLevelUpPerk(btn.getAttribute('data-perk-id')); return; }
+        };
+        grid.onkeydown = function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                var box = e.target.closest('.perk-eligible');
+                if (box) { e.preventDefault(); selectLevelUpPerk(box.getAttribute('data-perk-id')); }
+            }
+        };
+    }
+
+    function renderLevelUpSkills() {
+        var pts = playerData.skillPointsAvailable || 0;
+        var grid = document.getElementById('luSkillsGrid');
+        if (!grid) return;
+        grid.innerHTML = SKILLS.map(function(skill) {
+            var sp     = getSpecialForSkill(skill);
+            var val    = playerData.skills[skill] || 0;
+            var tagged = playerData.tagSkills.indexOf(skill) !== -1;
+            var bonus  = calculateSkillBonus(val, tagged);
+            var canInc = pts > 0;
+            var baseline = (playerData.skillsLockBaseline || {})[skill] || 0;
+            var canDec = val > baseline;
+            var displayVal = tagged ? val + TAG_SKILL_BONUS : val;
+            return '<div class="skill-item' + (canInc ? ' lu-glow' : '') + '">' +
+                '<div class="skill-left">' +
+                    '<div class="skill-info">' +
+                        '<div class="skill-name">'+escHtml(skill)+'</div>' +
+                        '<div class="skill-special">'+escHtml(sp)+'</div>' +
+                        '<div class="skill-bonus">Bonus: '+formatBonus(bonus)+'</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="skill-controls">' +
+                    '<button class="skill-btn lu-skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" data-skill="' + escHtml(skill) + '" data-delta="-1" ' + (!canDec ? 'disabled' : 'title="Decrease (refunds 1 point)"') + ' tabindex="0">-</button>' +
+                    '<span class="skill-value">'+displayVal+'</span>' +
+                    '<button class="skill-btn lu-skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" data-skill="' + escHtml(skill) + '" data-delta="1" ' + (!canInc ? 'disabled title="No skill points available"' : 'title="Increase skill (costs 1 point)"') + ' tabindex="0">+</button>' +
+                '</div>' +
+                '</div>';
+        }).join('');
+        var spEl = document.getElementById('luSkillPointsCount');
+        if (spEl) {
+            spEl.textContent = pts;
+            spEl.className = 'skill-points-value' + (pts <= 0 ? ' skill-points-zero' : '');
+        }
+        // Delegated event listener for skill +/- buttons
+        grid.onclick = function(e) {
+            var btn = e.target.closest('.lu-skill-btn');
+            if (btn && !btn.disabled) {
+                luUpdateSkill(btn.getAttribute('data-skill'), parseInt(btn.getAttribute('data-delta'), 10));
+            }
+        };
+    }
+
+    function luUpdateSkill(skillName, amount) {
+        if (amount > 0) {
+            if ((playerData.skillPointsAvailable || 0) <= 0) { showInfoModal('No Points', 'No skill points remaining.'); return; }
+            _levelUpUndoStack.push(deepCopy(playerData));
+            playerData.skillPointsAvailable = Math.max(0, (playerData.skillPointsAvailable || 0) - 1);
+        } else {
+            var baseline = (playerData.skillsLockBaseline || {})[skillName] || 0;
+            if ((playerData.skills[skillName] || 0) <= baseline) return;
+            _levelUpUndoStack.push(deepCopy(playerData));
+            playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + 1;
+        }
+        playerData.skills[skillName] = Math.max(0, Math.min(100, (playerData.skills[skillName]||0) + amount));
+        savePlayerData();
+        renderLevelUpSkills();
+        renderLevelUpPerks();
+        updateDisplay();
+        refreshLevelUpTabVisibility();
+    }
+
+    function selectLevelUpPerk(perkId) {
+        if ((playerData.perkPointsAvailable || 0) <= 0) { showInfoModal('No Perk Points', 'No perk points available.'); return; }
+        var pool = window.PERKS_POOL || [];
+        var perk = pool.find(function(p){ return p.id === perkId; });
+        if (!perk) return;
+        var missing = checkPerkPrereqs(perk);
+        if (missing.length > 0) { showInfoModal('Prerequisites Not Met', 'You do not meet the requirements:\n' + missing.join('\n')); return; }
+        var maxRank = perk.rank || 1;
+        var currentRank = getPlayerPerkRank(perkId);
+        if (currentRank >= maxRank) { showInfoModal('Max Rank', 'You have already reached the maximum rank for this perk.'); return; }
+        _levelUpUndoStack.push(deepCopy(playerData));
+        if (!playerData.selectedPerks) playerData.selectedPerks = [];
+        var existing = playerData.selectedPerks.find(function(p){ return p.id === perkId; });
+        if (existing) {
+            existing.currentRank = (existing.currentRank || 1) + 1;
+        } else {
+            playerData.selectedPerks.push({ id: perkId, name: perk.name, description: perk.benefit, rank: maxRank, currentRank: 1 });
+        }
+        playerData.perkPointsAvailable = Math.max(0, (playerData.perkPointsAvailable || 0) - 1);
+        savePlayerData();
+        renderLevelUpPerks();
+        updatePerksDisplay();
+        refreshLevelUpTabVisibility();
+        var ptEl = document.getElementById('luPerkPointsCount');
+        if (ptEl) {
+            ptEl.textContent = playerData.perkPointsAvailable || 0;
+            ptEl.className = 'skill-points-value' + (playerData.perkPointsAvailable <= 0 ? ' skill-points-zero' : '');
+        }
+    }
+
+    function undoLevelUp() {
+        if (_levelUpUndoStack.length === 0) { showInfoModal('Nothing to Undo', 'No changes to undo.'); return; }
+        Object.assign(playerData, _levelUpUndoStack.pop());
+        savePlayerData();
+        renderLevelUpSkills();
+        renderLevelUpPerks();
+        updateDisplay();
+        updatePerksDisplay();
+        refreshLevelUpTabVisibility();
+    }
+
+    function resetLevelUp() {
+        showConfirmModal('Reset Level Up', 'Reset all level-up changes? This will restore your skills and perks to their state at the start of level-up.', function() {
+            if (_levelUpBaseline) {
+                Object.assign(playerData, deepCopy(_levelUpBaseline));
+                _levelUpUndoStack = [];
+                savePlayerData();
+                renderLevelUpSkills();
+                renderLevelUpPerks();
+                updateDisplay();
+                updatePerksDisplay();
+                refreshLevelUpTabVisibility();
+            }
+        });
+    }
+
+    function saveLevelUp() {
+        if ((playerData.skillPointsAvailable || 0) > 0 || (playerData.perkPointsAvailable || 0) > 0) {
+            showConfirmModal('Save Level Up', 'You still have unspent points. Save anyway and lose them?', function() {
+                _finalizeLevelUp();
+            });
+        } else {
+            _finalizeLevelUp();
+        }
+    }
+
+    function _finalizeLevelUp() {
+        playerData.skillsLocked = true;
+        playerData.skillsAllocationActive = false;
+        playerData.perkSelectionActive = false;
+        playerData.skillPointsAvailable = 0;
+        playerData.perkPointsAvailable = 0;
+        playerData.skillsLockBaseline = deepCopy(playerData.skills);
+        _levelUpUndoStack = [];
+        savePlayerData();
+        updateDisplay();
+        updatePerksDisplay();
+        refreshLevelUpTabVisibility();
+        switchTab('stats', document.querySelector('.tab-btn.active') || document.querySelector('.tab-btn'));
+        showInfoModal('Level Up Complete', 'Your level-up choices have been saved. Well done, Vault Dweller!');
+    }
+
+    function updateLevelUpTab() {
+        var ptEl = document.getElementById('luPerkPointsCount');
+        if (ptEl) {
+            ptEl.textContent = playerData.perkPointsAvailable || 0;
+            ptEl.className = 'skill-points-value' + ((playerData.perkPointsAvailable||0) <= 0 ? ' skill-points-zero' : '');
+        }
+        renderLevelUpSkills();
+        renderLevelUpPerks();
+    }
+
+    function checkAndHandleLevelUp(totalXP) {
+        var level = getLevelFromXP(totalXP);
+        var lastSeenLevel = parseInt(localStorage.getItem('pipboyLevel') || '1');
+        if (level > lastSeenLevel) {
+            var gained = level - lastSeenLevel;
+            playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + gained * SKILL_POINTS_PER_LEVEL;
+            playerData.perkPointsAvailable = (playerData.perkPointsAvailable || 0) + gained;
+            playerData.skillsLocked = false;
+            playerData.skillsAllocationActive = true;
+            playerData.perkSelectionActive = true;
+            playerData.skillsLockBaseline = deepCopy(playerData.skills);
+            _levelUpUndoStack = [];
+            _levelUpBaseline  = deepCopy(playerData); // capture baseline for Reset
+            savePlayerData();
+        } else if (playerData.skillPointsAvailable > 0 || playerData.perkPointsAvailable > 0) {
+            // Already in level-up window (e.g. page reload mid-allocation) — capture baseline if not set
+            if (!_levelUpBaseline) _levelUpBaseline = deepCopy(playerData);
+        }
     }
 
     // ---- INIT ----
@@ -1273,7 +1790,17 @@
         updatePerksDisplay();
         updateEffectsDisplay();
         updateTempDisplays();
-        updateXPDisplay(parseInt(localStorage.getItem('pipboyXP')||'0'));
+        var storedXP = parseInt(localStorage.getItem('pipboyXP')||'0');
+        checkAndHandleLevelUp(storedXP);
+        updateXPDisplay(storedXP);
+        refreshLevelUpTabVisibility();
+        updateLevelUpTab();
+        showOnboarding();
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.vault-overlay').forEach(function(m){ m.style.display = 'none'; });
+            }
+        });
     });
     </script>
     <script src="../../assets/helpers/Managers/settingsManager.js"></script>
