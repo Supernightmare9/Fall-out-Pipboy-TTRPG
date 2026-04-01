@@ -764,6 +764,17 @@
 
     SKILLS.forEach(function(s){ playerData.skills[s] = 0; });
 
+    // Ensure playerData.skills is a plain object with a numeric value for every known skill.
+    // Call after loading or whenever skills may be missing/corrupt (new save, legacy, corrupted data).
+    function ensureValidSkills() {
+        if (!playerData.skills || typeof playerData.skills !== 'object' || Array.isArray(playerData.skills)) {
+            playerData.skills = {};
+        }
+        SKILLS.forEach(function(s) {
+            if (typeof playerData.skills[s] !== 'number') playerData.skills[s] = 0;
+        });
+    }
+
     // ---- TAB SWITCHING ----
     function switchTab(tabName, btn) {
         document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.remove('active'); });
@@ -793,6 +804,9 @@
         if (!playerData.skillsLockBaseline || typeof playerData.skillsLockBaseline !== 'object') {
             playerData.skillsLockBaseline = deepCopy(playerData.skills || {});
         }
+        // Guard: ensure skills is always a plain object with a numeric value for every skill
+        // (handles new saves, legacy saves, and corrupted localStorage data)
+        ensureValidSkills();
         // Migration: initialize skillsAllocationActive for existing saves
         if (playerData.skillsAllocationActive === undefined) {
             playerData.skillsAllocationActive = ((playerData.skillPointsAvailable || 0) > 0 && !playerData.skillsLocked);
@@ -1285,6 +1299,8 @@
     }
 
     function updateDisplay() {
+        // Guard: ensure skills is always a valid object before rendering
+        ensureValidSkills();
         var pts    = playerData.skillPointsAvailable || 0;
         var locked = !!playerData.skillsLocked;
         document.getElementById('tagBadge').textContent = playerData.tagSkills.length + '/' + MAX_TAG_SKILLS;
