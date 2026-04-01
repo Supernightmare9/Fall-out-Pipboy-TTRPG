@@ -409,7 +409,7 @@
 (function() {
     // Auth guard — only admin role may access this page
     var _role = sessionStorage.getItem('role');
-    if (_role !== 'admin') { window.location.replace('../login.html'); }
+    if (_role !== 'admin') { window.location.replace('../login.html'); return; }
 
     // Placeholder data array for export
     var enemies = [];
