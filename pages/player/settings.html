@@ -126,11 +126,6 @@
 
         .form-label {
             min-width: 200px;
-            font-size: 12px;
-            color: var(--vault-green);
-            text-shadow: 0 0 5px var(--vault-green);
-            letter-spacing: 1px;
-            text-transform: uppercase;
             flex-shrink: 0;
         }
 
@@ -516,28 +511,6 @@
 
         @keyframes fadeIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform:none; } }
 
-        /* ===== OVERSEER-ONLY BADGE ===== */
-        .overseer-badge {
-            display: inline-block;
-            font-size: 9px;
-            padding: 2px 8px;
-            border: 1px solid var(--vault-accent);
-            color: var(--vault-accent);
-            text-shadow: 0 0 5px var(--vault-accent);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
-        /* ===== OVERSEER SECTION ===== */
-        .overseer-section {
-            border-color: var(--vault-accent);
-            box-shadow: 0 0 15px rgba(192,132,252,0.15);
-        }
-
-        .overseer-section .section-title { color: var(--vault-accent); text-shadow: 0 0 8px var(--vault-accent); }
-
         /* Range value display */
         .range-row {
             display: flex;
@@ -553,6 +526,31 @@
             font-size: 13px;
             color: var(--vault-gold);
             text-shadow: 0 0 5px var(--vault-gold);
+        }
+
+        /* ===== SETTING HINTS ===== */
+        .setting-hint {
+            font-size: 10px;
+            color: var(--vault-green);
+            opacity: 0.65;
+            letter-spacing: 0.5px;
+            text-transform: none;
+            font-weight: normal;
+            margin-top: 5px;
+            line-height: 1.5;
+        }
+
+        .form-label {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label-text {
+            font-size: 12px;
+            color: var(--vault-green);
+            text-shadow: 0 0 5px var(--vault-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         /* ===== RESPONSIVE ===== */
@@ -593,25 +591,38 @@
         <div id="statusMsg"></div>
 
         <!-- ══════════════════════════════════════
-             SECTION 1 — ACCOUNT PREFERENCES
+             SECTION 1 — ACCOUNT
              ══════════════════════════════════════ -->
         <section class="settings-section">
-            <h2 class="section-title"><span class="section-icon">👤</span>Account Preferences</h2>
+            <h2 class="section-title"><span class="section-icon">👤</span>Account</h2>
 
             <!-- Display Name -->
             <div class="form-row">
-                <span class="form-label">Display Name</span>
+                <div class="form-label">
+                    <span class="form-label-text">Display Name</span>
+                    <p class="setting-hint">Your name shown to other players and the Overseer during the session.</p>
+                </div>
                 <div class="form-control">
-                    <input type="text" id="displayName" placeholder="Enter your display name" maxlength="32" autocomplete="off">
+                    <input type="text" id="displayName" placeholder="Enter your display name" maxlength="32" autocomplete="off" title="Your display name shown to other players and the Overseer">
                 </div>
             </div>
+        </section>
+
+        <!-- ══════════════════════════════════════
+             SECTION 2 — DISPLAY
+             ══════════════════════════════════════ -->
+        <section class="settings-section">
+            <h2 class="section-title"><span class="section-icon">🖥</span>Display</h2>
 
             <!-- Theme Toggle -->
             <div class="form-row">
-                <span class="form-label">Interface Theme</span>
+                <div class="form-label">
+                    <span class="form-label-text">Interface Theme</span>
+                    <p class="setting-hint">Switch between dark (classic Pip-Boy) and light display modes.</p>
+                </div>
                 <div class="form-control">
                     <div class="toggle-wrapper">
-                        <label class="toggle-switch">
+                        <label class="toggle-switch" title="Toggle between dark and light interface theme">
                             <input type="checkbox" id="themeToggle">
                             <span class="toggle-slider"></span>
                         </label>
@@ -622,9 +633,12 @@
 
             <!-- Font Size -->
             <div class="form-row">
-                <span class="form-label">Font Size</span>
+                <div class="form-label">
+                    <span class="form-label-text">Font Size</span>
+                    <p class="setting-hint">Adjust the text size used throughout the interface.</p>
+                </div>
                 <div class="form-control">
-                    <select id="fontSize">
+                    <select id="fontSize" title="Choose small, medium, or large text size">
                         <option value="small">Small</option>
                         <option value="medium" selected>Medium</option>
                         <option value="large">Large</option>
@@ -634,9 +648,12 @@
 
             <!-- Font Family -->
             <div class="form-row">
-                <span class="form-label">Font Family</span>
+                <div class="form-label">
+                    <span class="form-label-text">Font Family</span>
+                    <p class="setting-hint">Choose your preferred monospace typeface for the interface.</p>
+                </div>
                 <div class="form-control">
-                    <select id="fontFamily">
+                    <select id="fontFamily" title="Select a typeface for the interface">
                         <option value="courier-new">Courier New (Classic)</option>
                         <option value="courier">Courier (Monospace Alt)</option>
                         <option value="roboto-mono">Roboto Mono (Modern)</option>
@@ -653,10 +670,11 @@
         </section>
 
         <!-- ══════════════════════════════════════
-             SECTION 2 — UI COLOR CUSTOMIZATION
+             SECTION 3 — COLOR CUSTOMIZATION
              ══════════════════════════════════════ -->
         <section class="settings-section">
-            <h2 class="section-title"><span class="section-icon">🎨</span>UI Color Customization</h2>
+            <h2 class="section-title"><span class="section-icon">🎨</span>Color Customization</h2>
+            <p class="setting-hint" style="margin-bottom:16px;">Customize the three main UI accent colors. Changes are previewed live below and saved when you click Save Settings.</p>
 
             <!-- PRIMARY COLOR -->
             <div class="color-group">
@@ -776,12 +794,12 @@
         </section>
 
         <!-- ══════════════════════════════════════
-             SECTION 3 — CHARACTER DISPLAY COLORS
+             SECTION 4 — CHARACTER DISPLAY COLORS
              ══════════════════════════════════════ -->
         <section class="settings-section" id="characterColorsSection">
             <h2 class="section-title"><span class="section-icon">⚔</span>Character Display Colors</h2>
-            <p style="font-size:11px; color:var(--vault-green); margin-bottom:16px; letter-spacing:1px; opacity:0.8;">
-                These colors appear next to your character's name on the Overseer Hub.
+            <p class="setting-hint" style="margin-bottom:16px;">
+                Assign a unique color to each of your characters. This color appears next to your character's name on the Overseer Hub and in session logs.
             </p>
             <div id="characterColorList">
                 <!-- Populated by JS -->
@@ -789,17 +807,20 @@
         </section>
 
         <!-- ══════════════════════════════════════
-             SECTION 4 — NOTIFICATIONS & AUDIO
+             SECTION 5 — NOTIFICATIONS
              ══════════════════════════════════════ -->
         <section class="settings-section">
-            <h2 class="section-title"><span class="section-icon">🔊</span>Notifications &amp; Audio</h2>
+            <h2 class="section-title"><span class="section-icon">🔊</span>Notifications</h2>
 
             <!-- Notifications Toggle -->
             <div class="form-row">
-                <span class="form-label">Notifications</span>
+                <div class="form-label">
+                    <span class="form-label-text">Notifications</span>
+                    <p class="setting-hint">Show in-app alerts for game events, combat updates, and new messages.</p>
+                </div>
                 <div class="form-control">
                     <div class="toggle-wrapper">
-                        <label class="toggle-switch">
+                        <label class="toggle-switch" title="Enable or disable in-app notifications">
                             <input type="checkbox" id="notificationsToggle" checked>
                             <span class="toggle-slider"></span>
                         </label>
@@ -810,10 +831,13 @@
 
             <!-- Sound Toggle -->
             <div class="form-row">
-                <span class="form-label">Sound Effects</span>
+                <div class="form-label">
+                    <span class="form-label-text">Sound Effects</span>
+                    <p class="setting-hint">Enable or disable interface sounds and audio feedback.</p>
+                </div>
                 <div class="form-control">
                     <div class="toggle-wrapper">
-                        <label class="toggle-switch">
+                        <label class="toggle-switch" title="Enable or disable interface sound effects">
                             <input type="checkbox" id="soundToggle" checked>
                             <span class="toggle-slider"></span>
                         </label>
@@ -824,111 +848,14 @@
 
             <!-- Volume Slider -->
             <div class="form-row">
-                <span class="form-label">Volume Level</span>
+                <div class="form-label">
+                    <span class="form-label-text">Volume Level</span>
+                    <p class="setting-hint">Set the volume for all interface sounds (0 = mute, 100 = full).</p>
+                </div>
                 <div class="form-control">
                     <div class="range-row">
-                        <input type="range" id="volumeSlider" min="0" max="100" value="70">
+                        <input type="range" id="volumeSlider" min="0" max="100" value="70" title="Drag to set sound volume">
                         <span class="range-display" id="volumeDisplay">70%</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ══════════════════════════════════════
-             SECTION 5 — GAME MECHANICS (OVERSEER)
-             ══════════════════════════════════════ -->
-        <section class="settings-section overseer-section" id="gameMechanicsSection" style="display:none;">
-            <h2 class="section-title">
-                <span class="section-icon">🎲</span>Game Mechanics
-                <span class="overseer-badge">Overseer Only</span>
-            </h2>
-
-            <!-- Difficulty -->
-            <div class="form-row">
-                <span class="form-label">Difficulty Level</span>
-                <div class="form-control">
-                    <select id="difficulty">
-                        <option value="easy">Easy</option>
-                        <option value="medium" selected>Medium</option>
-                        <option value="hard">Hard</option>
-                        <option value="hardcore">Hardcore</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Turn Timer -->
-            <div class="form-row">
-                <span class="form-label">Turn Timer (seconds)</span>
-                <div class="form-control">
-                    <div class="range-row">
-                        <input type="range" id="turnTimer" min="10" max="300" step="5" value="60">
-                        <span class="range-display" id="turnTimerDisplay">60s</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Critical Hit Chance -->
-            <div class="form-row">
-                <span class="form-label">Critical Hit Chance (%)</span>
-                <div class="form-control">
-                    <div class="range-row">
-                        <input type="range" id="critChance" min="1" max="50" value="5">
-                        <span class="range-display" id="critChanceDisplay">5%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- XP Scaling -->
-            <div class="form-row">
-                <span class="form-label">XP Scaling Multiplier</span>
-                <div class="form-control">
-                    <div class="range-row">
-                        <input type="range" id="xpScaling" min="0.5" max="3.0" step="0.1" value="1.0">
-                        <span class="range-display" id="xpScalingDisplay">1.0×</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Minimum Damage -->
-            <div class="form-row">
-                <span class="form-label">Minimum Damage</span>
-                <div class="form-control">
-                    <input type="number" id="minDamage" min="0" max="99" value="1" style="max-width:120px;">
-                </div>
-            </div>
-
-            <!-- Maximum Level -->
-            <div class="form-row">
-                <span class="form-label">Maximum Level Cap</span>
-                <div class="form-control">
-                    <input type="number" id="maxLevel" min="1" max="999" value="50" style="max-width:120px;">
-                </div>
-            </div>
-
-            <!-- Auto-Save Toggle -->
-            <div class="form-row">
-                <span class="form-label">Auto-Save</span>
-                <div class="form-control">
-                    <div class="toggle-wrapper">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="autoSave" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span class="toggle-label" id="autoSaveLabel">ENABLED</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- House Rules Toggle -->
-            <div class="form-row">
-                <span class="form-label">House Rules</span>
-                <div class="form-control">
-                    <div class="toggle-wrapper">
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="houseRules">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span class="toggle-label" id="houseRulesLabel">DISABLED</span>
                     </div>
                 </div>
             </div>
@@ -964,17 +891,6 @@
         soundEnabled: true,
         notificationsEnabled: true,
         volumeLevel: 70
-    };
-
-    const OVERSEER_DEFAULTS = {
-        difficulty: 'medium',
-        turnTimer: 60,
-        autoSave: true,
-        enableHouseRules: false,
-        criticalHitChance: 5,
-        minDamage: 1,
-        maxLevel: 50,
-        experienceScaling: 1.0
     };
 
     // Font family CSS mapping
@@ -1225,13 +1141,6 @@
         } catch(e) { return null; }
     }
 
-    function getStoredOverseerSettings() {
-        try {
-            const raw = localStorage.getItem('vaultOverseerSettings');
-            return raw ? JSON.parse(raw) : null;
-        } catch(e) { return null; }
-    }
-
     function getCharacterColor(charId) {
         try {
             const raw = localStorage.getItem('vaultCharColors');
@@ -1287,31 +1196,6 @@
         document.getElementById('volumeDisplay').textContent = vol + '%';
     }
 
-    function loadOverseerSettingsToForm(os) {
-        const s = Object.assign({}, OVERSEER_DEFAULTS, os || {});
-        document.getElementById('difficulty').value = s.difficulty || 'medium';
-
-        document.getElementById('turnTimer').value          = s.turnTimer || 60;
-        document.getElementById('turnTimerDisplay').textContent = (s.turnTimer || 60) + 's';
-
-        document.getElementById('critChance').value         = s.criticalHitChance || 5;
-        document.getElementById('critChanceDisplay').textContent = (s.criticalHitChance || 5) + '%';
-
-        document.getElementById('xpScaling').value          = s.experienceScaling || 1.0;
-        document.getElementById('xpScalingDisplay').textContent = (s.experienceScaling || 1.0).toFixed(1) + '×';
-
-        document.getElementById('minDamage').value  = s.minDamage || 1;
-        document.getElementById('maxLevel').value   = s.maxLevel  || 50;
-
-        const autoSave = document.getElementById('autoSave');
-        autoSave.checked = s.autoSave !== false;
-        document.getElementById('autoSaveLabel').textContent = autoSave.checked ? 'ENABLED' : 'DISABLED';
-
-        const houseRules = document.getElementById('houseRules');
-        houseRules.checked = s.enableHouseRules === true;
-        document.getElementById('houseRulesLabel').textContent = houseRules.checked ? 'ENABLED' : 'DISABLED';
-    }
-
     // ─── Collect settings from form ────────────────────────────────
     function collectSettings() {
         return {
@@ -1326,19 +1210,6 @@
             soundEnabled:         document.getElementById('soundToggle').checked,
             notificationsEnabled: document.getElementById('notificationsToggle').checked,
             volumeLevel:          parseInt(document.getElementById('volumeSlider').value)
-        };
-    }
-
-    function collectOverseerSettings() {
-        return {
-            difficulty:        document.getElementById('difficulty').value,
-            turnTimer:         parseInt(document.getElementById('turnTimer').value),
-            autoSave:          document.getElementById('autoSave').checked,
-            enableHouseRules:  document.getElementById('houseRules').checked,
-            criticalHitChance: parseInt(document.getElementById('critChance').value),
-            minDamage:         parseInt(document.getElementById('minDamage').value),
-            maxLevel:          parseInt(document.getElementById('maxLevel').value),
-            experienceScaling: parseFloat(document.getElementById('xpScaling').value)
         };
     }
 
@@ -1407,13 +1278,6 @@
             SettingsManager.applySettingsToPage(prefs);
         }
 
-        // If overseer, save game settings too
-        const role = sessionStorage.getItem('role') || localStorage.getItem('userRole') || (account && account.role);
-        if (role === 'admin') {
-            const os = collectOverseerSettings();
-            localStorage.setItem('vaultOverseerSettings', JSON.stringify(os));
-        }
-
         applySettingsToPage(settings);
         showStatus('✔ Settings saved successfully!');
     }
@@ -1427,7 +1291,6 @@
 
     function resetSettings() {
         localStorage.removeItem('vaultPlayerSettings');
-        localStorage.removeItem('vaultOverseerSettings');
         localStorage.removeItem('vaultCharColors');
         if (typeof SettingsManager !== 'undefined') SettingsManager.clearAllSettings();
         loadSettingsToForm(DEFAULTS);
@@ -1436,11 +1299,7 @@
         const username = sessionStorage.getItem('username') || localStorage.getItem('username') || localStorage.getItem('currentUser');
         const account = username && typeof ACCOUNTS !== 'undefined'
             ? ACCOUNTS.find(a => a.username === username) : null;
-        const role = sessionStorage.getItem('role') || localStorage.getItem('userRole') || (account && account.role);
 
-        if (role === 'admin') {
-            loadOverseerSettingsToForm(OVERSEER_DEFAULTS);
-        }
         if (account) buildCharacterColorSection(account);
 
         showStatus('↺ Settings reset to defaults.');
@@ -1485,37 +1344,15 @@
             document.getElementById('notifLabel').textContent = this.checked ? 'ENABLED' : 'DISABLED';
         });
 
-        // Auto-save toggle label
-        document.getElementById('autoSave').addEventListener('change', function() {
-            document.getElementById('autoSaveLabel').textContent = this.checked ? 'ENABLED' : 'DISABLED';
-        });
-
-        // House rules toggle label
-        document.getElementById('houseRules').addEventListener('change', function() {
-            document.getElementById('houseRulesLabel').textContent = this.checked ? 'ENABLED' : 'DISABLED';
-        });
-
         // Volume slider display
         document.getElementById('volumeSlider').addEventListener('input', function() {
             document.getElementById('volumeDisplay').textContent = this.value + '%';
-        });
-
-        // Overseer range sliders
-        document.getElementById('turnTimer').addEventListener('input', function() {
-            document.getElementById('turnTimerDisplay').textContent = this.value + 's';
-        });
-        document.getElementById('critChance').addEventListener('input', function() {
-            document.getElementById('critChanceDisplay').textContent = this.value + '%';
-        });
-        document.getElementById('xpScaling').addEventListener('input', function() {
-            document.getElementById('xpScalingDisplay').textContent = parseFloat(this.value).toFixed(1) + '×';
         });
 
         // ── Load user context ──────────────────────────────────────
         var username = sessionStorage.getItem('username') || localStorage.getItem('username') || localStorage.getItem('currentUser');
         var account = (username && typeof ACCOUNTS !== 'undefined')
             ? ACCOUNTS.find(function(a) { return a.username === username; }) : null;
-        var role = sessionStorage.getItem('role') || localStorage.getItem('userRole') || (account ? account.role : null);
 
         // Load preferences via SettingsManager (displayName, displayColor, theme, font)
         if (typeof SettingsManager !== 'undefined') {
@@ -1537,14 +1374,6 @@
             buildCharacterColorSection(account);
         } else {
             document.getElementById('characterColorsSection').style.display = 'none';
-        }
-
-        // Overseer-only section
-        if (role === 'admin') {
-            document.getElementById('gameMechanicsSection').style.display = 'block';
-            const storedOs = getStoredOverseerSettings();
-            const baseOs = (typeof gameSettings !== 'undefined') ? gameSettings.overseerSettings : OVERSEER_DEFAULTS;
-            loadOverseerSettingsToForm(storedOs || baseOs);
         }
     });
 
