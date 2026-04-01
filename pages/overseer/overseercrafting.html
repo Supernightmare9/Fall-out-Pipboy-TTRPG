@@ -201,7 +201,7 @@
 <!-- ══════════════════════════════════════════════════════════════════
      COMMAND BAR
 ══════════════════════════════════════════════════════════════════ -->
-<div class="command-bar">
+<div class="command-bar" role="banner">
     <div class="command-bar-left">
         <div>
             <div class="overseer-title-bar">🛠️ CRAFTING RECIPE MANAGER</div>
@@ -210,8 +210,8 @@
         <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
     </div>
     <div style="display:flex;gap:8px;">
-        <button class="cmd-btn success" onclick="showNewRecipeForm()">+ NEW RECIPE</button>
-        <button class="cmd-btn" onclick="exportRecipes()">⬇ EXPORT</button>
+        <button class="cmd-btn success" onclick="showNewRecipeForm()" title="Create a new crafting recipe">+ NEW RECIPE</button>
+        <button class="cmd-btn" onclick="exportRecipes()" title="Export all recipes as JSON">⬇ EXPORT</button>
     </div>
 </div>
 
@@ -276,8 +276,8 @@
                 <div class="panel-header">
                     <span class="panel-title">📋 RECIPE DETAILS — <span id="detailRecipeName">BASEBALL GRENADE</span></span>
                     <div style="display:flex;gap:6px;">
-                        <button class="cmd-btn" onclick="editRecipe()">✏ EDIT</button>
-                        <button class="cmd-btn danger" onclick="deleteRecipe()">🗑 DELETE</button>
+                        <button class="cmd-btn" onclick="editRecipe()" title="Save changes to this recipe">✏ EDIT</button>
+                        <button class="cmd-btn danger" onclick="deleteRecipe()" title="Permanently delete this recipe">🗑 DELETE</button>
                     </div>
                 </div>
                 <div class="panel-body">
@@ -409,7 +409,7 @@
 
                     <div class="form-actions">
                         <button class="cmd-btn danger" onclick="cancelEdit()">CANCEL</button>
-                        <button class="cmd-btn success" onclick="saveRecipe()">💾 SAVE RECIPE</button>
+                        <button class="cmd-btn success" onclick="saveRecipe()" title="Save changes to this recipe">💾 SAVE RECIPE</button>
                     </div>
                 </div>
             </div>
@@ -423,6 +423,13 @@
 
 <script>
 (function() {
+    // Auth guard — only admin role may access this page
+    var _role = sessionStorage.getItem('role');
+    if (_role !== 'admin') { window.location.replace('../login.html'); return; }
+
+    // Placeholder data array for export
+    var recipes = [];
+
     // Show campaign name
     var cname = sessionStorage.getItem('campaignName') || sessionStorage.getItem('campaignId') || '';
     if (cname) {
@@ -488,7 +495,15 @@
     };
 
     window.exportRecipes = function() {
-        showToast('Export not yet wired. Data connection coming soon.');
+        try {
+            var data = JSON.stringify(recipes, null, 2);
+            var blob = new Blob([data], {type:'application/json'});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = 'crafting-recipes.json'; a.click();
+            URL.revokeObjectURL(url);
+            showToast('Recipes exported successfully.');
+        } catch(e) { showToast('Export failed: ' + e.message, true); }
     };
 
     window.addIngredientRow = function() {

@@ -209,7 +209,7 @@
 <!-- ══════════════════════════════════════════════════════════════════
      COMMAND BAR
 ══════════════════════════════════════════════════════════════════ -->
-<div class="command-bar">
+<div class="command-bar" role="banner">
     <div class="command-bar-left">
         <div>
             <div class="overseer-title-bar">👥 PLAYER OVERVIEW — ADMIN</div>
@@ -218,8 +218,8 @@
         <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
     </div>
     <div style="display:flex;gap:8px;">
-        <button class="cmd-btn success" onclick="giftItems()">🎁 GIFT ITEMS</button>
-        <button class="cmd-btn danger" onclick="confirmReset()">↺ RESET SECTION</button>
+        <button class="cmd-btn success" onclick="giftItems()" title="Gift items to the selected player from the item pool">🎁 GIFT ITEMS</button>
+        <button class="cmd-btn danger" onclick="confirmReset()" title="Reset the current section for the selected player">↺ RESET SECTION</button>
     </div>
 </div>
 
@@ -678,6 +678,10 @@
 
 <script>
 (function() {
+    // Auth guard — only admin role may access this page
+    var _role = sessionStorage.getItem('role');
+    if (_role !== 'admin') { window.location.replace('../login.html'); return; }
+
     var cname = sessionStorage.getItem('campaignName') || sessionStorage.getItem('campaignId') || '';
     if (cname) { var el = document.getElementById('campaignDisplay'); if (el) el.textContent = '⚑ ' + cname; }
 
