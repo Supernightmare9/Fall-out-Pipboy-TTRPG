@@ -69,7 +69,7 @@
         .header-btn.import-btn:hover { background-color: rgba(192,132,252,0.1); }
 
         /* LAYOUT */
-        .page-layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 100px); }
+        .page-layout { display: flex; flex: 1; overflow: hidden; height: 100vh; }
 
         /* SIDEBAR */
         .sidebar {
@@ -253,6 +253,14 @@
         .settings-key { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--vault-gold); margin-bottom: 6px; }
         .settings-value { font-size: 12px; word-break: break-all; }
 
+        /* PLAYER ACCORDION */
+        .player-accordion { background-color: rgba(0,0,0,0.3); border: 1px solid rgba(74,222,128,0.25); margin-bottom: 6px; }
+        .player-accordion summary { padding: 10px 14px; font-size: 12px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        .player-accordion summary::-webkit-details-marker { display: none; }
+        .player-accordion summary::after { content: '\25bc'; font-size: 10px; opacity: 0.6; margin-left: 8px; }
+        .player-accordion[open] summary::after { content: '\25b2'; }
+        .player-accordion-body { padding: 10px 14px 12px; border-top: 1px solid rgba(74,222,128,0.15); font-size: 11px; line-height: 1.7; }
+
         /* HIDDEN INPUTS */
         #importFileInput, #imageUploadInput { display: none; }
 
@@ -274,17 +282,6 @@
 </head>
 <body>
 <div class="page-wrapper">
-
-    <div class="vault-header">
-        <div class="header-actions">
-            <button class="header-btn export-btn" onclick="exportAllData()">&#8595; EXPORT</button>
-            <button class="header-btn import-btn" onclick="document.getElementById('importFileInput').click()">&#8593; IMPORT</button>
-            <a class="header-btn" href="terminal.html">&#9166; TERMINAL</a>
-        </div>
-        <div class="vault-badge">VAULT-TEC INDUSTRIES PIP-BOY 3000</div>
-        <div class="vault-title">DATA TERMINAL</div>
-        <div class="vault-subtitle">PERSONAL INFORMATION PROCESSOR &mdash; VAULT 215</div>
-    </div>
 
     <div class="page-layout">
 
@@ -317,8 +314,12 @@
                 <button class="sidebar-btn" onclick="showSection('backup')" id="btn-backup">
                     <span class="btn-icon">&#x1F4BE;</span> Backup &amp; Export
                 </button>
-                <button class="sidebar-btn" onclick="showSection('settings')" id="btn-settings">
-                    <span class="btn-icon">&#x2699;&#xFE0F;</span> Settings
+                <button class="sidebar-btn" onclick="showSection('notes')" id="btn-notes">
+                    <span class="btn-icon">&#x1F4DD;</span> Notes / Log
+                </button>
+                <button class="sidebar-btn" onclick="showSection('factions')" id="btn-factions">
+                    <span class="btn-icon">&#x2691;</span> Factions
+                    <span class="sidebar-count" id="count-factions">0</span>
                 </button>
             </nav>
         </aside>
@@ -409,32 +410,6 @@
                         <button class="action-btn danger" onclick="clearBackstory()">Clear</button>
                     </div>
                     <div class="status-message" id="backstoryMessage"></div>
-                </div>
-
-                <div class="char-section">
-                    <div class="char-section-title">Notable NPCs (Custom)</div>
-                    <ul style="list-style:none;" id="customNpcsList"></ul>
-                    <div style="margin-top:14px;">
-                        <div class="info-field"><div class="info-label">NPC Name</div><input type="text" class="info-input" id="npcNameInput" placeholder="e.g., Preston Garvey"></div>
-                        <div class="info-field"><div class="info-label">Description</div><input type="text" class="info-input" id="npcDescInput" placeholder="What is this NPC known for?"></div>
-                        <div class="info-field"><div class="info-label">Location</div><input type="text" class="info-input" id="npcLocInput" placeholder="e.g., Diamond City"></div>
-                        <div class="info-field"><div class="info-label">Notes</div><input type="text" class="info-input" id="npcNotesInput" placeholder="e.g., Faction: Minutemen | Friendly"></div>
-                        <div class="btn-group"><button class="action-btn" onclick="addCustomNPC()">+ Add NPC</button></div>
-                        <div class="status-message" id="npcMessage"></div>
-                    </div>
-                </div>
-
-                <div class="char-section">
-                    <div class="char-section-title">Factions (Custom)</div>
-                    <ul style="list-style:none;" id="customFactionsList"></ul>
-                    <div style="margin-top:14px;">
-                        <div class="info-field"><div class="info-label">Faction Name</div><input type="text" class="info-input" id="factionNameInput" placeholder="e.g., Brotherhood of Steel"></div>
-                        <div class="info-field"><div class="info-label">Description</div><input type="text" class="info-input" id="factionDescInput" placeholder="Brief description..."></div>
-                        <div class="info-field"><div class="info-label">Reputation</div><input type="text" class="info-input" id="factionRepInput" placeholder="e.g., Allied, Neutral, Hostile"></div>
-                        <div class="info-field"><div class="info-label">Notes</div><input type="text" class="info-input" id="factionNotesInput" placeholder="Additional notes..."></div>
-                        <div class="btn-group"><button class="action-btn" onclick="addCustomFaction()">+ Add Faction</button></div>
-                        <div class="status-message" id="factionMessage"></div>
-                    </div>
                 </div>
             </div>
 
@@ -573,16 +548,47 @@
                 </div>
             </div>
 
-            <!-- SETTINGS -->
-            <div class="section-panel" id="section-settings">
+            <!-- NOTES / LOG -->
+            <div class="section-panel" id="section-notes">
                 <div class="section-header">
                     <div class="section-title-row">
-                        <span class="section-icon">&#x2699;&#xFE0F;</span>
-                        <span class="section-title">Settings</span>
+                        <span class="section-icon">&#x1F4DD;</span>
+                        <span class="section-title">Notes / Log</span>
                     </div>
-                    <a class="action-btn" href="settings.html" style="text-decoration:none;">Open Settings Page &#x2197;</a>
+                    <button class="action-btn" onclick="saveNotes()">&#x1F4BE; Save</button>
                 </div>
-                <div class="settings-grid" id="settings-grid"></div>
+                <div class="char-section">
+                    <div class="char-section-title">Personal Notes &amp; Campaign Log</div>
+                    <textarea class="info-textarea" id="notesTextarea" placeholder="Write your notes and campaign log here..." style="min-height:400px;"></textarea>
+                    <div class="btn-group">
+                        <button class="action-btn" onclick="saveNotes()">Save Notes</button>
+                        <button class="action-btn danger" onclick="clearNotes()">Clear</button>
+                    </div>
+                    <div class="status-message" id="notesMessage"></div>
+                </div>
+            </div>
+
+            <!-- FACTIONS -->
+            <div class="section-panel" id="section-factions">
+                <div class="section-header">
+                    <div class="section-title-row">
+                        <span class="section-icon">&#x2691;</span>
+                        <span class="section-title">Factions</span>
+                        <span class="section-count-badge" id="factions-total">0</span>
+                    </div>
+                </div>
+                <div class="char-section">
+                    <div class="char-section-title">Known Factions</div>
+                    <ul style="list-style:none;" id="customFactionsList"></ul>
+                    <div style="margin-top:14px;">
+                        <div class="info-field"><div class="info-label">Faction Name</div><input type="text" class="info-input" id="factionNameInput" placeholder="e.g., Brotherhood of Steel"></div>
+                        <div class="info-field"><div class="info-label">Description</div><input type="text" class="info-input" id="factionDescInput" placeholder="Brief description..."></div>
+                        <div class="info-field"><div class="info-label">Reputation</div><input type="text" class="info-input" id="factionRepInput" placeholder="e.g., Allied, Neutral, Hostile"></div>
+                        <div class="info-field"><div class="info-label">Notes</div><input type="text" class="info-input" id="factionNotesInput" placeholder="Additional notes..."></div>
+                        <div class="btn-group"><button class="action-btn" onclick="addCustomFaction()">+ Add Faction</button></div>
+                        <div class="status-message" id="factionMessage"></div>
+                    </div>
+                </div>
             </div>
 
         </main>
@@ -607,7 +613,7 @@
     // ═══════════════════════════════════════════
     // SIDEBAR NAVIGATION
     // ═══════════════════════════════════════════
-    var SECTIONS = ['campaigns','character','enemies','items','npcs','localstorage','backup','settings'];
+    var SECTIONS = ['campaigns','character','enemies','items','npcs','localstorage','backup','notes','factions'];
 
     function showSection(name) {
         SECTIONS.forEach(function(s) {
@@ -619,7 +625,7 @@
         var activeBtn = document.getElementById('btn-' + name);
         if (activeBtn) activeBtn.classList.add('active');
         if (name === 'localstorage') renderLocalStorage();
-        if (name === 'settings') renderSettings();
+        if (name === 'factions') renderCustomFactions();
     }
 
     // ═══════════════════════════════════════════
@@ -683,13 +689,15 @@
             var statusBadgeClass = 'badge-' + escapeHtml(c.status || 'active');
 
             var playersHtml = (c.players || []).map(function(p) {
-                return '<div class="player-card">' +
-                    '<div class="player-name">' + escapeHtml(p.characterName || p.username) + '</div>' +
-                    '<div class="player-stats-row">' +
-                        '<span class="player-stat-chip">HP ' + escapeHtml(String(p.currentHp)) + '/' + escapeHtml(String(p.maxHp)) + '</span>' +
-                        '<span class="player-stat-chip">AC ' + escapeHtml(String(p.ac)) + '</span>' +
-                        '<span class="player-stat-chip">' + escapeHtml(p.status || 'alive') + '</span>' +
-                    '</div></div>';
+                var name = escapeHtml(p.characterName || p.username);
+                var joinedDate = p.joinedDate ? '<div style="opacity:0.6;">Joined: ' + escapeHtml(p.joinedDate) + '</div>' : '';
+                var skills = (p.skills || []).length ? '<div style="margin-top:6px;opacity:0.75;">Skills: ' + escapeHtml(p.skills.join(', ')) + '</div>' : '';
+                var abilities = (p.abilities || []).length ? '<div style="opacity:0.75;">Abilities: ' + escapeHtml(p.abilities.join(', ')) + '</div>' : '';
+                var backstory = p.backstory ? '<div style="margin-top:6px;opacity:0.85;">' + escapeHtml(p.backstory) + '</div>' : '';
+                return '<details class="player-accordion">' +
+                    '<summary>' + name + '</summary>' +
+                    '<div class="player-accordion-body">' + joinedDate + skills + abilities + backstory + '</div>' +
+                '</details>';
             }).join('');
 
             var questsHtml = (c.quests || []).map(function(q) {
@@ -728,7 +736,7 @@
                     '<span>\U0001f4c5 ' + sessionCount + ' Sessions</span>' +
                 '</div>' +
                 '<div class="campaign-section-label">Players</div>' +
-                '<div class="players-grid">' + (playersHtml || '<div style="opacity:0.4;font-size:11px;">No players.</div>') + '</div>' +
+                '<div>' + (playersHtml || '<div style="opacity:0.4;font-size:11px;">No players.</div>') + '</div>' +
                 '<div class="campaign-section-label">Quests</div>' +
                 '<div class="quest-list">' + questsHtml + '</div>' +
             '</div>';
@@ -751,7 +759,7 @@
         var grid = document.getElementById('enemies-grid');
         document.getElementById('enemies-total').textContent = data.length;
         document.getElementById('count-enemies').textContent = data.length;
-        if (!data.length) { grid.innerHTML = '<div class="empty-state">[ NO ENEMY DATA FOUND ]</div>'; return; }
+        if (!data.length) { grid.innerHTML = '<div class="empty-state">[ No enemies added yet. ]</div>'; return; }
 
         var difficulties = ['all'];
         data.forEach(function(e) { if (e.difficulty && difficulties.indexOf(e.difficulty) === -1) difficulties.push(e.difficulty); });
@@ -809,7 +817,7 @@
         var grid = document.getElementById('items-grid');
         document.getElementById('items-total').textContent = data.length;
         document.getElementById('count-items').textContent = data.length;
-        if (!data.length) { grid.innerHTML = '<div class="empty-state">[ NO ITEM DATA FOUND ]</div>'; return; }
+        if (!data.length) { grid.innerHTML = '<div class="empty-state">[ No items added yet. ]</div>'; return; }
 
         var types = ['all'];
         data.forEach(function(i) { if (i.type && types.indexOf(i.type) === -1) types.push(i.type); });
@@ -1063,6 +1071,7 @@
 
     function renderCustomNPCs() {
         var list = document.getElementById('customNpcsList');
+        if (!list) return;
         if (!customNPCsData.length) {
             list.innerHTML = '<li style="opacity:0.4;font-size:11px;padding:8px 0;">No custom NPCs added yet.</li>';
             return;
@@ -1103,6 +1112,11 @@
 
     function renderCustomFactions() {
         var list = document.getElementById('customFactionsList');
+        if (!list) return;
+        var countEl = document.getElementById('factions-total');
+        var sidebarCount = document.getElementById('count-factions');
+        if (countEl) countEl.textContent = customFactionsData.length;
+        if (sidebarCount) sidebarCount.textContent = customFactionsData.length;
         if (!customFactionsData.length) {
             list.innerHTML = '<li style="opacity:0.4;font-size:11px;padding:8px 0;">No custom factions added yet.</li>';
             return;
@@ -1133,6 +1147,31 @@
         customFactionsData = customFactionsData.filter(function(f) { return f.id !== id; });
         localStorage.setItem('customFactions', JSON.stringify(customFactionsData));
         renderCustomFactions();
+    }
+
+    // ═══════════════════════════════════════════
+    // NOTES / LOG
+    // ═══════════════════════════════════════════
+    function saveNotes() {
+        var textarea = document.getElementById('notesTextarea');
+        if (!textarea) return;
+        localStorage.setItem('playerNotes', textarea.value);
+        setMsg('notesMessage', '\u2713 Notes saved!', 'success');
+    }
+
+    function clearNotes() {
+        if (!confirm('Clear all notes?')) return;
+        var textarea = document.getElementById('notesTextarea');
+        if (textarea) textarea.value = '';
+        localStorage.removeItem('playerNotes');
+        setMsg('notesMessage', '\u2713 Notes cleared.', 'success');
+    }
+
+    function loadNotes() {
+        var textarea = document.getElementById('notesTextarea');
+        if (!textarea) return;
+        var saved = localStorage.getItem('playerNotes');
+        if (saved !== null) textarea.value = saved;
     }
 
     // ═══════════════════════════════════════════
@@ -1355,8 +1394,15 @@
     // ═══════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', function() {
         loadCharacterData();
-        renderCustomNPCs();
+        loadNotes();
         renderCustomFactions();
+
+        // Notes auto-save
+        (function() {
+            function debounce(fn, ms) { var t; return function() { clearTimeout(t); t = setTimeout(fn, ms); }; }
+            var notesEl = document.getElementById('notesTextarea');
+            if (notesEl) notesEl.addEventListener('input', debounce(saveNotes, 800));
+        })();
 
         // Image upload
         var imageInput = document.getElementById('imageUploadInput');
@@ -1388,15 +1434,13 @@
             if (el) el.addEventListener('change', saveCharacterData);
         });
 
-        // Load data from global arrays
+        // Load campaign data
         if (typeof CAMPAIGNS !== 'undefined') renderCampaigns(CAMPAIGNS);
         else document.getElementById('campaigns-grid').innerHTML = '<div class="empty-state">[ campaigns.js not loaded ]</div>';
 
-        if (typeof ENEMIES !== 'undefined') renderEnemies(ENEMIES);
-        else document.getElementById('enemies-grid').innerHTML = '<div class="empty-state">[ enemies.js not loaded ]</div>';
-
-        if (typeof ITEMS !== 'undefined') renderItems(ITEMS);
-        else document.getElementById('items-grid').innerHTML = '<div class="empty-state">[ items.js not loaded ]</div>';
+        // Enemies and items start blank — players add their own entries
+        renderEnemies([]);
+        renderItems([]);
 
         if (typeof NPCS !== 'undefined') renderNPCTemplates(NPCS);
         else document.getElementById('npcs-grid').innerHTML = '<div class="empty-state">[ npcs.js not loaded ]</div>';
