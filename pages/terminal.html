@@ -39,15 +39,16 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
-        /* CRT screen effect */
+        /* CRT vignette – darkened edges like a glass screen */
         body::before {
             content: '';
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
             background: radial-gradient(
                 ellipse at center,
-                transparent 60%,
-                rgba(0, 0, 0, 0.7) 100%
+                transparent 55%,
+                rgba(0, 0, 0, 0.55) 80%,
+                rgba(0, 0, 0, 0.85) 100%
             );
             pointer-events: none;
             z-index: 100;
@@ -62,11 +63,79 @@
                 to bottom,
                 transparent 0px,
                 transparent 3px,
-                rgba(0, 0, 0, 0.12) 3px,
-                rgba(0, 0, 0, 0.12) 4px
+                rgba(0, 0, 0, 0.18) 3px,
+                rgba(0, 0, 0, 0.18) 4px
             );
             pointer-events: none;
             z-index: 99;
+        }
+
+        /* ── CRT CRACKLE & WAVE ANIMATIONS ────── */
+        @keyframes crtCrackle {
+            0%,  91%, 100% { opacity: 1; transform: none; }
+            92%  { opacity: 0.88; transform: translateX(-2px) skewX(-0.5deg); }
+            93%  { opacity: 1;    transform: translateX(1px); }
+            94%  { opacity: 0.93; transform: translateX(0); }
+            95%  { opacity: 1;    transform: translateX(-1px) skewX(0.3deg); }
+            96%  { opacity: 0.82; transform: none; }
+            97%  { opacity: 1; }
+        }
+
+        @keyframes crtWave {
+            0%   { transform: perspective(1000px) rotateX(0deg)    skewX(0deg); }
+            20%  { transform: perspective(1000px) rotateX(0.25deg) skewX(-0.12deg); }
+            40%  { transform: perspective(1000px) rotateX(0deg)    skewX(0.10deg); }
+            60%  { transform: perspective(1000px) rotateX(-0.2deg) skewX(0.05deg); }
+            80%  { transform: perspective(1000px) rotateX(0.15deg) skewX(-0.08deg); }
+            100% { transform: perspective(1000px) rotateX(0deg)    skewX(0deg); }
+        }
+
+        /* Occasional screen-wide brightness flicker */
+        @keyframes screenFlicker {
+            0%, 89%, 100% { opacity: 1; }
+            90%  { opacity: 0.96; }
+            91%  { opacity: 1; }
+            92%  { opacity: 0.90; }
+            93%  { opacity: 1; }
+        }
+
+        /* Moving horizontal noise band (bright sweep) */
+        @keyframes noiseSweep {
+            0%   { background-position: 0 -100vh; }
+            100% { background-position: 0 200vh; }
+        }
+
+        /* ── CRT NOISE / CRACKLE OVERLAY ─────── */
+        .crt-noise {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 102;
+            /* Subtle horizontal sweep band */
+            background: linear-gradient(
+                to bottom,
+                transparent 0%,
+                rgba(0, 255, 65, 0.03) 45%,
+                rgba(0, 255, 65, 0.06) 50%,
+                rgba(0, 255, 65, 0.03) 55%,
+                transparent 100%
+            );
+            background-size: 100% 200%;
+            animation: noiseSweep 7s linear infinite;
+        }
+
+        /* Glass / screen-surface reflection highlight */
+        .crt-glass {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 98;
+            background:
+                /* top-left corner highlight */
+                radial-gradient(ellipse 40% 20% at 30% 8%,
+                    rgba(0, 255, 65, 0.04) 0%, transparent 100%),
+                /* bottom reflection */
+                linear-gradient(to top, rgba(0,0,0,0.2) 0%, transparent 30%);
         }
 
         .terminal-wrapper {
@@ -77,21 +146,29 @@
             z-index: 1;
         }
 
+
+
         /* ── HEADER ───────────────────────── */
+        /* Wave distortion on header only (non-interactive, decorative) */
         .terminal-header {
             border: 1px solid var(--terminal-border);
             border-bottom: none;
             padding: 12px 20px;
             background: rgba(0, 255, 65, 0.04);
             text-align: center;
+            box-shadow: 0 0 18px rgba(0, 255, 65, 0.15), inset 0 1px 0 rgba(0,255,65,0.12);
+            animation: crtWave 9s ease-in-out infinite;
         }
 
         .terminal-header h1 {
             font-size: 1.4rem;
             letter-spacing: 4px;
-            text-shadow: 0 0 10px var(--terminal-glow);
+            text-shadow:
+                0 0 6px var(--terminal-glow),
+                0 0 20px rgba(0, 255, 65, 0.4),
+                0 0 40px rgba(0, 255, 65, 0.15);
             color: var(--terminal-bright);
-            animation: textFlicker 8s infinite;
+            animation: textFlicker 8s infinite, crtCrackle 18s 2s infinite;
         }
 
         .terminal-subheader {
@@ -121,13 +198,28 @@
         .difficulty-badge.hard  { color: var(--terminal-red); border-color: var(--terminal-red); }
 
         /* ── MAIN TERMINAL BODY ───────────── */
+        /* screenFlicker uses opacity only — no layout shift */
         .terminal-body {
             border: 1px solid var(--terminal-border);
             padding: 20px;
             background: var(--terminal-bg);
             box-shadow:
-                0 0 20px rgba(0, 255, 65, 0.2),
-                inset 0 0 40px rgba(0, 0, 0, 0.5);
+                0 0 30px rgba(0, 255, 65, 0.25),
+                0 0 60px rgba(0, 255, 65, 0.08),
+                inset 0 0 50px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(0, 255, 65, 0.10);
+            position: relative;
+            animation: screenFlicker 14s ease-in-out infinite;
+        }
+
+        /* Subtle inner glass top-highlight */
+        .terminal-body::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 80px;
+            background: linear-gradient(to bottom, rgba(0,255,65,0.04) 0%, transparent 100%);
+            pointer-events: none;
         }
 
         /* ── ATTEMPTS BAR ────────────────── */
@@ -183,26 +275,35 @@
         }
 
         .char-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
-            font-size: 1.3rem;
-            letter-spacing: 6px;
-            line-height: 1.8;
+            font-size: 0.88rem;
+            letter-spacing: 3px;
+            line-height: 1.9;
             color: var(--terminal-dim);
-            padding: 10px;
+            padding: 10px 12px;
             border: 1px solid rgba(0, 170, 34, 0.3);
             background: rgba(0, 0, 0, 0.4);
             font-weight: bold;
+            overflow: hidden;
         }
 
         .grid-row {
-            display: contents;
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
         }
 
-        .grid-cell {
-            text-align: center;
-            padding: 4px 2px;
+        .grid-addr {
+            color: rgba(0, 170, 34, 0.55);
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            min-width: 80px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        .grid-chars {
+            letter-spacing: 4px;
+            flex: 1;
             animation: cellFlicker 0.1s step-end infinite;
             animation-delay: var(--delay, 0s);
         }
@@ -348,6 +449,117 @@
             box-shadow: 0 0 10px rgba(255, 51, 0, 0.3);
         }
 
+        /* ── LORE COMMAND INPUT ──────────── */
+        .lore-section {
+            margin-top: 20px;
+            border-top: 1px solid rgba(0, 170, 34, 0.25);
+            padding-top: 16px;
+        }
+
+        .lore-label {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: var(--terminal-dim);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .lore-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lore-prompt {
+            color: var(--terminal-green);
+            font-size: 1rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .lore-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--terminal-border);
+            color: var(--terminal-green);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            padding: 4px 6px;
+            outline: none;
+            caret-color: var(--terminal-bright);
+            text-transform: uppercase;
+        }
+
+        .lore-input::placeholder {
+            color: rgba(0, 170, 34, 0.35);
+            letter-spacing: 2px;
+        }
+
+        .lore-input:focus {
+            border-bottom-color: var(--terminal-bright);
+            box-shadow: 0 2px 6px rgba(0, 255, 65, 0.2);
+        }
+
+        .lore-output {
+            margin-top: 8px;
+            min-height: 1.4em;
+            font-size: 0.78rem;
+            letter-spacing: 1px;
+            line-height: 1.8;
+            color: var(--terminal-dim);
+        }
+
+        .lore-output.response {
+            color: var(--terminal-green);
+            text-shadow: 0 0 6px rgba(0, 255, 65, 0.4);
+        }
+
+        /* ── INLINE HELP PANEL ───────────── */
+        .help-toggle {
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: var(--terminal-dim);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: inherit;
+            padding: 0;
+            text-decoration: underline dotted;
+        }
+
+        .help-toggle:hover {
+            color: var(--terminal-green);
+        }
+
+        .help-panel {
+            display: none;
+            margin-top: 10px;
+            border: 1px solid rgba(0, 170, 34, 0.3);
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.35);
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            line-height: 1.9;
+            color: var(--terminal-dim);
+        }
+
+        .help-panel.open {
+            display: block;
+        }
+
+        .help-panel dt {
+            color: var(--terminal-green);
+            letter-spacing: 2px;
+            margin-top: 8px;
+        }
+
+        .help-panel dd {
+            margin-left: 16px;
+            color: var(--terminal-dim);
+        }
+
         /* ── OVERLAY SCREENS ─────────────── */
         .overlay {
             display: none;
@@ -453,14 +665,21 @@
         /* ── RESPONSIVE ─────────────────── */
         @media (max-width: 600px) {
             .terminal-subheader { flex-direction: column; align-items: flex-start; }
-            .char-grid { font-size: 1rem; letter-spacing: 3px; }
+            .char-grid { font-size: 0.75rem; letter-spacing: 2px; }
+            .grid-addr { min-width: 60px; font-size: 0.65rem; }
+            .grid-chars { letter-spacing: 2px; }
             .words-grid { grid-template-columns: repeat(2, 1fr); }
             .overlay-box { padding: 24px 20px; }
             .overlay-title { font-size: 1.3rem; }
+            .lore-input-row { flex-wrap: wrap; }
         }
     </style>
 </head>
 <body data-page="terminal">
+
+<!-- CRT overlays (noise sweep + glass reflection) -->
+<div class="crt-noise"  aria-hidden="true"></div>
+<div class="crt-glass"  aria-hidden="true"></div>
 
 <!-- VICTORY OVERLAY -->
 <div class="overlay" id="victoryOverlay">
@@ -550,14 +769,78 @@
         <div class="actions-section">
             <button class="action-btn" onclick="goToData()">BACK</button>
             <button class="action-btn" onclick="startNewGame()">NEW GAME</button>
-            <button class="action-btn" onclick="goToMenu()">MAIN MENU</button>
             <button class="action-btn danger" onclick="logout()">LOGOUT</button>
+        </div>
+
+        <hr class="terminal-divider">
+
+        <!-- LORE COMMANDS -->
+        <div class="lore-section" role="region" aria-label="System command input">
+            <div class="lore-label">SYSTEM INPUT — TYPE A COMMAND</div>
+            <div class="lore-input-row">
+                <span class="lore-prompt" aria-hidden="true">&gt;</span>
+                <input
+                    type="text"
+                    id="loreInput"
+                    class="lore-input"
+                    placeholder="HELP"
+                    maxlength="40"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="System command input"
+                    onkeydown="if(event.key==='Enter')execLoreCmd()"
+                >
+                <button class="action-btn" onclick="execLoreCmd()" aria-label="Execute command">EXEC</button>
+            </div>
+            <div id="loreOutput" class="lore-output" aria-live="polite"></div>
+        </div>
+
+        <hr class="terminal-divider">
+
+        <!-- INLINE HELP -->
+        <div>
+            <button class="help-toggle" onclick="toggleHelp()" aria-expanded="false" aria-controls="helpPanel" id="helpToggleBtn">
+                [ HOW TO PLAY / COMMAND REFERENCE ▼ ]
+            </button>
+            <div class="help-panel" id="helpPanel" role="region" aria-label="Help reference">
+                <strong style="color:var(--terminal-bright);letter-spacing:3px;">HACKING MINIGAME</strong>
+                <dl>
+                    <dt>OBJECTIVE</dt>
+                    <dd>Select the correct password from the word list to gain terminal access.</dd>
+                    <dt>LIKENESS</dt>
+                    <dd>After each wrong guess, LIKENESS shows how many letters match the password at the same position. Use it to narrow down your choice.</dd>
+                    <dt>ATTEMPTS</dt>
+                    <dd>You have 4 attempts. Each wrong guess costs one. Run out and the terminal locks.</dd>
+                    <dt>DIFFICULTY</dt>
+                    <dd>Determined by your Intelligence stat. Higher INT = shorter words = easier hack.</dd>
+                    <dt>XP REWARD</dt>
+                    <dd>EASY: 25 XP &nbsp;|&nbsp; MEDIUM: 50 XP &nbsp;|&nbsp; HARD: 100 XP</dd>
+                </dl>
+                <hr style="border-color:rgba(0,170,34,0.25);margin:10px 0;">
+                <strong style="color:var(--terminal-bright);letter-spacing:3px;">SYSTEM COMMANDS</strong>
+                <dl>
+                    <dt>HELP</dt>
+                    <dd>Display this command reference.</dd>
+                    <dt>STATUS</dt>
+                    <dd>Show current operator and Intelligence rating.</dd>
+                    <dt>WHOAMI</dt>
+                    <dd>Display authenticated vault dweller identity.</dd>
+                    <dt>DUMPDATA</dt>
+                    <dd>Refresh character matrix with new random data.</dd>
+                    <dt>MOTD</dt>
+                    <dd>Display Vault 215 message of the day.</dd>
+                    <dt>CLEAR</dt>
+                    <dd>Clear the system output log.</dd>
+                    <dt>NEW / NEWGAME</dt>
+                    <dd>Start a fresh hacking session with a new password.</dd>
+                </dl>
+            </div>
         </div>
 
     </div><!-- /terminal-body -->
 </div><!-- /terminal-wrapper -->
 
-<script src="../assets/logic/xp.js"></script>
+<script src="../assets/logic/xp/xpprogression.js"></script>
 <script>
 // ════════════════════════════════════════════════
 //  FALLOUT TERMINAL HACKING MINIGAME
@@ -779,16 +1062,38 @@ function renderAttempts() {
 function renderCharGrid() {
     const grid = document.getElementById('charGrid');
     grid.innerHTML = '';
-    // 4 columns × 5 rows = 20 cells
-    for (let i = 0; i < 20; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'grid-cell';
-        cell.style.setProperty('--delay', (Math.random() * 10).toFixed(2) + 's');
-        // Build a cluster of 4 random chars per cell
+
+    // Simulate a Fallout-style memory dump: address + random char columns
+    const baseAddr = randomInt(0x1A000, 0x9F000);
+    const rowStep  = 0x10;
+    const ROWS = 10;
+    const COLS = 16; // chars per row
+
+    for (let r = 0; r < ROWS; r++) {
+        const addr = (baseAddr + r * rowStep).toString(16).toUpperCase().padStart(5, '0');
+        const row = document.createElement('div');
+        row.className = 'grid-row';
+
+        const addrSpan = document.createElement('span');
+        addrSpan.className = 'grid-addr';
+        addrSpan.setAttribute('aria-hidden', 'true');
+        addrSpan.textContent = '0x' + addr + ':';
+
+        const charsSpan = document.createElement('span');
+        charsSpan.className = 'grid-chars';
+        charsSpan.style.setProperty('--delay', (Math.random() * 12).toFixed(2) + 's');
+        charsSpan.setAttribute('aria-hidden', 'true');
+
         let chars = '';
-        for (let j = 0; j < 4; j++) chars += randomChar();
-        cell.textContent = chars;
-        grid.appendChild(cell);
+        for (let c = 0; c < COLS; c++) {
+            chars += randomChar();
+            if (c === 7) chars += ' '; // mid-row space separator
+        }
+        charsSpan.textContent = chars;
+
+        row.appendChild(addrSpan);
+        row.appendChild(charsSpan);
+        grid.appendChild(row);
     }
 }
 
@@ -952,13 +1257,94 @@ function goToData() {
     window.location.href = 'player/data.html';
 }
 
-function goToMenu() {
-    window.location.href = 'player/data.html';
-}
-
 function logout() {
     localStorage.clear();
     window.location.href = 'login.html';
+}
+
+// ── HELP TOGGLE ───────────────────────────────
+
+function toggleHelp() {
+    const panel = document.getElementById('helpPanel');
+    const btn   = document.getElementById('helpToggleBtn');
+    const isOpen = panel.classList.toggle('open');
+    btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    btn.textContent = isOpen
+        ? '[ HOW TO PLAY / COMMAND REFERENCE ▲ ]'
+        : '[ HOW TO PLAY / COMMAND REFERENCE ▼ ]';
+}
+
+// ── LORE COMMANDS ─────────────────────────────
+
+const MOTD_LINES = [
+    'VAULT-TEC REMINDS YOU: PLEASE REPORT SUSPICIOUS BEHAVIOR.',
+    'TODAY\'S CAFETERIA SPECIAL: BRAHMIN STEW (RECONSTITUTED).',
+    'SECURITY NOTICE: SECTORS 7-G AND 12 REMAIN UNDER LOCKDOWN.',
+    'REMEMBER: LOYALTY TO THE VAULT IS LOYALTY TO HUMANITY.',
+    'VAULT-TEC WISHES ALL DWELLERS A PRODUCTIVE CYCLE.',
+    'WATER CHIP MAINTENANCE SCHEDULED FOR NEXT CYCLE. CONSERVE WATER.',
+    'CRITICAL THINKING IS ENCOURAGED. UNAUTHORISED EXPLORATION IS NOT.',
+];
+
+function execLoreCmd() {
+    const input  = document.getElementById('loreInput');
+    const output = document.getElementById('loreOutput');
+    const cmd    = (input.value || '').trim().toUpperCase();
+    input.value  = '';
+
+    let response = '';
+
+    switch (cmd) {
+        case 'HELP':
+            // Open the help panel and scroll to it
+            const panel = document.getElementById('helpPanel');
+            if (!panel.classList.contains('open')) toggleHelp();
+            panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            response = 'HELP PANEL OPENED. SEE REFERENCE BELOW.';
+            break;
+
+        case 'STATUS':
+            response =
+                'OPERATOR: ' + gameState.playerName +
+                ' | INT: '  + gameState.intelligence +
+                ' | DIFFICULTY: ' + gameState.difficulty.toUpperCase() +
+                ' | ATTEMPTS REMAINING: ' + gameState.attemptsLeft;
+            break;
+
+        case 'WHOAMI':
+            response = 'AUTHENTICATED IDENTITY: VAULT DWELLER "' + gameState.playerName + '"';
+            break;
+
+        case 'DUMPDATA':
+            renderCharGrid();
+            response = 'CHARACTER MATRIX REFRESHED.';
+            break;
+
+        case 'MOTD':
+            response = MOTD_LINES[randomInt(0, MOTD_LINES.length - 1)];
+            break;
+
+        case 'CLEAR':
+            output.textContent = '';
+            output.className   = 'lore-output';
+            return;
+
+        case 'NEW':
+        case 'NEWGAME':
+            startNewGame();
+            response = 'NEW TERMINAL SESSION INITIALISED.';
+            break;
+
+        case '':
+            return;
+
+        default:
+            response = 'UNKNOWN COMMAND: "' + cmd + '". TYPE "HELP" FOR COMMAND LIST.';
+            break;
+    }
+
+    output.textContent = '> ' + response;
+    output.className   = 'lore-output response';
 }
 </script>
 
