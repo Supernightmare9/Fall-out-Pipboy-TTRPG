@@ -212,7 +212,7 @@
 <!-- ══════════════════════════════════════════════════════════════════
      COMMAND BAR
 ══════════════════════════════════════════════════════════════════ -->
-<div class="command-bar">
+<div class="command-bar" role="banner">
     <div class="command-bar-left">
         <div>
             <div class="overseer-title-bar">📻 OVERSEER MESSAGES</div>
@@ -220,7 +220,7 @@
         </div>
         <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
     </div>
-    <button class="cmd-btn success" onclick="newConversation()">+ NEW CONVERSATION</button>
+    <button class="cmd-btn success" onclick="newConversation()" title="Start a new conversation with a player or NPC">+ NEW CONVERSATION</button>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════════
@@ -273,6 +273,22 @@
                 </div>
                 <div class="conv-preview">I have a proposition for you…</div>
             </div>
+
+            <div class="conv-section-label" style="margin-top:8px;">BROADCAST CHANNELS</div>
+            <div class="conv-item" onclick="openConv(this,'ALL PLAYERS','System Broadcast','')">
+                <div class="conv-top">
+                    <span class="conv-name" style="color:var(--overseer-red-bright);">📢 ALL PLAYERS</span>
+                    <span class="conv-time">Broadcast</span>
+                </div>
+                <div class="conv-preview">Send message to all players simultaneously</div>
+            </div>
+            <div class="conv-item" onclick="openConv(this,'SYSTEM ALERT','System Alert','')">
+                <div class="conv-top">
+                    <span class="conv-name" style="color:var(--overseer-gold);">⚠ SYSTEM ALERT</span>
+                    <span class="conv-time">Alert</span>
+                </div>
+                <div class="conv-preview">Broadcast urgent system-wide alert</div>
+            </div>
         </div>
     </div>
 
@@ -317,6 +333,7 @@
                 <div id="senderRow">
                     <span id="senderLabel">SEND AS:</span>
                     <select id="senderSelect">
+                        <option value="broadcast">📢 BROADCAST (All Players)</option>
                         <option value="overseer">⬡ OVERSEER (Official)</option>
                         <option value="npc_benny">Merchant Benny (NPC)</option>
                         <option value="npc_doc">Doc Mitchell (NPC)</option>
@@ -326,7 +343,7 @@
                 </div>
                 <div id="composeRow">
                     <textarea id="msgTextarea" placeholder="Type your message as Overseer or NPC…"></textarea>
-                    <button id="sendBtn" onclick="sendMessage()">► SEND</button>
+                    <button id="sendBtn" onclick="sendMessage()" title="Send message (or Shift+Enter for newline, Enter to send)">► SEND</button>
                 </div>
             </div>
         </div>
@@ -339,6 +356,10 @@
 
 <script>
 (function() {
+    // Auth guard — only admin role may access this page
+    var _role = sessionStorage.getItem('role');
+    if (_role !== 'admin') { window.location.replace('../login.html'); }
+
     var cname = sessionStorage.getItem('campaignName') || sessionStorage.getItem('campaignId') || '';
     if (cname) { var el = document.getElementById('campaignDisplay'); if (el) el.textContent = '⚑ ' + cname; }
 
@@ -369,7 +390,7 @@
     };
 
     window.newConversation = function() {
-        showToast('New conversation — will connect to player list. (Placeholder)');
+        showToast('New conversation — select a player from the player overview to start a direct message. (Placeholder)');
     };
 
     window.sendMessage = function() {
@@ -378,6 +399,7 @@
         if (!_activeConv) { showToast('Select a conversation first.', true); return; }
 
         var sender = document.getElementById('senderSelect');
+        var senderVal = sender.value;
         var senderText = sender.options[sender.selectedIndex].text;
         var thread = document.getElementById('messageThread');
 
@@ -385,14 +407,25 @@
         bubble.className = 'msg-bubble sent';
         var now = new Date();
         var timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
-        bubble.innerHTML = '<div class="msg-sender">' + senderText.replace(/[<>]/g,'') + '</div>' +
-            '<div class="msg-body">' + text.replace(/[<>]/g,'') + '</div>' +
-            '<div class="msg-time">' + timeStr + '</div>';
-        thread.appendChild(bubble);
-        thread.scrollTop = thread.scrollHeight;
 
-        document.getElementById('msgTextarea').value = '';
-        showToast('Message sent as "' + senderText.replace(/[<>]/g,'') + '". (Placeholder — not wired to backend yet)');
+        if (senderVal === 'broadcast') {
+            bubble.style.borderColor = 'var(--overseer-red-bright)';
+            bubble.innerHTML = '<div class="msg-sender" style="color:var(--overseer-red-bright);">📢 BROADCAST — ALL PLAYERS</div>' +
+                '<div class="msg-body">' + text.replace(/[<>]/g,'') + '</div>' +
+                '<div class="msg-time">' + timeStr + '</div>';
+            thread.appendChild(bubble);
+            thread.scrollTop = thread.scrollHeight;
+            document.getElementById('msgTextarea').value = '';
+            showToast('Broadcast sent to all players.');
+        } else {
+            bubble.innerHTML = '<div class="msg-sender">' + senderText.replace(/[<>]/g,'') + '</div>' +
+                '<div class="msg-body">' + text.replace(/[<>]/g,'') + '</div>' +
+                '<div class="msg-time">' + timeStr + '</div>';
+            thread.appendChild(bubble);
+            thread.scrollTop = thread.scrollHeight;
+            document.getElementById('msgTextarea').value = '';
+            showToast('Message sent as "' + senderText.replace(/[<>]/g,'') + '". (Placeholder — not wired to backend yet)');
+        }
     };
 
     window.markAllRead = function() { showToast('Messages marked as read. (Placeholder)'); };

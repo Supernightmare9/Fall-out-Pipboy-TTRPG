@@ -160,7 +160,7 @@
 <!-- ══════════════════════════════════════════════════════════════════
      COMMAND BAR
 ══════════════════════════════════════════════════════════════════ -->
-<div class="command-bar">
+<div class="command-bar" role="banner">
     <div class="command-bar-left">
         <div>
             <div class="overseer-title-bar">📦 ITEM POKÉDEX &amp; BUILDER</div>
@@ -169,8 +169,8 @@
         <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
     </div>
     <div style="display:flex;gap:8px;">
-        <button class="cmd-btn success" onclick="showNewItemForm()">+ NEW ITEM</button>
-        <button class="cmd-btn" onclick="exportPool()">⬇ EXPORT POOL</button>
+        <button class="cmd-btn success" onclick="showNewItemForm()" title="Add a new item to the pool">+ NEW ITEM</button>
+        <button class="cmd-btn" onclick="exportPool()" title="Export items pool as JSON">⬇ EXPORT POOL</button>
     </div>
 </div>
 
@@ -372,6 +372,13 @@
 
 <script>
 (function() {
+    // Auth guard — only admin role may access this page
+    var _role = sessionStorage.getItem('role');
+    if (_role !== 'admin') { window.location.replace('../login.html'); }
+
+    // Placeholder data array for export
+    var items = [];
+
     var cname = sessionStorage.getItem('campaignName') || sessionStorage.getItem('campaignId') || '';
     if (cname) { var el = document.getElementById('campaignDisplay'); if (el) el.textContent = '⚑ ' + cname; }
 
@@ -423,7 +430,17 @@
         }
     };
 
-    window.exportPool = function() { showToast('Export not yet wired. Data connection coming soon.'); };
+    window.exportPool = function() {
+        try {
+            var data = JSON.stringify(items, null, 2);
+            var blob = new Blob([data], {type:'application/json'});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = 'items-pool.json'; a.click();
+            URL.revokeObjectURL(url);
+            showToast('Items pool exported successfully.');
+        } catch(e) { showToast('Export failed: ' + e.message, true); }
+    };
 
     function showToast(msg, isError) {
         var t = document.getElementById('statusToast');
