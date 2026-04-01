@@ -1770,5 +1770,74 @@
 
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     REAL-TIME OVERSEER SYNC (optional — only activates if server URL is set)
+     To enable: open browser console and run:
+       localStorage.setItem('PIPBOY_SERVER_URL',   'https://your-server.com');
+       localStorage.setItem('PIPBOY_SESSION_CODE',  'VAULT01');
+       localStorage.setItem('PIPBOY_ADMIN_CODE',    'OVERSEER215');
+     Then reload the page.
+════════════════════════════════════════════════════════════════════════ -->
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+<script src="../../assets/helpers/sync/overseerSync.js"></script>
+<script>
+(function () {
+    'use strict';
+    var serverUrl   = localStorage.getItem('PIPBOY_SERVER_URL');
+    var sessionCode = localStorage.getItem('PIPBOY_SESSION_CODE');
+    var adminCode   = localStorage.getItem('PIPBOY_ADMIN_CODE');
+
+    if (!serverUrl && !sessionCode) return; // sync not configured — skip silently
+
+    OverseerSync.init({
+        serverUrl:   serverUrl,
+        sessionCode: sessionCode || 'VAULT01',
+        adminCode:   adminCode   || 'OVERSEER215',
+
+        onConnected: function (payload) {
+            // payload.players = [{ handle, data }, ...]
+            var players = payload.players || [];
+            if (players.length > 0) {
+                addLog('SYNC: Connected — ' + players.length + ' player(s) in session ' + (sessionCode || ''), 'green');
+            } else {
+                addLog('SYNC: Overseer online — waiting for players to join…', 'yellow');
+            }
+        },
+
+        onPlayerJoined: function (handle, data) {
+            addLog('SYNC: ' + handle + ' joined the session', 'green');
+            // Refresh the player overview panel if it is rendered
+            if (typeof renderPlayerPanel === 'function') renderPlayerPanel();
+        },
+
+        onPlayerUpdate: function (handle, field, value, snapshot) {
+            // Live update: reflect changes in the Overseer UI
+            // The player HP panel (if rendered) uses the campaign data; update it here
+            if (field === 'hp' || field === 'all') {
+                var hp = (field === 'all' ? (snapshot && snapshot.hp) : value);
+                if (typeof hp === 'number') {
+                    addLog('SYNC: ' + handle + ' HP → ' + hp, 'blue');
+                }
+            }
+            if (field === 'xp' || field === 'all') {
+                var xp = (field === 'all' ? (snapshot && snapshot.xp) : value);
+                if (typeof xp === 'number') {
+                    addLog('SYNC: ' + handle + ' XP → ' + xp, 'blue');
+                }
+            }
+        },
+
+        onPlayerLeft: function (handle) {
+            addLog('SYNC: ' + handle + ' disconnected', 'red');
+        },
+
+        onSnapshot: function (payload) {
+            var players = payload.players || [];
+            addLog('SYNC: Snapshot — ' + players.length + ' player(s) active', 'yellow');
+        }
+    });
+}());
+</script>
 </body>
 </html>
