@@ -1821,5 +1821,69 @@
     </script>
     <script src="../../assets/helpers/Managers/settingsManager.js"></script>
     <script src="../../assets/helpers/navigation/playernavigation.js"></script>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         REAL-TIME SYNC (optional — only activates if server URL is configured)
+         To enable: open browser console and run:
+           localStorage.setItem('PIPBOY_SERVER_URL',  'https://your-server.com');
+           localStorage.setItem('PIPBOY_SESSION_CODE', 'VAULT01');
+           localStorage.setItem('PIPBOY_PLAYER_HANDLE', 'Jade');
+         Then reload the page.
+    ════════════════════════════════════════════════════════════════════════ -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+    <script src="../../assets/helpers/sync/playerSync.js"></script>
+    <script>
+    (function () {
+        'use strict';
+        var serverUrl    = localStorage.getItem('PIPBOY_SERVER_URL');
+        var sessionCode  = localStorage.getItem('PIPBOY_SESSION_CODE');
+        var playerHandle = localStorage.getItem('PIPBOY_PLAYER_HANDLE');
+
+        if (!serverUrl && !sessionCode) return; // sync not configured — skip silently
+
+        // Wrap savePlayerData so every local save also pushes to the server
+        var _origSave = window.savePlayerData;
+        window.savePlayerData = function () {
+            if (_origSave) _origSave();
+            if (PlayerSync.isConnected()) {
+                PlayerSync.pushAll(playerData);
+            }
+        };
+
+        PlayerSync.init({
+            serverUrl:    serverUrl,
+            sessionCode:  sessionCode  || 'VAULT01',
+            playerHandle: playerHandle || 'Player',
+            initialData:  playerData,
+
+            onConnected: function (payload) {
+                // Server sends back the current data for this player — apply it
+                if (payload.data && typeof payload.data === 'object') {
+                    Object.assign(playerData, payload.data);
+                    ensureValidSkills();
+                    updateDisplay();
+                    updatePerksDisplay();
+                    updateEffectsDisplay();
+                }
+            },
+
+            onUpdate: function (field, value, snapshot) {
+                // Overseer pushed a change — apply it locally
+                if (field === 'all' && snapshot) {
+                    Object.assign(playerData, snapshot);
+                } else if (field && value !== undefined) {
+                    playerData[field] = value;
+                }
+                ensureValidSkills();
+                updateDisplay();
+                updatePerksDisplay();
+                updateEffectsDisplay();
+                if (snapshot && snapshot.xp !== undefined) {
+                    updateXPDisplay(snapshot.xp);
+                }
+            }
+        });
+    }());
+    </script>
 </body>
 </html>
