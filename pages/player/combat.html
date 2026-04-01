@@ -191,22 +191,131 @@
             margin-bottom: 14px;
         }
 
-        /* ===== THREE-COLUMN GRID ===== */
+        /* ===== TWO-COLUMN GRID ===== */
         .character-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 16px;
             margin-bottom: 20px;
         }
 
-        @media (max-width: 1200px) {
-            .character-grid { grid-template-columns: 1fr 1fr; }
+        @media (max-width: 900px) {
+            .character-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 768px) {
             .character-grid { grid-template-columns: 1fr; }
             .top-bar { flex-direction: column; align-items: flex-start; }
         }
+
+        /* ===== COLLAPSIBLE PANELS ===== */
+        .panel-collapse-toggle {
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .panel-collapse-toggle:hover { opacity: 0.85; }
+        .panel-chevron {
+            font-size: 10px;
+            transition: transform 0.2s;
+            margin-left: 6px;
+        }
+        .panel-body-collapsed { display: none; }
+
+        /* ===== INITIATIVE TRACKER ===== */
+        .initiative-tracker {
+            margin-top: 6px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        .initiative-tracker::-webkit-scrollbar { width: 4px; }
+        .initiative-tracker::-webkit-scrollbar-track { background: var(--vault-dark); }
+        .initiative-tracker::-webkit-scrollbar-thumb { background: rgba(74,222,128,0.3); border-radius: 2px; }
+
+        .initiative-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 7px;
+            margin-bottom: 4px;
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.15);
+        }
+        .initiative-row.initiative-current {
+            border-color: var(--vault-gold);
+            background: rgba(251,191,36,0.06);
+            box-shadow: 0 0 8px rgba(251,191,36,0.2);
+        }
+        .initiative-num {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            min-width: 24px;
+            text-align: center;
+        }
+        .initiative-info { flex: 1; min-width: 0; }
+        .initiative-name {
+            font-size: 11px;
+            font-weight: bold;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .initiative-player { color: var(--vault-green); }
+        .initiative-enemy  { color: var(--vault-error); }
+        .initiative-hp-bar {
+            height: 4px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(74,222,128,0.1);
+            margin: 2px 0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .initiative-hp-text {
+            font-size: 9px;
+            color: rgba(74,222,128,0.55);
+        }
+        .initiative-controls {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .initiative-hp-input {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            padding: 3px 5px;
+            width: 46px;
+            outline: none;
+        }
+        .initiative-hp-input:focus { border-color: var(--vault-gold); }
+
+        /* ===== LEVEL UP TAB ===== */
+        .levelup-award-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .levelup-source-select {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.4);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 6px 8px;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+        }
+        .levelup-source-select:focus { border-color: var(--vault-gold); }
 
         /* ===== CHARACTER INFO (LEFT COLUMN) ===== */
         .char-name-display {
@@ -1291,8 +1400,12 @@
 
             <!-- LEFT: CHARACTER INFO & STATUS -->
             <div class="panel" id="leftPanel">
-                <div class="panel-title">⚙ Character Status</div>
-
+                <div class="panel-title panel-collapse-toggle" onclick="togglePanelCollapse('leftPanelBody', this)"
+                     role="button" aria-expanded="true" aria-controls="leftPanelBody">
+                    <span>⚙ Character Status</span>
+                    <span class="panel-chevron">▲</span>
+                </div>
+                <div id="leftPanelBody">
                 <div class="char-name-display" id="charNameDisplay">—</div>
                 <div class="char-color-row">
                     <div class="char-color-dot" id="charColorDot" style="background:#4ade80;"></div>
@@ -1345,11 +1458,6 @@
                     <span class="stat-label">Proficiency Bonus</span>
                     <span class="stat-value" id="charProf">—</span>
                 </div>
-
-                <div class="panel-title" style="margin-top:14px;">Skills</div>
-                <ul class="skills-list" id="skillsList">
-                    <li class="empty-state" style="list-style:none;">No skills loaded</li>
-                </ul>
 
                 <!-- PROGRESSION PANEL -->
                 <div class="progression-panel" id="progressionPanel">
@@ -1409,16 +1517,24 @@
                     </div>
                     <div id="rollResults" style="margin-top:8px;max-height:120px;overflow-y:auto;font-size:10px;"></div>
                 </div>
+                </div><!-- end leftPanelBody -->
             </div>
 
             <!-- MIDDLE: PARTY STATUS & COMBAT -->
             <div class="panel" id="middlePanel">
                 <!-- Party Status -->
-                <div class="panel-title">👥 Party Status
-                    <button class="vault-btn" style="float:right;padding:2px 8px;font-size:9px;" onclick="refreshAll()">↻</button>
+                <div class="panel-title panel-collapse-toggle" onclick="togglePanelCollapse('partyStatusBody', this)"
+                     role="button" aria-expanded="true" aria-controls="partyStatusBody">
+                    <span>👥 Party Status</span>
+                    <span style="display:flex;align-items:center;gap:6px;">
+                        <button class="vault-btn" style="padding:2px 8px;font-size:9px;" onclick="handlePartyRefresh(event)">↻</button>
+                        <span class="panel-chevron">▲</span>
+                    </span>
                 </div>
-                <div id="partyStatusList">
-                    <div class="empty-state">Loading party...</div>
+                <div id="partyStatusBody">
+                    <div id="partyStatusList">
+                        <div class="empty-state">Loading party...</div>
+                    </div>
                 </div>
 
                 <!-- Combat Status -->
@@ -1436,23 +1552,13 @@
                 </div>
             </div>
 
-            <!-- RIGHT: MESSAGES FROM OVERSEER -->
-            <div class="panel" id="rightPanel">
-                <div class="panel-title">📡 Overseer Messages
-                    <button class="vault-btn vault-btn-danger" style="float:right;padding:2px 8px;font-size:9px;" onclick="clearMessages()">Clear</button>
-                </div>
-                <div class="messages-list" id="messagesList">
-                    <div class="empty-state">No messages yet.</div>
-                </div>
-            </div>
-
         </div><!-- end .character-grid -->
 
         <!-- ── TABS ──────────────────────────────────────── -->
         <div class="tabs-container">
             <div class="tab-buttons">
                 <button class="tab-btn active" onclick="switchTab('inventory', this)">📦 Inventory</button>
-                <button class="tab-btn"        onclick="switchTab('quests', this)">📋 Quest Log</button>
+                <button class="tab-btn"        onclick="switchTab('levelup', this)">⭐ Level Up</button>
                 <button class="tab-btn"        onclick="switchTab('abilities', this)">✦ Abilities &amp; Skills</button>
             </div>
 
@@ -1479,10 +1585,10 @@
                 <div class="inventory-footer" id="inventoryFooter"></div>
             </div>
 
-            <!-- TAB 2: QUEST LOG -->
-            <div class="tab-content" id="tab-quests">
-                <div id="questLogContent">
-                    <div class="empty-state">Load a campaign to view quests.</div>
+            <!-- TAB 2: LEVEL UP -->
+            <div class="tab-content" id="tab-levelup">
+                <div id="levelUpTabContent">
+                    <div class="empty-state">Load a campaign to view level up options.</div>
                 </div>
             </div>
 
@@ -1678,6 +1784,9 @@
                             p.status       = savedP.status       || 'alive';
                             p.equipment    = savedP.equipment    || {};
                             p.conditions   = savedP.conditions   || [];
+                            if (savedP.stats && Object.keys(savedP.stats).length > 0) {
+                                p.stats = savedP.stats;
+                            }
                         }
                     });
                 }
@@ -1713,7 +1822,8 @@
                     initiative:    p.initiative   || 0,
                     status:        p.status       || 'alive',
                     equipment:     p.equipment    || {},
-                    conditions:    p.conditions   || []
+                    conditions:    p.conditions   || [],
+                    stats:         p.stats        || {}
                 };
             }),
             activeEncounter: campaign.activeEncounter,
@@ -1736,9 +1846,8 @@
         renderPartyStatus(campaign);
         renderCombatStatus(campaign);
         updateConditionsDisplay(campaign);
-        renderMessages(campaign);
         renderInventory(campaign);
-        renderQuestLog(campaign);
+        renderLevelUpTab();
         renderAbilities(campaign);
         updateEquipmentPanel(campaign);
         updateACDisplay(campaign);
@@ -1757,10 +1866,13 @@
         var fresh = getCampaignData(activeCampaign.id);
         if (!fresh) return;
         activeCampaign = fresh;
+        renderCharacterInfo(fresh);
         renderPartyStatus(fresh);
         renderCombatStatus(fresh);
         updateConditionsDisplay(fresh);
-        renderMessages(fresh);
+        renderInventory(fresh);
+        updateEquipmentPanel(fresh);
+        updateACDisplay(fresh);
 
         // Re-sync own HP display in case overseer changed it
         var myEntry = fresh.players.find(function(p) { return p.username === sessionUsername; });
@@ -1808,22 +1920,12 @@
         document.getElementById('hpMax').textContent     = myEntry.maxHp;
         updateHpBar(myEntry.currentHp, myEntry.maxHp);
 
-        // Stats
+        // Stats (synced from centralized campaign state including localStorage overlay)
         renderStats(myEntry);
 
         // AC / Prof
         document.getElementById('charAc').textContent   = myEntry.ac   !== undefined ? myEntry.ac   : '—';
         document.getElementById('charProf').textContent = myEntry.proficiencyBonus !== undefined ? '+' + myEntry.proficiencyBonus : '—';
-
-        // Skills
-        var skillsList = document.getElementById('skillsList');
-        if (myEntry.skills && myEntry.skills.length > 0) {
-            skillsList.innerHTML = myEntry.skills.map(function(s) {
-                return '<li>' + escHtml(s) + '</li>';
-            }).join('');
-        } else {
-            skillsList.innerHTML = '<li class="empty-state" style="list-style:none;">No skills listed</li>';
-        }
     }
 
     function renderStats(playerEntry) {
@@ -1971,14 +2073,9 @@
 
         // Find current turn
         var combatants  = enc.combatants || [];
-        var currentTurn = null;
-        var currentIdx  = null;
-        if (combatants.length > 0) {
-            // Find the combatant with currentTurn flag, fallback to first
-            currentIdx  = combatants.findIndex(function(c) { return c.currentTurn; });
-            if (currentIdx === -1) currentIdx = 0;
-            currentTurn = combatants[currentIdx];
-        }
+        var currentIdx  = combatants.findIndex(function(c) { return c.currentTurn; });
+        if (currentIdx === -1) currentIdx = 0;
+        var currentTurn = combatants.length > 0 ? combatants[currentIdx] : null;
 
         // Find MY initiative
         var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
@@ -1986,12 +2083,193 @@
 
         var currentTurnText = currentTurn ? escHtml(currentTurn.name || currentTurn.id) : '—';
 
-        sec.innerHTML =
+        var html =
             '<div class="combat-indicator combat-active-badge">⚔ COMBAT ACTIVE</div>' +
             '<div class="combat-detail-row"><span class="stat-label">Round</span><span class="stat-value">' + (enc.round || 1) + '</span></div>' +
             '<div class="combat-detail-row"><span class="stat-label">Current Turn</span><span class="stat-value" style="color:var(--vault-gold);">' + currentTurnText + '</span></div>' +
             '<div class="combat-detail-row"><span class="stat-label">Your Initiative</span><span class="stat-value">' + (myInitiative !== null ? myInitiative : '—') + '</span></div>' +
             '<div class="combat-detail-row"><span class="stat-label">In Initiative</span><span class="stat-value">' + (myEntry && myEntry.inInitiative ? '<span style="color:var(--vault-green);">YES</span>' : '<span style="color:rgba(74,222,128,0.4);">NO</span>') + '</span></div>';
+
+        // ── Initiative order tracker ──
+        if (combatants.length > 0) {
+            html += '<div class="panel-title" style="margin-top:14px;cursor:default;">⚔ Initiative Order</div>';
+            html += '<div class="initiative-tracker">';
+            combatants.forEach(function(c, idx) {
+                var isCurrent  = (idx === currentIdx);
+                var isPlayer   = c.type === 'player';
+                var curHp      = typeof c.currentHp === 'number' ? c.currentHp : 0;
+                var maxHp      = typeof c.maxHp     === 'number' ? c.maxHp     : curHp;
+                var hpPct      = maxHp > 0 ? Math.min(100, Math.round((curHp / maxHp) * 100)) : 0;
+                var hpCls      = hpPct >= 75 ? 'hp-high' : hpPct >= 25 ? 'hp-mid' : 'hp-low';
+                var safeId     = escHtml(c.id || String(idx));
+                var nameCls    = isPlayer ? 'initiative-player' : 'initiative-enemy';
+
+                html += '<div class="initiative-row' + (isCurrent ? ' initiative-current' : '') + '">' +
+                    '<span class="initiative-num">' + (c.initiative || 0) + '</span>' +
+                    '<div class="initiative-info">' +
+                        '<span class="initiative-name ' + nameCls + '">' + escHtml(c.name || c.id) + '</span>' +
+                        '<div class="initiative-hp-bar"><div class="player-hp-bar-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div>' +
+                        '<span class="initiative-hp-text">' + curHp + '/' + maxHp + ' HP</span>' +
+                    '</div>' +
+                    '<div class="initiative-controls">' +
+                        '<input type="number" class="initiative-hp-input" id="hpInput_' + safeId + '" placeholder="amt" min="1"' +
+                            ' aria-label="HP adjustment for ' + escHtml(c.name || c.id) + '">' +
+                        '<button class="hp-btn" title="Heal" onclick="applyCombatantHp(\'' + safeId + '\', true)">+</button>' +
+                        '<button class="hp-btn minus" title="Damage" onclick="applyCombatantHp(\'' + safeId + '\', false)">−</button>' +
+                    '</div>' +
+                    '</div>';
+            });
+            html += '</div>';
+        }
+
+        sec.innerHTML = html;
+    }
+
+    // ── COMBATANT HP ADJUSTMENT (initiative tracker) ─────────────
+    window.applyCombatantHp = function(combatantId, isHeal) {
+        if (!activeCampaign) return;
+        var enc = activeCampaign.activeEncounter;
+        if (!enc || enc.status !== 'active') return;
+
+        var inputEl = document.getElementById('hpInput_' + combatantId);
+        var amount  = inputEl ? parseInt(inputEl.value, 10) : 0;
+        if (!amount || amount <= 0) return;
+
+        var combatants = enc.combatants || [];
+        var combatant  = combatants.find(function(c) { return (c.id || '') === combatantId; });
+        if (!combatant) return;
+
+        var maxHp = typeof combatant.maxHp === 'number' ? combatant.maxHp : combatant.currentHp;
+        if (isHeal) {
+            combatant.currentHp = Math.min(maxHp, (combatant.currentHp || 0) + amount);
+        } else {
+            combatant.currentHp = Math.max(0, (combatant.currentHp || 0) - amount);
+        }
+
+        // Sync to players array when a player combatant is adjusted
+        if (combatant.type === 'player') {
+            var player = activeCampaign.players.find(function(p) {
+                return p.characterId === combatant.characterId;
+            });
+            if (player) {
+                player.currentHp = combatant.currentHp;
+                if (player.username === sessionUsername) {
+                    document.getElementById('hpCurrent').textContent = player.currentHp;
+                    updateHpBar(player.currentHp, player.maxHp);
+                }
+            }
+        }
+
+        if (inputEl) inputEl.value = '';
+        saveCampaignData(activeCampaign);
+        renderCombatStatus(activeCampaign);
+        renderPartyStatus(activeCampaign);
+    };
+
+    // ── COLLAPSIBLE PANEL TOGGLE ─────────────────────────────────
+    function togglePanelCollapse(bodyId, titleEl) {
+        var body = document.getElementById(bodyId);
+        if (!body) return;
+        var chevron = titleEl ? titleEl.querySelector('.panel-chevron') : null;
+        var isCollapsed = body.classList.toggle('panel-body-collapsed');
+        if (chevron) chevron.style.transform = isCollapsed ? 'rotate(180deg)' : '';
+        if (titleEl) titleEl.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+    }
+
+    function handlePartyRefresh(event) {
+        event.stopPropagation();
+        refreshAll();
+    }
+
+    // ── LEVEL UP TAB ─────────────────────────────────────────────
+    function renderLevelUpTab() {
+        var div = document.getElementById('levelUpTabContent');
+        if (!div) return;
+
+        if (!activeCampaign) {
+            div.innerHTML = '<div class="empty-state">Load a campaign to view level up options.</div>';
+            return;
+        }
+
+        if (typeof ProgressionManager === 'undefined') {
+            div.innerHTML = '<div class="empty-state">Progression system unavailable.</div>';
+            return;
+        }
+
+        var cid     = activeCampaign.id;
+        var user    = sessionUsername;
+        var prog    = ProgressionManager.getPlayerProgression(cid, user);
+        var info    = ProgressionManager.getLevelInfo(prog.totalXp);
+        var history = ProgressionManager.getLevelHistory(cid, user);
+
+        var html = '';
+
+        // Level & XP progress
+        html += '<div class="progression-level-display" style="margin-bottom:14px;">' +
+            '<div>' +
+                '<div class="progression-level-badge">' + info.level + '</div>' +
+                '<div class="progression-level-label">Level</div>' +
+            '</div>' +
+            '<div style="flex:1;">' +
+                '<div class="progression-xp-label">Experience Points</div>' +
+                '<div class="progression-xp-bar-bg">' +
+                    '<div class="progression-xp-bar-fill" style="width:' + Math.min(100, info.progressPct) + '%"></div>' +
+                '</div>' +
+                '<div class="progression-xp-text">' +
+                    '<span>' + ProgressionManager.formatXpNumber(prog.totalXp) + ' XP</span>' +
+                    '<span>' + (info.level >= 100 ? 'Max Level' : ProgressionManager.formatXpNumber(info.xpForNext) + ' to next') + '</span>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+
+        // Stat bonuses
+        html += '<div class="stat-row"><span class="stat-label">Ability Score Bonus</span><span class="stat-value">' + (info.abilityBonus > 0 ? '+' + info.abilityBonus : '+0') + '</span></div>';
+        html += '<div class="stat-row" style="margin-bottom:12px;"><span class="stat-label">Unlocked Abilities</span><span class="stat-value">' + info.unlockedAbilities.length + '</span></div>';
+
+        // Award XP section
+        html += '<div class="panel-title" style="margin-top:4px;">Award XP</div>';
+        html += '<div class="levelup-award-row">' +
+            '<input type="number" id="xpAwardAmount" class="hp-manual-input" placeholder="XP amount" min="1" style="flex:1;min-width:80px;">' +
+            '<select id="xpAwardSource" class="levelup-source-select">' +
+                '<option value="Combat">Combat</option>' +
+                '<option value="Quest">Quest</option>' +
+                '<option value="Exploration">Exploration</option>' +
+                '<option value="Learning">Learning</option>' +
+                '<option value="Other">Other</option>' +
+            '</select>' +
+            '<button class="hp-update-btn" onclick="awardXpFromTab()">+ AWARD</button>' +
+        '</div>';
+
+        // Level-up history
+        html += '<div class="progression-history" style="margin-top:8px;">' +
+            '<div class="progression-history-title">Level-Up History</div>';
+        if (history.length === 0) {
+            html += '<div class="empty-state" style="padding:8px 0;font-size:9px;">No level-ups yet</div>';
+        } else {
+            html += history.map(function(h) {
+                var ts  = h.timestamp ? new Date(h.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
+                var src = h.source || 'Combat';
+                return '<div class="progression-history-entry">Lvl ' + h.level + ' — ' + escHtml(ts) + ' (' + escHtml(src) + ')</div>';
+            }).join('');
+        }
+        html += '</div>';
+
+        div.innerHTML = html;
+    }
+
+    function awardXpFromTab() {
+        var amountInput  = document.getElementById('xpAwardAmount');
+        var sourceSelect = document.getElementById('xpAwardSource');
+        if (!amountInput || !amountInput.value) return;
+
+        var amount = parseInt(amountInput.value, 10);
+        var source = sourceSelect ? sourceSelect.value : 'Combat';
+
+        if (!amount || amount <= 0) return;
+
+        awardXpToCharacter(amount, source);
+        amountInput.value = '';
+        renderLevelUpTab();
     }
 
     // ── CONDITIONS DISPLAY ────────────────────────────────────────
@@ -2047,10 +2325,9 @@
 
     // ── MESSAGES (RIGHT) ─────────────────────────────────────────
     function renderMessages(campaign) {
-        var list     = document.getElementById('messagesList');
+        var list = document.getElementById('messagesList');
+        if (!list) return; // messages panel removed from player combat view
         var messages = campaign.messages || [];
-
-        // Check for locally-cleared messages
         var cleared  = sessionStorage.getItem('clearedMessages_' + campaign.id);
         var clearedTs = cleared ? (parseInt(cleared, 10) || 0) : 0;
 
@@ -2310,9 +2587,10 @@
         }
     }
 
-    // ── QUEST LOG TAB ────────────────────────────────────────────
+    // ── QUEST LOG FUNCTIONS (kept for data integrity) ────────────
     function renderQuestLog(campaign) {
-        var div    = document.getElementById('questLogContent');
+        var div = document.getElementById('questLogContent');
+        if (!div) return; // quest log tab removed from player view
         var quests = campaign.quests || [];
 
         if (quests.length === 0) {
@@ -2474,12 +2752,15 @@
                 historyList.innerHTML = '<div class="empty-state" style="padding:8px 0;font-size:9px;">No level-ups yet</div>';
             } else {
                 historyList.innerHTML = history.map(function (h) {
-                    var ts  = h.timestamp ? new Date(h.timestamp).toLocaleDateString() : '—';
+                    var ts  = h.timestamp ? new Date(h.timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
                     var src = h.source || 'Combat';
                     return '<div class="progression-history-entry">Lvl ' + h.level + ' — ' + escHtml(ts) + ' (' + escHtml(src) + ')</div>';
                 }).join('');
             }
         }
+
+        // Refresh level up tab if it is active
+        renderLevelUpTab();
     }
 
     function awardXpToCharacter(xpAmount, source) {
@@ -2577,10 +2858,6 @@
                 renderCombatStatus(activeCampaign);
                 renderPartyStatus(activeCampaign);
             }
-            if (Array.isArray(data.messages)) {
-                activeCampaign.messages = data.messages;
-                renderMessages(activeCampaign);
-            }
             // Sync inventory when overseer awards loot
             if (Array.isArray(data.inventory)) {
                 activeCampaign.inventory = data.inventory;
@@ -2589,15 +2866,19 @@
                 updateACDisplay(activeCampaign);
                 addRollResult('📦 Inventory updated', '');
             }
-            // Sync conditions applied by overseer
+            // Sync player data (conditions, stats, HP) applied by overseer
             if (Array.isArray(data.players)) {
                 data.players.forEach(function(savedP) {
                     var p = activeCampaign.players.find(function(x) { return x.username === savedP.username; });
-                    if (p && Array.isArray(savedP.conditions)) {
-                        p.conditions = savedP.conditions;
+                    if (p) {
+                        if (Array.isArray(savedP.conditions)) p.conditions = savedP.conditions;
+                        if (savedP.stats && Object.keys(savedP.stats).length > 0) p.stats = savedP.stats;
+                        if (typeof savedP.currentHp === 'number') p.currentHp = savedP.currentHp;
                     }
                 });
                 updateConditionsDisplay(activeCampaign);
+                renderCharacterInfo(activeCampaign);
+                renderPartyStatus(activeCampaign);
             }
         } catch (ex) { /* ignore malformed */ }
     });
@@ -2664,7 +2945,6 @@
             timestamp: new Date().toISOString()
         });
         saveCampaignData(activeCampaign);
-        renderMessages(activeCampaign);
     }
 
     window.quickRoll = function(sides) {
