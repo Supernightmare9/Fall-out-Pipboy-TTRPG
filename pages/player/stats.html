@@ -728,6 +728,7 @@
     </div>
 
     <script src="../../assets/logic/xp/xpprogression.js"></script>
+    <script src="../../assets/data/pools/perks.js"></script>
     <script>
     // ================================================================
     //  VAULT 215 - STATS PAGE (Redesigned with character.html style)
@@ -1354,10 +1355,12 @@
         document.getElementById('perksGrid').innerHTML = perks.length === 0
             ? '<div class="perks-empty">No perks earned yet. Keep adventuring!</div>'
             : perks.map(function(p){
-                var rankDisplay = p.rank > 1 ? ' (Rank '+(p.currentRank||1)+'/'+p.rank+')' : '';
-                return '<div class="perk-box" tabindex="0" title="'+escHtml(p.description||p.benefit||'No description')+'">' +
-                    '<div class="perk-title">' + escHtml(p.name||'Unknown') + rankDisplay + '</div>' +
-                    '<div class="perk-description">' + escHtml(p.description||p.benefit||'No description') + '</div>' +
+                var maxRank = p.rank || 1;
+                var rankDisplay = maxRank > 1 ? ' (Rank '+(p.currentRank||1)+'/'+maxRank+')' : '';
+                var desc = p.description || p.benefit || 'No description';
+                return '<div class="perk-box" tabindex="0" title="'+escHtml(desc)+'">' +
+                    '<div class="perk-title">' + escHtml(p.name||'Unknown') + escHtml(rankDisplay) + '</div>' +
+                    '<div class="perk-description">' + escHtml(desc) + '</div>' +
                     '</div>';
             }).join('');
     }
@@ -1462,25 +1465,37 @@
         yesBtn.focus();
     }
     function showInputModal(title, prompt, defaultVal, onOk) {
-        document.getElementById('infoTitle').textContent = title;
-        document.getElementById('infoBody').innerHTML = escHtml(prompt) + '<br><input type="number" id="modalInputField" style="margin-top:8px;background:var(--vault-dark);border:1px solid var(--vault-gold);color:var(--vault-green);font-family:\'Courier New\',monospace;padding:6px 10px;width:100%;font-size:13px;" value="' + escHtml(String(defaultVal||'')) + '">';
         var m = document.getElementById('infoModal');
+        document.getElementById('infoTitle').textContent = title;
+        // Build input field via DOM for safety
+        var body = document.getElementById('infoBody');
+        body.textContent = '';
+        var label = document.createElement('span');
+        label.textContent = prompt;
+        var input = document.createElement('input');
+        input.type = 'number';
+        input.id = 'modalInputField';
+        input.style.cssText = 'display:block;margin-top:8px;background:var(--vault-dark);border:1px solid var(--vault-gold);color:var(--vault-green);font-family:\'Courier New\',monospace;padding:6px 10px;width:100%;font-size:13px;';
+        input.value = defaultVal !== undefined && defaultVal !== null ? String(defaultVal) : '';
+        body.appendChild(label);
+        body.appendChild(input);
         m.style.display = 'flex';
         var okBtn = m.querySelector('button');
         okBtn.textContent = 'OK';
-        var prevOnclick = okBtn.onclick;
+        // Replace handler (always reset to closeInfoModal after use)
         okBtn.onclick = function() {
-            var v = document.getElementById('modalInputField');
+            var val = input.value;
             m.style.display = 'none';
-            okBtn.onclick = prevOnclick;
+            okBtn.onclick = closeInfoModal;
             okBtn.textContent = 'OK';
-            if (v) onOk(v.value);
+            onOk(val);
         };
-        setTimeout(function(){ var f = document.getElementById('modalInputField'); if(f) f.focus(); }, 50);
+        setTimeout(function(){ input.focus(); }, 50);
     }
 
     // ---- LEVEL-UP TAB ----
     var _levelUpUndoStack = [];
+    var _levelUpBaseline  = null; // snapshot of playerData at the start of level-up, used for Reset
 
     function refreshLevelUpTabVisibility() {
         var active = !!(playerData.skillPointsAvailable > 0 || playerData.perkPointsAvailable > 0);
@@ -1552,27 +1567,41 @@
             return;
         }
         grid.innerHTML = available.map(function(perk) {
+            var maxRank = perk.rank || 1;
             var currentRank = getPlayerPerkRank(perk.id);
             var missing = checkPerkPrereqs(perk);
-            var isMaxed = currentRank >= perk.rank;
+            var isMaxed = currentRank >= maxRank;
             var isEligible = missing.length === 0 && !isMaxed;
             var cssClass = isMaxed ? 'perk-maxed' : (isEligible ? 'perk-eligible' : 'perk-locked');
-            var rankDisplay = perk.rank > 1 ? ' (Rank ' + currentRank + '/' + perk.rank + ')' : '';
+            var rankDisplay = maxRank > 1 ? ' (Rank ' + currentRank + '/' + maxRank + ')' : '';
             var missingHtml = missing.length > 0 ? '<div class="perk-missing-prereqs">Missing: ' + missing.map(function(m){return escHtml(m);}).join(', ') + '</div>' : '';
             var btnHtml = '';
             if (perkPts > 0 && isEligible) {
-                btnHtml = '<button class="update-btn" style="margin-top:8px;font-size:9px;padding:4px 10px;" onclick="selectLevelUpPerk(\'' + perk.id + '\',event)" tabindex="0" title="Select this perk (costs 1 perk point)">Select' + (perk.rank > 1 ? ' (Rank ' + (currentRank+1) + ')' : '') + '</button>';
+                var rankLabel = maxRank > 1 ? ' (Rank ' + (currentRank+1) + ')' : '';
+                // Use data attribute; click handled by delegation below
+                btnHtml = '<button class="update-btn lu-perk-select-btn" data-perk-id="' + escHtml(perk.id) + '" style="margin-top:8px;font-size:9px;padding:4px 10px;" tabindex="0" title="Select this perk (costs 1 perk point)">Select' + escHtml(rankLabel) + '</button>';
             } else if (isMaxed) {
                 btnHtml = '<div style="font-size:9px;color:rgba(74,222,128,0.5);margin-top:5px;">Max rank reached</div>';
             }
             return '<div class="perk-box ' + cssClass + '" tabindex="' + (isEligible && perkPts > 0 ? '0' : '-1') + '" ' +
-                (isEligible && perkPts > 0 ? 'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){selectLevelUpPerk(\'' + perk.id + '\',event);}" ' : '') +
+                'data-perk-id="' + escHtml(perk.id) + '" ' +
                 'title="' + escHtml(perk.benefit) + '">' +
-                '<div class="perk-title">' + escHtml(perk.name) + rankDisplay + '</div>' +
+                '<div class="perk-title">' + escHtml(perk.name) + escHtml(rankDisplay) + '</div>' +
                 '<div class="perk-description">' + escHtml(perk.benefit) + '</div>' +
                 missingHtml + btnHtml +
                 '</div>';
         }).join('');
+        // Delegated event listener for Select buttons and keyboard on perk boxes
+        grid.onclick = function(e) {
+            var btn = e.target.closest('.lu-perk-select-btn');
+            if (btn) { selectLevelUpPerk(btn.getAttribute('data-perk-id')); return; }
+        };
+        grid.onkeydown = function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                var box = e.target.closest('.perk-eligible');
+                if (box) { e.preventDefault(); selectLevelUpPerk(box.getAttribute('data-perk-id')); }
+            }
+        };
     }
 
     function renderLevelUpSkills() {
@@ -1591,15 +1620,15 @@
             return '<div class="skill-item' + (canInc ? ' lu-glow' : '') + '">' +
                 '<div class="skill-left">' +
                     '<div class="skill-info">' +
-                        '<div class="skill-name">'+skill+'</div>' +
-                        '<div class="skill-special">'+sp+'</div>' +
+                        '<div class="skill-name">'+escHtml(skill)+'</div>' +
+                        '<div class="skill-special">'+escHtml(sp)+'</div>' +
                         '<div class="skill-bonus">Bonus: '+formatBonus(bonus)+'</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="skill-controls">' +
-                    '<button class="skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" onclick="luUpdateSkill(\''+skill+'\',-1)" ' + (!canDec ? 'disabled' : 'title="Decrease (refunds 1 point)"') + ' tabindex="0">-</button>' +
+                    '<button class="skill-btn lu-skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" data-skill="' + escHtml(skill) + '" data-delta="-1" ' + (!canDec ? 'disabled' : 'title="Decrease (refunds 1 point)"') + ' tabindex="0">-</button>' +
                     '<span class="skill-value">'+displayVal+'</span>' +
-                    '<button class="skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" onclick="luUpdateSkill(\''+skill+'\',1)" ' + (!canInc ? 'disabled title="No skill points available"' : 'title="Increase skill (costs 1 point)"') + ' tabindex="0">+</button>' +
+                    '<button class="skill-btn lu-skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" data-skill="' + escHtml(skill) + '" data-delta="1" ' + (!canInc ? 'disabled title="No skill points available"' : 'title="Increase skill (costs 1 point)"') + ' tabindex="0">+</button>' +
                 '</div>' +
                 '</div>';
         }).join('');
@@ -1608,6 +1637,13 @@
             spEl.textContent = pts;
             spEl.className = 'skill-points-value' + (pts <= 0 ? ' skill-points-zero' : '');
         }
+        // Delegated event listener for skill +/- buttons
+        grid.onclick = function(e) {
+            var btn = e.target.closest('.lu-skill-btn');
+            if (btn && !btn.disabled) {
+                luUpdateSkill(btn.getAttribute('data-skill'), parseInt(btn.getAttribute('data-delta'), 10));
+            }
+        };
     }
 
     function luUpdateSkill(skillName, amount) {
@@ -1629,23 +1665,23 @@
         refreshLevelUpTabVisibility();
     }
 
-    function selectLevelUpPerk(perkId, event) {
-        if (event) event.stopPropagation();
+    function selectLevelUpPerk(perkId) {
         if ((playerData.perkPointsAvailable || 0) <= 0) { showInfoModal('No Perk Points', 'No perk points available.'); return; }
         var pool = window.PERKS_POOL || [];
         var perk = pool.find(function(p){ return p.id === perkId; });
         if (!perk) return;
         var missing = checkPerkPrereqs(perk);
         if (missing.length > 0) { showInfoModal('Prerequisites Not Met', 'You do not meet the requirements:\n' + missing.join('\n')); return; }
+        var maxRank = perk.rank || 1;
         var currentRank = getPlayerPerkRank(perkId);
-        if (currentRank >= perk.rank) { showInfoModal('Max Rank', 'You have already reached the maximum rank for this perk.'); return; }
+        if (currentRank >= maxRank) { showInfoModal('Max Rank', 'You have already reached the maximum rank for this perk.'); return; }
         _levelUpUndoStack.push(deepCopy(playerData));
         if (!playerData.selectedPerks) playerData.selectedPerks = [];
         var existing = playerData.selectedPerks.find(function(p){ return p.id === perkId; });
         if (existing) {
             existing.currentRank = (existing.currentRank || 1) + 1;
         } else {
-            playerData.selectedPerks.push({ id: perkId, name: perk.name, description: perk.benefit, rank: perk.rank, currentRank: 1 });
+            playerData.selectedPerks.push({ id: perkId, name: perk.name, description: perk.benefit, rank: maxRank, currentRank: 1 });
         }
         playerData.perkPointsAvailable = Math.max(0, (playerData.perkPointsAvailable || 0) - 1);
         savePlayerData();
@@ -1672,8 +1708,8 @@
 
     function resetLevelUp() {
         showConfirmModal('Reset Level Up', 'Reset all level-up changes? This will restore your skills and perks to their state at the start of level-up.', function() {
-            if (_levelUpUndoStack.length > 0) {
-                Object.assign(playerData, deepCopy(_levelUpUndoStack[0]));
+            if (_levelUpBaseline) {
+                Object.assign(playerData, deepCopy(_levelUpBaseline));
                 _levelUpUndoStack = [];
                 savePlayerData();
                 renderLevelUpSkills();
@@ -1733,7 +1769,11 @@
             playerData.perkSelectionActive = true;
             playerData.skillsLockBaseline = deepCopy(playerData.skills);
             _levelUpUndoStack = [];
+            _levelUpBaseline  = deepCopy(playerData); // capture baseline for Reset
             savePlayerData();
+        } else if (playerData.skillPointsAvailable > 0 || playerData.perkPointsAvailable > 0) {
+            // Already in level-up window (e.g. page reload mid-allocation) — capture baseline if not set
+            if (!_levelUpBaseline) _levelUpBaseline = deepCopy(playerData);
         }
     }
 
