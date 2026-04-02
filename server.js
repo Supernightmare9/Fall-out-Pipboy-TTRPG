@@ -75,6 +75,8 @@ function getOrCreateSession(code) {
   if (!sessions[code]) {
     sessions[code] = {
       overseerSocketId: null,
+      campaignActive: false,
+      campaignId: null,
       players: {},
       combat: { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] }
     };
@@ -160,6 +162,32 @@ io.on('connection', (socket) => {
     const handle  = String(playerHandle).trim();
     const session = getOrCreateSession(code);
 
+    // If no campaign is active, hold the player in a waiting state.
+    // Store their socket in a pending map on the session so we can
+    // automatically complete the join once the Overseer starts the campaign.
+    if (!session.campaignActive) {
+      socket.join(code);
+      socket.data.role        = 'player';
+      socket.data.sessionCode = code;
+      socket.data.handle      = handle;
+
+      // Keep a pending socket reference so start-campaign can promote them
+      if (!session.pendingPlayers) session.pendingPlayers = {};
+      session.pendingPlayers[handle] = { socketId: socket.id, initialData: initialData || null };
+
+      socket.emit('campaign:waiting', {
+        message: 'Waiting for Overseer to start the campaign…',
+        sessionCode: code
+      });
+
+      if (session.overseerSocketId) {
+        io.to(session.overseerSocketId).emit('overseer:player-waiting', { handle });
+      }
+
+      console.log(`[player:join] ${handle} → session ${code} (waiting for campaign)`);
+      return;
+    }
+
     // Re-joining: keep existing data unless fresh initialData is provided
     if (!session.players[handle]) {
       session.players[handle] = {
@@ -218,17 +246,164 @@ io.on('connection', (socket) => {
     socket.data.role        = 'overseer';
     socket.data.sessionCode = code;
 
-    // Send full session snapshot to Overseer
+    // Send full session snapshot to Overseer (including campaign status)
     socket.emit('session:joined', {
       role: 'overseer',
       sessionCode: code,
+      campaignActive: session.campaignActive,
+      campaignId: session.campaignId,
       players: allPlayersSnapshot(session)
     });
 
     console.log(`[overseer:join] → session ${code}`);
   });
 
-  // ── PLAYER: push data update ───────────────────────────────────────────────
+  // ── OVERSEER: start campaign ───────────────────────────────────────────────
+  // Payload: { campaignId: string, playerData?: { [handle]: dataObject } }
+  // The Overseer sends the authoritative campaign state (loaded from their
+  // localStorage).  The server marks the session as active, merges all player
+  // data, and broadcasts `campaign:started` + each player's data to every
+  // connected player socket (including those held in the pending queue).
+  socket.on('overseer:start-campaign', ({ campaignId, playerData } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    session.campaignActive = true;
+    session.campaignId     = campaignId || null;
+
+    // Merge any supplied player data into authoritative server state
+    if (playerData && typeof playerData === 'object') {
+      Object.entries(playerData).forEach(([handle, data]) => {
+        if (!session.players[handle]) {
+          session.players[handle] = { socketId: null, data: Object.assign(defaultPlayerData(), data) };
+        } else {
+          Object.assign(session.players[handle].data, data);
+        }
+      });
+    }
+
+    // Promote pending players: complete their join now that campaign is live.
+    // Track which sockets we already sent session:joined so we don't double-send.
+    const promotedSockets = new Set();
+    const pending = session.pendingPlayers || {};
+    Object.entries(pending).forEach(([handle, info]) => {
+      if (!session.players[handle]) {
+        session.players[handle] = {
+          socketId: info.socketId,
+          data: Object.assign(defaultPlayerData(), info.initialData || {})
+        };
+      } else {
+        session.players[handle].socketId = info.socketId;
+        if (info.initialData) Object.assign(session.players[handle].data, info.initialData);
+      }
+
+      const playerSocket = io.sockets.sockets.get(info.socketId);
+      if (playerSocket) {
+        playerSocket.emit('session:joined', {
+          role:         'player',
+          sessionCode:  sessionCode,
+          playerHandle: handle,
+          data:         session.players[handle].data
+        });
+        promotedSockets.add(info.socketId);
+      }
+    });
+    session.pendingPlayers = {};
+
+    // Broadcast campaign:started to all room members (players receive the event
+    // but their primary join confirmation is session:joined, sent below).
+    io.to(sessionCode).emit('campaign:started', {
+      campaignId: session.campaignId,
+      message:    'Campaign started by Overseer.'
+    });
+
+    // Send session:joined + authoritative data to every already-connected player
+    // that was NOT in the pending queue (they missed the initial join).
+    Object.entries(session.players).forEach(([handle, p]) => {
+      if (p.socketId && !promotedSockets.has(p.socketId)) {
+        io.to(p.socketId).emit('session:joined', {
+          role:         'player',
+          sessionCode:  sessionCode,
+          playerHandle: handle,
+          data:         p.data
+        });
+      }
+    });
+
+    // Confirm to Overseer with current snapshot
+    socket.emit('overseer:campaign-started', {
+      campaignId: session.campaignId,
+      players:    allPlayersSnapshot(session)
+    });
+
+    console.log(`[overseer:start-campaign] campaignId=${campaignId} session=${sessionCode}`);
+  });
+
+  // ── OVERSEER: end campaign ─────────────────────────────────────────────────
+  socket.on('overseer:end-campaign', () => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    session.campaignActive = false;
+
+    // Broadcast to all players so their UIs can show "campaign ended"
+    io.to(sessionCode).emit('campaign:ended', {
+      message: 'The Overseer has ended the campaign session.'
+    });
+
+    // Confirm to Overseer with final snapshot for localStorage persistence
+    socket.emit('overseer:campaign-ended', {
+      players: allPlayersSnapshot(session)
+    });
+
+    console.log(`[overseer:end-campaign] session=${sessionCode}`);
+  });
+
+  // ── OVERSEER: sync campaign (resync after reconnect) ──────────────────────
+  // Payload: { campaignId: string, playerData?: { [handle]: dataObject } }
+  socket.on('overseer:sync-campaign', ({ campaignId, playerData } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    // Re-apply campaign ID and player data from Overseer's localStorage
+    if (campaignId) session.campaignId = campaignId;
+    if (playerData && typeof playerData === 'object') {
+      Object.entries(playerData).forEach(([handle, data]) => {
+        if (!session.players[handle]) {
+          session.players[handle] = { socketId: null, data: Object.assign(defaultPlayerData(), data) };
+        } else {
+          Object.assign(session.players[handle].data, data);
+        }
+        // Push updated data to the player if connected
+        const p = session.players[handle];
+        if (p.socketId) {
+          io.to(p.socketId).emit('player:updated-by-overseer', {
+            field:    'all',
+            value:    p.data,
+            snapshot: p.data
+          });
+        }
+      });
+    }
+
+    socket.emit('overseer:sync-ack', {
+      campaignId: session.campaignId,
+      players:    allPlayersSnapshot(session)
+    });
+
+    console.log(`[overseer:sync-campaign] campaignId=${campaignId} session=${sessionCode}`);
+  });
+
+
   // Payload: { field: string, value: any }
   // field can be 'xp','skills','perks','debuffs','boosts','hp','actionPoints',
   //              'special','radiation','ac','critChance','skillPointsAvailable',

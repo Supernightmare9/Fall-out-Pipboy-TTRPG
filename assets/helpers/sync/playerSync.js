@@ -9,9 +9,11 @@
  *     serverUrl:    'https://your-server.onrender.com',  // or leave blank for same-origin
  *     sessionCode:  'VAULT01',
  *     playerHandle: 'Jade',
- *     onConnected:    function(data) { ... },   // called when server confirms join
- *     onUpdate:       function(field, value, snapshot) { ... }, // overseer pushed a change
- *     onDisconnect:   function() { ... }
+ *     onConnected:         function(data) { ... },   // called when server confirms join
+ *     onUpdate:            function(field, value, snapshot) { ... }, // overseer pushed a change
+ *     onDisconnect:        function() { ... },
+ *     onCampaignWaiting:   function() { ... },       // called when no campaign is active yet
+ *     onCampaignStarted:   function() { ... }        // called when campaign becomes active
  *   });
  *
  *   // Push a changed field to the server:
@@ -21,6 +23,9 @@
  *
  * The module reads PIPBOY_SERVER_URL from localStorage if serverUrl is omitted,
  * falling back to same-origin (works when the Express server serves the HTML).
+ *
+ * When no campaign is active the module automatically injects a full-screen
+ * "Waiting for Overseer" overlay, which is removed once the campaign starts.
  */
 
 (function (root) {
@@ -30,6 +35,7 @@
   var _opts       = {};
   var _connected  = false;
   var _statusEl   = null;   // injected status bar element
+  var _waitingEl  = null;   // injected "waiting for campaign" overlay
 
   // ── Status Bar UI ────────────────────────────────────────────────────────────
   function _buildStatusBar() {
@@ -64,18 +70,70 @@
     _statusEl.textContent = text;
   }
 
+  // ── Waiting-for-Campaign Overlay ─────────────────────────────────────────────
+  function _showWaitingOverlay(msg) {
+    // If overlay exists just update the message
+    if (_waitingEl) {
+      var sub = document.getElementById('pipboy-waiting-msg');
+      if (sub) sub.textContent = msg || 'Waiting for the Overseer to start the campaign…';
+      return;
+    }
+
+    var overlay = document.createElement('div');
+    overlay.id = 'pipboy-campaign-waiting';
+    overlay.style.cssText = [
+      'position:fixed', 'top:0', 'left:0', 'right:0', 'bottom:0', 'z-index:10000',
+      'display:flex', 'flex-direction:column', 'align-items:center', 'justify-content:center',
+      'background:rgba(0,0,0,0.92)',
+      'font-family:"Courier New",monospace', 'color:#d4a017',
+      'letter-spacing:2px', 'text-align:center', 'padding:32px'
+    ].join(';');
+
+    var icon = document.createElement('div');
+    icon.style.cssText = 'font-size:48px;margin-bottom:24px;animation:pipboy-pulse 2s infinite;';
+    icon.textContent = '⬡';
+
+    var title = document.createElement('div');
+    title.style.cssText = 'font-size:20px;font-weight:bold;margin-bottom:12px;color:#fbbf24;';
+    title.textContent = 'AWAITING OVERSEER';
+
+    var sub = document.createElement('div');
+    sub.id = 'pipboy-waiting-msg';
+    sub.style.cssText = 'font-size:13px;color:#d4a017;opacity:0.8;max-width:380px;line-height:1.6;';
+    sub.textContent = msg || 'Waiting for the Overseer to start the campaign…';
+
+    var style = document.createElement('style');
+    style.textContent = '@keyframes pipboy-pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}';
+
+    overlay.appendChild(style);
+    overlay.appendChild(icon);
+    overlay.appendChild(title);
+    overlay.appendChild(sub);
+    document.body.appendChild(overlay);
+    _waitingEl = overlay;
+  }
+
+  function _hideWaitingOverlay() {
+    if (_waitingEl && _waitingEl.parentNode) {
+      _waitingEl.parentNode.removeChild(_waitingEl);
+    }
+    _waitingEl = null;
+  }
+
   // ── Public API ────────────────────────────────────────────────────────────────
   var PlayerSync = {
 
     /**
      * Initialise the sync connection.
      * @param {object} opts
-     *   serverUrl    {string}   WebSocket server URL (blank = same-origin)
-     *   sessionCode  {string}   Session room code
-     *   playerHandle {string}   Player name/handle
-     *   onConnected  {function} Called with { data } when session join is confirmed
-     *   onUpdate     {function} Called with (field, value, snapshot) on overseer push
-     *   onDisconnect {function} Called on socket disconnect
+     *   serverUrl          {string}   WebSocket server URL (blank = same-origin)
+     *   sessionCode        {string}   Session room code
+     *   playerHandle       {string}   Player name/handle
+     *   onConnected        {function} Called with { data } when session join is confirmed
+     *   onUpdate           {function} Called with (field, value, snapshot) on overseer push
+     *   onDisconnect       {function} Called on socket disconnect
+     *   onCampaignWaiting  {function} Called when server reports no active campaign
+     *   onCampaignStarted  {function} Called when campaign becomes active and join is completed
      */
     init: function (opts) {
       _opts = opts || {};
@@ -108,8 +166,31 @@
       });
 
       _socket.on('session:joined', function (payload) {
+        _hideWaitingOverlay();
         _setStatus('connected', '⬤ SYNC: LIVE — ' + payload.playerHandle + ' @ ' + payload.sessionCode);
         if (typeof _opts.onConnected === 'function') _opts.onConnected(payload);
+      });
+
+      // Server: no campaign is active yet — show waiting overlay
+      _socket.on('campaign:waiting', function (payload) {
+        var msg = (payload && payload.message) || 'Waiting for the Overseer to start the campaign…';
+        _setStatus('connecting', '⬤ SYNC: WAITING FOR OVERSEER…');
+        _showWaitingOverlay(msg);
+        if (typeof _opts.onCampaignWaiting === 'function') _opts.onCampaignWaiting(payload);
+      });
+
+      // Server: campaign just started — hide overlay; session:joined will follow shortly
+      _socket.on('campaign:started', function () {
+        _hideWaitingOverlay();
+        _setStatus('connected', '⬤ SYNC: CAMPAIGN STARTING…');
+        if (typeof _opts.onCampaignStarted === 'function') _opts.onCampaignStarted();
+      });
+
+      // Server: campaign ended
+      _socket.on('campaign:ended', function (payload) {
+        var msg = (payload && payload.message) || 'The Overseer has ended the session.';
+        _showWaitingOverlay(msg);
+        _setStatus('connecting', '⬤ SYNC: SESSION ENDED');
       });
 
       _socket.on('player:ack', function (payload) {
@@ -195,7 +276,6 @@
 
   function _flashSync() {
     if (!_statusEl) return;
-    var prev = _statusEl.textContent;
     _setStatus('syncing', '⬤ SYNC: SYNCING…');
     setTimeout(function () {
       if (_connected) {

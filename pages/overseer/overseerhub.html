@@ -67,7 +67,17 @@
         .cmd-btn.danger{border-color:var(--overseer-red-bright);color:var(--overseer-red-bright);}
         .cmd-btn.danger:hover{background:rgba(255,51,0,.15);}
 
-        .dashboard-content{padding:20px 24px;max-width:1800px;margin:0 auto;}
+        .cmd-btn.campaign-start{border-color:#00cc66;color:#00cc66;font-weight:bold;}
+        .cmd-btn.campaign-start:hover{background:rgba(0,204,102,.2);box-shadow:0 0 12px rgba(0,204,102,.4);}
+        .cmd-btn.campaign-end{border-color:#ff3300;color:#ff3300;font-weight:bold;}
+        .cmd-btn.campaign-end:hover{background:rgba(255,51,0,.2);}
+        #campaignSessionBadge{
+            font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;
+            padding:4px 10px;border:1px solid #666;color:#666;text-transform:uppercase;
+        }
+        #campaignSessionBadge.active{border-color:#00cc66;color:#00cc66;}
+
+
 
         .panel{background:var(--overseer-blue-mid);border:1px solid var(--overseer-border);box-shadow:0 0 20px rgba(42,82,152,.2);}
         .panel-header{
@@ -341,6 +351,9 @@
         </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span id="campaignSessionBadge">● NO SESSION</span>
+        <button class="cmd-btn campaign-start" id="btnStartCampaign" onclick="startCampaignSession()">[▶ START SESSION]</button>
+        <button class="cmd-btn campaign-end"   id="btnEndCampaign"   onclick="endCampaignSession()"   style="display:none;">[■ END SESSION]</button>
         <button class="cmd-btn success" onclick="exportCampaign()">[SAVE CAMPAIGN]</button>
         <button class="cmd-btn success" onclick="handleStorageExport()">[EXPORT CAMPAIGN]</button>
         <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(this)">
@@ -1887,10 +1900,132 @@
     var sessionCode = localStorage.getItem('PIPBOY_SESSION_CODE');
     var adminCode   = localStorage.getItem('PIPBOY_ADMIN_CODE');
 
+    // ── Campaign session state ──────────────────────────────────────────────
+    var _campaignSessionActive = false;
+    var _campaignSessionId     = null;   // e.g. 'fallout_main_2077'
+
+    // ── localStorage key helpers ────────────────────────────────────────────
+    // Persistent key under which the full campaign player-data map is stored
+    // on the Overseer's device.  Format: fallout-campaign-{id}
+    function _campaignStorageKey(id) {
+        return 'fallout-campaign-' + (id || 'default');
+    }
+
+    /**
+     * Load the saved player-data map from Overseer localStorage.
+     * Returns {} if nothing is stored yet.
+     * @param {string} id  campaignId
+     * @returns {object}   { handle: dataObject, ... }
+     */
+    function _loadCampaignFromStorage(id) {
+        try {
+            var raw = localStorage.getItem(_campaignStorageKey(id));
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            console.warn('[Campaign] Failed to load from localStorage:', e);
+            return {};
+        }
+    }
+
+    /**
+     * Persist the full player-data map to Overseer localStorage.
+     * @param {string} id          campaignId
+     * @param {object} playerMap   { handle: dataObject, ... }
+     */
+    function _saveCampaignToStorage(id, playerMap) {
+        try {
+            localStorage.setItem(_campaignStorageKey(id), JSON.stringify(playerMap));
+        } catch (e) {
+            console.warn('[Campaign] Failed to save to localStorage:', e);
+        }
+    }
+
+    // ── UI helpers ───────────────────────────────────────────────────────────
+    function _setCampaignBadge(active) {
+        var badge   = document.getElementById('campaignSessionBadge');
+        var btnStart = document.getElementById('btnStartCampaign');
+        var btnEnd   = document.getElementById('btnEndCampaign');
+        if (!badge) return;
+        if (active) {
+            badge.className   = 'active';
+            badge.textContent = '● SESSION LIVE';
+            if (btnStart) btnStart.style.display = 'none';
+            if (btnEnd)   btnEnd.style.display   = '';
+        } else {
+            badge.className   = '';
+            badge.textContent = '● NO SESSION';
+            if (btnStart) btnStart.style.display = '';
+            if (btnEnd)   btnEnd.style.display   = 'none';
+        }
+    }
+
+    // ── Public campaign session controls ─────────────────────────────────────
+
+    /**
+     * Start a campaign session.  Loads player data from Overseer's localStorage
+     * and pushes it to the server as the authoritative state.  All waiting
+     * players are promoted and receive their data via session:joined.
+     */
+    window.startCampaignSession = function () {
+        if (!OverseerSync.isConnected()) {
+            addLog('CAMPAIGN: Not connected to sync server — cannot start session', 'red');
+            return;
+        }
+
+        // Derive campaign ID from the currently-loaded campaign or use a default.
+        // sessionStorage 'campaignId' is set by the main overseer IIFE when a
+        // campaign is selected via the campaign dropdown.
+        var cid = _campaignSessionId
+               || sessionStorage.getItem('campaignId')
+               || sessionCode
+               || 'default';
+
+        // Promote pending sync-player data into the campaign storage key so we
+        // have the latest server-side snapshots persisted locally before start.
+        var stored = _loadCampaignFromStorage(cid);
+        // Merge any live sync-player data we already have (from prior sessions)
+        Object.keys(_syncPlayers).forEach(function (h) {
+            if (!stored[h]) stored[h] = {};
+            Object.assign(stored[h], _syncPlayers[h]);
+        });
+        _saveCampaignToStorage(cid, stored);
+
+        _campaignSessionId     = cid;
+        _campaignSessionActive = true;
+
+        OverseerSync.startCampaign(cid, stored);
+        _setCampaignBadge(true);
+        addLog('CAMPAIGN: Session started (id=' + cid + ') — ' + Object.keys(stored).length + ' player record(s) synced', 'green');
+    };
+
+    /**
+     * End the current campaign session.  The server broadcasts `campaign:ended`
+     * to all players, and we persist the final player-data snapshot to localStorage.
+     */
+    window.endCampaignSession = function () {
+        if (!OverseerSync.isConnected()) {
+            addLog('CAMPAIGN: Not connected to sync server', 'red');
+            return;
+        }
+        OverseerSync.endCampaign();
+        _campaignSessionActive = false;
+        _setCampaignBadge(false);
+        addLog('CAMPAIGN: Session ended — data saved to localStorage', 'yellow');
+    };
+
     // ── In-memory caches for live sync ──────────────────────────────────────
     var _syncPlayers  = {};   // handle → data snapshot
     var _combatState  = { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] };
     var _syncConnected = false;
+
+    // Persist updated player snapshot to campaign localStorage whenever the
+    // Overseer receives a player update from the server.
+    function _persistPlayerUpdate(handle, snapshot) {
+        if (!_campaignSessionId || !_campaignSessionActive) return;
+        var stored = _loadCampaignFromStorage(_campaignSessionId);
+        stored[handle] = snapshot;
+        _saveCampaignToStorage(_campaignSessionId, stored);
+    }
 
     // ── DOM refs ──────────────────────────────────────────────────────────────
     var _badge    = document.getElementById('syncStatusBadge');
@@ -2176,7 +2311,11 @@
     };
 
     // ── Exit early if sync not configured ────────────────────────────────────
-    if (!serverUrl && !sessionCode) return;
+    if (!serverUrl && !sessionCode) {
+        // Still set up campaign session controls for localStorage-only use
+        _setCampaignBadge(false);
+        return;
+    }
 
     // ── Init OverseerSync ─────────────────────────────────────────────────────
     setSyncBadge('sync-badge-offline ● CONNECTING…', '◌ CONNECTING…');
@@ -2193,6 +2332,23 @@
             players.forEach(function (p) {
                 _syncPlayers[p.handle] = p.data || {};
             });
+
+            // If the server reports an active campaign (Overseer reconnected),
+            // restore the badge state and offer to re-sync from localStorage.
+            if (payload.campaignActive) {
+                _campaignSessionActive = true;
+                _campaignSessionId     = payload.campaignId || _campaignSessionId || 'default';
+                _setCampaignBadge(true);
+                addLog('SYNC: Campaign already active on server — re-syncing from localStorage…', 'yellow');
+                // Re-push the authoritative data from localStorage to the server
+                var stored = _loadCampaignFromStorage(_campaignSessionId);
+                if (Object.keys(stored).length > 0) {
+                    OverseerSync.syncCampaign(_campaignSessionId, stored);
+                }
+            } else {
+                _setCampaignBadge(false);
+            }
+
             if (players.length > 0) {
                 addLog('SYNC: Connected — ' + players.length + ' player(s) in session ' + (sessionCode || ''), 'green');
             } else {
@@ -2203,6 +2359,7 @@
 
         onPlayerJoined: function (handle, data) {
             _syncPlayers[handle] = data || {};
+            _persistPlayerUpdate(handle, _syncPlayers[handle]);
             addLog('SYNC: ' + handle + ' joined the session', 'green');
             renderSyncPlayers();
         },
@@ -2214,6 +2371,8 @@
             } else if (field) {
                 _syncPlayers[handle][field] = value;
             }
+            // Persist update to Overseer localStorage
+            _persistPlayerUpdate(handle, _syncPlayers[handle]);
             // Log meaningful changes
             if (field === 'hp' || (field === 'all' && snapshot && snapshot.hp !== undefined)) {
                 var hp = field === 'all' ? snapshot.hp : value;
@@ -2231,6 +2390,10 @@
             renderSyncPlayers();
         },
 
+        onPlayerWaiting: function (handle) {
+            addLog('SYNC: ' + handle + ' is waiting — start the campaign session to admit them', 'yellow');
+        },
+
         onCombatUpdate: function (state) {
             _combatState = state || _combatState;
             if (_combatState.active) {
@@ -2238,6 +2401,31 @@
             } else {
                 setSyncBadge('sync-badge-standby', '● STANDBY');
             }
+            renderSyncPlayers();
+        },
+
+        onCampaignStarted: function (payload) {
+            var players = payload.players || [];
+            players.forEach(function (p) { _syncPlayers[p.handle] = p.data || {}; });
+            addLog('CAMPAIGN: Session live — ' + players.length + ' player(s) admitted', 'green');
+            renderSyncPlayers();
+        },
+
+        onCampaignEnded: function (payload) {
+            // Persist final snapshot to localStorage before badge update
+            var players = payload.players || [];
+            if (_campaignSessionId && players.length > 0) {
+                var finalMap = {};
+                players.forEach(function (p) { finalMap[p.handle] = p.data; });
+                _saveCampaignToStorage(_campaignSessionId, finalMap);
+            }
+            addLog('CAMPAIGN: Session ended — ' + players.length + ' player record(s) saved to localStorage', 'yellow');
+        },
+
+        onSyncAck: function (payload) {
+            var players = payload.players || [];
+            players.forEach(function (p) { _syncPlayers[p.handle] = p.data || {}; });
+            addLog('CAMPAIGN: Re-sync complete — ' + players.length + ' player(s)', 'green');
             renderSyncPlayers();
         },
 
