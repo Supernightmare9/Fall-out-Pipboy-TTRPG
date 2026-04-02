@@ -15,4 +15,9 @@ function getHealth(baseHealth, endurance) {
   return baseHealth + (endurance * 5); // Adjust multiplier per your rules
 }
 
-// You can add more as needed!
+// Perception Initiative Bonus: +1 per point, starting at Perception 5
+
+function getInitiativeBonusFromPerception(perception) {
+  return (perception >= 5) ? (perception - 4) : 0;
+}
+
