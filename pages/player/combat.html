@@ -1758,8 +1758,8 @@
                     <span class="stat-value" id="charAc">—</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Proficiency Bonus</span>
-                    <span class="stat-value" id="charProf">—</span>
+                    <span class="stat-label">Action Points</span>
+                    <span class="stat-value" id="charProf" aria-label="Action Points">—</span>
                 </div>
 
                 <!-- PROGRESSION PANEL -->
@@ -1861,7 +1861,6 @@
         <div class="tabs-container">
             <div class="tab-buttons">
                 <button class="tab-btn active" onclick="switchTab('inventory', this)">📦 Inventory</button>
-                <button class="tab-btn"        onclick="switchTab('levelup', this)">⭐ Level Up</button>
                 <button class="tab-btn"        onclick="switchTab('abilities', this)">✦ Abilities &amp; Skills</button>
             </div>
 
@@ -1888,14 +1887,7 @@
                 <div class="inventory-footer" id="inventoryFooter"></div>
             </div>
 
-            <!-- TAB 2: LEVEL UP -->
-            <div class="tab-content" id="tab-levelup">
-                <div id="levelUpTabContent">
-                    <div class="empty-state">Load a campaign to view level up options.</div>
-                </div>
-            </div>
-
-            <!-- TAB 3: ABILITIES/SKILLS -->
+            <!-- TAB 2: ABILITIES/SKILLS (Fallout perks and skills from live playerData) -->
             <div class="tab-content" id="tab-abilities">
                 <div id="abilitiesContent">
                     <div class="empty-state">Load a campaign to view abilities.</div>
@@ -1904,15 +1896,6 @@
         </div>
 
     </div><!-- end .container -->
-
-    <!-- LEVEL-UP NOTIFICATION OVERLAY -->
-    <div id="levelUpNotification">
-        <div class="level-up-title">⭐ Level Up! ⭐</div>
-        <div class="level-up-number" id="levelUpNumber">2</div>
-        <div class="level-up-sub">VAULT DWELLER ADVANCES</div>
-        <div class="level-up-details" id="levelUpDetails"></div>
-        <button class="level-up-close-btn" onclick="closeLevelUpNotification()">[ Acknowledge ]</button>
-    </div>
 
     <script src="../../assets/data/accounts.js"></script>
     <script src="../../assets/data/campaigns.js"></script>
@@ -1950,6 +1933,46 @@
     var activeCampaign = null;
     var hpLastUpdated  = null;
     var refreshInterval = null;
+
+    // ── FALLOUT CONSTANTS (single source of truth, matches stats.html & server) ──
+    // These must remain in sync with the server's defaultPlayerData() in server.js
+    // and the SKILLS/SKILLS_BY_SPECIAL arrays in stats.html.
+    var FALLOUT_SKILLS = [
+        'Barter', 'Small Guns', 'Big Guns', 'Melee Weapons', 'Energy Weapons',
+        'Explosives', 'Lockpick', 'Medicine', 'Science', 'Repair',
+        'Sneak', 'Speech', 'Unarmed', 'Survival'
+    ];
+
+    // Maps each skill to its governing S.P.E.C.I.A.L. attribute (matches stats.html)
+    // Luck has no directly governed skills — it influences all checks slightly
+    var FALLOUT_SKILLS_BY_SPECIAL = {
+        strength:     ['Melee Weapons', 'Big Guns', 'Unarmed'],
+        perception:   ['Small Guns', 'Energy Weapons'],
+        endurance:    ['Survival', 'Explosives'],
+        charisma:     ['Barter', 'Speech'],
+        intelligence: ['Science', 'Repair', 'Medicine'],
+        agility:      ['Sneak', 'Lockpick'],
+        luck:         []   // Luck has no directly governed skills
+    };
+
+    // Default neutral S.P.E.C.I.A.L. value (range 1–10, 5 is neutral)
+    var DEFAULT_SPECIAL_VALUE    = 5;
+    // Default maximum AP value (matches server.js defaultPlayerData)
+    var DEFAULT_MAX_ACTION_POINTS = 10;
+
+    /** Get the governing S.P.E.C.I.A.L. key for a Fallout skill, or null if none */
+    function getSpecialForSkill(skillName) {
+        for (var sp in FALLOUT_SKILLS_BY_SPECIAL) {
+            if (FALLOUT_SKILLS_BY_SPECIAL[sp].indexOf(skillName) !== -1) return sp;
+        }
+        return null; // Luck has no directly governed skills; returns null for ungoverned skills
+    }
+
+    /** Abbreviate a S.P.E.C.I.A.L. attribute name to 3 characters (e.g. 'strength' → 'Str.') */
+    function abbreviateSpecial(name) {
+        if (!name) return '';
+        return name.charAt(0).toUpperCase() + name.slice(1, 3) + '.';
+    }
 
     // ── LOCAL STORAGE KEY ────────────────────────────────────────
     function lsKey(campaignId) {
@@ -2150,8 +2173,7 @@
         renderCombatStatus(campaign);
         updateConditionsDisplay(campaign);
         renderInventory(campaign);
-        renderLevelUpTab();
-        renderAbilities(campaign);
+        renderAbilities();  // uses live playerData from Socket.IO, not campaign.js D&D data
         updateEquipmentPanel(campaign);
         updateACDisplay(campaign);
         updateProgressionDisplay();
@@ -2185,6 +2207,9 @@
             updateHpBar(myEntry.currentHp, myEntry.maxHp);
         }
         updateProgressionDisplay();
+        // Refresh S.P.E.C.I.A.L. and skills/perks panels from live playerData
+        renderStats();
+        renderAbilities();
     }
 
     // ── CHARACTER INFO (LEFT) ────────────────────────────────────
@@ -2223,38 +2248,52 @@
         document.getElementById('hpMax').textContent     = myEntry.maxHp;
         updateHpBar(myEntry.currentHp, myEntry.maxHp);
 
-        // Stats (synced from centralized campaign state including localStorage overlay)
-        renderStats(myEntry);
+        // S.P.E.C.I.A.L. stats — always pulled from live Socket.IO playerData (see renderStats)
+        renderStats();
 
-        // AC / Prof
+        // AC / AP — prefer live Socket.IO playerData for AP
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle]
+                       : null;
         document.getElementById('charAc').textContent   = myEntry.ac   !== undefined ? myEntry.ac   : '—';
-        document.getElementById('charProf').textContent = myEntry.proficiencyBonus !== undefined ? '+' + myEntry.proficiencyBonus : '—';
+        // Show Action Points from live data; fall back to '—' if not yet connected
+        var apDisplay = liveData && typeof liveData.actionPoints === 'number'
+            ? liveData.actionPoints + ' / ' + (liveData.maxActionPoints || DEFAULT_MAX_ACTION_POINTS)
+            : '—';
+        document.getElementById('charProf').textContent = apDisplay;
     }
 
-    function renderStats(playerEntry) {
+    // ── S.P.E.C.I.A.L. STATS ────────────────────────────────────
+    // Always pulls from live Socket.IO playerData (_livePlayerCache) which is the
+    // single source of truth shared with stats.html and the Overseer dashboard.
+    // Never uses D&D stats (str/dex/con/int/wis/cha) from campaigns.js.
+    function renderStats() {
         var grid = document.getElementById('statsGrid');
-        var statsOrder = [
-            { key: 'str', label: 'STR' },
-            { key: 'dex', label: 'DEX' },
-            { key: 'con', label: 'CON' },
-            { key: 'int', label: 'INT' },
-            { key: 'wis', label: 'WIS' },
-            { key: 'cha', label: 'CHA' }
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle]
+                       : null;
+        var special = liveData && liveData.special ? liveData.special : null;
+        var specialOrder = [
+            { key: 'strength',     letter: 'S', label: 'Strength'     },
+            { key: 'perception',   letter: 'P', label: 'Perception'   },
+            { key: 'endurance',    letter: 'E', label: 'Endurance'    },
+            { key: 'charisma',     letter: 'C', label: 'Charisma'     },
+            { key: 'intelligence', letter: 'I', label: 'Intelligence' },
+            { key: 'agility',      letter: 'A', label: 'Agility'      },
+            { key: 'luck',         letter: 'L', label: 'Luck'         }
         ];
 
-        if (!playerEntry.stats) {
-            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;">No stats available</div>';
+        if (!special) {
+            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;font-size:9px;">Connect to sync server to view S.P.E.C.I.A.L. stats</div>';
             return;
         }
 
-        grid.innerHTML = statsOrder.map(function(s) {
-            var val = playerEntry.stats[s.key] || 0;
-            var mod = Math.floor((val - 10) / 2);
-            var modStr = mod >= 0 ? '+' + mod : String(mod);
+        grid.innerHTML = specialOrder.map(function(s) {
+            var val = special[s.key] !== undefined ? special[s.key] : '—';
             return '<div class="stat-box">' +
-                '<span class="stat-box-label">' + s.label + '</span>' +
+                '<span class="stat-box-label">' + s.letter + '</span>' +
                 '<span class="stat-box-value">' + val + '</span>' +
-                '<span class="stat-box-mod">(' + modStr + ')</span>' +
+                '<span class="stat-box-mod">' + escHtml(s.label) + '</span>' +
                 '</div>';
         }).join('');
     }
@@ -2297,6 +2336,11 @@
         saveCampaignData(activeCampaign);
         hpLastUpdated = new Date();
         updateHpTimestamp();
+
+        // Push HP to Socket.IO server so stats.html and Overseer stay in sync in real time
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            PlayerSync.push('hp', myEntry.currentHp);
+        }
 
         // Notify StorageManager (and any other listeners) of HP change
         document.dispatchEvent(new CustomEvent('hpChange', {
@@ -2683,7 +2727,13 @@
         var myEntry = campaign.players.find(function(p) {
             return p.username === sessionStorage.getItem('username');
         });
-        var strStat   = myEntry && myEntry.stats ? (myEntry.stats.str || 10) : 10;
+        // Use S.P.E.C.I.A.L. Strength from live playerData (single source of truth with stats.html)
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle]
+                       : null;
+        var strStat = (liveData && liveData.special && typeof liveData.special.strength === 'number')
+                      ? liveData.special.strength
+                      : DEFAULT_SPECIAL_VALUE; // default S.P.E.C.I.A.L. value if not yet connected
         var totalWeight = InventoryManager.calculateTotalWeight(items);
         var capacity    = InventoryManager.getCarryingCapacity(strStat);
         var encStatus   = InventoryManager.getEncumbranceStatus(totalWeight, capacity);
@@ -2883,7 +2933,13 @@
 
         var carryDisplay = document.getElementById('carryDisplay');
         if (carryDisplay) {
-            var strStat     = myEntry.stats ? (myEntry.stats.str || 10) : 10;
+            // Use S.P.E.C.I.A.L. Strength from live playerData (single source of truth)
+            var liveDataAc = (window._livePlayerCache && window._liveMyHandle)
+                             ? window._livePlayerCache[window._liveMyHandle]
+                             : null;
+            var strStat = (liveDataAc && liveDataAc.special && typeof liveDataAc.special.strength === 'number')
+                          ? liveDataAc.special.strength
+                          : DEFAULT_SPECIAL_VALUE;
             var totalWeight = InventoryManager.calculateTotalWeight(campaign.inventory || []);
             var capacity    = InventoryManager.getCarryingCapacity(strStat);
             carryDisplay.textContent = Math.round(totalWeight * 10) / 10 + ' / ' + capacity + ' lbs';
@@ -2959,48 +3015,58 @@
             '</div>';
     }
 
-    // ── ABILITIES TAB ────────────────────────────────────────────
-    function renderAbilities(campaign) {
-        var div     = document.getElementById('abilitiesContent');
-        var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
+    // ── ABILITIES & SKILLS TAB ───────────────────────────────────
+    // Always uses live Socket.IO playerData (same source as stats.html and Overseer).
+    // Shows Fallout perks and the 14 Fallout skills with their values and tag status.
+    // Never uses D&D class abilities or skill lists.
+    function renderAbilities() {
+        var div = document.getElementById('abilitiesContent');
+        if (!div) return;
 
-        if (!myEntry) {
-            div.innerHTML = '<div class="empty-state">Character not found in campaign.</div>';
+        // Pull from live playerData cache (populated by PlayerSync / Socket.IO)
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle]
+                       : null;
+
+        if (!liveData) {
+            div.innerHTML = '<div class="empty-state">Connect to sync server to view skills and perks.</div>';
             return;
         }
 
-        var abilities = myEntry.abilities || [];
-        var skills    = myEntry.skills    || [];
+        var perks     = Array.isArray(liveData.perks)     ? liveData.perks     : [];
+        var skills    = (liveData.skills && typeof liveData.skills === 'object') ? liveData.skills : {};
+        var tagSkills = Array.isArray(liveData.tagSkills) ? liveData.tagSkills : [];
 
-        // Known skills for proficiency display
-        var allSkills = [
-            'Acrobatics','Animal Handling','Arcana','Athletics','Deception',
-            'History','Insight','Intimidation','Investigation','Medicine',
-            'Nature','Perception','Performance','Persuasion','Religion',
-            'Sleight of Hand','Stealth','Survival'
-        ];
-
-        var html = '<div class="panel-title">Special Abilities</div>';
-
-        if (abilities.length > 0) {
-            html += abilities.map(function(ab) {
+        // ── Perks section ──────────────────────────────────────────
+        var html = '<div class="panel-title">Perks</div>';
+        if (perks.length > 0) {
+            html += perks.map(function(perk) {
+                var name = typeof perk === 'string' ? perk : (perk.name || '?');
+                var desc = typeof perk === 'object' ? (perk.description || perk.benefit || '') : '';
                 return '<div class="ability-card">' +
-                    '<div class="ability-name">✦ ' + escHtml(ab) + '</div>' +
-                    '<div class="ability-desc">Special class or character ability.</div>' +
+                    '<div class="ability-name">✦ ' + escHtml(name) + '</div>' +
+                    (desc ? '<div class="ability-desc">' + escHtml(desc) + '</div>' : '') +
                     '</div>';
             }).join('');
         } else {
-            html += '<div class="empty-state">No special abilities listed.</div>';
+            html += '<div class="empty-state">No perks earned yet. Keep adventuring!</div>';
         }
 
-        html += '<div class="skills-section"><div class="panel-title" style="margin-top:16px;">All Skills</div>';
-        html += allSkills.map(function(sk) {
-            var isProficient = skills.indexOf(sk) !== -1;
-            var badgeCls = isProficient ? 'skill-proficient' : 'skill-standard';
-            var badgeText = isProficient ? 'Proficient' : 'Standard';
+        // ── Fallout Skills section (14 skills, 0–100 range) ────────
+        html += '<div class="skills-section"><div class="panel-title" style="margin-top:16px;">Skills</div>';
+        html += '<div style="font-size:9px;color:rgba(74,222,128,0.5);margin-bottom:8px;">TAG skills receive a permanent +15 bonus.</div>';
+        html += FALLOUT_SKILLS.map(function(sk) {
+            var baseVal   = typeof skills[sk] === 'number' ? skills[sk] : 0;
+            var isTag     = tagSkills.indexOf(sk) !== -1;
+            var effective = Math.min(100, baseVal + (isTag ? 15 : 0));
+            var badgeCls  = isTag ? 'skill-proficient' : 'skill-standard';
+            var govSp     = getSpecialForSkill(sk);
+            var spLabel   = govSp ? abbreviateSpecial(govSp) : '';
             return '<div class="skill-row">' +
                 '<span class="skill-name">' + escHtml(sk) + '</span>' +
-                '<span class="skill-badge ' + badgeCls + '">' + badgeText + '</span>' +
+                (spLabel ? '<span style="font-size:9px;color:var(--vault-accent);margin-left:4px;">' + escHtml(spLabel) + '</span>' : '') +
+                '<span class="skill-badge ' + badgeCls + '" style="margin-left:auto;">' + (isTag ? 'TAG ✦' : 'Standard') + '</span>' +
+                '<span style="font-size:11px;color:var(--vault-green);min-width:28px;text-align:right;">' + effective + '</span>' +
                 '</div>';
         }).join('');
         html += '</div>';
@@ -3061,9 +3127,6 @@
                 }).join('');
             }
         }
-
-        // Refresh level up tab if it is active
-        renderLevelUpTab();
     }
 
     function awardXpToCharacter(xpAmount, source) {
@@ -3258,38 +3321,61 @@
         broadcastRoll(sessionUsername + ' rolled d' + sides + ': ' + result, 'normal');
     };
 
+    // ── DICE ROLLER: FALLOUT SKILL CHECK ────────────────────────
+    // Skill check = d20 + (skill_value / 10) + SPECIAL modifier.
+    // Formula: each 10 points in a skill = +1 bonus. Governing SPECIAL (1-10 scale)
+    // gives (value - 5) bonus (so a 5 is neutral, 10 is +5, 1 is -4).
+    // Tag skills receive an extra +1 to reflect their +15 point bonus.
     window.rollSkillCheck = function() {
         if (typeof DiceRoller === 'undefined') { addRollResult('Dice roller not available.'); return; }
         var skillSel = document.getElementById('skillSelector');
         if (!skillSel || !skillSel.value) { addRollResult('Select a skill first.'); return; }
-        var skillName = skillSel.options[skillSel.selectedIndex].text;
-        if (!activeCampaign) { addRollResult('Load a campaign first.'); return; }
+        var skillName = skillSel.value;
 
-        var myEntry = activeCampaign.players.find(function(p) {
-            return p.username === sessionUsername;
-        });
-        if (!myEntry) { addRollResult('Character not found in campaign.'); return; }
+        // Always pull skill values from live Socket.IO playerData (single source of truth)
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle]
+                       : null;
+        var skills    = (liveData && typeof liveData.skills === 'object') ? liveData.skills : {};
+        var tagSkills = (liveData && Array.isArray(liveData.tagSkills))   ? liveData.tagSkills : [];
+        var special   = (liveData && liveData.special)                    ? liveData.special : {};
 
-        var skillToStat = {
-            'Acrobatics': 'dex', 'Animal Handling': 'wis', 'Arcana': 'int',
-            'Athletics': 'str', 'Deception': 'cha', 'History': 'int',
-            'Insight': 'wis', 'Intimidation': 'cha', 'Investigation': 'int',
-            'Medicine': 'wis', 'Nature': 'int', 'Perception': 'wis',
-            'Performance': 'cha', 'Persuasion': 'cha', 'Religion': 'int',
-            'Sleight of Hand': 'dex', 'Stealth': 'dex', 'Survival': 'wis'
-        };
+        var skillVal  = typeof skills[skillName] === 'number' ? skills[skillName] : 0;
+        var isTag     = tagSkills.indexOf(skillName) !== -1;
+        var effective = Math.min(100, skillVal + (isTag ? 15 : 0));
 
-        var statKey = skillToStat[skillName] || 'wis';
-        var stats = myEntry.stats || {};
-        var statValue = stats[statKey] || 10;
-        var statMod = Math.floor((statValue - 10) / 2);
-        var isProficient = Array.isArray(myEntry.skills) && myEntry.skills.indexOf(skillName) !== -1;
-        var profBonus = myEntry.proficiencyBonus || 2;
+        // Governing S.P.E.C.I.A.L. attribute modifier: (stat - DEFAULT_SPECIAL_VALUE), range -4 to +5
+        var govSp     = getSpecialForSkill(skillName);
+        var spVal     = govSp && special[govSp] !== undefined ? special[govSp] : DEFAULT_SPECIAL_VALUE;
+        var spMod     = spVal - DEFAULT_SPECIAL_VALUE; // neutral at 5, bonus above, penalty below
 
-        var rollResult = DiceRoller.skillCheck(skillName, statMod, profBonus, isProficient);
-        addRollResult(rollResult.description + (isProficient ? ' (prof)' : ''));
-        broadcastRoll(sessionUsername + ' rolled ' + rollResult.description + (isProficient ? ' (proficient)' : ''), 'important');
+        // Total modifier = (skill_value / 10) + SPECIAL modifier
+        // Each 10 points in a Fallout skill (0–100 scale) contributes +1 to the d20 roll modifier
+        var skillMod  = Math.floor(effective / 10) + spMod;
+
+        var rollResult = DiceRoller.skillCheck(skillName, skillMod, 0, false);
+        var tagNote    = isTag ? ' [TAG +15]' : '';
+        var desc       = skillName + ' Check' + tagNote +
+                         ': [d20: ' + rollResult.d20 + '] + [skill: ' + Math.floor(effective / 10) +
+                         (govSp ? ', ' + abbreviateSpecial(govSp) + ' mod: ' + (spMod >= 0 ? '+' : '') + spMod : '') +
+                         '] = ' + rollResult.total;
+        addRollResult(desc);
+        broadcastRoll(sessionUsername + ' rolled ' + desc, 'important');
     };
+
+    // ── DICE ROLLER: SKILL SELECTOR (Fallout skills from playerData) ──
+    // Populates the skill dropdown with the 14 Fallout skills.
+    // Matches FALLOUT_SKILLS constant and the server's defaultPlayerData in server.js.
+    function initSkillSelector() {
+        var sel = document.getElementById('skillSelector');
+        if (!sel) return;
+        FALLOUT_SKILLS.forEach(function(skill) {
+            var opt = document.createElement('option');
+            opt.value = skill;
+            opt.textContent = skill;
+            sel.appendChild(opt);
+        });
+    }
 
     window.rollGenericDice = function() {
         if (typeof DiceRoller === 'undefined') { addRollResult('Dice roller not available.'); return; }
@@ -3303,23 +3389,6 @@
         addRollResult(text);
         broadcastRoll(sessionUsername + ' rolled ' + expr + ' = ' + result.total + ' (' + text + ')', 'normal');
     };
-
-    function initSkillSelector() {
-        var sel = document.getElementById('skillSelector');
-        if (!sel) return;
-        var allSkills = [
-            'Acrobatics','Animal Handling','Arcana','Athletics','Deception',
-            'History','Insight','Intimidation','Investigation','Medicine',
-            'Nature','Perception','Performance','Persuasion','Religion',
-            'Sleight of Hand','Stealth','Survival'
-        ];
-        allSkills.forEach(function(skill) {
-            var opt = document.createElement('option');
-            opt.value = skill;
-            opt.textContent = skill;
-            sel.appendChild(opt);
-        });
-    }
 
     // ── QUEST OBJECTIVE TOGGLE ───────────────────────────────────
 
@@ -3697,6 +3766,11 @@
             if (!_playerCache[handle]) _playerCache[handle] = {};
             Object.assign(_playerCache[handle], data);
             renderCombat();
+            // Re-render left-panel stats and abilities tab with fresh live data
+            if (handle === _myHandle) {
+                if (typeof renderStats === 'function')      renderStats();
+                if (typeof renderAbilities === 'function')  renderAbilities();
+            }
         }
 
         // ── Init ──────────────────────────────────────────────────────────────
@@ -3737,6 +3811,9 @@
                 }
 
                 renderCombat();
+                // Refresh S.P.E.C.I.A.L. panel and abilities tab with live data
+                if (typeof renderStats === 'function')     renderStats();
+                if (typeof renderAbilities === 'function') renderAbilities();
             },
 
             onUpdate: function (field, value, snapshot) {
@@ -3748,6 +3825,9 @@
                     _playerCache[_myHandle][field] = value;
                 }
                 renderCombat();
+                // Refresh left-panel stat display whenever the Overseer pushes a change
+                if (typeof renderStats === 'function')     renderStats();
+                if (typeof renderAbilities === 'function') renderAbilities();
             },
 
             onCombatUpdate: function (state) {
@@ -3764,6 +3844,12 @@
 
         // Expose so overseer updates from same-page context can refresh cache
         window._liveCombatApplyPlayer = applyPlayerData;
+
+        // Expose live player cache and handle so other page functions (renderStats,
+        // renderAbilities, rollSkillCheck, renderInventory) can read Fallout playerData
+        // from the single source of truth instead of D&D campaign.js data.
+        window._livePlayerCache = _playerCache;
+        window._liveMyHandle    = _myHandle;
 
     }());
     </script>
