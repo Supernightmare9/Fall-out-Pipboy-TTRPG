@@ -219,6 +219,21 @@
         sessionStorage.clear();
 
         // ═══════════════════════════════════════════════════════
+        // DEV CONVENIENCE: auto-fill 'test' on localhost
+        // Makes it quicker to reach the test character during
+        // local development — has no effect in production.
+        // ═══════════════════════════════════════════════════════
+        (function autoFillTestOnLocalhost() {
+            if (window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1') {
+                var input = document.getElementById('username');
+                if (input && !input.value) {
+                    input.value = 'test';
+                }
+            }
+        }());
+
+        // ═══════════════════════════════════════════════════════
         // PLAYER LOGIN
         // ═══════════════════════════════════════════════════════
         function handleLogin(event) {
