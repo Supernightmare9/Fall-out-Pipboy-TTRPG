@@ -247,6 +247,15 @@
             sessionStorage.setItem('username', account.username);
             sessionStorage.setItem('role', account.role);
 
+            // Configure Socket.IO player identity so stats/combat/inventory
+            // pages connect to the server under this player's own handle.
+            // Player-facing pages read these keys from localStorage.
+            if (account.role !== 'admin') {
+                localStorage.setItem('PIPBOY_PLAYER_HANDLE', account.username);
+                localStorage.setItem('PIPBOY_SESSION_CODE',  'VAULT01');
+                localStorage.setItem('PIPBOY_SERVER_URL',    window.location.origin);
+            }
+
             // Load player session to resume last campaign
             var playerSession = StorageManager.loadPlayerSession(account.username);
             if (playerSession && playerSession.currentCampaign) {
