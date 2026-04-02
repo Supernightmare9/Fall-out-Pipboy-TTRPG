@@ -140,6 +140,13 @@
         _flashSync();
       });
 
+      // Combat state broadcast from server
+      _socket.on('combat:state-updated', function (combatState) {
+        if (typeof _opts.onCombatUpdate === 'function') {
+          _opts.onCombatUpdate(combatState);
+        }
+      });
+
       _socket.on('disconnect', function () {
         _connected = false;
         _setStatus('disconnected', '⬤ OVERSEER SYNC: DISCONNECTED — reconnecting…');
@@ -177,6 +184,44 @@
     requestSnapshot: function () {
       if (!_socket || !_connected) return;
       _socket.emit('overseer:request-snapshot');
+    },
+
+    // ── Combat Controls ──────────────────────────────────────────────────────
+
+    /**
+     * Start combat with a given player turn order.
+     * @param {string[]} turnOrder  Array of player handles in initiative order
+     */
+    startCombat: function (turnOrder) {
+      if (!_socket || !_connected) return;
+      _socket.emit('combat:start', { turnOrder: turnOrder || [] });
+    },
+
+    /** End the current combat. */
+    endCombat: function () {
+      if (!_socket || !_connected) return;
+      _socket.emit('combat:end');
+    },
+
+    /** Advance to the next turn. */
+    nextTurn: function () {
+      if (!_socket || !_connected) return;
+      _socket.emit('combat:next-turn');
+    },
+
+    /** Go back to the previous turn. */
+    prevTurn: function () {
+      if (!_socket || !_connected) return;
+      _socket.emit('combat:prev-turn');
+    },
+
+    /**
+     * Jump directly to a specific turn index.
+     * @param {number} index  Zero-based index into the turn order
+     */
+    setTurn: function (index) {
+      if (!_socket || !_connected) return;
+      _socket.emit('combat:set-turn', { index: index });
     },
 
     /** @returns {boolean} Whether connected */

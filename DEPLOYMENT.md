@@ -45,12 +45,14 @@ npm start
 Before syncing, each browser must know the server URL, session code, and (for Overseer) the admin code.  
 Run these lines in the browser's **DevTools console** and then **reload the page**:
 
-### Player (stats.html)
+### Player (stats.html and combat.html)
 ```js
 localStorage.setItem('PIPBOY_SERVER_URL',   'https://your-server.com');  // or http://localhost:3000
 localStorage.setItem('PIPBOY_SESSION_CODE', 'VAULT01');   // any shared code the whole party uses
 localStorage.setItem('PIPBOY_PLAYER_HANDLE', 'Jade');     // player's display name
 ```
+
+Both `stats.html` and `combat.html` read the same localStorage keys — set them once and both pages sync automatically.
 
 ### Overseer (overseerhub.html)
 ```js
@@ -149,12 +151,80 @@ pm2 save && pm2 startup
 | Overseer | `overseer:join` | `{ sessionCode, adminCode }` | Authenticate and join |
 | Overseer | `overseer:update-player` | `{ playerHandle, field, value }` | Push change to a player |
 | Overseer | `overseer:request-snapshot` | — | Request full player list |
+| Overseer | `combat:start` | `{ turnOrder: string[] }` | Start combat with given handle order |
+| Overseer | `combat:end` | — | End combat |
+| Overseer | `combat:next-turn` | — | Advance to the next turn |
+| Overseer | `combat:prev-turn` | — | Go back to the previous turn |
+| Overseer | `combat:set-turn` | `{ index: number }` | Jump to a specific turn index |
+| Any | `combat:request-state` | — | Request the current combat state |
 | Server→Player | `session:joined` | `{ role, sessionCode, playerHandle, data }` | Confirm join |
 | Server→Player | `player:updated-by-overseer` | `{ field, value, snapshot }` | Overseer pushed a change |
 | Server→Overseer | `session:joined` | `{ role, sessionCode, players[] }` | Confirm join + player list |
 | Server→Overseer | `overseer:player-joined` | `{ handle, data }` | New player connected |
 | Server→Overseer | `overseer:player-update` | `{ handle, field, value, snapshot }` | Player changed data |
 | Server→Overseer | `overseer:player-disconnected` | `{ handle }` | Player went offline |
+| Server→All | `combat:state-updated` | `{ active, round, currentTurnIndex, turnOrder }` | Combat state changed |
+
+---
+
+## Live Combat Feature (combat.html)
+
+The `pages/player/combat.html` page includes a **⚔ Live Combat** panel at the top that activates when the Socket.IO sync is configured.
+
+### What it shows
+- **Initiative tracker** with round counter and turn order
+- **Player cards** for each connected player showing:
+  - HP and AP with live progress bars
+  - S.P.E.C.I.A.L. stats (pulled from server — the same values as stats.html)
+  - Active status effects (debuffs and boosts)
+- **Take Damage / Heal buttons** — enabled only when it is that player's own turn
+
+### How it works
+1. Players open `combat.html` — it connects to the server via `PlayerSync` (same session code as `stats.html`)
+2. The Overseer opens `overseerhub.html` and sees the **Live Combat — Real-Time Sync** panel
+3. The Overseer clicks **[▶ START COMBAT]** to begin; this broadcasts turn order to all clients
+4. The current player's card **glows gold** on every connected page simultaneously
+5. Players can apply damage or healing on their own turn via the action buttons
+6. The Overseer can edit HP/AP for any player at any time from the sync panel
+
+---
+
+## Multi-Tab / Multi-Device QA Checklist
+
+Use this checklist to verify the real-time sync works across devices before a session.
+
+### Setup
+- [ ] Server deployed and accessible (confirm `/health` endpoint returns `{"status":"ok"}`)
+- [ ] At least 2 player browser tabs and 1 Overseer tab open (can be same device for solo testing)
+- [ ] All tabs have `PIPBOY_SERVER_URL`, `PIPBOY_SESSION_CODE` set; overseer has `PIPBOY_ADMIN_CODE` set
+- [ ] All tabs show **● LIVE** or **● STANDBY** in their sync status bar
+
+### Player Sync (stats.html ↔ server)
+- [ ] Open `stats.html` in Tab A as player "Alice", open `stats.html` in Tab B as player "Bob"
+- [ ] Change Alice's HP on the Overseer → Alice's stats.html reflects the new value instantly
+- [ ] Change Bob's XP on the Overseer → Bob's stats.html updates instantly
+- [ ] Modify Alice's S.P.E.C.I.A.L. on her stats.html → Overseer console reflects the change
+
+### Combat Sync (combat.html)
+- [ ] Open `combat.html` as player "Alice" — Live Combat panel shows "STANDBY"
+- [ ] On the Overseer, click **[▶ START COMBAT]** → all combat.html tabs switch to "COMBAT ACTIVE"
+- [ ] Alice's card glows on both Alice's combat.html AND the Overseer console (Alice is first in order)
+- [ ] Alice's S.P.E.C.I.A.L. stats in combat.html match her stats.html values exactly (no drift)
+- [ ] Alice's "Take Damage" and "Heal" buttons are enabled; Bob's are disabled (not Alice's turn)
+- [ ] Alice clicks "Take Damage" → enters amount → HP decreases on all tabs simultaneously
+- [ ] Overseer clicks **[NEXT ▶]** → Bob's card glows, Alice's stops; Bob's buttons become active
+- [ ] Overseer edits Bob's HP from the sync panel → Bob's combat.html and stats.html both update
+- [ ] Overseer clicks **[■ END COMBAT]** → all cards return to normal, round counter resets
+- [ ] Reload Alice's combat.html tab → panel reconnects, shows correct current combat state and HP
+
+### Cross-Page Data Consistency
+- [ ] Damage dealt in combat.html → HP on stats.html is updated to match
+- [ ] Overseer sets a player's special stat → same value shows in combat.html grid
+- [ ] Status effect applied via Overseer → appears in player's combat.html card
+
+### Disconnect / Reconnect
+- [ ] Close a player tab; Overseer console shows the player offline
+- [ ] Reopen the same player's page → player reconnects, data is restored from server
 
 ---
 

@@ -63,7 +63,11 @@ const sessions = {};
 
 function getOrCreateSession(code) {
   if (!sessions[code]) {
-    sessions[code] = { overseerSocketId: null, players: {} };
+    sessions[code] = {
+      overseerSocketId: null,
+      players: {},
+      combat: { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] }
+    };
   }
   return sessions[code];
 }
@@ -266,6 +270,92 @@ io.on('connection', (socket) => {
     const session = sessions[sessionCode];
     if (!session) return;
     socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
+  });
+
+  // ── COMBAT: request current state (any connected role) ────────────────────
+  socket.on('combat:request-state', () => {
+    const { sessionCode } = socket.data || {};
+    if (!sessionCode) return;
+    const session = sessions[sessionCode];
+    if (!session) return;
+    socket.emit('combat:state-updated', session.combat);
+  });
+
+  // ── COMBAT: overseer starts combat ────────────────────────────────────────
+  // Payload: { turnOrder: [handle, handle, ...] }
+  socket.on('combat:start', ({ turnOrder } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const order = Array.isArray(turnOrder) && turnOrder.length > 0
+      ? turnOrder
+      : Object.keys(session.players);
+
+    session.combat = { active: true, round: 1, currentTurnIndex: 0, turnOrder: order };
+    io.to(sessionCode).emit('combat:state-updated', session.combat);
+    console.log(`[combat:start] session ${sessionCode} | order: ${order.join(', ')}`);
+  });
+
+  // ── COMBAT: overseer ends combat ──────────────────────────────────────────
+  socket.on('combat:end', () => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    session.combat = { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] };
+    io.to(sessionCode).emit('combat:state-updated', session.combat);
+    console.log(`[combat:end] session ${sessionCode}`);
+  });
+
+  // ── COMBAT: overseer advances to next turn ────────────────────────────────
+  socket.on('combat:next-turn', () => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+    const session = sessions[sessionCode];
+    if (!session || !session.combat.active) return;
+
+    const len = session.combat.turnOrder.length;
+    if (len === 0) return;
+    session.combat.currentTurnIndex = (session.combat.currentTurnIndex + 1) % len;
+    if (session.combat.currentTurnIndex === 0) session.combat.round += 1;
+    io.to(sessionCode).emit('combat:state-updated', session.combat);
+  });
+
+  // ── COMBAT: overseer goes to previous turn ────────────────────────────────
+  socket.on('combat:prev-turn', () => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+    const session = sessions[sessionCode];
+    if (!session || !session.combat.active) return;
+
+    const len = session.combat.turnOrder.length;
+    if (len === 0) return;
+    if (session.combat.currentTurnIndex === 0) {
+      session.combat.round = Math.max(1, session.combat.round - 1);
+      session.combat.currentTurnIndex = len - 1;
+    } else {
+      session.combat.currentTurnIndex -= 1;
+    }
+    io.to(sessionCode).emit('combat:state-updated', session.combat);
+  });
+
+  // ── COMBAT: overseer sets a specific turn index ───────────────────────────
+  // Payload: { index: number }
+  socket.on('combat:set-turn', ({ index } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+    const session = sessions[sessionCode];
+    if (!session || !session.combat.active) return;
+
+    const len = session.combat.turnOrder.length;
+    if (len === 0) return;
+    const idx = parseInt(index, 10);
+    if (isNaN(idx) || idx < 0 || idx >= len) return;
+    session.combat.currentTurnIndex = idx;
+    io.to(sessionCode).emit('combat:state-updated', session.combat);
   });
 
   // ── Disconnect ─────────────────────────────────────────────────────────────

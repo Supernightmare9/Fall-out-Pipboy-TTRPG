@@ -1370,6 +1370,296 @@
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
             .tab-btn { padding: 6px 10px; font-size: 9px; }
         }
+
+        /* ===== LIVE COMBAT PANEL ===== */
+        #liveCombatPanel {
+            margin-bottom: 20px;
+            border: 2px solid rgba(74,222,128,0.3);
+            background: var(--vault-darker);
+        }
+        #liveCombatPanel.combat-active { border-color: var(--vault-gold); box-shadow: 0 0 20px rgba(251,191,36,0.15); }
+
+        .live-combat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(74,222,128,0.2);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .live-combat-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(251,191,36,0.5);
+        }
+        .live-combat-badge {
+            font-size: 9px;
+            padding: 3px 8px;
+            border: 1px solid;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .live-combat-badge.offline { color: rgba(74,222,128,0.4); border-color: rgba(74,222,128,0.2); }
+        .live-combat-badge.standby { color: var(--vault-green); border-color: rgba(74,222,128,0.4); }
+        .live-combat-badge.active  { color: var(--vault-gold);  border-color: var(--vault-gold); animation: glow 1.5s ease-in-out infinite; }
+
+        .live-combat-body { padding: 16px; }
+
+        .live-combat-offline-msg {
+            text-align: center;
+            padding: 20px;
+            color: rgba(74,222,128,0.4);
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+
+        /* ─── Initiative Tracker ─── */
+        .live-initiative-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .live-round-badge {
+            font-size: 11px;
+            color: var(--vault-gold);
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+        .live-standby-msg {
+            font-size: 10px;
+            color: rgba(74,222,128,0.5);
+            letter-spacing: 1px;
+            padding: 8px 0;
+        }
+
+        /* ─── Combat Grid ─── */
+        .combat-players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .combat-player-card {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 12px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+        .combat-player-card.my-turn {
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 18px rgba(251,191,36,0.35), inset 0 0 12px rgba(251,191,36,0.06);
+            animation: turnGlow 1.8s ease-in-out infinite;
+        }
+        @keyframes turnGlow {
+            0%,100% { box-shadow: 0 0 12px rgba(251,191,36,0.3), inset 0 0 8px rgba(251,191,36,0.05); }
+            50%      { box-shadow: 0 0 28px rgba(251,191,36,0.6), inset 0 0 18px rgba(251,191,36,0.1); }
+        }
+        .combat-player-card.current-turn-global {
+            border-color: var(--vault-gold);
+            box-shadow: 0 0 14px rgba(251,191,36,0.25);
+        }
+
+        .cpc-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .cpc-turn-indicator {
+            font-size: 13px;
+            color: var(--vault-gold);
+            min-width: 16px;
+            text-align: center;
+        }
+        .cpc-name {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--vault-green);
+            letter-spacing: 1px;
+            flex: 1;
+        }
+        .cpc-name.self { color: var(--vault-gold); text-shadow: 0 0 6px rgba(251,191,36,0.4); }
+        .cpc-turn-badge {
+            font-size: 8px;
+            padding: 2px 6px;
+            border: 1px solid var(--vault-gold);
+            color: var(--vault-gold);
+            letter-spacing: 1px;
+            animation: glow 1.5s ease-in-out infinite;
+        }
+
+        /* HP/AP bars */
+        .cpc-stats-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .cpc-stat-block { flex: 1; }
+        .cpc-stat-label {
+            font-size: 9px;
+            color: var(--vault-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .cpc-stat-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--vault-green);
+        }
+        .cpc-bar-bg {
+            height: 5px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(74,222,128,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+        .cpc-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.4s, background 0.4s;
+        }
+        .cpc-bar-hp-high { background: var(--vault-green); }
+        .cpc-bar-hp-mid  { background: var(--vault-gold); }
+        .cpc-bar-hp-low  { background: var(--vault-error); }
+        .cpc-bar-ap      { background: var(--vault-info); }
+
+        /* S.P.E.C.I.A.L. mini row */
+        .cpc-special-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .cpc-special-box {
+            flex: 1;
+            min-width: 28px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(74,222,128,0.1);
+            text-align: center;
+            padding: 3px 2px;
+        }
+        .cpc-special-letter {
+            font-size: 7px;
+            color: var(--vault-gold);
+            letter-spacing: 0;
+            display: block;
+        }
+        .cpc-special-val {
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--vault-green);
+            display: block;
+        }
+
+        /* Status effects */
+        .cpc-effects {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 8px;
+            min-height: 18px;
+        }
+        .cpc-effect-chip {
+            font-size: 8px;
+            padding: 2px 6px;
+            border: 1px solid rgba(192,132,252,0.4);
+            color: var(--vault-accent);
+            letter-spacing: 0.5px;
+        }
+
+        /* Action buttons */
+        .cpc-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .cpc-action-btn {
+            flex: 1;
+            background: rgba(74,222,128,0.06);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 6px 4px;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.15s;
+        }
+        .cpc-action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .cpc-action-btn.damage {
+            border-color: rgba(255,107,107,0.4);
+            color: var(--vault-error);
+            background: rgba(255,107,107,0.04);
+        }
+        .cpc-action-btn.damage:not(:disabled):hover {
+            background: rgba(255,107,107,0.15);
+            border-color: var(--vault-error);
+            box-shadow: 0 0 8px rgba(255,107,107,0.3);
+        }
+        .cpc-action-btn.heal:not(:disabled):hover {
+            background: rgba(74,222,128,0.2);
+            border-color: var(--vault-green);
+            box-shadow: 0 0 8px rgba(74,222,128,0.4);
+        }
+        .cpc-action-btn.overseer-edit:not(:disabled):hover {
+            background: rgba(251,191,36,0.15);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            box-shadow: 0 0 8px rgba(251,191,36,0.3);
+        }
+
+        /* HP/AP adjust modal */
+        .hp-adjust-inline {
+            display: none;
+            gap: 4px;
+            align-items: center;
+            margin-top: 6px;
+        }
+        .hp-adjust-inline.open { display: flex; }
+        .hp-adjust-input {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.4);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 4px 8px;
+            width: 70px;
+            outline: none;
+        }
+        .hp-adjust-input:focus { border-color: var(--vault-gold); }
+        .hp-adj-confirm {
+            background: rgba(74,222,128,0.1);
+            border: 1px solid var(--vault-green);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .hp-adj-confirm:hover { background: rgba(74,222,128,0.25); }
+        .hp-adj-cancel {
+            background: transparent;
+            border: 1px solid rgba(255,107,107,0.4);
+            color: var(--vault-error);
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -1393,6 +1683,19 @@
             <div class="vault-badge">VAULT-TEC INDUSTRIES — PERSONAL INFORMATION PROCESSOR</div>
             <div class="vault-title" id="pageTitle">PIP-BOY TERMINAL</div>
             <div class="vault-subtitle" id="pageSubtitle">SELECT A CAMPAIGN TO CONTINUE</div>
+        </div>
+
+        <!-- ── LIVE COMBAT PANEL (real-time sync) ─────────── -->
+        <div id="liveCombatPanel">
+            <div class="live-combat-header">
+                <span class="live-combat-title">⚔ Live Combat</span>
+                <span id="liveCombatBadge" class="live-combat-badge offline">● OFFLINE</span>
+            </div>
+            <div class="live-combat-body" id="liveCombatBody">
+                <div class="live-combat-offline-msg" id="liveCombatOfflineMsg">
+                    SYNC NOT CONFIGURED — set PIPBOY_SERVER_URL in localStorage to enable real-time combat
+                </div>
+            </div>
         </div>
 
         <!-- ── THREE-COLUMN GRID ──────────────────────────── -->
@@ -3043,6 +3346,426 @@
         saveCampaignData(activeCampaign);
         renderQuestLog(activeCampaign);
     };
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         LIVE COMBAT REAL-TIME SYNC
+         Activates when PIPBOY_SERVER_URL + PIPBOY_SESSION_CODE are set in localStorage.
+         Connects via PlayerSync (Socket.IO) to show the live initiative tracker,
+         all player stats, and Take Damage / Heal controls for your own turn.
+    ════════════════════════════════════════════════════════════════════════ -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+    <script src="../../assets/helpers/sync/playerSync.js"></script>
+    <script>
+    (function () {
+        'use strict';
+
+        var serverUrl    = localStorage.getItem('PIPBOY_SERVER_URL');
+        var sessionCode  = localStorage.getItem('PIPBOY_SESSION_CODE');
+        var playerHandle = localStorage.getItem('PIPBOY_PLAYER_HANDLE');
+
+        var _combatState  = { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] };
+        var _playerCache  = {};  // handle → data snapshot
+        var _myHandle     = playerHandle || '';
+        var _connected    = false;
+
+        var _badge    = document.getElementById('liveCombatBadge');
+        var _body     = document.getElementById('liveCombatBody');
+        var _panel    = document.getElementById('liveCombatPanel');
+        var _offline  = document.getElementById('liveCombatOfflineMsg');
+
+        function setBadge(cls, text) {
+            if (!_badge) return;
+            _badge.className = 'live-combat-badge ' + cls;
+            _badge.textContent = text;
+        }
+
+        // ── Render the full live combat panel ──────────────────────────────────
+        function renderCombat() {
+            if (!_body) return;
+
+            // Clean slate
+            while (_body.firstChild) _body.removeChild(_body.firstChild);
+
+            if (!_connected) {
+                var msg = document.createElement('div');
+                msg.className = 'live-combat-offline-msg';
+                msg.textContent = 'DISCONNECTED — reconnecting…';
+                _body.appendChild(msg);
+                return;
+            }
+
+            if (_panel) {
+                if (_combatState.active) {
+                    _panel.classList.add('combat-active');
+                    setBadge('active', '⚔ COMBAT ACTIVE — ROUND ' + _combatState.round);
+                } else {
+                    _panel.classList.remove('combat-active');
+                    setBadge('standby', '● STANDBY');
+                }
+            }
+
+            // Initiative header
+            var header = document.createElement('div');
+            header.className = 'live-initiative-header';
+
+            var roundBadge = document.createElement('div');
+            roundBadge.className = 'live-round-badge';
+            roundBadge.textContent = _combatState.active
+                ? ('ROUND ' + _combatState.round + '  ·  TURN ORDER: ' + _combatState.turnOrder.join(' → '))
+                : 'STANDBY — AWAITING OVERSEER';
+            header.appendChild(roundBadge);
+            _body.appendChild(header);
+
+            if (!_combatState.active || _combatState.turnOrder.length === 0) {
+                var standby = document.createElement('div');
+                standby.className = 'live-standby-msg';
+                standby.textContent = 'Combat has not started. The Overseer will begin when ready.';
+                _body.appendChild(standby);
+                // Still render player cards so stats are visible
+            }
+
+            // Player cards grid
+            var grid = document.createElement('div');
+            grid.className = 'combat-players-grid';
+
+            // Build list of handles to show: turn order first, then any extra connected players
+            var handles = _combatState.turnOrder.slice();
+            Object.keys(_playerCache).forEach(function (h) {
+                if (handles.indexOf(h) === -1) handles.push(h);
+            });
+            if (handles.length === 0) handles = [_myHandle];
+
+            handles.forEach(function (handle, idx) {
+                if (!handle) return;
+                var data     = _playerCache[handle] || {};
+                var turnIdx  = _combatState.turnOrder.indexOf(handle);
+                var isCurrent = _combatState.active && turnIdx !== -1 && turnIdx === _combatState.currentTurnIndex;
+                var isMe     = handle === _myHandle;
+                var isMyTurn = isCurrent && isMe;
+
+                var special = data.special || {};
+                var debuffs = data.debuffs || [];
+                var boosts  = data.boosts  || [];
+                var effects = debuffs.concat(boosts);
+
+                var hp    = typeof data.hp    === 'number' ? data.hp    : (isMe ? _getMyHp()    : 0);
+                var maxHp = typeof data.maxHp === 'number' ? data.maxHp : (isMe ? _getMyMaxHp() : 100);
+                var ap    = typeof data.actionPoints === 'number' ? data.actionPoints : 0;
+                var maxAp = typeof data.maxActionPoints === 'number' ? data.maxActionPoints : 10;
+
+                var card = document.createElement('div');
+                card.className = 'combat-player-card' +
+                    (isMyTurn          ? ' my-turn'              : '') +
+                    (isCurrent && !isMe? ' current-turn-global'  : '');
+                card.id = 'cpc-' + handle.replace(/\s+/g, '_');
+
+                // Header row
+                var hdr = document.createElement('div');
+                hdr.className = 'cpc-header';
+
+                var turnIcon = document.createElement('span');
+                turnIcon.className = 'cpc-turn-indicator';
+                turnIcon.textContent = isCurrent ? '▶' : (turnIdx !== -1 ? String(turnIdx + 1) : '');
+
+                var nameEl = document.createElement('span');
+                nameEl.className = 'cpc-name' + (isMe ? ' self' : '');
+                nameEl.textContent = handle + (isMe ? ' (YOU)' : '');
+
+                hdr.appendChild(turnIcon);
+                hdr.appendChild(nameEl);
+
+                if (isCurrent) {
+                    var tb = document.createElement('span');
+                    tb.className = 'cpc-turn-badge';
+                    tb.textContent = 'YOUR TURN';
+                    hdr.appendChild(tb);
+                }
+                card.appendChild(hdr);
+
+                // HP / AP bars
+                var statsRow = document.createElement('div');
+                statsRow.className = 'cpc-stats-row';
+
+                // HP block
+                var hpBlock = document.createElement('div');
+                hpBlock.className = 'cpc-stat-block';
+                var hpLabel = document.createElement('div');
+                hpLabel.className = 'cpc-stat-label';
+                hpLabel.textContent = 'HP';
+                var hpVal = document.createElement('div');
+                hpVal.className = 'cpc-stat-value';
+                hpVal.id = 'cpc-hp-val-' + handle.replace(/\s+/g, '_');
+                hpVal.textContent = hp + ' / ' + maxHp;
+                var hpBarBg = document.createElement('div');
+                hpBarBg.className = 'cpc-bar-bg';
+                var hpBarFill = document.createElement('div');
+                hpBarFill.id = 'cpc-hp-bar-' + handle.replace(/\s+/g, '_');
+                var hpPct = maxHp > 0 ? Math.round((hp / maxHp) * 100) : 0;
+                hpBarFill.className = 'cpc-bar-fill ' + (hpPct > 50 ? 'cpc-bar-hp-high' : hpPct > 25 ? 'cpc-bar-hp-mid' : 'cpc-bar-hp-low');
+                hpBarFill.style.width = Math.min(hpPct, 100) + '%';
+                hpBarBg.appendChild(hpBarFill);
+                hpBlock.appendChild(hpLabel);
+                hpBlock.appendChild(hpVal);
+                hpBlock.appendChild(hpBarBg);
+
+                // AP block
+                var apBlock = document.createElement('div');
+                apBlock.className = 'cpc-stat-block';
+                var apLabel = document.createElement('div');
+                apLabel.className = 'cpc-stat-label';
+                apLabel.textContent = 'AP';
+                var apVal = document.createElement('div');
+                apVal.className = 'cpc-stat-value';
+                apVal.id = 'cpc-ap-val-' + handle.replace(/\s+/g, '_');
+                apVal.textContent = ap + ' / ' + maxAp;
+                var apBarBg = document.createElement('div');
+                apBarBg.className = 'cpc-bar-bg';
+                var apBarFill = document.createElement('div');
+                apBarFill.className = 'cpc-bar-fill cpc-bar-ap';
+                apBarFill.style.width = Math.min(maxAp > 0 ? Math.round((ap / maxAp) * 100) : 0, 100) + '%';
+                apBarBg.appendChild(apBarFill);
+                apBlock.appendChild(apLabel);
+                apBlock.appendChild(apVal);
+                apBlock.appendChild(apBarBg);
+
+                statsRow.appendChild(hpBlock);
+                statsRow.appendChild(apBlock);
+                card.appendChild(statsRow);
+
+                // S.P.E.C.I.A.L. row
+                var specialRow = document.createElement('div');
+                specialRow.className = 'cpc-special-row';
+                var specials = [
+                    { key: 'strength',     letter: 'S' },
+                    { key: 'perception',   letter: 'P' },
+                    { key: 'endurance',    letter: 'E' },
+                    { key: 'charisma',     letter: 'C' },
+                    { key: 'intelligence', letter: 'I' },
+                    { key: 'agility',      letter: 'A' },
+                    { key: 'luck',         letter: 'L' }
+                ];
+                specials.forEach(function (s) {
+                    var box = document.createElement('div');
+                    box.className = 'cpc-special-box';
+                    var letter = document.createElement('span');
+                    letter.className = 'cpc-special-letter';
+                    letter.textContent = s.letter;
+                    var val = document.createElement('span');
+                    val.className = 'cpc-special-val';
+                    val.textContent = (special[s.key] !== undefined ? special[s.key] : '—');
+                    box.appendChild(letter);
+                    box.appendChild(val);
+                    specialRow.appendChild(box);
+                });
+                card.appendChild(specialRow);
+
+                // Status effects
+                if (effects.length > 0) {
+                    var effectsRow = document.createElement('div');
+                    effectsRow.className = 'cpc-effects';
+                    effects.forEach(function (eff) {
+                        var chip = document.createElement('span');
+                        chip.className = 'cpc-effect-chip';
+                        chip.textContent = typeof eff === 'string' ? eff : (eff.name || eff.type || '?');
+                        effectsRow.appendChild(chip);
+                    });
+                    card.appendChild(effectsRow);
+                }
+
+                // Action buttons (only for self, or all for overseer role which won't show here)
+                if (isMe) {
+                    var actions = document.createElement('div');
+                    actions.className = 'cpc-actions';
+
+                    var dmgBtn = document.createElement('button');
+                    dmgBtn.className = 'cpc-action-btn damage';
+                    dmgBtn.textContent = '⚔ Take Damage';
+                    dmgBtn.disabled = !isMyTurn;
+                    dmgBtn.addEventListener('click', function () { openAdjust(card, 'damage', handle); });
+
+                    var healBtn = document.createElement('button');
+                    healBtn.className = 'cpc-action-btn heal';
+                    healBtn.textContent = '♥ Heal';
+                    healBtn.disabled = !isMyTurn;
+                    healBtn.addEventListener('click', function () { openAdjust(card, 'heal', handle); });
+
+                    actions.appendChild(dmgBtn);
+                    actions.appendChild(healBtn);
+                    card.appendChild(actions);
+                }
+
+                // Inline adjust form (hidden by default)
+                var adjustForm = document.createElement('div');
+                adjustForm.className = 'hp-adjust-inline';
+                adjustForm.id = 'adj-form-' + handle.replace(/\s+/g, '_');
+
+                var adjInput = document.createElement('input');
+                adjInput.type = 'number';
+                adjInput.min = '1';
+                adjInput.className = 'hp-adjust-input';
+                adjInput.placeholder = 'Amount';
+                adjInput.id = 'adj-input-' + handle.replace(/\s+/g, '_');
+
+                var adjConfirm = document.createElement('button');
+                adjConfirm.className = 'hp-adj-confirm';
+                adjConfirm.textContent = 'OK';
+                adjConfirm.dataset.handle = handle;
+                adjConfirm.dataset.mode = '';
+                adjConfirm.addEventListener('click', function () { commitAdjust(handle); });
+
+                var adjCancel = document.createElement('button');
+                adjCancel.className = 'hp-adj-cancel';
+                adjCancel.textContent = '✕';
+                adjCancel.addEventListener('click', function () { closeAdjust(handle); });
+
+                adjustForm.appendChild(adjInput);
+                adjustForm.appendChild(adjConfirm);
+                adjustForm.appendChild(adjCancel);
+                card.appendChild(adjustForm);
+
+                grid.appendChild(card);
+            });
+
+            _body.appendChild(grid);
+        }
+
+        // ── Helpers to read local HP from the campaign page ────────────────────
+        function _getMyHp() {
+            var el = document.getElementById('hpCurrent');
+            return el ? parseInt(el.textContent, 10) || 0 : 0;
+        }
+        function _getMyMaxHp() {
+            var el = document.getElementById('hpMax');
+            return el ? parseInt(el.textContent, 10) || 100 : 100;
+        }
+
+        // ── HP/AP Adjust Inline Form ──────────────────────────────────────────
+        var _adjustMode = {};  // handle → 'damage' | 'heal'
+
+        function openAdjust(card, mode, handle) {
+            var safeHandle = handle.replace(/\s+/g, '_');
+            var form  = document.getElementById('adj-form-' + safeHandle);
+            var btn   = form ? form.querySelector('.hp-adj-confirm') : null;
+            if (!form) return;
+            _adjustMode[handle] = mode;
+            if (btn) btn.dataset.mode = mode;
+            form.classList.add('open');
+            var inp = document.getElementById('adj-input-' + safeHandle);
+            if (inp) { inp.value = ''; inp.focus(); }
+        }
+
+        function closeAdjust(handle) {
+            var safeHandle = handle.replace(/\s+/g, '_');
+            var form = document.getElementById('adj-form-' + safeHandle);
+            if (form) form.classList.remove('open');
+            delete _adjustMode[handle];
+        }
+
+        function commitAdjust(handle) {
+            var safeHandle = handle.replace(/\s+/g, '_');
+            var inp  = document.getElementById('adj-input-' + safeHandle);
+            if (!inp) return;
+            var amount = parseInt(inp.value, 10);
+            if (isNaN(amount) || amount <= 0) { closeAdjust(handle); return; }
+            var mode = _adjustMode[handle] || 'damage';
+            var data = _playerCache[handle] || {};
+            var hp    = typeof data.hp    === 'number' ? data.hp    : _getMyHp();
+            var maxHp = typeof data.maxHp === 'number' ? data.maxHp : _getMyMaxHp();
+
+            var newHp;
+            if (mode === 'damage') {
+                newHp = Math.max(0, hp - amount);
+            } else {
+                newHp = Math.min(maxHp, hp + amount);
+            }
+
+            // Push to server — this updates all connected pages in real time
+            PlayerSync.push('hp', newHp);
+
+            // Optimistically update local cache
+            if (!_playerCache[handle]) _playerCache[handle] = {};
+            _playerCache[handle].hp = newHp;
+
+            closeAdjust(handle);
+            renderCombat();
+        }
+
+        // ── Apply a player data snapshot to cache and re-render ───────────────
+        function applyPlayerData(handle, data) {
+            if (!handle || !data) return;
+            if (!_playerCache[handle]) _playerCache[handle] = {};
+            Object.assign(_playerCache[handle], data);
+            renderCombat();
+        }
+
+        // ── Init ──────────────────────────────────────────────────────────────
+        if (!serverUrl && !sessionCode) {
+            // Not configured — leave the offline message visible
+            return;
+        }
+
+        setBadge('connecting', '◌ CONNECTING…');
+
+        // Re-use the page's own playerData if available (avoids a duplicate push)
+        var initialData = (typeof playerData !== 'undefined') ? playerData : null;
+
+        PlayerSync.init({
+            serverUrl:    serverUrl,
+            sessionCode:  sessionCode  || 'VAULT01',
+            playerHandle: _myHandle    || 'Player',
+            initialData:  initialData,
+
+            onConnected: function (payload) {
+                _connected = true;
+                setBadge('standby', '● STANDBY');
+
+                // Seed own data into cache from server snapshot
+                if (payload.data) {
+                    _playerCache[_myHandle] = Object.assign({}, payload.data);
+                }
+
+                // Request snapshot of all players + combat state
+                if (PlayerSync.isConnected()) {
+                    PlayerSync.requestCombatState();
+                }
+
+                // Also apply any existing local playerData to our own cache slot
+                if (typeof playerData !== 'undefined') {
+                    if (!_playerCache[_myHandle]) _playerCache[_myHandle] = {};
+                    Object.assign(_playerCache[_myHandle], playerData);
+                }
+
+                renderCombat();
+            },
+
+            onUpdate: function (field, value, snapshot) {
+                // Overseer pushed a change to this player
+                if (!_playerCache[_myHandle]) _playerCache[_myHandle] = {};
+                if (field === 'all' && snapshot) {
+                    Object.assign(_playerCache[_myHandle], snapshot);
+                } else if (field) {
+                    _playerCache[_myHandle][field] = value;
+                }
+                renderCombat();
+            },
+
+            onCombatUpdate: function (state) {
+                _combatState = state || _combatState;
+                renderCombat();
+            },
+
+            onDisconnect: function () {
+                _connected = false;
+                setBadge('offline', '● OFFLINE');
+                renderCombat();
+            }
+        });
+
+        // Expose so overseer updates from same-page context can refresh cache
+        window._liveCombatApplyPlayer = applyPlayerData;
+
+    }());
     </script>
 </body>
 </html>
