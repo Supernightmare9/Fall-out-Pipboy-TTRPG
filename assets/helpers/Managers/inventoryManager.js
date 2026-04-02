@@ -27,10 +27,20 @@ var InventoryManager = (function() {
         return Math.round(total * 10) / 10;
     }
 
+    // Base carry weight before the Strength bonus (100 lbs).
+    // Uses getCarryCapacity() from fallout_stat_bonuses.js — the single source of
+    // truth for all S.P.E.C.I.A.L. derived stats.  Ensure that script is loaded
+    // before inventoryManager.js in any HTML that calls this function.
+    var BASE_CARRY_CAPACITY = 100;
+
     function getCarryingCapacity(strengthStat) {
-        strengthStat = strengthStat || 10;
-        var strModifier = Math.max(0, strengthStat - 10);
-        return 150 + (strModifier * 10);
+        // Default to 5 (base S.P.E.C.I.A.L. value) only when strengthStat is null/undefined.
+        if (strengthStat === null || strengthStat === undefined) { strengthStat = 5; }
+        if (typeof getCarryCapacity === 'function') {
+            return getCarryCapacity(BASE_CARRY_CAPACITY, strengthStat);
+        }
+        // Fallback (fallout_stat_bonuses.js not yet loaded): inline formula
+        return BASE_CARRY_CAPACITY + (strengthStat * 10);
     }
 
     function getEncumbranceStatus(totalWeight, capacity) {

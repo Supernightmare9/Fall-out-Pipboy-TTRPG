@@ -1902,6 +1902,9 @@
     <script src="../../assets/data/pools/items.js"></script>
     <script src="../../assets/helpers/Managers/settingsManager.js"></script>
     <script src="../../assets/helpers/Managers/storageManager.js"></script>
+    <!-- fallout_stat_bonuses.js must be loaded before inventoryManager.js so that
+         getCarryCapacity() is available for carry-capacity calculations. -->
+    <script src="../../assets/logic/fallout_stat_bonuses.js"></script>
     <script src="../../assets/helpers/Managers/inventoryManager.js"></script>
     <script src="../../assets/helpers/mechanics/diceRoller.js"></script>
     <script src="../../assets/logic/xp.js"></script>
@@ -2428,13 +2431,29 @@
         var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
         var myInitiative = (myEntry && myEntry.inInitiative) ? myEntry.initiative : null;
 
+        // Show Perception initiative bonus alongside the stored initiative value.
+        // Bonus is calculated by getInitiativeBonusFromPerception() from
+        // fallout_stat_bonuses.js — the single source of truth for S.P.E.C.I.A.L. bonuses.
+        var liveDataForInit = (window._livePlayerCache && window._liveMyHandle)
+                              ? window._livePlayerCache[window._liveMyHandle]
+                              : null;
+        var myPerception = (liveDataForInit && liveDataForInit.special &&
+                            typeof liveDataForInit.special.perception === 'number')
+                           ? liveDataForInit.special.perception : 5;
+        var perceptionInitBonus = (typeof getInitiativeBonusFromPerception === 'function')
+                                  ? getInitiativeBonusFromPerception(myPerception) : 0;
+        var initiativeDisplay = myInitiative !== null ? myInitiative : '—';
+        if (perceptionInitBonus > 0 && myInitiative !== null) {
+            initiativeDisplay = myInitiative + ' <span style="color:var(--vault-gold);font-size:9px;">(PER +' + perceptionInitBonus + ')</span>';
+        }
+
         var currentTurnText = currentTurn ? escHtml(currentTurn.name || currentTurn.id) : '—';
 
         var html =
             '<div class="combat-indicator combat-active-badge">⚔ COMBAT ACTIVE</div>' +
             '<div class="combat-detail-row"><span class="stat-label">Round</span><span class="stat-value">' + (enc.round || 1) + '</span></div>' +
             '<div class="combat-detail-row"><span class="stat-label">Current Turn</span><span class="stat-value" style="color:var(--vault-gold);">' + currentTurnText + '</span></div>' +
-            '<div class="combat-detail-row"><span class="stat-label">Your Initiative</span><span class="stat-value">' + (myInitiative !== null ? myInitiative : '—') + '</span></div>' +
+            '<div class="combat-detail-row"><span class="stat-label">Your Initiative</span><span class="stat-value">' + initiativeDisplay + '</span></div>' +
             '<div class="combat-detail-row"><span class="stat-label">In Initiative</span><span class="stat-value">' + (myEntry && myEntry.inInitiative ? '<span style="color:var(--vault-green);">YES</span>' : '<span style="color:rgba(74,222,128,0.4);">NO</span>') + '</span></div>';
 
         // ── Initiative order tracker ──

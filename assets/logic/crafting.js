@@ -1,5 +1,9 @@
 // assets/logic/crafting.js
 // Crafting System - Recipe crafting, success calculations, and legendary item generation
+//
+// MAINTAINER NOTE: All Luck-based crafting bonuses (crafting roll bonus, legendary chance,
+// extra yield chance) are calculated using functions from fallout_stat_bonuses.js.
+// Ensure that script is loaded before crafting.js in any HTML that uses this module.
 
 const craftingRarityTable = {
   common: { min: 80, max: 100 },
@@ -9,7 +13,9 @@ const craftingRarityTable = {
   legendary: { min: 1, max: 1 }
 };
 
-const legendaryChance = 0.01; // 1% chance for all items to become legendary
+// Base legendary craft chance (used as fallback when luck is not provided).
+// For luck-scaled legendary chance use getLegendaryCraftChance(luck) from fallout_stat_bonuses.js.
+var BASE_LEGENDARY_CHANCE = 0.01;
 
 // Function to calculate average rarity from components (weighted by quantity)
 function calculateComponentRarity(components) {
@@ -45,48 +51,72 @@ function calculateComponentRarity(components) {
 
 // Function to calculate crafting success chance
 function calculateSuccessChance(rarity, playerStats) {
-  // playerStats = { intelligence: 7, repairSkill: 75, hasTools: true, skillBooks: ['electronics', 'weaponsmithing'] }
-  
+  // playerStats = { intelligence: 7, repairSkill: 75, hasTools: true, skillBooks: ['electronics'],
+  //                 luck: 5 }
+  // Luck bonus uses getCraftingBonusFromLuck() from fallout_stat_bonuses.js.
+
   let baseSuccessMin = craftingRarityTable[rarity.toLowerCase()].min;
   let baseSuccessMax = craftingRarityTable[rarity.toLowerCase()].max;
-  
+
   // Intelligence modifier: +2% per point above 5 (or -2% per point below 5)
   const intModifier = (playerStats.intelligence - 5) * 2;
-  
+
   // Repair skill modifier: +0.5% per skill point
   const skillModifier = playerStats.repairSkill * 0.5;
-  
+
   // Tool bonus: +10% if player has appropriate tools
   const toolBonus = playerStats.hasTools ? 10 : 0;
-  
+
   // Skill book bonus: +5% per relevant skill book
   const bookBonus = playerStats.skillBooks ? playerStats.skillBooks.length * 5 : 0;
-  
+
+  // Luck bonus: flat bonus to crafting roll from fallout_stat_bonuses.js
+  const luckBonus = (typeof getCraftingBonusFromLuck === 'function' && typeof playerStats.luck === 'number')
+    ? getCraftingBonusFromLuck(playerStats.luck)
+    : 0;
+
   // Calculate final success range
-  const successMin = Math.max(1, baseSuccessMin + intModifier + skillModifier + toolBonus + bookBonus);
-  const successMax = Math.min(100, baseSuccessMax + intModifier + skillModifier + toolBonus + bookBonus);
-  
+  const successMin = Math.max(1, baseSuccessMin + intModifier + skillModifier + toolBonus + bookBonus + luckBonus);
+  const successMax = Math.min(100, baseSuccessMax + intModifier + skillModifier + toolBonus + bookBonus + luckBonus);
+
   return { min: Math.floor(successMin), max: Math.floor(successMax) };
 }
 
 // Function to attempt crafting
 function attemptCraft(recipeOrCustomItem, playerStats, playerInventory) {
   // recipeOrCustomItem = { name, components: [], rarity }
-  // Returns: { success: boolean, legendary: boolean, result: itemObject, xpGained: number, componentsConsumed: array }
-  
+  // playerStats must include a `luck` property for Luck-based bonuses.
+  // Returns: { success, legendary, extraYield, result, xpGained, componentsConsumed }
+  //
+  // Luck bonuses (all from fallout_stat_bonuses.js — single source of truth):
+  //   getCraftingBonusFromLuck(luck)  → flat bonus to crafting roll
+  //   getLegendaryCraftChance(luck)   → % chance of legendary result on success
+  //   getExtraYieldChance(luck)       → % chance of crafting an extra item on success
+
+  const luck = (playerStats && typeof playerStats.luck === 'number') ? playerStats.luck : 0;
+
   const rarity = recipeOrCustomItem.rarity || calculateComponentRarity(recipeOrCustomItem.components);
   const successChance = calculateSuccessChance(rarity, playerStats);
   const craftRoll = Math.floor(Math.random() * 100) + 1; // Roll 1-100
-  
+
   // Check if craft succeeds (components consumed regardless)
   const success = craftRoll >= successChance.min && craftRoll <= successChance.max;
-  
-  // Check for legendary upgrade (1% chance on any successful craft)
-  const isLegendary = success && Math.random() < legendaryChance;
-  
+
+  // Legendary chance: use getLegendaryCraftChance(luck) from fallout_stat_bonuses.js
+  const legendaryChanceValue = (typeof getLegendaryCraftChance === 'function')
+    ? getLegendaryCraftChance(luck)
+    : BASE_LEGENDARY_CHANCE;
+  const isLegendary = success && Math.random() < legendaryChanceValue;
+
+  // Extra yield chance: use getExtraYieldChance(luck) from fallout_stat_bonuses.js
+  const extraYieldChanceValue = (typeof getExtraYieldChance === 'function')
+    ? getExtraYieldChance(luck)
+    : 0;
+  const hasExtraYield = success && Math.random() < extraYieldChanceValue;
+
   // Consume components from player inventory (pass or fail)
   const consumedComponents = consumeComponents(recipeOrCustomItem.components, playerInventory);
-  
+
   // Build result item
   let resultItem = null;
   if (success) {
@@ -96,16 +126,17 @@ function attemptCraft(recipeOrCustomItem, playerStats, playerInventory) {
       itemType: recipeOrCustomItem.itemType || 'miscellaneous',
       components: recipeOrCustomItem.components
     };
-    
+
     // Add legendary modifier if applicable
     if (isLegendary) {
       resultItem.legendaryModifier = getRandomLegendaryModifier(recipeOrCustomItem.itemType);
     }
   }
-  
+
   return {
     success: success,
     legendary: isLegendary,
+    extraYield: hasExtraYield,
     result: resultItem,
     xpGained: success ? getQuestXP(playerStats.level, 'easySkillCheck') : 0, // XP only on success
     componentsConsumed: consumedComponents,

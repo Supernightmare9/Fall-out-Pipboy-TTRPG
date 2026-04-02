@@ -304,6 +304,9 @@
     <script src="../../assets/data/pools/enemies.js"></script>
     <script src="../../assets/helpers/Managers/storageManager.js"></script>
     <script src="../../assets/helpers/mechanics/diceRoller.js"></script>
+    <!-- fallout_stat_bonuses.js must be loaded before encounterBuilder.js so that
+         getLootBonusChance() is available for luck-based bonus loot rolls. -->
+    <script src="../../assets/logic/fallout_stat_bonuses.js"></script>
     <script src="../../assets/helpers/mechanics/encounterBuilder.js"></script>
     <script src="../../assets/logic/xp.js"></script>
     <script src="../../assets/helpers/Managers/progressionManager.js"></script>
@@ -1796,7 +1799,22 @@
         if (!_campaign) { addLog('Load a campaign first', 'red'); return; }
         if (typeof EncounterBuilder === 'undefined') { addLog('EncounterBuilder not loaded', 'red'); return; }
         var defeated = (_campaign.activeEncounter.enemies || []).filter(function(e) { return e.currentHp <= 0; });
-        _pendingLoot = EncounterBuilder.collectEncounterLoot(defeated);
+
+        // Compute average party Luck to pass to collectEncounterLoot so that
+        // getLootBonusChance() from fallout_stat_bonuses.js can apply bonus loot.
+        // Falls back to 5 (default S.P.E.C.I.A.L.) when live stats are unavailable.
+        var partyLuck = 5;
+        if (_campaign && Array.isArray(_campaign.players) && _campaign.players.length > 0) {
+            var luckValues = _campaign.players.map(function(p) {
+                return (p.stats && p.stats.special && typeof p.stats.special.luck === 'number')
+                    ? p.stats.special.luck : 5;
+            });
+            partyLuck = Math.round(
+                luckValues.reduce(function(a, b) { return a + b; }, 0) / luckValues.length
+            );
+        }
+
+        _pendingLoot = EncounterBuilder.collectEncounterLoot(defeated, partyLuck);
         var lootList = document.getElementById('lootList');
         var emptyState = document.getElementById('lootEmptyState');
         var awardBtn = document.getElementById('awardLootBtn');

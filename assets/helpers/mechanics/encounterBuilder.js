@@ -2,6 +2,10 @@
 // Encounter Management System for Fall-out Pipboy TTRPG
 // Provides custom enemy creation, encounter difficulty calculation,
 // XP rewards, preset encounter templates, and loot management.
+//
+// MAINTAINER NOTE: Loot bonus chance is calculated using getLootBonusChance(luck)
+// from fallout_stat_bonuses.js — the single source of truth for all S.P.E.C.I.A.L.
+// derived stats.  Ensure that script is loaded before encounterBuilder.js.
 
 var EncounterBuilder = (function () {
     'use strict';
@@ -252,15 +256,32 @@ var EncounterBuilder = (function () {
 
     // ── LOOT ──────────────────────────────────────────────────────
 
-    function getLootFromEnemy(enemy) {
+    // Base drop rate per enemy loot entry (70%).
+    var BASE_LOOT_DROP_RATE = 0.7;
+
+    function getLootFromEnemy(enemy, luck) {
+        // luck (optional): player/party Luck stat; uses getLootBonusChance() from
+        // fallout_stat_bonuses.js to add a bonus-item roll on top of the base drop rate.
         if (!enemy || !Array.isArray(enemy.loot)) return [];
-        return enemy.loot.filter(function () { return Math.random() < 0.7; });
+        var drops = enemy.loot.filter(function () { return Math.random() < BASE_LOOT_DROP_RATE; });
+
+        // Luck-based bonus: chance to roll an extra item from this enemy's loot pool
+        if (typeof luck === 'number' && enemy.loot.length > 0 &&
+                typeof getLootBonusChance === 'function') {
+            var bonusChance = getLootBonusChance(luck);
+            if (bonusChance > 0 && Math.random() < bonusChance) {
+                drops.push(enemy.loot[Math.floor(Math.random() * enemy.loot.length)]);
+            }
+        }
+        return drops;
     }
 
-    function collectEncounterLoot(enemies) {
+    function collectEncounterLoot(enemies, luck) {
+        // luck (optional): pass the party's Luck stat (or average) so that
+        // getLootBonusChance() from fallout_stat_bonuses.js can apply bonus loot.
         var loot = [];
         (enemies || []).forEach(function (e) {
-            getLootFromEnemy(e).forEach(function (item) {
+            getLootFromEnemy(e, luck).forEach(function (item) {
                 loot.push({ enemyName: e.name, itemId: item });
             });
         });

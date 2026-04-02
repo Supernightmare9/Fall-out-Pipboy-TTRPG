@@ -727,15 +727,30 @@
       </div>
     </div>
 
+    <script src="../../assets/logic/fallout_stat_bonuses.js"></script>
     <script src="../../assets/logic/xp/xpprogression.js"></script>
     <script src="../../assets/data/pools/perks.js"></script>
     <script>
     // ================================================================
     //  VAULT 215 - STATS PAGE (Redesigned with character.html style)
+    //
+    //  MAINTAINER NOTE: All derived-stat formulas (HP max, AP max,
+    //  carry weight, initiative bonus, crafting/loot/XP bonuses) live
+    //  exclusively in fallout_stat_bonuses.js (loaded above).  Never
+    //  hard-code these formulas here — always call the shared functions
+    //  and recalculate via recalcDerivedStats() whenever S.P.E.C.I.A.L.
+    //  values change.
     // ================================================================
 
-    var MAX_HEALTH        = 100;
-    var MAX_ACTION_POINTS = 20;
+    // Base stats before S.P.E.C.I.A.L. bonuses are applied.
+    // These are passed to the functions in fallout_stat_bonuses.js.
+    var BASE_HEALTH        = 100; // HP before Endurance bonus
+    var BASE_AP            = 10;  // AP before Agility bonus
+
+    // MAX_HEALTH and MAX_ACTION_POINTS are computed by recalcDerivedStats()
+    // at page load and whenever S.P.E.C.I.A.L. values change.
+    var MAX_HEALTH        = BASE_HEALTH;
+    var MAX_ACTION_POINTS = BASE_AP;
     var MAX_RAD           = 1000;
     var MAX_TAG_SKILLS    = 3;
     var TAG_SKILL_BONUS   = 15;
@@ -815,8 +830,8 @@
         var sAP = localStorage.getItem('pipboyActionPoints');
         if (sH)  document.getElementById('health').textContent        = sH;
         if (sAP) document.getElementById('actionPoints').textContent  = sAP;
-        document.getElementById('maxHealth').textContent       = MAX_HEALTH;
-        document.getElementById('maxActionPoints').textContent = MAX_ACTION_POINTS;
+        // Max HP and AP are derived from S.P.E.C.I.A.L. via fallout_stat_bonuses.js;
+        // recalcDerivedStats() is called by loadSpecialStats() which runs after this.
         refreshHpBar();
         refreshApBar();
     }
@@ -827,6 +842,8 @@
             s[k] = parseInt(document.getElementById('special-'+k).textContent) || 5;
         });
         localStorage.setItem('pipboySpecial', JSON.stringify(s));
+        // Recalculate all S.P.E.C.I.A.L.-derived stats whenever values change.
+        recalcDerivedStats();
     }
 
     function loadSpecialStats() {
@@ -838,6 +855,38 @@
                 if (s[k] !== undefined) document.getElementById('special-'+k).textContent = s[k];
             });
         } catch(e){}
+        // Recalculate all S.P.E.C.I.A.L.-derived stats after loading saved values.
+        recalcDerivedStats();
+    }
+
+    // ---- DERIVED STAT RECALCULATION ----
+    // Uses functions from fallout_stat_bonuses.js — the single source of truth for
+    // all S.P.E.C.I.A.L.-based derived stats.  Call this whenever S.P.E.C.I.A.L.
+    // values change (level up, injury, item effects, etc.).
+    function recalcDerivedStats() {
+        var endurance = parseInt(document.getElementById('special-endurance').textContent) || 5;
+        var agility   = parseInt(document.getElementById('special-agility').textContent)   || 5;
+
+        // Recompute max HP and max AP using shared formulas from fallout_stat_bonuses.js
+        MAX_HEALTH        = getHealth(BASE_HEALTH, endurance);
+        MAX_ACTION_POINTS = getAP(BASE_AP, agility);
+
+        // Update DOM displays
+        document.getElementById('maxHealth').textContent       = MAX_HEALTH;
+        document.getElementById('maxActionPoints').textContent = MAX_ACTION_POINTS;
+
+        // Clamp current HP/AP to new maximums so they stay valid
+        var curHP = parseInt(document.getElementById('health').textContent) || 0;
+        if (curHP > MAX_HEALTH) {
+            document.getElementById('health').textContent = MAX_HEALTH;
+        }
+        var curAP = parseInt(document.getElementById('actionPoints').textContent) || 0;
+        if (curAP > MAX_ACTION_POINTS) {
+            document.getElementById('actionPoints').textContent = MAX_ACTION_POINTS;
+        }
+
+        refreshHpBar();
+        refreshApBar();
     }
 
     function saveEffects() {

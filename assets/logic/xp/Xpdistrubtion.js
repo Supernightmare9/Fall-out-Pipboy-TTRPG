@@ -1,5 +1,12 @@
 // assets/logic/playerxpmanager.js
 // Player XP Manager - Centralized system for all XP sources and player leveling
+//
+// MAINTAINER NOTE: The `intBonus` parameter accepted by every XP-award function
+// below should come from getIntXPMultiplier(player.special.intelligence), defined
+// in fallout_stat_bonuses.js — the single source of truth for all S.P.E.C.I.A.L.
+// derived stats.  Example:
+//   const intBonus = getIntXPMultiplier(player.special.intelligence);
+//   addCombatXP(player, rawXP, intBonus);
 
 // Function to add quest XP to player
 function addQuestXP(player, questType, intBonus = 1) {
