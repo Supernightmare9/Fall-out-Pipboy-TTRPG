@@ -112,8 +112,29 @@ const CAMPAIGNS = [
         skills: ["Performance", "Persuasion", "Deception"],
         abilities: ["Bardic Inspiration", "Jack of All Trades", "Song of Rest"],
         joinedDate: "2025-03-19"
+      },
+
+      // ── DEV / TEST ACCOUNT ─────────────────────────────────────────────────
+      // ⚠️  For local development and stat-sync testing ONLY.
+      //     The matching server-side data is seeded by server/playerDataSeed.js.
+      {
+        username: "test",
+        characterId: "char_test_1",
+        characterName: "Test Character",
+        currentHp: 110,
+        maxHp: 110,
+        ac: 10,
+        initiative: 0,
+        inInitiative: false,
+        status: "alive",
+        proficiencyBonus: 2,
+        stats: { str: 5, per: 7, end: 6, cha: 4, int: 5, agi: 6, luk: 5 },
+        skills: ["Small Guns", "Melee Weapons", "Science"],
+        abilities: ["Wasteland Survival"],
+        backstory: "Dev-only test character for local development and sync testing.",
+        joinedDate: "2026-01-01",
+        _devOnly: true
       }
-    ],
 
     // ── ACTIVE ENCOUNTER ────────────────────────────────────────────────────
     // Populated by the Overseer when a combat encounter begins.

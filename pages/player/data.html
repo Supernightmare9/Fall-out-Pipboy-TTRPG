@@ -598,6 +598,13 @@
 <input type="file" id="importFileInput" accept=".json" onchange="importData(event)">
 
 <script>
+    // ── Per-player localStorage namespace ─────────────────────────────────────
+    // All player-specific keys are prefixed with the logged-in username so that
+    // multiple accounts on the same device/browser stay fully isolated.
+    var _lsPlayer = (sessionStorage.getItem('username') ||
+                     localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
+    function lsKey(k) { return k + '_' + _lsPlayer; }
+
     // ═══════════════════════════════════════════
     // SECURITY: XSS prevention
     // ═══════════════════════════════════════════
@@ -1011,7 +1018,7 @@
         var race = document.getElementById('charRace').value;
         var cls = document.getElementById('charClass').value;
         var alignment = document.getElementById('charAlignment').value;
-        localStorage.setItem('characterData', JSON.stringify({ name: name, race: race, class: cls, alignment: alignment }));
+        localStorage.setItem(lsKey('characterData'), JSON.stringify({ name: name, race: race, class: cls, alignment: alignment }));
         setMsg('saveMessage', '\u2713 Character data saved!', 'success');
     }
 
@@ -1022,25 +1029,25 @@
         document.getElementById('charClass').value = '';
         document.getElementById('charAlignment').value = '';
         document.getElementById('characterImageContainer').innerHTML = '<div class="char-image-placeholder">No image uploaded</div>';
-        localStorage.removeItem('characterData');
-        localStorage.removeItem('characterImage');
+        localStorage.removeItem(lsKey('characterData'));
+        localStorage.removeItem(lsKey('characterImage'));
         setMsg('saveMessage', '\u2713 Character data cleared!', 'success');
     }
 
     function saveBackstory() {
-        localStorage.setItem('characterBackstory', document.getElementById('characterBackstory').value);
+        localStorage.setItem(lsKey('characterBackstory'), document.getElementById('characterBackstory').value);
         setMsg('backstoryMessage', '\u2713 Backstory saved!', 'success');
     }
 
     function clearBackstory() {
         if (!confirm('Clear the backstory?')) return;
         document.getElementById('characterBackstory').value = '';
-        localStorage.removeItem('characterBackstory');
+        localStorage.removeItem(lsKey('characterBackstory'));
         setMsg('backstoryMessage', '\u2713 Backstory cleared!', 'success');
     }
 
     function loadCharacterData() {
-        var saved = localStorage.getItem('characterData');
+        var saved = localStorage.getItem(lsKey('characterData'));
         if (saved) {
             try {
                 var d = JSON.parse(saved);
@@ -1050,7 +1057,7 @@
                 document.getElementById('charAlignment').value = d.alignment || '';
             } catch(e) {}
         }
-        var img = localStorage.getItem('characterImage');
+        var img = localStorage.getItem(lsKey('characterImage'));
         if (img) {
             var imgEl = document.createElement('img');
             imgEl.src = img;
@@ -1059,7 +1066,7 @@
             container.innerHTML = '';
             container.appendChild(imgEl);
         }
-        var bs = localStorage.getItem('characterBackstory');
+        var bs = localStorage.getItem(lsKey('characterBackstory'));
         if (bs) document.getElementById('characterBackstory').value = bs;
     }
 
@@ -1067,7 +1074,7 @@
     // CUSTOM NPCS
     // ═══════════════════════════════════════════
     var customNPCsData = [];
-    try { customNPCsData = JSON.parse(localStorage.getItem('customNPCs') || '[]'); } catch(e) {}
+    try { customNPCsData = JSON.parse(localStorage.getItem(lsKey('customNPCs')) || '[]'); } catch(e) {}
 
     function renderCustomNPCs() {
         var list = document.getElementById('customNpcsList');
@@ -1092,7 +1099,7 @@
         var name = document.getElementById('npcNameInput').value.trim();
         if (!name) { setMsg('npcMessage', '\u26a0 NPC name is required.', 'error'); return; }
         customNPCsData.push({ id: 'cnpc-' + Date.now(), name: name, description: document.getElementById('npcDescInput').value.trim(), location: document.getElementById('npcLocInput').value.trim(), notes: document.getElementById('npcNotesInput').value.trim() });
-        localStorage.setItem('customNPCs', JSON.stringify(customNPCsData));
+        localStorage.setItem(lsKey('customNPCs'), JSON.stringify(customNPCsData));
         ['npcNameInput','npcDescInput','npcLocInput','npcNotesInput'].forEach(function(id) { document.getElementById(id).value = ''; });
         renderCustomNPCs();
         setMsg('npcMessage', '\u2713 ' + name + ' added!', 'success');
@@ -1100,7 +1107,7 @@
 
     function deleteCustomNPC(id) {
         customNPCsData = customNPCsData.filter(function(n) { return n.id !== id; });
-        localStorage.setItem('customNPCs', JSON.stringify(customNPCsData));
+        localStorage.setItem(lsKey('customNPCs'), JSON.stringify(customNPCsData));
         renderCustomNPCs();
     }
 
@@ -1108,7 +1115,7 @@
     // CUSTOM FACTIONS
     // ═══════════════════════════════════════════
     var customFactionsData = [];
-    try { customFactionsData = JSON.parse(localStorage.getItem('customFactions') || '[]'); } catch(e) {}
+    try { customFactionsData = JSON.parse(localStorage.getItem(lsKey('customFactions')) || '[]'); } catch(e) {}
 
     function renderCustomFactions() {
         var list = document.getElementById('customFactionsList');
@@ -1137,7 +1144,7 @@
         var name = document.getElementById('factionNameInput').value.trim();
         if (!name) { setMsg('factionMessage', '\u26a0 Faction name is required.', 'error'); return; }
         customFactionsData.push({ id: 'cfact-' + Date.now(), name: name, description: document.getElementById('factionDescInput').value.trim(), reputation: document.getElementById('factionRepInput').value.trim(), notes: document.getElementById('factionNotesInput').value.trim() });
-        localStorage.setItem('customFactions', JSON.stringify(customFactionsData));
+        localStorage.setItem(lsKey('customFactions'), JSON.stringify(customFactionsData));
         ['factionNameInput','factionDescInput','factionRepInput','factionNotesInput'].forEach(function(id) { document.getElementById(id).value = ''; });
         renderCustomFactions();
         setMsg('factionMessage', '\u2713 ' + name + ' added!', 'success');
@@ -1145,7 +1152,7 @@
 
     function deleteCustomFaction(id) {
         customFactionsData = customFactionsData.filter(function(f) { return f.id !== id; });
-        localStorage.setItem('customFactions', JSON.stringify(customFactionsData));
+        localStorage.setItem(lsKey('customFactions'), JSON.stringify(customFactionsData));
         renderCustomFactions();
     }
 
@@ -1155,7 +1162,7 @@
     function saveNotes() {
         var textarea = document.getElementById('notesTextarea');
         if (!textarea) return;
-        localStorage.setItem('playerNotes', textarea.value);
+        localStorage.setItem(lsKey('playerNotes'), textarea.value);
         setMsg('notesMessage', '\u2713 Notes saved!', 'success');
     }
 
@@ -1163,14 +1170,14 @@
         if (!confirm('Clear all notes?')) return;
         var textarea = document.getElementById('notesTextarea');
         if (textarea) textarea.value = '';
-        localStorage.removeItem('playerNotes');
+        localStorage.removeItem(lsKey('playerNotes'));
         setMsg('notesMessage', '\u2713 Notes cleared.', 'success');
     }
 
     function loadNotes() {
         var textarea = document.getElementById('notesTextarea');
         if (!textarea) return;
-        var saved = localStorage.getItem('playerNotes');
+        var saved = localStorage.getItem(lsKey('playerNotes'));
         if (saved !== null) textarea.value = saved;
     }
 
@@ -1413,7 +1420,7 @@
                 var reader = new FileReader();
                 reader.onload = function(ev) {
                     var src = ev.target.result;
-                    localStorage.setItem('characterImage', src);
+                    localStorage.setItem(lsKey('characterImage'), src);
                     var container = document.getElementById('characterImageContainer');
                     container.innerHTML = '';
                     var img = document.createElement('img');
@@ -1434,9 +1441,30 @@
             if (el) el.addEventListener('change', saveCharacterData);
         });
 
-        // Load campaign data
-        if (typeof CAMPAIGNS !== 'undefined') renderCampaigns(CAMPAIGNS);
-        else document.getElementById('campaigns-grid').innerHTML = '<div class="empty-state">[ campaigns.js not loaded ]</div>';
+        // Load campaign data — filter to only the logged-in player's entry
+        if (typeof CAMPAIGNS !== 'undefined') {
+            var _myUsername = sessionStorage.getItem('username') ||
+                              localStorage.getItem('PIPBOY_PLAYER_HANDLE') || '';
+            if (!_myUsername) {
+                // No authenticated user — show nothing; redirect to login
+                document.getElementById('campaigns-grid').innerHTML =
+                    '<div class="empty-state">[ NOT AUTHENTICATED — please log in ]</div>';
+            } else {
+                // Build a view that only exposes this player's entry in each campaign
+                var _playerCampaigns = CAMPAIGNS.map(function(c) {
+                    var myEntry = (c.players || []).filter(function(p) {
+                        return p.username === _myUsername;
+                    });
+                    return Object.assign({}, c, { players: myEntry });
+                }).filter(function(c) {
+                    return c.players.length > 0;
+                });
+                renderCampaigns(_playerCampaigns);
+            }
+        } else {
+            document.getElementById('campaigns-grid').innerHTML =
+                '<div class="empty-state">[ campaigns.js not loaded ]</div>';
+        }
 
         // Enemies and items start blank — players add their own entries
         renderEnemies([]);

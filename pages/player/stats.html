@@ -756,6 +756,13 @@
     var TAG_SKILL_BONUS   = 15;
     var SKILL_POINTS_PER_LEVEL = 13;
 
+    // ── Per-player localStorage namespace ─────────────────────────────────────
+    // All player-specific keys are prefixed with the logged-in username so that
+    // multiple accounts on the same device/browser stay fully isolated.
+    var _lsPlayer = (sessionStorage.getItem('username') ||
+                     localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
+    function lsKey(k) { return k + '_' + _lsPlayer; }
+
     function deepCopy(obj) { return JSON.parse(JSON.stringify(obj)); }
 
     var SKILLS_BY_SPECIAL = {
@@ -800,15 +807,15 @@
 
     // ---- SAVE / LOAD ----
     function savePlayerData() {
-        localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
-        localStorage.setItem('pipboyXP',           parseInt(document.getElementById('xp').textContent.replace(/,/g,'')) || 0);
-        localStorage.setItem('pipboyLevel',         document.getElementById('level').textContent);
-        localStorage.setItem('pipboyHealth',        document.getElementById('health').textContent);
-        localStorage.setItem('pipboyActionPoints',  document.getElementById('actionPoints').textContent);
+        localStorage.setItem(lsKey('pipboyPlayerData'), JSON.stringify(playerData));
+        localStorage.setItem(lsKey('pipboyXP'),           parseInt(document.getElementById('xp').textContent.replace(/,/g,'')) || 0);
+        localStorage.setItem(lsKey('pipboyLevel'),         document.getElementById('level').textContent);
+        localStorage.setItem(lsKey('pipboyHealth'),        document.getElementById('health').textContent);
+        localStorage.setItem(lsKey('pipboyActionPoints'),  document.getElementById('actionPoints').textContent);
     }
 
     function loadPlayerData() {
-        var saved = localStorage.getItem('pipboyPlayerData');
+        var saved = localStorage.getItem(lsKey('pipboyPlayerData'));
         if (saved) { try { playerData = JSON.parse(saved); } catch(e){} }
         // Sanitize: never more than MAX_TAG_SKILLS tags
         if (!Array.isArray(playerData.tagSkills)) playerData.tagSkills = [];
@@ -826,8 +833,8 @@
         if (playerData.skillsAllocationActive === undefined) {
             playerData.skillsAllocationActive = ((playerData.skillPointsAvailable || 0) > 0 && !playerData.skillsLocked);
         }
-        var sH = localStorage.getItem('pipboyHealth');
-        var sAP = localStorage.getItem('pipboyActionPoints');
+        var sH = localStorage.getItem(lsKey('pipboyHealth'));
+        var sAP = localStorage.getItem(lsKey('pipboyActionPoints'));
         if (sH)  document.getElementById('health').textContent        = sH;
         if (sAP) document.getElementById('actionPoints').textContent  = sAP;
         // Max HP and AP are derived from S.P.E.C.I.A.L. via fallout_stat_bonuses.js;
@@ -841,13 +848,13 @@
         ['strength','perception','endurance','charisma','intelligence','agility','luck'].forEach(function(k){
             s[k] = parseInt(document.getElementById('special-'+k).textContent) || 5;
         });
-        localStorage.setItem('pipboySpecial', JSON.stringify(s));
+        localStorage.setItem(lsKey('pipboySpecial'), JSON.stringify(s));
         // Recalculate all S.P.E.C.I.A.L.-derived stats whenever values change.
         recalcDerivedStats();
     }
 
     function loadSpecialStats() {
-        var saved = localStorage.getItem('pipboySpecial');
+        var saved = localStorage.getItem(lsKey('pipboySpecial'));
         if (!saved) return;
         try {
             var s = JSON.parse(saved);
@@ -890,19 +897,19 @@
     }
 
     function saveEffects() {
-        localStorage.setItem('pipboyDebuffs', JSON.stringify(debuffs));
-        localStorage.setItem('pipboyBoosts',  JSON.stringify(boosts));
+        localStorage.setItem(lsKey('pipboyDebuffs'), JSON.stringify(debuffs));
+        localStorage.setItem(lsKey('pipboyBoosts'),  JSON.stringify(boosts));
     }
 
     function loadEffects() {
-        var sd = localStorage.getItem('pipboyDebuffs');
-        var sb = localStorage.getItem('pipboyBoosts');
+        var sd = localStorage.getItem(lsKey('pipboyDebuffs'));
+        var sb = localStorage.getItem(lsKey('pipboyBoosts'));
         if (sd) { try { debuffs = JSON.parse(sd); } catch(e){} }
         if (sb) { try { boosts  = JSON.parse(sb); } catch(e){} }
     }
 
     function loadCharacterName() {
-        var cd = localStorage.getItem('characterData');
+        var cd = localStorage.getItem(lsKey('characterData'));
         if (!cd) return;
         try {
             var ch = JSON.parse(cd);
@@ -920,17 +927,17 @@
     }
 
     function loadAC() {
-        var s = localStorage.getItem('pipboyAC');
+        var s = localStorage.getItem(lsKey('pipboyAC'));
         if (s) document.getElementById('armorClass').textContent = parseInt(s);
     }
 
     function saveAC() {
-        localStorage.setItem('pipboyAC', parseInt(document.getElementById('armorClass').textContent) || 10);
+        localStorage.setItem(lsKey('pipboyAC'), parseInt(document.getElementById('armorClass').textContent) || 10);
     }
 
     // ---- BARS ----
     function getEffectiveMaxHP() {
-        var rad = parseInt(localStorage.getItem('pipboyRadiation') || '0');
+        var rad = parseInt(localStorage.getItem(lsKey('pipboyRadiation')) || '0');
         var radReduction = Math.min(MAX_HEALTH, Math.round((rad / MAX_RAD) * MAX_HEALTH));
         return MAX_HEALTH - radReduction;
     }
@@ -938,7 +945,7 @@
     function refreshHpBar() {
         var cur = parseInt(document.getElementById('health').textContent) || 0;
         var effectiveMaxHP = getEffectiveMaxHP();
-        var rad = parseInt(localStorage.getItem('pipboyRadiation') || '0');
+        var rad = parseInt(localStorage.getItem(lsKey('pipboyRadiation')) || '0');
 
         // Update max HP display to show effective max
         document.getElementById('maxHealth').textContent = effectiveMaxHP;
@@ -1157,7 +1164,7 @@
         var nv  = parseInt(inp.value);
         if (inp.value === '' || isNaN(nv)) { showMsg('radiationMessage', '⚠ Enter a valid number (0-1000)', false); return; }
         nv = Math.max(0, Math.min(MAX_RAD, nv));
-        localStorage.setItem('pipboyRadiation', nv);
+        localStorage.setItem(lsKey('pipboyRadiation'), nv);
         inp.value = '';
         refreshRadiationDisplay(nv);
         refreshHpBar();
@@ -1173,7 +1180,7 @@
     }
 
     function loadRadiation() {
-        var radVal = parseInt(localStorage.getItem('pipboyRadiation') || '0');
+        var radVal = parseInt(localStorage.getItem(lsKey('pipboyRadiation')) || '0');
         refreshRadiationDisplay(radVal);
         refreshHpBar();
     }
@@ -1184,7 +1191,7 @@
         var nv  = parseInt(inp.value);
         if (inp.value === '' || isNaN(nv)) { showMsg('critChanceMessage', '⚠ Enter a value 0-100', false); return; }
         nv = Math.max(0, Math.min(100, nv));
-        localStorage.setItem('pipboyCriticalChance', nv);
+        localStorage.setItem(lsKey('pipboyCriticalChance'), nv);
         inp.value = '';
         refreshCritDisplay(nv);
         showMsg('critChanceMessage', '✓ Crit Chance → ' + nv + '%', true);
@@ -1213,15 +1220,15 @@
     }
 
     function useCrit() {
-        var val = parseInt(localStorage.getItem('pipboyCriticalChance') || '0');
+        var val = parseInt(localStorage.getItem(lsKey('pipboyCriticalChance')) || '0');
         if (val < 100) { showMsg('critChanceMessage', '⚠ Critical gauge is not at 100 yet.', false); return; }
-        localStorage.setItem('pipboyCriticalChance', 0);
+        localStorage.setItem(lsKey('pipboyCriticalChance'), 0);
         refreshCritDisplay(0);
         showMsg('critChanceMessage', '✓ Critical used! Gauge reset to 0.', true);
     }
 
     function loadCritChance() {
-        refreshCritDisplay(parseInt(localStorage.getItem('pipboyCriticalChance') || '0'));
+        refreshCritDisplay(parseInt(localStorage.getItem(lsKey('pipboyCriticalChance')) || '0'));
     }
 
     // ---- EFFECTS ----
@@ -1440,8 +1447,8 @@
         document.getElementById('xpToNext').textContent = level >= 100 ? 'MAX' : formatXP(xpNeeded);
         document.getElementById('xpPercent').textContent = progress + '%';
         document.getElementById('xpBar').style.width    = progress + '%';
-        localStorage.setItem('pipboyXP',    totalXP);
-        localStorage.setItem('pipboyLevel', level);
+        localStorage.setItem(lsKey('pipboyXP'),    totalXP);
+        localStorage.setItem(lsKey('pipboyLevel'), level);
     }
 
     function addXP() {
@@ -1453,7 +1460,7 @@
         var desc   = descEl ? descEl.value.trim() : '';
         var amount = parseInt(inp.value);
         if (!inp.value || isNaN(amount) || amount <= 0) { showMsg('xpMessage', '⚠ Enter a valid positive XP amount', false); return; }
-        var cur    = parseInt(localStorage.getItem('pipboyXP')||'0');
+        var cur    = parseInt(localStorage.getItem(lsKey('pipboyXP'))||'0');
         var nv     = cur + amount;
         addXPToHistory(amount, src, desc, nv);
         var gained = checkLevelUp(cur, nv);
@@ -1484,7 +1491,7 @@
         var desc   = descEl ? descEl.value.trim() : '';
         var amount = parseInt(inp.value);
         if (!inp.value || isNaN(amount) || amount <= 0) { showMsg('xpMessage', '⚠ Enter a valid positive XP amount', false); return; }
-        var cur = parseInt(localStorage.getItem('pipboyXP')||'0');
+        var cur = parseInt(localStorage.getItem(lsKey('pipboyXP'))||'0');
         var nv  = Math.max(0, cur - amount);
         addXPToHistory(-amount, src, desc, nv);
         updateXPDisplay(nv);
@@ -1496,14 +1503,14 @@
 
     // ---- ONBOARDING ----
     function showOnboarding() {
-        var skipped = localStorage.getItem('pipboyOnboarded');
+        var skipped = localStorage.getItem(lsKey('pipboyOnboarded'));
         if (skipped) return;
         document.getElementById('onboardingModal').style.display = 'flex';
         document.getElementById('onboardingModal').querySelector('button').focus();
     }
     function closeOnboarding() {
         var skip = document.getElementById('onboardDontShow').checked;
-        if (skip) localStorage.setItem('pipboyOnboarded', '1');
+        if (skip) localStorage.setItem(lsKey('pipboyOnboarded'), '1');
         document.getElementById('onboardingModal').style.display = 'none';
     }
 
@@ -1824,7 +1831,7 @@
 
     function checkAndHandleLevelUp(totalXP) {
         var level = getLevelFromXP(totalXP);
-        var lastSeenLevel = parseInt(localStorage.getItem('pipboyLevel') || '1');
+        var lastSeenLevel = parseInt(localStorage.getItem(lsKey('pipboyLevel')) || '1');
         if (level > lastSeenLevel) {
             var gained = level - lastSeenLevel;
             playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + gained * SKILL_POINTS_PER_LEVEL;
@@ -1855,7 +1862,7 @@
         updatePerksDisplay();
         updateEffectsDisplay();
         updateTempDisplays();
-        var storedXP = parseInt(localStorage.getItem('pipboyXP')||'0');
+        var storedXP = parseInt(localStorage.getItem(lsKey('pipboyXP'))||'0');
         checkAndHandleLevelUp(storedXP);
         updateXPDisplay(storedXP);
         refreshLevelUpTabVisibility();
