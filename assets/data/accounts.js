@@ -171,5 +171,34 @@ const ACCOUNTS = [
       soundEnabled: true,
       notificationsEnabled: true
     }
+  },
+
+  // ── DEV / TEST ACCOUNT ───────────────────────────────────────────────────────
+  // ⚠️  For local development and stat-sync testing ONLY.
+  //     Do NOT use in real game sessions. The matching server-side data is
+  //     seeded by server/playerDataSeed.js into session VAULT01 at startup.
+  {
+    username: "test",
+    role: "player",
+    _devOnly: true,
+    characters: [
+      {
+        id: "char_test_1",
+        name: "Test Character",
+        campaignId: "campaign_001",
+        currentHp: 110,
+        maxHp: 110,
+        displayColor: "#a3e635"
+      }
+    ],
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#a3e635",
+      displayName: "Test Character",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
   }
 ];

@@ -29,6 +29,16 @@ const PORT       = process.env.PORT       || 3000;
 const ADMIN_CODE = process.env.ADMIN_CODE || 'OVERSEER215';
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
+// ── Dev-only: test player seed ────────────────────────────────────────────────
+// Only loaded outside of production to keep the test character out of live games.
+const {
+  SEED_SESSION_CODE,
+  SEED_PLAYER_HANDLE,
+  TEST_PLAYER_DATA
+} = (process.env.NODE_ENV !== 'production')
+  ? require('./server/playerDataSeed')
+  : { SEED_SESSION_CODE: null, SEED_PLAYER_HANDLE: null, TEST_PLAYER_DATA: null };
+
 const app    = express();
 const server = http.createServer(app);
 
@@ -110,6 +120,29 @@ function defaultPlayerData() {
     boosts: []
   };
 }
+
+// ── Pre-seed the 'test' developer player ─────────────────────────────────────
+// Inserts the test character into the default session at startup so that any
+// client connecting with playerHandle 'test' / sessionCode VAULT01 gets a
+// fully populated data object without needing a prior join payload.
+// ⚠️  DEV ONLY — skipped in production (NODE_ENV=production).
+(function seedTestPlayer() {
+  if (!SEED_PLAYER_HANDLE || !TEST_PLAYER_DATA) return; // production guard
+  const session = getOrCreateSession(SEED_SESSION_CODE);
+  if (!session.players[SEED_PLAYER_HANDLE]) {
+    const defaults = defaultPlayerData();
+    session.players[SEED_PLAYER_HANDLE] = {
+      socketId: null,
+      data: Object.assign(defaults, TEST_PLAYER_DATA, {
+        // Deep-merge nested objects so any future keys added to defaultPlayerData()
+        // are preserved even when TEST_PLAYER_DATA only partially defines them.
+        special: Object.assign({}, defaults.special, TEST_PLAYER_DATA.special),
+        skills:  Object.assign({}, defaults.skills,  TEST_PLAYER_DATA.skills)
+      })
+    };
+    console.log(`[dev] Seeded test player '${SEED_PLAYER_HANDLE}' into session '${SEED_SESSION_CODE}'`);
+  }
+}());
 
 // ── Socket.IO connection handling ─────────────────────────────────────────────
 io.on('connection', (socket) => {
