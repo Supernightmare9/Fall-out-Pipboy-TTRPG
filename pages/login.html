@@ -7,6 +7,134 @@
     <link rel="stylesheet" href="../css/branding.css">
     <link rel="stylesheet" href="../css/login.css">
     <style>
+        /* CAMPAIGN SELECTION STYLES */
+        .campaign-select-title {
+            text-align: center;
+            font-size: 11px;
+            color: #fbbf24;
+            text-shadow: 0 0 5px #fbbf24;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        .campaign-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .campaign-item {
+            background-color: #0d1a0d;
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: #4ade80;
+            padding: 10px 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.15s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .campaign-item:hover, .campaign-item.selected {
+            background-color: #1a3a1a;
+            border-color: #4ade80;
+            box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+        }
+        .campaign-item.selected {
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+        .campaign-item-badge {
+            font-size: 9px;
+            letter-spacing: 1px;
+            padding: 2px 6px;
+            border: 1px solid;
+            border-radius: 2px;
+        }
+        .campaign-item-badge.live {
+            color: #00cc66;
+            border-color: #00cc66;
+        }
+        .campaign-item-badge.waiting {
+            color: #fbbf24;
+            border-color: #fbbf24;
+        }
+        .campaign-no-active {
+            color: rgba(74, 222, 128, 0.5);
+            font-size: 11px;
+            text-align: center;
+            padding: 20px;
+            letter-spacing: 1px;
+        }
+        .campaign-new-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .campaign-new-input {
+            flex: 1;
+            background-color: #0a0a0a;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 10px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        .campaign-new-input::placeholder {
+            color: rgba(74, 222, 128, 0.4);
+        }
+        .campaign-new-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+        .campaign-join-btn {
+            background-color: #2d5016;
+            border: 2px solid #4ade80;
+            color: #4ade80;
+            padding: 12px 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 0 0 5px #4ade80;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            width: 100%;
+        }
+        .campaign-join-btn:hover {
+            background-color: #3d6b1f;
+            box-shadow: 0 0 16px rgba(74, 222, 128, 0.7);
+            border-color: #fbbf24;
+            color: #fbbf24;
+        }
+        .campaign-refresh-btn {
+            background-color: transparent;
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: rgba(74, 222, 128, 0.6);
+            padding: 6px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+        .campaign-refresh-btn:hover {
+            border-color: #4ade80;
+            color: #4ade80;
+        }
+
         /* PIN PAD STYLES */
         .pin-display {
             text-align: center;
@@ -171,6 +299,21 @@
         </div>
 
         <!-- ═══════════════════════════════════
+             PLAYER CAMPAIGN SELECTION
+             Shown after username validation
+             ═══════════════════════════════════ -->
+        <div id="playerCampaignSection" style="display:none;">
+            <div class="campaign-select-title">⬡ SELECT CAMPAIGN TO JOIN</div>
+            <div id="playerCampaignList" class="campaign-list">
+                <div class="campaign-no-active">Loading campaigns…</div>
+            </div>
+            <button class="campaign-refresh-btn" onclick="refreshPlayerCampaigns()">↻ REFRESH LIST</button>
+            <button class="campaign-join-btn" onclick="confirmPlayerCampaign()">▶ JOIN CAMPAIGN</button>
+            <button class="pin-back-btn" onclick="backToPlayerLogin()">← BACK TO LOGIN</button>
+            <div id="playerCampaignError" class="error-msg"></div>
+        </div>
+
+        <!-- ═══════════════════════════════════
              OVERSEER PIN PAD (hidden by default)
              Revealed by triple-clicking VAULT 215
              ═══════════════════════════════════ -->
@@ -198,6 +341,25 @@
             <div id="pinError" class="error-msg"></div>
         </div>
 
+        <!-- ═══════════════════════════════════
+             OVERSEER CAMPAIGN SELECTION
+             Shown after PIN validation
+             ═══════════════════════════════════ -->
+        <div id="overseerCampaignSection" style="display:none;">
+            <div class="campaign-select-title">⬡ OVERSEER — SELECT OR CREATE CAMPAIGN</div>
+            <div id="overseerCampaignList" class="campaign-list">
+                <div class="campaign-no-active">Loading campaigns…</div>
+            </div>
+            <div class="campaign-new-row">
+                <input type="text" id="newCampaignName" class="campaign-new-input"
+                    placeholder="New campaign name…" autocomplete="off" maxlength="60">
+                <button class="campaign-refresh-btn" style="margin-bottom:0;" onclick="addNewCampaign()">＋ CREATE</button>
+            </div>
+            <button class="campaign-join-btn" onclick="confirmOverseerCampaign()">▶ ENTER HUB</button>
+            <button class="pin-back-btn" onclick="backToPinPad()">← BACK TO PIN</button>
+            <div id="overseerCampaignError" class="error-msg"></div>
+        </div>
+
         <!-- STATUS BAR — triple-click "VAULT 215" to reveal Overseer PIN -->
         <div class="status-bar">
             <div class="status-item">
@@ -211,6 +373,7 @@
     </div>
 
     <script src="../assets/data/accounts.js"></script>
+    <script src="../assets/data/campaigns.js"></script>
     <script src="../assets/helpers/Managers/storageManager.js"></script>
     <script>
         // ═══════════════════════════════════════════════════════
@@ -220,8 +383,6 @@
 
         // ═══════════════════════════════════════════════════════
         // DEV CONVENIENCE: auto-fill 'test' on localhost
-        // Makes it quicker to reach the test character during
-        // local development — has no effect in production.
         // ═══════════════════════════════════════════════════════
         (function autoFillTestOnLocalhost() {
             if (window.location.hostname === 'localhost' ||
@@ -234,8 +395,21 @@
         }());
 
         // ═══════════════════════════════════════════════════════
+        // HELPER — hide all sections
+        // ═══════════════════════════════════════════════════════
+        function _hideAll() {
+            ['playerLoginSection','playerCampaignSection',
+             'pinPadSection','overseerCampaignSection'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════
         // PLAYER LOGIN
         // ═══════════════════════════════════════════════════════
+        var _pendingAccount = null;   // account waiting for campaign selection
+
         function handleLogin(event) {
             event.preventDefault();
             var username = document.getElementById('username').value.trim();
@@ -244,35 +418,117 @@
                 showLoginError('⚠ Unknown Vault Dweller ID. Access denied.');
                 return;
             }
-            sessionStorage.setItem('username', account.username);
-            sessionStorage.setItem('role', account.role);
-
-            // Configure Socket.IO player identity so stats/combat/inventory
-            // pages connect to the server under this player's own handle.
-            // Player-facing pages read these keys from localStorage.
-            if (account.role !== 'admin') {
-                localStorage.setItem('PIPBOY_PLAYER_HANDLE', account.username);
-                localStorage.setItem('PIPBOY_SESSION_CODE',  'VAULT01');
-                localStorage.setItem('PIPBOY_SERVER_URL',    window.location.origin);
-            }
-
-            // Load player session to resume last campaign
-            var playerSession = StorageManager.loadPlayerSession(account.username);
-            if (playerSession && playerSession.currentCampaign) {
-                sessionStorage.setItem('activeCampaign', playerSession.currentCampaign);
-                sessionStorage.setItem('campaignId', playerSession.currentCampaign);
-            }
 
             if (account.role === 'admin') {
-                window.location.href = 'overseer/overseerhub.html';
-            } else {
-                window.location.href = 'player/combat.html';
+                // Admins go through PIN pad, not here
+                showLoginError('⚠ Unknown Vault Dweller ID. Access denied.');
+                return;
             }
+
+            sessionStorage.setItem('username', account.username);
+            sessionStorage.setItem('role', account.role);
+            localStorage.setItem('PIPBOY_PLAYER_HANDLE', account.username);
+            localStorage.setItem('PIPBOY_SERVER_URL', window.location.origin);
+
+            _pendingAccount = account;
+            showPlayerCampaignSelection();
         }
 
         function showLoginError(msg) {
             var el = document.getElementById('loginError');
             el.textContent = msg;
+        }
+
+        function backToPlayerLogin() {
+            _hideAll();
+            document.getElementById('playerLoginSection').style.display = 'block';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        // ═══════════════════════════════════════════════════════
+        // PLAYER — CAMPAIGN SELECTION
+        // ═══════════════════════════════════════════════════════
+        var _selectedPlayerCampaignCode = null;
+
+        function showPlayerCampaignSelection() {
+            _hideAll();
+            document.getElementById('playerCampaignSection').style.display = 'block';
+            document.getElementById('playerCampaignError').textContent = '';
+            _selectedPlayerCampaignCode = null;
+            refreshPlayerCampaigns();
+        }
+
+        function refreshPlayerCampaigns() {
+            var listEl = document.getElementById('playerCampaignList');
+            listEl.innerHTML = '<div class="campaign-no-active">Loading live campaigns…</div>';
+
+            // Try to fetch live campaigns from the server
+            var serverUrl = window.location.origin;
+            fetch(serverUrl + '/api/campaigns')
+                .then(function(r) { return r.json(); })
+                .then(function(json) {
+                    var live = json.campaigns || [];
+                    renderPlayerCampaignList(listEl, live);
+                })
+                .catch(function() {
+                    // Server not reachable — fall back to local campaigns.js list
+                    var fallback = (typeof CAMPAIGNS !== 'undefined')
+                        ? CAMPAIGNS.filter(function(c) { return c.status === 'active'; })
+                              .map(function(c) { return { code: c.id, campaignId: c.id, name: c.name, playerCount: 0, offline: true }; })
+                        : [];
+                    renderPlayerCampaignList(listEl, fallback);
+                });
+        }
+
+        function renderPlayerCampaignList(listEl, campaigns) {
+            listEl.innerHTML = '';
+            if (campaigns.length === 0) {
+                listEl.innerHTML = '<div class="campaign-no-active">⚠ No active campaigns found.<br>Ask the Overseer to start a campaign session.</div>';
+                return;
+            }
+            // Enrich server entries with local campaign name when available.
+            // c.name is already populated for offline (fallback) entries.
+            campaigns.forEach(function(c) {
+                var displayName = c.name;
+                if (!displayName && typeof CAMPAIGNS !== 'undefined') {
+                    // Normalise to lowercase for a reliable match across different
+                    // case conventions (server returns UPPER, local IDs are lower).
+                    var codeLC = (c.code || '').toLowerCase();
+                    var localCampaign = CAMPAIGNS.find(function(lc) {
+                        return lc.id.toLowerCase() === codeLC ||
+                               lc.id.toLowerCase() === (c.campaignId || '').toLowerCase();
+                    });
+                    displayName = localCampaign ? localCampaign.name : null;
+                }
+                displayName = displayName || c.campaignId || c.code;
+                var item = document.createElement('div');
+                item.className = 'campaign-item';
+                item.dataset.code = c.code;
+                item.innerHTML =
+                    '<span>' + displayName + '</span>' +
+                    '<span class="campaign-item-badge ' + (c.offline ? 'waiting' : 'live') + '">' +
+                    (c.offline ? 'LOCAL' : ('LIVE · ' + (c.playerCount || 0) + ' player(s)')) +
+                    '</span>';
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('#playerCampaignList .campaign-item')
+                        .forEach(function(el) { el.classList.remove('selected'); });
+                    item.classList.add('selected');
+                    _selectedPlayerCampaignCode = c.code;
+                    document.getElementById('playerCampaignError').textContent = '';
+                });
+                listEl.appendChild(item);
+            });
+        }
+
+        function confirmPlayerCampaign() {
+            if (!_selectedPlayerCampaignCode) {
+                document.getElementById('playerCampaignError').textContent = '⚠ Select a campaign to join.';
+                return;
+            }
+            // Store the selected campaign's session code so PlayerSync uses it
+            localStorage.setItem('PIPBOY_SESSION_CODE', _selectedPlayerCampaignCode);
+            sessionStorage.setItem('campaignId', _selectedPlayerCampaignCode);
+            window.location.href = 'player/combat.html';
         }
 
         // ═══════════════════════════════════════════════════════
@@ -292,7 +548,7 @@
         }
 
         function showPinPad() {
-            document.getElementById('playerLoginSection').style.display = 'none';
+            _hideAll();
             document.getElementById('pinPadSection').style.display = 'block';
             pinEntry = '';
             updatePinDisplay();
@@ -300,10 +556,16 @@
         }
 
         function hidePinPad() {
-            document.getElementById('pinPadSection').style.display = 'none';
+            _hideAll();
             document.getElementById('playerLoginSection').style.display = 'block';
             pinEntry = '';
             document.getElementById('loginError').textContent = '';
+        }
+
+        function backToPinPad() {
+            _hideAll();
+            document.getElementById('pinPadSection').style.display = 'block';
+            document.getElementById('pinError').textContent = '';
         }
 
         // ═══════════════════════════════════════════════════════
@@ -348,7 +610,7 @@
             if (overseer && overseer.pin === pinEntry) {
                 sessionStorage.setItem('username', overseer.username);
                 sessionStorage.setItem('role', overseer.role);
-                window.location.href = 'overseer/overseerhub.html';
+                showOverseerCampaignSelection();
             } else {
                 document.getElementById('pinError').textContent = '⚠ INCORRECT PIN. ACCESS DENIED.';
                 pinEntry = '';
@@ -368,6 +630,100 @@
                 }
             }
         });
+
+        // ═══════════════════════════════════════════════════════
+        // OVERSEER — CAMPAIGN SELECTION
+        // ═══════════════════════════════════════════════════════
+        var _selectedOverseerCampaignId = null;
+        // Track locally-created (new) campaigns that don't exist in CAMPAIGNS yet
+        var _localCampaigns = [];
+
+        function showOverseerCampaignSelection() {
+            _hideAll();
+            document.getElementById('overseerCampaignSection').style.display = 'block';
+            document.getElementById('overseerCampaignError').textContent = '';
+            document.getElementById('newCampaignName').value = '';
+            _selectedOverseerCampaignId = null;
+            renderOverseerCampaignList();
+        }
+
+        function renderOverseerCampaignList() {
+            var listEl = document.getElementById('overseerCampaignList');
+            listEl.innerHTML = '';
+
+            var allCampaigns = [];
+            if (typeof CAMPAIGNS !== 'undefined') {
+                CAMPAIGNS.forEach(function(c) { allCampaigns.push({ id: c.id, name: c.name, status: c.status }); });
+            }
+            _localCampaigns.forEach(function(c) {
+                if (!allCampaigns.find(function(x) { return x.id === c.id; })) {
+                    allCampaigns.push(c);
+                }
+            });
+
+            if (allCampaigns.length === 0) {
+                listEl.innerHTML = '<div class="campaign-no-active">No campaigns found. Create one below.</div>';
+                return;
+            }
+
+            allCampaigns.forEach(function(c) {
+                var item = document.createElement('div');
+                item.className = 'campaign-item';
+                if (c.id === _selectedOverseerCampaignId) item.classList.add('selected');
+                item.dataset.id = c.id;
+                var statusLabel = c.status === 'active' ? 'ACTIVE' : (c.status === 'paused' ? 'PAUSED' : (c.status || 'NEW'));
+                item.innerHTML =
+                    '<span>' + (c.name || c.id) + '</span>' +
+                    '<span class="campaign-item-badge ' + (c.status === 'active' ? 'live' : 'waiting') + '">' +
+                    statusLabel + '</span>';
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('#overseerCampaignList .campaign-item')
+                        .forEach(function(el) { el.classList.remove('selected'); });
+                    item.classList.add('selected');
+                    _selectedOverseerCampaignId = c.id;
+                    document.getElementById('overseerCampaignError').textContent = '';
+                });
+                listEl.appendChild(item);
+            });
+        }
+
+        function addNewCampaign() {
+            var nameInput = document.getElementById('newCampaignName');
+            var name = nameInput.value.trim();
+            if (!name) {
+                document.getElementById('overseerCampaignError').textContent = '⚠ Enter a name for the new campaign.';
+                return;
+            }
+            // Derive a URL-safe ID: lowercase alphanumeric segments joined by underscores.
+            // e.g. "Nuclear Winter Campaign" → "nuclear_winter_campaign"
+            // Non-ASCII / special characters are replaced with underscores and
+            // leading/trailing underscores are stripped.
+            var id = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+            if (!id) id = 'campaign_' + Date.now();
+            // Add to local list if not already present
+            var exists = (typeof CAMPAIGNS !== 'undefined' && CAMPAIGNS.find(function(c) { return c.id === id; }))
+                      || _localCampaigns.find(function(c) { return c.id === id; });
+            if (!exists) {
+                _localCampaigns.push({ id: id, name: name, status: 'active' });
+            }
+            _selectedOverseerCampaignId = id;
+            nameInput.value = '';
+            document.getElementById('overseerCampaignError').textContent = '';
+            renderOverseerCampaignList();
+        }
+
+        function confirmOverseerCampaign() {
+            if (!_selectedOverseerCampaignId) {
+                document.getElementById('overseerCampaignError').textContent = '⚠ Select or create a campaign first.';
+                return;
+            }
+            // Store so overseerhub.html picks it up on load
+            localStorage.setItem('PIPBOY_SESSION_CODE', _selectedOverseerCampaignId);
+            localStorage.setItem('PIPBOY_ADMIN_CODE',   'OVERSEER215');
+            localStorage.setItem('PIPBOY_SERVER_URL',   window.location.origin);
+            sessionStorage.setItem('campaignId', _selectedOverseerCampaignId);
+            window.location.href = 'overseer/overseerhub.html';
+        }
     </script>
 </body>
 </html>

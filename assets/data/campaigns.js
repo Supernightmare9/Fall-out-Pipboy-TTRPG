@@ -135,6 +135,7 @@ const CAMPAIGNS = [
         joinedDate: "2026-01-01",
         _devOnly: true
       }
+    ],
 
     // ── ACTIVE ENCOUNTER ────────────────────────────────────────────────────
     // Populated by the Overseer when a combat encounter begins.

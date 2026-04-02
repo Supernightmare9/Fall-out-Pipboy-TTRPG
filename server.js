@@ -56,6 +56,20 @@ app.use(express.json());
 // Health-check endpoint (used by Render / Heroku uptime monitors)
 app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: Date.now() }));
 
+// ── Campaign discovery endpoint ────────────────────────────────────────────────
+// Returns all sessions that currently have an active campaign so that the login
+// page can show players which campaigns they can join right now.
+app.get('/api/campaigns', (_req, res) => {
+  const active = Object.entries(sessions)
+    .filter(([, s]) => s.campaignActive)
+    .map(([code, s]) => ({
+      code:        code,
+      campaignId:  s.campaignId || code,
+      playerCount: Object.keys(s.players || {}).length
+    }));
+  res.json({ campaigns: active });
+});
+
 // ── In-memory session store ────────────────────────────────────────────────────
 //
 // sessions = {
