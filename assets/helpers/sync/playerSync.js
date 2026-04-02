@@ -132,6 +132,13 @@
         _setStatus('connected', '⬤ SYNC: LIVE (Overseer offline)');
       });
 
+      // Combat state broadcast from server
+      _socket.on('combat:state-updated', function (combatState) {
+        if (typeof _opts.onCombatUpdate === 'function') {
+          _opts.onCombatUpdate(combatState);
+        }
+      });
+
       _socket.on('disconnect', function () {
         _connected = false;
         _setStatus('disconnected', '⬤ SYNC: DISCONNECTED — reconnecting…');
@@ -166,6 +173,15 @@
       if (!_socket || !_connected) return;
       _socket.emit('player:update', { field: 'all', value: data });
       _flashSync();
+    },
+
+    /**
+     * Request the current combat state from the server.
+     * The response arrives via the onCombatUpdate callback.
+     */
+    requestCombatState: function () {
+      if (!_socket || !_connected) return;
+      _socket.emit('combat:request-state');
     },
 
     /** @returns {boolean} Whether the socket is currently connected */

@@ -236,6 +236,67 @@
         .condition-active-name{color:var(--overseer-red-bright);font-weight:bold;font-size:10px;text-transform:uppercase;}
         .condition-active-target{color:var(--overseer-gold);font-size:10px;}
         .condition-active-dur{color:rgba(232,232,232,.5);font-size:10px;}
+
+        /* ── LIVE SYNC COMBAT PANEL ───────────────────────────────── */
+        #liveSyncPanel{margin-bottom:16px;border:2px solid rgba(42,82,152,.5);}
+        #liveSyncPanel.sync-combat-active{border-color:var(--overseer-gold);box-shadow:0 0 20px rgba(212,160,23,.2);}
+        .sync-panel-header{background:var(--overseer-blue-bright);border-bottom:2px solid var(--overseer-gold);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+        .sync-panel-title{font-size:12px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 8px rgba(212,160,23,.5);}
+        #syncStatusBadge{font-size:9px;padding:3px 8px;border:1px solid;letter-spacing:1px;text-transform:uppercase;}
+        .sync-badge-offline{color:rgba(232,232,232,.3);border-color:rgba(232,232,232,.2);}
+        .sync-badge-standby{color:var(--overseer-green);border-color:var(--overseer-green);}
+        .sync-badge-active{color:var(--overseer-gold-bright);border-color:var(--overseer-gold);}
+
+        .sync-combat-controls{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid rgba(42,82,152,.3);}
+        .sync-round-badge{font-size:13px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:2px;align-self:center;flex:1;}
+
+        .sync-players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:14px;}
+
+        .spc-card{background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:12px;transition:border-color .3s,box-shadow .3s;}
+        .spc-card.current-turn{border-color:var(--overseer-gold-bright);box-shadow:0 0 16px rgba(212,160,23,.35);animation:overseerTurnGlow 1.8s ease-in-out infinite;}
+        @keyframes overseerTurnGlow{0%,100%{box-shadow:0 0 10px rgba(212,160,23,.3);}50%{box-shadow:0 0 28px rgba(212,160,23,.6);}}
+
+        .spc-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+        .spc-turn-icon{font-size:13px;color:var(--overseer-gold-bright);min-width:16px;text-align:center;}
+        .spc-name{font-size:13px;font-weight:bold;color:var(--overseer-white);letter-spacing:1px;flex:1;text-transform:uppercase;}
+        .spc-turn-badge{font-size:8px;padding:2px 6px;border:1px solid var(--overseer-gold);color:var(--overseer-gold-bright);letter-spacing:1px;}
+
+        .spc-stats-row{display:flex;gap:10px;margin-bottom:8px;}
+        .spc-stat-block{flex:1;}
+        .spc-stat-label{font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+        .spc-stat-value{font-size:14px;font-weight:bold;color:var(--overseer-white);}
+        .spc-bar-bg{height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-top:2px;}
+        .spc-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+        .spc-bar-hp-high{background:#4ade80;box-shadow:0 0 4px #4ade80;}
+        .spc-bar-hp-mid{background:#fbbf24;box-shadow:0 0 4px #fbbf24;}
+        .spc-bar-hp-low{background:#ef4444;box-shadow:0 0 4px #ef4444;}
+        .spc-bar-ap{background:#60a5fa;box-shadow:0 0 4px #60a5fa;}
+
+        .spc-special-row{display:flex;gap:3px;margin-bottom:8px;flex-wrap:wrap;}
+        .spc-special-box{flex:1;min-width:26px;background:rgba(0,0,0,.3);border:1px solid rgba(42,82,152,.4);text-align:center;padding:3px 2px;}
+        .spc-special-letter{font-size:7px;color:var(--overseer-gold);display:block;}
+        .spc-special-val{font-size:11px;font-weight:bold;color:var(--overseer-white);display:block;}
+
+        .spc-effects{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px;min-height:16px;}
+        .spc-effect-chip{font-size:8px;padding:2px 5px;border:1px solid rgba(192,132,252,.4);color:#c084fc;letter-spacing:.5px;}
+
+        .spc-actions{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}
+        .spc-edit-btn{flex:1;background:rgba(42,82,152,.2);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;padding:5px 6px;cursor:pointer;transition:all .15s;}
+        .spc-edit-btn:hover{background:rgba(212,160,23,.15);border-color:var(--overseer-gold);color:var(--overseer-gold-bright);}
+        .spc-edit-btn.damage{border-color:rgba(204,34,0,.5);color:var(--overseer-red-bright);}
+        .spc-edit-btn.damage:hover{background:rgba(204,34,0,.15);}
+        .spc-edit-btn.heal{border-color:rgba(0,204,102,.4);color:var(--overseer-green);}
+        .spc-edit-btn.heal:hover{background:rgba(0,204,102,.12);}
+
+        .spc-adjust-row{display:none;gap:4px;align-items:center;margin-top:4px;}
+        .spc-adjust-row.open{display:flex;}
+        .spc-adj-input{background:var(--overseer-blue-mid);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:10px;padding:3px 7px;width:70px;outline:none;}
+        .spc-adj-input:focus{border-color:var(--overseer-gold);}
+        .spc-adj-ok{background:rgba(0,204,102,.1);border:1px solid var(--overseer-green);color:var(--overseer-green);font-family:'Courier New',monospace;font-size:9px;padding:3px 8px;cursor:pointer;transition:all .15s;}
+        .spc-adj-ok:hover{background:rgba(0,204,102,.25);}
+        .spc-adj-cancel{background:transparent;border:1px solid rgba(204,34,0,.4);color:var(--overseer-red-bright);font-family:'Courier New',monospace;font-size:9px;padding:3px 7px;cursor:pointer;}
+
+        .sync-offline-msg{padding:20px;text-align:center;color:rgba(232,232,232,.35);font-size:11px;letter-spacing:1px;}
     </style>
 
     <script src="../../assets/data/accounts.js"></script>
@@ -287,6 +348,26 @@
 
 <!-- MAIN DASHBOARD -->
 <div class="dashboard-content">
+
+    <!-- LIVE SYNC COMBAT PANEL (Socket.IO) -->
+    <div id="liveSyncPanel" class="panel" style="margin-bottom:16px;">
+        <div class="sync-panel-header">
+            <span class="sync-panel-title">⚔ Live Combat — Real-Time Sync</span>
+            <span id="syncStatusBadge" class="sync-badge-offline">● OFFLINE</span>
+        </div>
+        <div class="sync-combat-controls" id="syncCombatControls">
+            <span class="sync-round-badge" id="syncRoundBadge">ROUND —</span>
+            <button class="cmd-btn success" id="syncStartBtn" onclick="syncStartCombat()">[▶ START COMBAT]</button>
+            <button class="cmd-btn" onclick="syncPrevTurn()">[◀ PREV]</button>
+            <button class="cmd-btn" onclick="syncNextTurn()">[NEXT ▶]</button>
+            <button class="cmd-btn danger" onclick="syncEndCombat()">[■ END COMBAT]</button>
+        </div>
+        <div class="sync-players-grid" id="syncPlayersGrid">
+            <div class="sync-offline-msg" id="syncOfflineMsg">
+                SYNC NOT CONFIGURED — set PIPBOY_SERVER_URL in localStorage to enable real-time player tracking
+            </div>
+        </div>
+    </div>
 
     <div class="combat-grid">
 
@@ -1788,7 +1869,299 @@
     var sessionCode = localStorage.getItem('PIPBOY_SESSION_CODE');
     var adminCode   = localStorage.getItem('PIPBOY_ADMIN_CODE');
 
-    if (!serverUrl && !sessionCode) return; // sync not configured — skip silently
+    // ── In-memory caches for live sync ──────────────────────────────────────
+    var _syncPlayers  = {};   // handle → data snapshot
+    var _combatState  = { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] };
+    var _syncConnected = false;
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    var _badge    = document.getElementById('syncStatusBadge');
+    var _grid     = document.getElementById('syncPlayersGrid');
+    var _roundBdg = document.getElementById('syncRoundBadge');
+    var _panel    = document.getElementById('liveSyncPanel');
+
+    // ── Status helpers ────────────────────────────────────────────────────────
+    function setSyncBadge(cls, text) {
+        if (!_badge) return;
+        _badge.className = cls;
+        _badge.textContent = text;
+    }
+
+    // ── Render live sync player cards ─────────────────────────────────────────
+    function renderSyncPlayers() {
+        if (!_grid) return;
+        while (_grid.firstChild) _grid.removeChild(_grid.firstChild);
+
+        if (!_syncConnected) {
+            var msg = document.createElement('div');
+            msg.className = 'sync-offline-msg';
+            msg.textContent = 'DISCONNECTED — reconnecting…';
+            _grid.appendChild(msg);
+            return;
+        }
+
+        if (_panel) {
+            if (_combatState.active) {
+                _panel.classList.add('sync-combat-active');
+            } else {
+                _panel.classList.remove('sync-combat-active');
+            }
+        }
+
+        if (_roundBdg) {
+            _roundBdg.textContent = _combatState.active
+                ? ('ROUND ' + _combatState.round)
+                : 'STANDBY';
+        }
+
+        var handles = Object.keys(_syncPlayers);
+        if (handles.length === 0) {
+            var empty = document.createElement('div');
+            empty.className = 'sync-offline-msg';
+            empty.textContent = 'No players connected. Waiting for players to join the session…';
+            _grid.appendChild(empty);
+            return;
+        }
+
+        // Show in turn order first, then remaining
+        var ordered = _combatState.turnOrder.slice();
+        handles.forEach(function (h) { if (ordered.indexOf(h) === -1) ordered.push(h); });
+
+        ordered.forEach(function (handle, idx) {
+            if (!_syncPlayers[handle] && !_combatState.turnOrder.includes(handle)) return;
+            var data = _syncPlayers[handle] || {};
+            var turnIdx  = _combatState.turnOrder.indexOf(handle);
+            var isCurrent = _combatState.active && turnIdx !== -1 && turnIdx === _combatState.currentTurnIndex;
+
+            var special = data.special || {};
+            var debuffs = data.debuffs || [];
+            var boosts  = data.boosts  || [];
+            var effects = debuffs.concat(boosts);
+
+            var hp    = typeof data.hp    === 'number' ? data.hp    : 0;
+            var maxHp = typeof data.maxHp === 'number' ? data.maxHp : 100;
+            var ap    = typeof data.actionPoints    === 'number' ? data.actionPoints    : 0;
+            var maxAp = typeof data.maxActionPoints === 'number' ? data.maxActionPoints : 10;
+
+            var card = document.createElement('div');
+            card.className = 'spc-card' + (isCurrent ? ' current-turn' : '');
+            card.id = 'spc-' + handle.replace(/\s+/g, '_');
+
+            // Header
+            var hdr = document.createElement('div');
+            hdr.className = 'spc-header';
+            var turnIcon = document.createElement('span');
+            turnIcon.className = 'spc-turn-icon';
+            turnIcon.textContent = isCurrent ? '▶' : (turnIdx !== -1 ? String(turnIdx + 1) : '');
+            var nameEl = document.createElement('span');
+            nameEl.className = 'spc-name';
+            nameEl.textContent = handle;
+            hdr.appendChild(turnIcon);
+            hdr.appendChild(nameEl);
+            if (isCurrent) {
+                var tb = document.createElement('span');
+                tb.className = 'spc-turn-badge';
+                tb.textContent = 'ACTIVE TURN';
+                hdr.appendChild(tb);
+            }
+            card.appendChild(hdr);
+
+            // HP / AP
+            var statsRow = document.createElement('div');
+            statsRow.className = 'spc-stats-row';
+
+            function makeStatBlock(label, current, max, barClass) {
+                var block = document.createElement('div');
+                block.className = 'spc-stat-block';
+                var lbl = document.createElement('div');
+                lbl.className = 'spc-stat-label';
+                lbl.textContent = label;
+                var val = document.createElement('div');
+                val.className = 'spc-stat-value';
+                val.id = 'spc-' + label.toLowerCase() + '-val-' + handle.replace(/\s+/g, '_');
+                val.textContent = current + ' / ' + max;
+                var bg = document.createElement('div');
+                bg.className = 'spc-bar-bg';
+                var fill = document.createElement('div');
+                fill.className = 'spc-bar-fill ' + barClass;
+                var pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0;
+                fill.style.width = pct + '%';
+                bg.appendChild(fill);
+                block.appendChild(lbl);
+                block.appendChild(val);
+                block.appendChild(bg);
+                return block;
+            }
+
+            var hpPct = maxHp > 0 ? Math.round((hp / maxHp) * 100) : 0;
+            var hpCls = hpPct > 50 ? 'spc-bar-hp-high' : hpPct > 25 ? 'spc-bar-hp-mid' : 'spc-bar-hp-low';
+            statsRow.appendChild(makeStatBlock('HP', hp, maxHp, hpCls));
+            statsRow.appendChild(makeStatBlock('AP', ap, maxAp, 'spc-bar-ap'));
+            card.appendChild(statsRow);
+
+            // S.P.E.C.I.A.L.
+            var specRow = document.createElement('div');
+            specRow.className = 'spc-special-row';
+            [['S','strength'],['P','perception'],['E','endurance'],['C','charisma'],['I','intelligence'],['A','agility'],['L','luck']].forEach(function(s) {
+                var box = document.createElement('div');
+                box.className = 'spc-special-box';
+                var letter = document.createElement('span');
+                letter.className = 'spc-special-letter';
+                letter.textContent = s[0];
+                var v = document.createElement('span');
+                v.className = 'spc-special-val';
+                v.textContent = special[s[1]] !== undefined ? special[s[1]] : '—';
+                box.appendChild(letter);
+                box.appendChild(v);
+                specRow.appendChild(box);
+            });
+            card.appendChild(specRow);
+
+            // Effects
+            if (effects.length > 0) {
+                var efx = document.createElement('div');
+                efx.className = 'spc-effects';
+                effects.forEach(function (eff) {
+                    var chip = document.createElement('span');
+                    chip.className = 'spc-effect-chip';
+                    chip.textContent = typeof eff === 'string' ? eff : (eff.name || eff.type || '?');
+                    efx.appendChild(chip);
+                });
+                card.appendChild(efx);
+            }
+
+            // Overseer action buttons (HP/AP edit for any player)
+            var actions = document.createElement('div');
+            actions.className = 'spc-actions';
+            ['damage','heal'].forEach(function (mode) {
+                var btn = document.createElement('button');
+                btn.className = 'spc-edit-btn ' + mode;
+                btn.textContent = mode === 'damage' ? '⚔ Damage' : '♥ Heal';
+                btn.addEventListener('click', function () { openSyncAdjust(handle, mode); });
+                actions.appendChild(btn);
+            });
+            // AP adjust
+            var apBtn = document.createElement('button');
+            apBtn.className = 'spc-edit-btn';
+            apBtn.textContent = '⬡ Set AP';
+            apBtn.addEventListener('click', function () { openSyncAdjust(handle, 'ap'); });
+            actions.appendChild(apBtn);
+            card.appendChild(actions);
+
+            // Adjust inline form
+            var adjRow = document.createElement('div');
+            adjRow.className = 'spc-adjust-row';
+            adjRow.id = 'sadj-' + handle.replace(/\s+/g, '_');
+            var adjInp = document.createElement('input');
+            adjInp.type = 'number';
+            adjInp.min = '0';
+            adjInp.className = 'spc-adj-input';
+            adjInp.placeholder = 'Amount';
+            adjInp.id = 'sadj-inp-' + handle.replace(/\s+/g, '_');
+            var adjOk = document.createElement('button');
+            adjOk.className = 'spc-adj-ok';
+            adjOk.textContent = 'OK';
+            adjOk.addEventListener('click', function () { commitSyncAdjust(handle); });
+            var adjCancel = document.createElement('button');
+            adjCancel.className = 'spc-adj-cancel';
+            adjCancel.textContent = '✕';
+            adjCancel.addEventListener('click', function () { closeSyncAdjust(handle); });
+            adjRow.appendChild(adjInp);
+            adjRow.appendChild(adjOk);
+            adjRow.appendChild(adjCancel);
+            card.appendChild(adjRow);
+
+            _grid.appendChild(card);
+        });
+    }
+
+    // ── Overseer HP/AP adjust helpers ─────────────────────────────────────────
+    var _sAdjMode = {};
+
+    function openSyncAdjust(handle, mode) {
+        var safe = handle.replace(/\s+/g, '_');
+        var row  = document.getElementById('sadj-' + safe);
+        if (!row) return;
+        _sAdjMode[handle] = mode;
+        row.classList.add('open');
+        var inp = document.getElementById('sadj-inp-' + safe);
+        if (inp) { inp.value = ''; inp.focus(); }
+    }
+
+    function closeSyncAdjust(handle) {
+        var safe = handle.replace(/\s+/g, '_');
+        var row  = document.getElementById('sadj-' + safe);
+        if (row) row.classList.remove('open');
+        delete _sAdjMode[handle];
+    }
+
+    function commitSyncAdjust(handle) {
+        var safe   = handle.replace(/\s+/g, '_');
+        var inp    = document.getElementById('sadj-inp-' + safe);
+        if (!inp) return;
+        var amount = parseInt(inp.value, 10);
+        var mode   = _sAdjMode[handle];
+        if (isNaN(amount) || amount < 0) { closeSyncAdjust(handle); return; }
+
+        var data  = _syncPlayers[handle] || {};
+        if (mode === 'ap') {
+            var newAp = amount;
+            OverseerSync.updatePlayer(handle, 'actionPoints', newAp);
+            if (!_syncPlayers[handle]) _syncPlayers[handle] = {};
+            _syncPlayers[handle].actionPoints = newAp;
+            addLog('SYNC: ' + handle + ' AP → ' + newAp, 'blue');
+        } else {
+            var hp    = typeof data.hp    === 'number' ? data.hp    : 0;
+            var maxHp = typeof data.maxHp === 'number' ? data.maxHp : 100;
+            var newHp;
+            if (mode === 'damage') {
+                newHp = Math.max(0, hp - amount);
+                addLog('SYNC: ' + handle + ' took ' + amount + ' damage (HP: ' + hp + ' → ' + newHp + ')', 'red');
+            } else {
+                newHp = Math.min(maxHp, hp + amount);
+                addLog('SYNC: ' + handle + ' healed ' + amount + ' (HP: ' + hp + ' → ' + newHp + ')', 'green');
+            }
+            OverseerSync.updatePlayer(handle, 'hp', newHp);
+            if (!_syncPlayers[handle]) _syncPlayers[handle] = {};
+            _syncPlayers[handle].hp = newHp;
+        }
+
+        closeSyncAdjust(handle);
+        renderSyncPlayers();
+    }
+
+    // ── Combat control buttons (exposed to onclick handlers) ──────────────────
+    window.syncStartCombat = function () {
+        if (!_syncConnected) { addLog('SYNC: Not connected', 'red'); return; }
+        var order = _combatState.turnOrder.length > 0
+            ? _combatState.turnOrder.slice()
+            : Object.keys(_syncPlayers);
+        if (order.length === 0) { addLog('SYNC: No players connected to start combat', 'red'); return; }
+        OverseerSync.startCombat(order);
+        addLog('SYNC: Combat started with order: ' + order.join(', '), 'yellow');
+    };
+
+    window.syncNextTurn = function () {
+        if (!_syncConnected) return;
+        OverseerSync.nextTurn();
+    };
+
+    window.syncPrevTurn = function () {
+        if (!_syncConnected) return;
+        OverseerSync.prevTurn();
+    };
+
+    window.syncEndCombat = function () {
+        if (!_syncConnected) return;
+        OverseerSync.endCombat();
+        addLog('SYNC: Combat ended', 'yellow');
+    };
+
+    // ── Exit early if sync not configured ────────────────────────────────────
+    if (!serverUrl && !sessionCode) return;
+
+    // ── Init OverseerSync ─────────────────────────────────────────────────────
+    setSyncBadge('sync-badge-offline ● CONNECTING…', '◌ CONNECTING…');
 
     OverseerSync.init({
         serverUrl:   serverUrl,
@@ -1796,45 +2169,65 @@
         adminCode:   adminCode   || 'OVERSEER215',
 
         onConnected: function (payload) {
-            // payload.players = [{ handle, data }, ...]
+            _syncConnected = true;
+            setSyncBadge('sync-badge-standby', '● STANDBY');
             var players = payload.players || [];
+            players.forEach(function (p) {
+                _syncPlayers[p.handle] = p.data || {};
+            });
             if (players.length > 0) {
                 addLog('SYNC: Connected — ' + players.length + ' player(s) in session ' + (sessionCode || ''), 'green');
             } else {
                 addLog('SYNC: Overseer online — waiting for players to join…', 'yellow');
             }
+            renderSyncPlayers();
         },
 
         onPlayerJoined: function (handle, data) {
+            _syncPlayers[handle] = data || {};
             addLog('SYNC: ' + handle + ' joined the session', 'green');
-            // Refresh the player overview panel if it is rendered
-            if (typeof renderPlayerPanel === 'function') renderPlayerPanel();
+            renderSyncPlayers();
         },
 
         onPlayerUpdate: function (handle, field, value, snapshot) {
-            // Live update: reflect changes in the Overseer UI
-            // The player HP panel (if rendered) uses the campaign data; update it here
-            if (field === 'hp' || field === 'all') {
-                var hp = (field === 'all' ? (snapshot && snapshot.hp) : value);
-                if (typeof hp === 'number') {
-                    addLog('SYNC: ' + handle + ' HP → ' + hp, 'blue');
-                }
+            if (!_syncPlayers[handle]) _syncPlayers[handle] = {};
+            if (field === 'all' && snapshot) {
+                Object.assign(_syncPlayers[handle], snapshot);
+            } else if (field) {
+                _syncPlayers[handle][field] = value;
             }
-            if (field === 'xp' || field === 'all') {
-                var xp = (field === 'all' ? (snapshot && snapshot.xp) : value);
-                if (typeof xp === 'number') {
-                    addLog('SYNC: ' + handle + ' XP → ' + xp, 'blue');
-                }
+            // Log meaningful changes
+            if (field === 'hp' || (field === 'all' && snapshot && snapshot.hp !== undefined)) {
+                var hp = field === 'all' ? snapshot.hp : value;
+                if (typeof hp === 'number') addLog('SYNC: ' + handle + ' HP → ' + hp, 'blue');
             }
+            if (field === 'xp' || (field === 'all' && snapshot && snapshot.xp !== undefined)) {
+                var xp = field === 'all' ? snapshot.xp : value;
+                if (typeof xp === 'number') addLog('SYNC: ' + handle + ' XP → ' + xp, 'blue');
+            }
+            renderSyncPlayers();
         },
 
         onPlayerLeft: function (handle) {
             addLog('SYNC: ' + handle + ' disconnected', 'red');
+            renderSyncPlayers();
+        },
+
+        onCombatUpdate: function (state) {
+            _combatState = state || _combatState;
+            if (_combatState.active) {
+                setSyncBadge('sync-badge-active', '⚔ COMBAT — ROUND ' + _combatState.round);
+            } else {
+                setSyncBadge('sync-badge-standby', '● STANDBY');
+            }
+            renderSyncPlayers();
         },
 
         onSnapshot: function (payload) {
             var players = payload.players || [];
+            players.forEach(function (p) { _syncPlayers[p.handle] = p.data || {}; });
             addLog('SYNC: Snapshot — ' + players.length + ' player(s) active', 'yellow');
+            renderSyncPlayers();
         }
     });
 }());
