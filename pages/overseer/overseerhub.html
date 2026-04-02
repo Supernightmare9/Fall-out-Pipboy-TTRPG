@@ -811,7 +811,15 @@
         sessionStorage.setItem('campaignId',id);
         var c=(typeof CAMPAIGNS!=='undefined')?CAMPAIGNS.find(function(x){return x.id===id;}):null;
         if(c)sessionStorage.setItem('campaignName',c.name);
+        // Keep the sync session code in sync with the selected campaign
+        localStorage.setItem('PIPBOY_SESSION_CODE', id);
         loadCampaign(id);
+        // Reconnect OverseerSync to the new campaign session if it is available.
+        // OverseerSync.init() (called internally by reconnect) will exit early if
+        // PIPBOY_SERVER_URL is not set, so no additional guard is needed here.
+        if(typeof OverseerSync !== 'undefined'){
+            OverseerSync.reconnect(id);
+        }
     };
 
     function loadCampaign(id){
@@ -1133,9 +1141,13 @@
 
     document.addEventListener('DOMContentLoaded',function(){
         populateCampaignDropdown();
-        var id=sessionStorage.getItem('campaignId');
+        var id=sessionStorage.getItem('campaignId')||localStorage.getItem('PIPBOY_SESSION_CODE');
         if(!id&&typeof CAMPAIGNS!=='undefined'&&CAMPAIGNS.length>0){id=CAMPAIGNS[0].id;sessionStorage.setItem('campaignId',id);sessionStorage.setItem('campaignName',CAMPAIGNS[0].name);}
-        if(id){loadCampaign(id);}else{populateCampaignDropdown();addLog('Select a campaign to begin','blue');}
+        if(id){
+            // Keep session code and campaign ID in sync
+            localStorage.setItem('PIPBOY_SESSION_CODE',id);
+            loadCampaign(id);
+        }else{populateCampaignDropdown();addLog('Select a campaign to begin','blue');}
 
         // Enable auto-save every 30 seconds
         var activeCampaignId=sessionStorage.getItem('campaignId')||id;
@@ -1885,9 +1897,10 @@
 
 <!-- ═══════════════════════════════════════════════════════════════════════
      REAL-TIME OVERSEER SYNC (optional — only activates if server URL is set)
-     To enable: open browser console and run:
+     Session code is automatically set to the selected campaign ID on login.
+     To enable manually, open browser console and run:
        localStorage.setItem('PIPBOY_SERVER_URL',   'https://your-server.com');
-       localStorage.setItem('PIPBOY_SESSION_CODE',  'VAULT01');
+       localStorage.setItem('PIPBOY_SESSION_CODE',  'campaign_001');
        localStorage.setItem('PIPBOY_ADMIN_CODE',    'OVERSEER215');
      Then reload the page.
 ════════════════════════════════════════════════════════════════════════ -->
@@ -1902,7 +1915,8 @@
 
     // ── Campaign session state ──────────────────────────────────────────────
     var _campaignSessionActive = false;
-    var _campaignSessionId     = null;   // e.g. 'fallout_main_2077'
+    // Pre-populate from the session code chosen on the login page (= campaign ID)
+    var _campaignSessionId     = sessionCode || sessionStorage.getItem('campaignId') || null;
 
     // ── localStorage key helpers ────────────────────────────────────────────
     // Persistent key under which the full campaign player-data map is stored

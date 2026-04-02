@@ -309,6 +309,21 @@
     /** Disconnect */
     disconnect: function () {
       if (_socket) _socket.disconnect();
+    },
+
+    /**
+     * Reconnect to a different session code (e.g. when the Overseer switches campaigns).
+     * Disconnects the existing socket, updates the session code, then reconnects.
+     * @param {string} newSessionCode  The new session/campaign code to join
+     */
+    reconnect: function (newSessionCode) {
+      if (_socket) {
+        _socket.disconnect();
+        _socket = null;
+        _connected = false;
+      }
+      _opts.sessionCode = newSessionCode || _opts.sessionCode;
+      OverseerSync.init(_opts);
     }
   };
 
