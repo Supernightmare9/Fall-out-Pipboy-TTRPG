@@ -6,18 +6,27 @@
  * Include socket.io client CDN before this script, then call:
  *
  *   OverseerSync.init({
- *     serverUrl:   'https://your-server.onrender.com',
- *     sessionCode: 'VAULT01',
- *     adminCode:   'OVERSEER215',         // must match server ADMIN_CODE
+ *     serverUrl:       'https://your-server.onrender.com',
+ *     sessionCode:     'VAULT01',
+ *     adminCode:       'OVERSEER215',         // must match server ADMIN_CODE
  *     onConnected:     function(players) { ... },   // called with initial player list
  *     onPlayerJoined:  function(handle, data) { ... },
  *     onPlayerUpdate:  function(handle, field, value, snapshot) { ... },
- *     onPlayerLeft:    function(handle) { ... }
+ *     onPlayerLeft:    function(handle) { ... },
+ *     onPlayerWaiting: function(handle) { ... },    // player waiting for campaign
+ *     onCampaignStarted: function(payload) { ... }, // campaign started ack
+ *     onCampaignEnded:   function(payload) { ... }, // campaign ended ack
+ *     onSyncAck:         function(payload) { ... }  // sync-campaign ack
  *   });
  *
  *   // Push a change to a specific player:
  *   OverseerSync.updatePlayer('Jade', 'xp', 1500);
  *   OverseerSync.updatePlayer('Jade', 'all', fullDataObject);
+ *
+ *   // Campaign session controls:
+ *   OverseerSync.startCampaign('campaign-id', { Jade: {...}, Rex: {...} });
+ *   OverseerSync.endCampaign();
+ *   OverseerSync.syncCampaign('campaign-id', playerDataMap); // re-sync after reconnect
  *
  *   // Request a fresh snapshot of all players:
  *   OverseerSync.requestSnapshot();
@@ -70,14 +79,18 @@
     /**
      * Initialise the Overseer sync connection.
      * @param {object} opts
-     *   serverUrl       {string}   WebSocket server URL (blank = same-origin)
-     *   sessionCode     {string}   Session room code
-     *   adminCode       {string}   Admin / GM secret code
-     *   onConnected     {function} Called with { players } on join
-     *   onPlayerJoined  {function} Called with (handle, data) when player connects
-     *   onPlayerUpdate  {function} Called with (handle, field, value, snapshot)
-     *   onPlayerLeft    {function} Called with (handle) when player disconnects
-     *   onSnapshot      {function} Called with { players } on snapshot response
+     *   serverUrl        {string}   WebSocket server URL (blank = same-origin)
+     *   sessionCode      {string}   Session room code
+     *   adminCode        {string}   Admin / GM secret code
+     *   onConnected      {function} Called with { players, campaignActive, campaignId } on join
+     *   onPlayerJoined   {function} Called with (handle, data) when player connects
+     *   onPlayerUpdate   {function} Called with (handle, field, value, snapshot)
+     *   onPlayerLeft     {function} Called with (handle) when player disconnects
+     *   onPlayerWaiting  {function} Called with (handle) when player is waiting for campaign
+     *   onSnapshot       {function} Called with { players } on snapshot response
+     *   onCampaignStarted {function} Called with { campaignId, players } when campaign is started
+     *   onCampaignEnded  {function} Called with { players } when campaign is ended
+     *   onSyncAck        {function} Called with { campaignId, players } after sync-campaign
      */
     init: function (opts) {
       _opts = opts || {};
@@ -132,12 +145,36 @@
         if (typeof _opts.onPlayerLeft === 'function') _opts.onPlayerLeft(payload.handle);
       });
 
+      // Player is holding in the waiting queue (no active campaign yet)
+      _socket.on('overseer:player-waiting', function (payload) {
+        if (typeof _opts.onPlayerWaiting === 'function') _opts.onPlayerWaiting(payload.handle);
+      });
+
       _socket.on('overseer:snapshot', function (payload) {
         if (typeof _opts.onSnapshot === 'function') _opts.onSnapshot(payload);
       });
 
       _socket.on('overseer:ack', function () {
         _flashSync();
+      });
+
+      // Campaign start confirmed by server
+      _socket.on('overseer:campaign-started', function (payload) {
+        _setStatus('connected', '⬤ OVERSEER SYNC: CAMPAIGN LIVE — ' + (payload.players || []).length + ' player(s)');
+        if (typeof _opts.onCampaignStarted === 'function') _opts.onCampaignStarted(payload);
+      });
+
+      // Campaign end confirmed by server
+      _socket.on('overseer:campaign-ended', function (payload) {
+        _setStatus('connected', '⬤ OVERSEER SYNC: CAMPAIGN ENDED — session ' + (_opts.sessionCode || ''));
+        if (typeof _opts.onCampaignEnded === 'function') _opts.onCampaignEnded(payload);
+      });
+
+      // Sync-campaign ack
+      _socket.on('overseer:sync-ack', function (payload) {
+        _setStatus('connected', '⬤ OVERSEER SYNC: RESYNCED — ' + (payload.players || []).length + ' player(s)');
+        setTimeout(function () { _restoreConnectedStatus(); }, 2000);
+        if (typeof _opts.onSyncAck === 'function') _opts.onSyncAck(payload);
       });
 
       // Combat state broadcast from server
@@ -184,6 +221,48 @@
     requestSnapshot: function () {
       if (!_socket || !_connected) return;
       _socket.emit('overseer:request-snapshot');
+    },
+
+    // ── Campaign Session Controls ─────────────────────────────────────────────
+
+    /**
+     * Start the campaign session.  Sends authoritative player data from the
+     * Overseer's localStorage to the server so every waiting player is promoted
+     * and synced.
+     * @param {string} campaignId    Identifier for this campaign
+     * @param {object} playerData    Map of { handle: dataObject } for all players
+     */
+    startCampaign: function (campaignId, playerData) {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:start-campaign', {
+        campaignId: campaignId || null,
+        playerData: playerData || {}
+      });
+      _flashSync();
+    },
+
+    /**
+     * End the campaign session.  The server notifies all players.
+     * Call this with the final player state so the caller can persist to localStorage.
+     */
+    endCampaign: function () {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:end-campaign');
+      _flashSync();
+    },
+
+    /**
+     * Re-sync campaign from localStorage after Overseer reconnects.
+     * @param {string} campaignId  Campaign identifier
+     * @param {object} playerData  Map of { handle: dataObject }
+     */
+    syncCampaign: function (campaignId, playerData) {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:sync-campaign', {
+        campaignId: campaignId || null,
+        playerData: playerData || {}
+      });
+      _flashSync();
     },
 
     // ── Combat Controls ──────────────────────────────────────────────────────
