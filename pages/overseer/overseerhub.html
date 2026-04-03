@@ -4115,12 +4115,14 @@
         if (td) td.innerHTML = '<span style="color:var(--overseer-gold-bright);font-size:10px;">COMPLETE</span>';
         btn.parentNode.removeChild(btn);
         poShowToast('Quest marked complete.');
+        if (_currentHandle) window.poSaveSection('quests');
     };
 
     window.poActivateQuest = function(btn) {
         var td = btn.closest('tr').querySelector('td:nth-child(2)');
         if (td) td.innerHTML = '<span style="color:var(--overseer-green-bright);font-size:10px;">ACTIVE</span>';
         poShowToast('Quest activated.');
+        if (_currentHandle) window.poSaveSection('quests');
     };
 }());
 </script>
