@@ -2310,7 +2310,8 @@
         if (typeof applyMutationToEnemy === 'function') {
             applyMutationToEnemy(enemy, effect);
         } else {
-            // Fallback if mutationSystem.js is not loaded
+            // mutationSystem.js is not loaded — log a warning; HP restored but stat effects skipped
+            addLog('\u26A0 mutationSystem.js not loaded — HP restored but stat effects not applied', 'yellow');
             enemy.currentHp  = Math.ceil((enemy.maxHp || 1) / 2);
             enemy.hasMutated = true;
             enemy.mutationEffect = effect;
@@ -2335,14 +2336,10 @@
     };
 
     window.skipMutation = function() {
-        if (!_pendingMutation) {
-            var modal = document.getElementById('mutationModal');
-            if (modal) modal.classList.add('hidden');
-            return;
-        }
-
         var modal = document.getElementById('mutationModal');
         if (modal) modal.classList.add('hidden');
+
+        if (!_pendingMutation) return;
 
         var enemy        = _pendingMutation.enemy;
         var killerHandle = _pendingMutation.killerHandle;
