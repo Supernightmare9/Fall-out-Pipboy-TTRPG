@@ -582,7 +582,8 @@
          getLootBonusChance() is available for luck-based bonus loot rolls. -->
     <script src="../../assets/logic/fallout_stat_bonuses.js"></script>
     <script src="../../assets/helpers/mechanics/encounterBuilder.js"></script>
-    <script src="../../assets/logic/xp.js"></script>
+    <script src="../../assets/logic/xp/xpprogression.js"></script>
+    <script src="../../assets/logic/xp/enemyxp.js"></script>
     <script src="../../assets/helpers/Managers/progressionManager.js"></script>
     <script src="../../assets/helpers/mechanics/combatSystem.js"></script>
 </head>
@@ -2048,36 +2049,165 @@
         var el=document.getElementById('enemyListBody');if(!el)return;
         if(!_campaign||!_campaign.activeEncounter.enemies||_campaign.activeEncounter.enemies.length===0){el.innerHTML='<div class="empty-state">No active enemies</div>';return;}
         el.innerHTML='';
+        var ae=_campaign.activeEncounter;
         _campaign.activeEncounter.enemies.forEach(function(e){
             var pct=e.maxHp>0?Math.round((e.currentHp/e.maxHp)*100):0;
+
+            // Build player attribution dropdown for damage tracking
+            var playerOpts='<option value="">— no attribution —</option>';
+            (_campaign.players||[]).forEach(function(p){
+                playerOpts+='<option value="'+esc(p.username)+'">'+esc(p.characterName||p.username)+'</option>';
+            });
+            // Include live-connected players not yet in campaign.players
+            var livePlayers=window._overseerLivePlayers||{};
+            Object.keys(livePlayers).forEach(function(h){
+                if(!(_campaign.players||[]).find(function(p){return p.username===h;})){
+                    playerOpts+='<option value="'+esc(h)+'">'+esc(h)+'</option>';
+                }
+            });
+
+            // Build damage-log summary for display
+            var damageLog=(ae.damageLog&&ae.damageLog[e.id])||{};
+            var contribs=Object.keys(damageLog).filter(function(h){return damageLog[h]>0;});
+            var dmgSummary=contribs.length>0
+                ?'Damage tracked: '+contribs.map(function(h){return h+': '+damageLog[h];}).join(', ')
+                :'No damage attributed yet';
+
+            // Ultra / boss badges
+            var badges='';
+            if(e.isUltra)badges+='<span style="color:#ef4444;font-size:9px;margin-left:4px;">[ULTRA]</span>';
+            if(e.isBoss) badges+='<span style="color:#d97706;font-size:9px;margin-left:4px;">[BOSS]</span>';
+
             var card=document.createElement('div');card.className='enemy-card';card.id='enemy-card-'+e.id;
             card.innerHTML=
                 '<div class="enemy-card-header">'+
-                    '<span class="enemy-name">'+esc(e.name)+'</span>'+
+                    '<span class="enemy-name">'+esc(e.name)+'</span>'+badges+
                     '<span class="enemy-hp-text">'+e.currentHp+' / '+e.maxHp+' HP</span>'+
                 '</div>'+
                 '<div class="hp-bar-container"><div class="hp-bar-fill '+hpClass(e.currentHp,e.maxHp)+'" style="width:'+hpW(e.currentHp,e.maxHp)+'"></div></div>'+
                 '<div class="enemy-meta">AC '+(e.ac||'?')+' | '+pct+'% HP | Initiative: '+(e.initiative||'?')+'</div>'+
+                '<div style="display:flex;align-items:center;gap:6px;margin:6px 0 4px;flex-wrap:wrap;">'+
+                    '<label style="font-size:9px;color:rgba(232,232,232,.5);white-space:nowrap;">Dealt by:</label>'+
+                    '<select id="attacker-'+e.id+'" style="flex:1;min-width:120px;background:#0c1524;border:1px solid #2a5298;color:#e8e8e8;font-family:\'Courier New\',monospace;font-size:10px;padding:2px 4px;">'+playerOpts+'</select>'+
+                '</div>'+
                 '<div class="enemy-damage-controls">'+
                     '<button class="dmg-btn dmg" onclick="adjustHp(\''+e.id+'\',-5)">\u2212 5</button>'+
+                    '<button class="dmg-btn dmg" onclick="adjustHp(\''+e.id+'\',-10)">\u2212 10</button>'+
                     '<button class="dmg-btn dmg" onclick="adjustHp(\''+e.id+'\',-1)">\u2212 1</button>'+
                     '<button class="dmg-btn heal" onclick="adjustHp(\''+e.id+'\',1)">+ 1</button>'+
                     '<button class="dmg-btn heal" onclick="adjustHp(\''+e.id+'\',5)">+ 5</button>'+
                     '<input class="enemy-hp-input" type="number" id="hpi-'+e.id+'" placeholder="Set HP" min="0"/>'+
                     '<button class="dmg-btn" onclick="setHpManual(\''+e.id+'\')" style="font-size:9px;">SET</button>'+
                     '<button class="dmg-btn remove" onclick="removeEnemy(\''+e.id+'\')">[REMOVE]</button>'+
-                '</div>';
+                '</div>'+
+                '<div style="font-size:9px;color:rgba(232,232,232,.35);margin-top:3px;font-style:italic;">'+esc(dmgSummary)+'</div>';
             el.appendChild(card);
         });
+    }
+
+    // Record damage dealt to an enemy by a specific player.
+    // Returns the actual HP reduction (may be less than |delta| due to HP flooring at 0).
+    function _recordDamageAttribution(enemyId, attackerHandle, actualDamage) {
+        if (!_campaign || !attackerHandle || actualDamage <= 0) return;
+        var ae = _campaign.activeEncounter;
+        if (!ae.damageLog) ae.damageLog = {};
+        if (!ae.damageLog[enemyId]) ae.damageLog[enemyId] = {};
+        ae.damageLog[enemyId][attackerHandle] = (ae.damageLog[enemyId][attackerHandle] || 0) + actualDamage;
+    }
+
+    // Trigger automatic XP distribution when a non-ultra, non-boss enemy is defeated.
+    function _triggerEnemyXpDistribution(enemy, killerHandle) {
+        // Ultra enemies and bosses are excluded — future mutation-event logic hooks here
+        if (enemy.isUltra || enemy.isBoss) {
+            addLog(enemy.name + ' is ' + (enemy.isUltra ? 'Ultra' : 'a Boss') + ' — XP pending future mutation/defeat logic', 'yellow');
+            return;
+        }
+
+        if (typeof OverseerSync === 'undefined' || !OverseerSync.isConnected()) {
+            addLog('No live sync — cannot auto-distribute XP for ' + enemy.name, 'yellow');
+            return;
+        }
+
+        var ae = _campaign.activeEncounter;
+        var damageLog = (ae.damageLog && ae.damageLog[enemy.id]) || {};
+        var contributors = Object.keys(damageLog).filter(function(h) { return damageLog[h] > 0; });
+
+        if (contributors.length === 0) {
+            addLog('\u26A0 No damage attributed for ' + enemy.name + ' — XP not auto-distributed (set attacker before dealing damage)', 'yellow');
+            return;
+        }
+
+        // Killing blow: stored from last damage attribution
+        var killer = (ae.killingBlows && ae.killingBlows[enemy.id]) || killerHandle || contributors[0];
+
+        // Determine base XP pool from enemy difficulty/rarity and killer's level
+        var killerData = (window._overseerLivePlayers && window._overseerLivePlayers[killer]) || {};
+        var killerLevel = killerData.level || 1;
+        var enemyRarity = enemy.difficulty || enemy.rarity || 'common';
+        var baseXP = (typeof getEnemyXP === 'function') ? getEnemyXP(killerLevel, enemyRarity) : 50;
+
+        // Split evenly; excess goes to the killing-blow player
+        var perPlayerBase = Math.floor(baseXP / contributors.length);
+        var excess = baseXP % contributors.length;
+
+        var awards = [];
+        contributors.forEach(function(handle) {
+            var playerData = (window._overseerLivePlayers && window._overseerLivePlayers[handle]) || {};
+            var intStat = (playerData.special && typeof playerData.special.intelligence === 'number')
+                ? playerData.special.intelligence : 5;
+            var intBonus = (typeof getIntXPMultiplier === 'function') ? getIntXPMultiplier(intStat) : 1.15;
+            var rawShare = perPlayerBase + (handle === killer ? excess : 0);
+            var finalXP  = Math.floor(rawShare * intBonus);
+
+            var msg = '\u2694 ' + enemy.name + ' defeated! ';
+            if (contributors.length > 1) {
+                msg += 'Shared XP: +' + finalXP;
+                if (handle === killer) msg += ' (killing blow)';
+            } else {
+                msg += '+' + finalXP + ' XP';
+            }
+            if (intBonus > 1) msg += ' [INT \u00D7' + intBonus.toFixed(2) + ']';
+
+            awards.push({ playerHandle: handle, xp: finalXP, message: msg });
+        });
+
+        OverseerSync.awardCombatXP(awards);
+
+        var totalAwarded = awards.reduce(function(sum, a) { return sum + a.xp; }, 0);
+        addLog('\u26A1 XP distributed for ' + enemy.name +
+               ' (' + baseXP + ' base, ' + contributors.length + ' player(s), ' + totalAwarded + ' total awarded)', 'green');
     }
 
     window.adjustHp=function(id,delta){
         if(!_campaign)return;
         var e=_campaign.activeEncounter.enemies.find(function(x){return x.id===id;});if(!e)return;
-        var b=e.currentHp;e.currentHp=Math.max(0,Math.min(e.maxHp,e.currentHp+delta));
-        if(delta<0)addLog(e.name+' took '+Math.abs(delta)+' damage ('+b+' \u2192 '+e.currentHp+')','red');
-        else addLog(e.name+' healed '+delta+' HP ('+b+' \u2192 '+e.currentHp+')','green');
-        if(e.currentHp===0)addLog(e.name+' has been defeated!','green');
+        var b=e.currentHp;
+        e.currentHp=Math.max(0,Math.min(e.maxHp,e.currentHp+delta));
+        var actualChange=b-e.currentHp; // positive = damage dealt
+
+        if(delta<0)addLog(e.name+' took '+actualChange+' damage ('+b+' \u2192 '+e.currentHp+')','red');
+        else addLog(e.name+' healed '+Math.abs(delta)+' HP ('+b+' \u2192 '+e.currentHp+')','green');
+
+        // Record damage attribution if a player was selected
+        if(delta<0&&actualChange>0){
+            var attackerSel=document.getElementById('attacker-'+id);
+            var attackerHandle=attackerSel?attackerSel.value:'';
+            if(attackerHandle){
+                _recordDamageAttribution(id,attackerHandle,actualChange);
+                // Record killing blow
+                if(e.currentHp===0){
+                    var ae=_campaign.activeEncounter;
+                    if(!ae.killingBlows)ae.killingBlows={};
+                    ae.killingBlows[id]=attackerHandle;
+                }
+            }
+        }
+
+        if(e.currentHp===0){
+            addLog(e.name+' has been defeated!','green');
+            var killerSel=document.getElementById('attacker-'+id);
+            _triggerEnemyXpDistribution(e, killerSel?killerSel.value:'');
+        }
         syncHp(id,e.currentHp);renderEnemyTracker();renderInitiativeTracker();save();
     };
 
@@ -2086,8 +2216,30 @@
         var val=parseInt(inp.value,10);if(isNaN(val)||val<0)return;
         if(!_campaign)return;
         var e=_campaign.activeEncounter.enemies.find(function(x){return x.id===id;});if(!e)return;
-        var b=e.currentHp;e.currentHp=Math.min(e.maxHp,Math.max(0,val));
+        var b=e.currentHp;
+        e.currentHp=Math.min(e.maxHp,Math.max(0,val));
+        var actualChange=b-e.currentHp; // positive = damage dealt
         addLog(e.name+' HP set to '+e.currentHp+' (was '+b+')','blue');
+
+        // Record damage attribution for manual HP set if it represents damage
+        if(actualChange>0){
+            var attackerSel=document.getElementById('attacker-'+id);
+            var attackerHandle=attackerSel?attackerSel.value:'';
+            if(attackerHandle){
+                _recordDamageAttribution(id,attackerHandle,actualChange);
+                if(e.currentHp===0){
+                    var ae=_campaign.activeEncounter;
+                    if(!ae.killingBlows)ae.killingBlows={};
+                    ae.killingBlows[id]=attackerHandle;
+                }
+            }
+        }
+
+        if(e.currentHp===0){
+            addLog(e.name+' has been defeated!','green');
+            var killerSel2=document.getElementById('attacker-'+id);
+            _triggerEnemyXpDistribution(e, killerSel2?killerSel2.value:'');
+        }
         inp.value='';syncHp(id,e.currentHp);renderEnemyTracker();renderInitiativeTracker();save();
     };
 

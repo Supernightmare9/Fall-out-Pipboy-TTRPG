@@ -1907,7 +1907,7 @@
     <script src="../../assets/logic/fallout_stat_bonuses.js"></script>
     <script src="../../assets/helpers/Managers/inventoryManager.js"></script>
     <script src="../../assets/helpers/mechanics/diceRoller.js"></script>
-    <script src="../../assets/logic/xp.js"></script>
+    <script src="../../assets/logic/xp/xpprogression.js"></script>
     <script src="../../assets/helpers/Managers/progressionManager.js"></script>
     <script src="../../assets/helpers/mechanics/combatSystem.js"></script>
     <!-- Navigation (hamburger injected by playernavigation.js) -->
@@ -3852,6 +3852,22 @@
             onCombatUpdate: function (state) {
                 _combatState = state || _combatState;
                 renderCombat();
+            },
+
+            onPrivateMessage: function (payload) {
+                // Handle private messages from Overseer — specifically XP awards
+                // triggered automatically on enemy defeat (mid-combat).
+                if (!payload) return;
+
+                if (payload.type === 'xp_award' && typeof payload.xp === 'number' && payload.xp > 0) {
+                    // Award XP through ProgressionManager so level-up logic fires
+                    awardXpToCharacter(payload.xp, 'Combat');
+                }
+
+                // Show the message text in the roll-result feed
+                if (payload.message) {
+                    addRollResult('⚔ ' + payload.message, 'roll-hit');
+                }
             },
 
             onDisconnect: function () {

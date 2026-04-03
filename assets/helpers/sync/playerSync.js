@@ -131,6 +131,8 @@
      *   playerHandle       {string}   Player name/handle
      *   onConnected        {function} Called with { data } when session join is confirmed
      *   onUpdate           {function} Called with (field, value, snapshot) on overseer push
+     *   onPrivateMessage   {function} Called with payload when a private message is received
+     *                                 (e.g. XP award: { type: 'xp_award', xp, message })
      *   onDisconnect       {function} Called on socket disconnect
      *   onCampaignWaiting  {function} Called when server reports no active campaign
      *   onCampaignStarted  {function} Called when campaign becomes active and join is completed
@@ -196,6 +198,19 @@
       _socket.on('player:ack', function (payload) {
         // Silent acknowledgement – optionally show a brief flash
         _flashSync();
+      });
+
+      // Private message from Overseer (e.g. XP award notification)
+      _socket.on('player:private-message', function (payload) {
+        _setStatus('syncing', '⬤ SYNC: MESSAGE RECEIVED');
+        setTimeout(function () {
+          if (_connected) {
+            _setStatus('connected', '⬤ SYNC: LIVE — ' + (_opts.playerHandle || '') + ' @ ' + (_opts.sessionCode || ''));
+          }
+        }, 1200);
+        if (typeof _opts.onPrivateMessage === 'function') {
+          _opts.onPrivateMessage(payload || {});
+        }
       });
 
       // Overseer pushed a change to this player
