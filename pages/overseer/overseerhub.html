@@ -571,6 +571,24 @@
         .ip-form-textarea::placeholder{color:rgba(232,232,232,.3);}
         .ip-two-col-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
         .ip-form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap;}
+
+        /* ── Mutation Modal ──────────────────────────────────────────────────── */
+        .mutation-modal-title{font-size:14px;font-weight:bold;color:#ef4444;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+        .mutation-modal-subtitle{font-size:11px;color:rgba(232,232,232,.6);margin-bottom:16px;letter-spacing:1px;}
+        .mutation-effect-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px;}
+        .mutation-effect-card{background:var(--overseer-dark);border:1px solid var(--overseer-border);padding:12px;cursor:pointer;transition:border-color .15s,background .15s;text-align:left;}
+        .mutation-effect-card:hover{border-color:var(--overseer-gold);background:rgba(212,160,23,.1);}
+        .mutation-effect-card.selected{border-color:#ef4444;background:rgba(239,68,68,.12);}
+        .mutation-effect-name{font-size:11px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+        .mutation-effect-type-buff{color:#34d399;font-size:9px;margin-bottom:4px;}
+        .mutation-effect-type-debuff{color:#f87171;font-size:9px;margin-bottom:4px;}
+        .mutation-effect-type-unique{color:#a78bfa;font-size:9px;margin-bottom:4px;}
+        .mutation-effect-desc{font-size:10px;color:rgba(232,232,232,.7);line-height:1.4;}
+        .mutation-modal-actions{display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--overseer-border);padding-top:12px;}
+        .mutation-danger-btn{background:rgba(239,68,68,.15);border:1px solid #ef4444;color:#ef4444;font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;padding:7px 14px;cursor:pointer;text-transform:uppercase;}
+        .mutation-danger-btn:hover{background:rgba(239,68,68,.3);}
+        .mutation-skip-btn{background:transparent;border:1px solid var(--overseer-border);color:rgba(232,232,232,.5);font-family:'Courier New',monospace;font-size:10px;letter-spacing:1px;padding:7px 14px;cursor:pointer;text-transform:uppercase;}
+        .mutation-skip-btn:hover{border-color:var(--overseer-gold);color:var(--overseer-gold);}
     </style>
 
     <script src="../../assets/data/accounts.js"></script>
@@ -586,6 +604,7 @@
     <script src="../../assets/logic/xp/enemyxp.js"></script>
     <script src="../../assets/helpers/Managers/progressionManager.js"></script>
     <script src="../../assets/helpers/mechanics/combatSystem.js"></script>
+    <script src="../../assets/logic/mutation/mutationSystem.js"></script>
 </head>
 <body>
 
@@ -1711,6 +1730,21 @@
     </div>
 </div>
 
+<!-- MUTATION MODAL — Overseer selects a mutation effect when an enemy survives -->
+<div id="mutationModal" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:680px;">
+        <div class="mutation-modal-title">&#x2622; MUTATION EVENT</div>
+        <div id="mutationModalSubtitle" class="mutation-modal-subtitle">
+            SELECT A MUTATION EFFECT FOR THE ENEMY
+        </div>
+        <div id="mutationEffectGrid" class="mutation-effect-grid"></div>
+        <div class="mutation-modal-actions">
+            <button class="mutation-skip-btn" onclick="skipMutation()">[SKIP MUTATION]</button>
+            <button class="mutation-danger-btn" id="applyMutationBtn" onclick="confirmMutation()" disabled>[APPLY MUTATION]</button>
+        </div>
+    </div>
+</div>
+
 <!-- LOOT DISTRIBUTION MODAL -->
 <div id="lootDistributionModal" class="modal-backdrop hidden">
     <div class="modal-box" style="max-width:500px;">
@@ -2073,10 +2107,11 @@
                 ?'Damage tracked: '+contribs.map(function(h){return h+': '+damageLog[h];}).join(', ')
                 :'No damage attributed yet';
 
-            // Ultra / boss badges
+            // Ultra / boss / mutated badges
             var badges='';
-            if(e.isUltra)badges+='<span style="color:#ef4444;font-size:9px;margin-left:4px;">[ULTRA]</span>';
-            if(e.isBoss) badges+='<span style="color:#d97706;font-size:9px;margin-left:4px;">[BOSS]</span>';
+            if(e.isUltra)   badges+='<span style="color:#ef4444;font-size:9px;margin-left:4px;">[ULTRA]</span>';
+            if(e.isBoss)    badges+='<span style="color:#d97706;font-size:9px;margin-left:4px;">[BOSS]</span>';
+            if(e.hasMutated)badges+='<span style="color:#a855f7;font-size:9px;margin-left:4px;">[MUTATED]</span>';
 
             var card=document.createElement('div');card.className='enemy-card';card.id='enemy-card-'+e.id;
             card.innerHTML=
@@ -2116,13 +2151,43 @@
     }
 
     // Trigger automatic XP distribution when a non-ultra, non-boss enemy is defeated.
+    // If the enemy qualifies for mutation (non-boss, not yet mutated) a random roll
+    // may trigger the Overseer mutation-choice prompt instead.
     function _triggerEnemyXpDistribution(enemy, killerHandle) {
-        // Ultra enemies and bosses are excluded — future mutation-event logic hooks here
-        if (enemy.isUltra || enemy.isBoss) {
-            addLog(enemy.name + ' is ' + (enemy.isUltra ? 'Ultra' : 'a Boss') + ' — XP pending future mutation/defeat logic', 'yellow');
+        // Bosses are immune to mutation — go straight to XP
+        if (enemy.isBoss) {
+            addLog(enemy.name + ' is a Boss — proceeding to XP distribution', 'yellow');
+            _runXpDistribution(enemy, killerHandle);
             return;
         }
 
+        // Already mutated once — true death; distribute XP normally
+        if (enemy.hasMutated) {
+            _runXpDistribution(enemy, killerHandle);
+            return;
+        }
+
+        // Roll for mutation
+        var mutated = (typeof rollForMutation === 'function')
+            ? rollForMutation(enemy)
+            : false;
+
+        if (mutated) {
+            // Mutation triggered — show Overseer the 3-effect picker; hold XP
+            var effects = (typeof sampleMutationEffects === 'function')
+                ? sampleMutationEffects()
+                : [];
+            _pendingMutation = { enemy: enemy, killerHandle: killerHandle, effects: effects };
+            _selectedMutationEffect = null;
+            _showMutationModal(enemy, effects);
+        } else {
+            // No mutation — standard XP distribution
+            _runXpDistribution(enemy, killerHandle);
+        }
+    }
+
+    // Internal XP distribution (runs after mutation is skipped or enemy is truly defeated).
+    function _runXpDistribution(enemy, killerHandle) {
         if (typeof OverseerSync === 'undefined' || !OverseerSync.isConnected()) {
             addLog('No live sync — cannot auto-distribute XP for ' + enemy.name, 'yellow');
             return;
@@ -2177,6 +2242,119 @@
         addLog('\u26A1 XP distributed for ' + enemy.name +
                ' (' + baseXP + ' base, ' + contributors.length + ' player(s), ' + totalAwarded + ' total awarded)', 'green');
     }
+
+    // ── Mutation Modal ────────────────────────────────────────────────────────
+
+    // Tracks the pending mutation choice until Overseer confirms or skips.
+    var _pendingMutation = null;
+    var _selectedMutationEffect = null;
+
+    function _showMutationModal(enemy, effects) {
+        var modal = document.getElementById('mutationModal');
+        if (!modal) return;
+
+        var subtitle = document.getElementById('mutationModalSubtitle');
+        if (subtitle) {
+            subtitle.textContent = '\u2622 ' + enemy.name.toUpperCase() + ' SURVIVED — SELECT A MUTATION EFFECT';
+        }
+
+        var grid = document.getElementById('mutationEffectGrid');
+        if (grid) {
+            grid.innerHTML = '';
+            effects.forEach(function(effect) {
+                var card = document.createElement('div');
+                card.className = 'mutation-effect-card';
+                card.setAttribute('data-effect-id', effect.id);
+
+                var typeClass = 'mutation-effect-type-' + (effect.type || 'unique');
+                var typeLabel = effect.type === 'buff'   ? '\u2B06 BUFF'
+                              : effect.type === 'debuff' ? '\u2B07 DEBUFF'
+                              : '\u2605 UNIQUE';
+
+                card.innerHTML =
+                    '<div class="mutation-effect-name">' + esc(effect.name) + '</div>' +
+                    '<div class="' + typeClass + '">' + typeLabel + '</div>' +
+                    '<div class="mutation-effect-desc">' + esc(effect.description) + '</div>';
+
+                card.onclick = function() {
+                    grid.querySelectorAll('.mutation-effect-card').forEach(function(c) {
+                        c.classList.remove('selected');
+                    });
+                    card.classList.add('selected');
+                    _selectedMutationEffect = effect;
+                    var applyBtn = document.getElementById('applyMutationBtn');
+                    if (applyBtn) applyBtn.removeAttribute('disabled');
+                };
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Reset apply button state
+        var applyBtn = document.getElementById('applyMutationBtn');
+        if (applyBtn) applyBtn.setAttribute('disabled', 'disabled');
+
+        modal.classList.remove('hidden');
+    }
+
+    window.confirmMutation = function() {
+        if (!_pendingMutation || !_selectedMutationEffect) return;
+
+        var modal = document.getElementById('mutationModal');
+        if (modal) modal.classList.add('hidden');
+
+        var enemy        = _pendingMutation.enemy;
+        var effect       = _selectedMutationEffect;
+
+        // Apply mutation: restore half HP, apply stat changes, mark hasMutated
+        if (typeof applyMutationToEnemy === 'function') {
+            applyMutationToEnemy(enemy, effect);
+        } else {
+            // Fallback if mutationSystem.js is not loaded
+            enemy.currentHp  = Math.ceil((enemy.maxHp || 1) / 2);
+            enemy.hasMutated = true;
+            enemy.mutationEffect = effect;
+        }
+
+        addLog('\u2622 MUTATION: ' + enemy.name + ' mutated! [' + effect.name + '] \u2014 ' + effect.description, 'red');
+
+        // Broadcast the mutation event to all players
+        if (typeof OverseerSync !== 'undefined' && OverseerSync.isConnected()) {
+            OverseerSync.announceMutation(enemy.name, effect.name, effect.description);
+        }
+
+        // No XP at this stage — clear pending state and refresh UI
+        _pendingMutation         = null;
+        _selectedMutationEffect  = null;
+
+        // Sync HP to combatants list and re-render
+        syncHp(enemy.id, enemy.currentHp);
+        renderEnemyTracker();
+        renderInitiativeTracker();
+        save();
+    };
+
+    window.skipMutation = function() {
+        if (!_pendingMutation) {
+            var modal = document.getElementById('mutationModal');
+            if (modal) modal.classList.add('hidden');
+            return;
+        }
+
+        var modal = document.getElementById('mutationModal');
+        if (modal) modal.classList.add('hidden');
+
+        var enemy        = _pendingMutation.enemy;
+        var killerHandle = _pendingMutation.killerHandle;
+
+        addLog(enemy.name + ' mutation skipped by Overseer \u2014 proceeding to XP distribution', 'yellow');
+
+        _pendingMutation        = null;
+        _selectedMutationEffect = null;
+
+        // Proceed with standard XP distribution
+        _runXpDistribution(enemy, killerHandle);
+    };
 
     window.adjustHp=function(id,delta){
         if(!_campaign)return;

@@ -3854,6 +3854,18 @@
                 renderCombat();
             },
 
+            onMutationEvent: function (payload) {
+                // Mutation announcement broadcast by Overseer when a non-boss enemy mutates.
+                if (!payload) return;
+                var enemyName  = payload.enemyName  || 'An enemy';
+                var effectName = payload.effectName || 'Unknown';
+                var effectDesc = payload.effectDescription || '';
+                var msg = '☢ MUTATION! ' + enemyName + ' has mutated!';
+                if (effectName) msg += ' [' + effectName + ']';
+                if (effectDesc) msg += ' — ' + effectDesc;
+                addRollResult(msg, 'roll-crit');
+            },
+
             onPrivateMessage: function (payload) {
                 // Handle private messages from Overseer — specifically XP awards
                 // triggered automatically on enemy defeat (mid-combat).
