@@ -913,7 +913,7 @@
                 <div class="po-form-group"><label class="po-form-label">Main Hand</label><input class="po-form-input" type="text" id="poEquip_mainHand" value=""></div>
                 <div class="po-form-group"><label class="po-form-label">Off Hand</label><input class="po-form-input" type="text" id="poEquip_offHand" placeholder="Empty"></div>
                 <div class="po-form-group"><label class="po-form-label">Head</label><input class="po-form-input" type="text" id="poEquip_head" placeholder="Empty"></div>
-                <div class="po-form-group"><label class="po-form-label">Chest Armor</label><input class="po-form-input" type="text" id="poEquip_chest" value="Leather Chest Piece"></div>
+                <div class="po-form-group"><label class="po-form-label">Chest Armor</label><input class="po-form-input" type="text" id="poEquip_chest" value=""></div>
                 <div class="po-form-group"><label class="po-form-label">Legs</label><input class="po-form-input" type="text" id="poEquip_legs" placeholder="Empty"></div>
                 <div class="po-form-group"><label class="po-form-label">Accessory</label><input class="po-form-input" type="text" id="poEquip_access" placeholder="Empty"></div>
             </div>
@@ -3582,7 +3582,7 @@
 
         // Rebuild options preserving the current selection
         var prev = sel.value;
-        while (sel.options.length > 1) sel.remove(1);
+        for (var i = sel.options.length - 1; i > 0; i--) sel.remove(i);
         handles.forEach(function(h) {
             var opt = document.createElement('option');
             opt.value = h;
@@ -3907,14 +3907,16 @@
         } else if (section === 'perks') {
             var perks = [];
             document.querySelectorAll('#poPerksContainer .po-tag').forEach(function(tag) {
-                var name = tag.childNodes[0] ? tag.childNodes[0].textContent.trim() : '';
+                var btn = tag.querySelector('.po-tag-remove');
+                var name = tag.textContent.replace(btn ? btn.textContent : '', '').trim();
                 if (name) perks.push(name);
             });
             OverseerSync.updatePlayer(handle, 'perks', perks);
         } else if (section === 'conditions') {
             var debuffs = [];
             document.querySelectorAll('#poConditionsContainer .po-tag').forEach(function(tag) {
-                var name = tag.childNodes[0] ? tag.childNodes[0].textContent.trim() : '';
+                var btn = tag.querySelector('.po-tag-remove');
+                var name = tag.textContent.replace(btn ? btn.textContent : '', '').trim();
                 if (name) debuffs.push(name);
             });
             OverseerSync.updatePlayer(handle, 'debuffs', debuffs);
@@ -4025,9 +4027,10 @@
         if (!handle) return;
         var maxHp = parseInt(document.getElementById('poCharMaxHP').value, 10) || 100;
         document.getElementById('poCharHP').value = maxHp;
+        var ap    = parseInt(document.getElementById('poCharAP').value,    10) || 0;
         var maxAp = parseInt(document.getElementById('poCharMaxAP').value, 10) || 10;
         var rad   = parseInt(document.getElementById('poCharRad').value,   10) || 0;
-        _updateVitalBars(maxHp, maxHp, maxAp, maxAp, rad, 1000);
+        _updateVitalBars(maxHp, maxHp, ap, maxAp, rad, 1000);
         OverseerSync.updatePlayer(handle, 'hp', maxHp);
         poShowToast(handle + ' fully healed to ' + maxHp + ' HP.');
     };
