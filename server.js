@@ -199,7 +199,12 @@ io.on('connection', (socket) => {
       });
 
       if (session.overseerSocketId) {
-        io.to(session.overseerSocketId).emit('overseer:player-waiting', { handle });
+        io.to(session.overseerSocketId).emit('overseer:player-waiting', {
+          handle,
+          data: initialData || null
+        });
+      } else {
+        console.log(`[player:join] No Overseer present in session ${code} — ${handle} is pending`);
       }
 
       console.log(`[player:join] ${handle} → session ${code} (waiting for campaign)`);
@@ -236,11 +241,14 @@ io.on('connection', (socket) => {
     if (session.overseerSocketId) {
       io.to(session.overseerSocketId).emit('overseer:player-joined', {
         handle,
-        data: session.players[handle].data
+        data:       session.players[handle].data,
+        campaignId: session.campaignId || null
       });
+    } else {
+      console.log(`[player:join] No Overseer present in session ${code} — ${handle} joined but Overseer cannot be notified`);
     }
 
-    console.log(`[player:join] ${handle} → session ${code}`);
+    console.log(`[player:join] ${handle} → session ${code} (campaignId=${session.campaignId || 'none'})`);
   });
 
   // ── OVERSEER: join session ─────────────────────────────────────────────────

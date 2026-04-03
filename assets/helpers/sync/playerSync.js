@@ -175,9 +175,12 @@
 
       // Server: no campaign is active yet — show waiting overlay
       _socket.on('campaign:waiting', function (payload) {
+        var code = (payload && payload.sessionCode) || (_opts.sessionCode || '?');
         var msg = (payload && payload.message) || 'Waiting for the Overseer to start the campaign…';
-        _setStatus('connecting', '⬤ SYNC: WAITING FOR OVERSEER…');
-        _showWaitingOverlay(msg);
+        _setStatus('connecting', '⬤ SYNC: WAITING FOR OVERSEER — session ' + code);
+        _showWaitingOverlay(msg + '\n(session: ' + code + ')');
+        console.log('[PlayerSync] Waiting for campaign — sessionCode:', code,
+                    '| handle:', _opts.playerHandle || 'Player');
         if (typeof _opts.onCampaignWaiting === 'function') _opts.onCampaignWaiting(payload);
       });
 
@@ -250,6 +253,8 @@
 
       _socket.on('error:join', function (err) {
         _setStatus('disconnected', '⬤ SYNC: ERROR — ' + (err.message || 'join failed'));
+        console.error('[PlayerSync] Join error — sessionCode:', _opts.sessionCode,
+                      '| handle:', _opts.playerHandle, '| message:', err.message);
       });
 
       _socket.on('error:auth', function (err) {
