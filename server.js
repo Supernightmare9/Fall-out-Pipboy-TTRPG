@@ -494,6 +494,51 @@ io.on('connection', (socket) => {
     socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
   });
 
+  // ── OVERSEER: award combat XP to individual players ───────────────────────
+  // Payload: { awards: [{ playerHandle, xp, message }] }
+  // Immediately delivers per-player XP grants mid-combat.  Each eligible player
+  // receives a private 'player:private-message' socket event with their XP amount
+  // so they can apply it to ProgressionManager and see a level-up if they cross
+  // the threshold.  Ultra / boss enemies are excluded upstream before calling this.
+  socket.on('overseer:award-combat-xp', ({ awards } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    if (!Array.isArray(awards) || awards.length === 0) return;
+
+    awards.forEach(({ playerHandle, xp, message }) => {
+      const handle = String(playerHandle || '').trim();
+      if (!handle) return;
+      const player = session.players[handle];
+      if (!player) return;
+
+      // Keep server-side XP tally in sync for the Overseer overview panel
+      if (typeof xp === 'number' && xp > 0) {
+        player.data.xp = (player.data.xp || 0) + xp;
+      }
+
+      // Send private XP notification directly to the player's socket
+      if (player.socketId) {
+        io.to(player.socketId).emit('player:private-message', {
+          type:    'xp_award',
+          message: message || `+${xp} XP gained!`,
+          xp:      typeof xp === 'number' ? xp : 0
+        });
+      }
+    });
+
+    // Notify Overseer with fresh snapshot so the player overview stays current
+    socket.emit('overseer:ack', { action: 'combat-xp-awarded', count: awards.length });
+    if (session.overseerSocketId) {
+      socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
+    }
+
+    console.log(`[overseer:award-combat-xp] session ${sessionCode} | ${awards.length} award(s)`);
+  });
+
   // ── COMBAT: request current state (any connected role) ────────────────────
   socket.on('combat:request-state', () => {
     const { sessionCode } = socket.data || {};

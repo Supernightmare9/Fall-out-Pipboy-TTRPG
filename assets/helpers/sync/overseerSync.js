@@ -200,6 +200,19 @@
     },
 
     /**
+     * Award combat XP to a list of players immediately (mid-combat).
+     * Each entry in awards should be { playerHandle, xp, message }.
+     * The server updates each player's XP and sends them a private message.
+     * Ultra enemies and boss enemies must be filtered out *before* calling this.
+     * @param {Array<{playerHandle: string, xp: number, message: string}>} awards
+     */
+    awardCombatXP: function (awards) {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:award-combat-xp', { awards: awards || [] });
+      _flashSync();
+    },
+
+    /**
      * Push a data change to a specific player.
      * @param {string} playerHandle  Target player name
      * @param {string} field         Field to update, or 'all'

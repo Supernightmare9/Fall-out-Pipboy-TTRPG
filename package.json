@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "jest"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -15,5 +16,8 @@
     "express": "^4.19.2",
     "socket.io": "^4.7.5"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^30.3.0"
+  }
 }

@@ -1,6 +1,13 @@
-// assets/logic/combatxp.js
+// assets/logic/xp/combatxp.js
 // Combat XP Tracking System
 // Tracks damage dealt, determines kill credit, and distributes XP to players
+//
+// Depends on:
+//   - getEnemyXP(playerLevel, enemyRarity)        from enemyxp.js
+//   - getIntXPMultiplier(intStat)                  from fallout_stat_bonuses.js
+//
+// Ultra enemies (enemy.isUltra === true) and boss enemies (enemy.isBoss === true)
+// skip the XP distribution entirely — no XP is awarded when they are defeated.
 
 // Active combat session tracker
 const activeCombatSessions = {};
@@ -55,60 +62,84 @@ function recordDamage(combatId, playerId, enemyId, damageAmount) {
 }
 
 // Function to award XP when an enemy is killed
-function awardEnemyKillXP(combatId, enemyId, killingPlayerId, playerLevels) {
-  // playerLevels = { playerId: playerLevel, ... }
-  
+//
+// playerLevels       = { playerId: playerLevel, ... }
+// playerIntelligences = { playerId: intStat (1-10), ... }  (optional; defaults to 5)
+//
+// Returns null if:
+//   - Session or enemy not found
+//   - No damage contributors exist
+//   - Enemy is flagged as isUltra or isBoss (XP skipped — future mutation logic hooks here)
+function awardEnemyKillXP(combatId, enemyId, killingPlayerId, playerLevels, playerIntelligences) {
   if (!activeCombatSessions[combatId]) {
     console.error(`Combat session ${combatId} not found`);
     return null;
   }
-  
+
   const session = activeCombatSessions[combatId];
   const enemy = session.enemies.find(e => e.id === enemyId);
-  
+
   if (!enemy) {
     console.error(`Enemy ${enemyId} not found`);
     return null;
   }
-  
-  // Get all players who damaged this enemy
+
+  // Ultra enemies and bosses do not award XP — future mutation-event logic hooks here
+  if (enemy.isUltra || enemy.isBoss) {
+    console.info(`Enemy ${enemyId} is ${enemy.isUltra ? 'Ultra' : 'Boss'} — XP skipped`);
+    return null;
+  }
+
+  // Get all players who dealt at least 1 point of damage to this enemy
   const damageContributors = Object.keys(session.damageTracking[enemyId]).filter(
     playerId => session.damageTracking[enemyId][playerId] > 0
   );
-  
+
   if (damageContributors.length === 0) {
     console.warn(`No damage contributors found for enemy ${enemyId}`);
     return null;
   }
-  
-  // Get base XP for this enemy and rarity
-  const baseEnemyXP = getEnemyXP(playerLevels[killingPlayerId], enemy.rarity);
-  
-  // Distribute XP to all contributors
+
+  // Use the killer's level as the benchmark for the enemy XP tier
+  const killerLevel = (playerLevels && playerLevels[killingPlayerId]) || 1;
+  const enemyRarity = enemy.rarity || enemy.difficulty || 'common';
+  const baseEnemyXP = typeof getEnemyXP === 'function'
+    ? getEnemyXP(killerLevel, enemyRarity)
+    : 0;
+
+  // ── Split XP evenly; excess (remainder) goes to the killing-blow player ──
+  const perPlayerBase = Math.floor(baseEnemyXP / damageContributors.length);
+  const excess = baseEnemyXP % damageContributors.length;
+
   const xpDistribution = {};
-  
-  if (damageContributors.length === 1) {
-    // Solo kill - full XP to killer
-    xpDistribution[killingPlayerId] = baseEnemyXP;
-  } else {
-    // Shared kill - split XP equally among contributors
-    const sharedXP = Math.floor(baseEnemyXP / damageContributors.length);
-    for (let playerId of damageContributors) {
-      xpDistribution[playerId] = sharedXP;
-    }
+
+  for (const playerId of damageContributors) {
+    // Killing-blow player receives the remainder on top of their equal share
+    const rawShare = perPlayerBase + (playerId === killingPlayerId ? excess : 0);
+
+    // Apply Intelligence XP multiplier (from fallout_stat_bonuses.js)
+    const intStat = (playerIntelligences?.[playerId] != null)
+      ? playerIntelligences[playerId]
+      : 5;
+    const intBonus = typeof getIntXPMultiplier === 'function'
+      ? getIntXPMultiplier(intStat)
+      : 1.15; // fallback: INT 5 default multiplier
+
+    xpDistribution[playerId] = Math.floor(rawShare * intBonus);
   }
-  
+
   // Record kill credit
   session.killCredits[enemyId] = killingPlayerId;
-  
-  // Store XP awarded
+
+  // Store XP awarded per enemy (indexed by enemyId)
   session.xpAwarded[enemyId] = xpDistribution;
-  
+
   return {
     enemyId: enemyId,
     enemy: enemy,
     baseXP: baseEnemyXP,
     contributors: damageContributors,
+    killingPlayerId: killingPlayerId,
     xpDistribution: xpDistribution
   };
 }
@@ -182,7 +213,7 @@ function getDamageContributors(combatId, enemyId) {
 
 // Example usage:
 // Initialize combat
-// const combat = initializeCombatSession('combat_001', 
+// const combat = initializeCombatSession('combat_001',
 //   [ { id: 'enemy1', rarity: 'uncommon', hp: 100 }, { id: 'enemy2', rarity: 'rare', hp: 150 } ],
 //   [ { id: 'player1', level: 25 }, { id: 'player2', level: 24 }, { id: 'player3', level: 25 } ]
 // );
@@ -192,13 +223,38 @@ function getDamageContributors(combatId, enemyId) {
 // recordDamage('combat_001', 'player2', 'enemy1', 20);
 // recordDamage('combat_001', 'player3', 'enemy2', 50);
 
-// Award XP when enemy dies
-// const xpReward = awardEnemyKillXP('combat_001', 'enemy1', 'player1', { player1: 25, player2: 24, player3: 25 });
-// Result: { enemyId: 'enemy1', baseXP: 520, contributors: ['player1', 'player2'], xpDistribution: { player1: 260, player2: 260 } }
+// Award XP when enemy dies (includes INT bonus; excess goes to killer)
+// const xpReward = awardEnemyKillXP(
+//   'combat_001', 'enemy1', 'player1',
+//   { player1: 40, player2: 40, player3: 40 },   // player levels
+//   { player1: 7,  player2: 5,  player3: 8  }    // player INT stats
+// );
+// Result: { enemyId: 'enemy1', baseXP: 520, contributors: ['player1','player2'],
+//           killingPlayerId: 'player1', xpDistribution: { player1: 315, player2: 299 } }
+//   (520/2=260 each; excess 0; player1 INT 7 → ×1.21=314.6→314; player2 INT 5 → ×1.15=299)
 
-// const xpReward2 = awardEnemyKillXP('combat_001', 'enemy2', 'player3', { player1: 25, player2: 24, player3: 25 });
-// Result: { enemyId: 'enemy2', baseXP: 970, contributors: ['player3'], xpDistribution: { player3: 970 } }
+// Ultra / boss enemies are skipped (returns null, no XP awarded):
+// const ultraReward = awardEnemyKillXP('combat_001', 'ultraEnemy', 'player1', levels, ints);
+// → null  (because enemy.isUltra === true)
 
 // Get summary
 // const summary = endCombatSession('combat_001');
-// Result: { combatId: 'combat_001', totalXPByPlayer: { player1: 260, player2: 260, player3: 970 }, ... }
+// Result: { combatId: 'combat_001', totalXPByPlayer: { player1: ..., player2: ..., player3: ... }, ... }
+
+// ── Node.js / CommonJS export (for automated tests) ──────────────────────────
+// In browser contexts, `module` is undefined and this block is skipped.
+// In Node.js (e.g. Jest), the functions and the shared session map are exported
+// so tests can require() this file directly.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    activeCombatSessions,
+    initializeCombatSession,
+    recordDamage,
+    awardEnemyKillXP,
+    getEnemyXPDistribution,
+    getCombatSessionXPSummary,
+    endCombatSession,
+    getDamageDealt,
+    getDamageContributors
+  };
+}
