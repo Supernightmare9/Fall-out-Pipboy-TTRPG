@@ -128,7 +128,7 @@
       _socket.on('overseer:player-joined', function (payload) {
         _setStatus('syncing', '⬤ OVERSEER SYNC: PLAYER JOINED — ' + payload.handle);
         setTimeout(function () { _restoreConnectedStatus(); }, 1500);
-        if (typeof _opts.onPlayerJoined === 'function') _opts.onPlayerJoined(payload.handle, payload.data);
+        if (typeof _opts.onPlayerJoined === 'function') _opts.onPlayerJoined(payload.handle, payload.data, payload.campaignId);
       });
 
       _socket.on('overseer:player-update', function (payload) {
@@ -147,7 +147,7 @@
 
       // Player is holding in the waiting queue (no active campaign yet)
       _socket.on('overseer:player-waiting', function (payload) {
-        if (typeof _opts.onPlayerWaiting === 'function') _opts.onPlayerWaiting(payload.handle);
+        if (typeof _opts.onPlayerWaiting === 'function') _opts.onPlayerWaiting(payload.handle, payload.data);
       });
 
       _socket.on('overseer:snapshot', function (payload) {

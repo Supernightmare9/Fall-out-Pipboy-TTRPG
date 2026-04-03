@@ -1897,6 +1897,10 @@
 
         if (!serverUrl && !sessionCode) return; // sync not configured — skip silently
 
+        // Debug: log connection context so mismatches can be identified
+        console.log('[PlayerSync/stats] Connecting — sessionCode:', sessionCode || 'VAULT01',
+                    '| handle:', playerHandle || 'Player');
+
         // Wrap savePlayerData so every local save also pushes to the server
         var _origSave = window.savePlayerData;
         window.savePlayerData = function () {

@@ -3798,6 +3798,10 @@
             return;
         }
 
+        // Debug: log connection context so mismatches can be identified
+        console.log('[PlayerSync/combat] Connecting — sessionCode:', sessionCode || 'VAULT01',
+                    '| handle:', _myHandle || 'Player');
+
         setBadge('connecting', '◌ CONNECTING…');
 
         // Re-use the page's own playerData if available (avoids a duplicate push)

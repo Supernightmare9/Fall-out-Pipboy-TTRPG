@@ -264,12 +264,14 @@
 
         .spc-card{background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:12px;transition:border-color .3s,box-shadow .3s;}
         .spc-card.current-turn{border-color:var(--overseer-gold-bright);box-shadow:0 0 16px rgba(212,160,23,.35);animation:overseerTurnGlow 1.8s ease-in-out infinite;}
+        .spc-card.spc-waiting{border-color:rgba(251,191,36,.5);opacity:.85;}
         @keyframes overseerTurnGlow{0%,100%{box-shadow:0 0 10px rgba(212,160,23,.3);}50%{box-shadow:0 0 28px rgba(212,160,23,.6);}}
 
         .spc-header{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
         .spc-turn-icon{font-size:13px;color:var(--overseer-gold-bright);min-width:16px;text-align:center;}
         .spc-name{font-size:13px;font-weight:bold;color:var(--overseer-white);letter-spacing:1px;flex:1;text-transform:uppercase;}
         .spc-turn-badge{font-size:8px;padding:2px 6px;border:1px solid var(--overseer-gold);color:var(--overseer-gold-bright);letter-spacing:1px;}
+        .spc-waiting-badge{border-color:rgba(251,191,36,.6);color:#fbbf24;}
 
         .spc-stats-row{display:flex;gap:10px;margin-bottom:8px;}
         .spc-stat-block{flex:1;}
@@ -3156,7 +3158,7 @@
             var maxAp = typeof data.maxActionPoints === 'number' ? data.maxActionPoints : 10;
 
             var card = document.createElement('div');
-            card.className = 'spc-card' + (isCurrent ? ' current-turn' : '');
+            card.className = 'spc-card' + (isCurrent ? ' current-turn' : '') + (data._waiting ? ' spc-waiting' : '');
             card.id = 'spc-' + handle.replace(/\s+/g, '_');
 
             // Header
@@ -3170,7 +3172,13 @@
             nameEl.textContent = handle;
             hdr.appendChild(turnIcon);
             hdr.appendChild(nameEl);
-            if (isCurrent) {
+            if (data._waiting) {
+                var wb = document.createElement('span');
+                wb.className = 'spc-turn-badge spc-waiting-badge';
+                wb.title = 'Player connected but waiting for campaign to start';
+                wb.textContent = '⏳ WAITING';
+                hdr.appendChild(wb);
+            } else if (isCurrent) {
                 var tb = document.createElement('span');
                 tb.className = 'spc-turn-badge';
                 tb.textContent = 'ACTIVE TURN';
@@ -3379,6 +3387,11 @@
         return;
     }
 
+    // ── Debug: log session context on load ───────────────────────────────────
+    console.log('[OverseerHub] Connecting — serverUrl:', serverUrl,
+                '| sessionCode:', sessionCode || 'VAULT01',
+                '| campaignId:', _campaignSessionId || '(none yet)');
+
     // ── Init OverseerSync ─────────────────────────────────────────────────────
     setSyncBadge('sync-badge-offline ● CONNECTING…', '◌ CONNECTING…');
 
@@ -3414,15 +3427,27 @@
             if (players.length > 0) {
                 addLog('SYNC: Connected — ' + players.length + ' player(s) in session ' + (sessionCode || ''), 'green');
             } else {
-                addLog('SYNC: Overseer online — waiting for players to join…', 'yellow');
+                addLog('SYNC: Overseer online (session: ' + (sessionCode || 'VAULT01').toUpperCase() + ') — waiting for players to join…', 'yellow');
             }
+            console.log('[OverseerHub] Session joined — sessionCode:', payload.sessionCode,
+                        '| campaignActive:', payload.campaignActive,
+                        '| campaignId:', payload.campaignId, '| players:', players.length);
             renderSyncPlayers();
         },
 
-        onPlayerJoined: function (handle, data) {
+        onPlayerJoined: function (handle, data, campaignId) {
             _syncPlayers[handle] = data || {};
+            // Clear any previous waiting flag — player is now fully connected
+            delete _syncPlayers[handle]._waiting;
             _persistPlayerUpdate(handle, _syncPlayers[handle]);
             addLog('SYNC: ' + handle + ' joined the session', 'green');
+            // Debug: check for campaign ID mismatch
+            if (campaignId && _campaignSessionId && campaignId !== _campaignSessionId) {
+                addLog('⚠ WARN: ' + handle + ' joined campaign "' + campaignId +
+                       '" but Overseer is on "' + _campaignSessionId + '" — session codes may differ', 'red');
+                console.warn('[OverseerHub] Campaign ID mismatch — player campaignId:', campaignId,
+                             '| overseer campaignId:', _campaignSessionId);
+            }
             renderSyncPlayers();
         },
 
@@ -3448,12 +3473,16 @@
         },
 
         onPlayerLeft: function (handle) {
+            delete _syncPlayers[handle];
             addLog('SYNC: ' + handle + ' disconnected', 'red');
             renderSyncPlayers();
         },
 
-        onPlayerWaiting: function (handle) {
+        onPlayerWaiting: function (handle, data) {
+            if (!_syncPlayers[handle]) _syncPlayers[handle] = data || {};
+            _syncPlayers[handle]._waiting = true;
             addLog('SYNC: ' + handle + ' is waiting — start the campaign session to admit them', 'yellow');
+            renderSyncPlayers();
         },
 
         onCombatUpdate: function (state) {
