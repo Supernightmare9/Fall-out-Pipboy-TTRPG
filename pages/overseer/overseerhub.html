@@ -2186,7 +2186,7 @@
         var actualChange=b-e.currentHp; // positive = damage dealt
 
         if(delta<0)addLog(e.name+' took '+actualChange+' damage ('+b+' \u2192 '+e.currentHp+')','red');
-        else addLog(e.name+' healed '+Math.abs(delta)+' HP ('+b+' \u2192 '+e.currentHp+')','green');
+        else addLog(e.name+' healed '+(e.currentHp-b)+' HP ('+b+' \u2192 '+e.currentHp+')','green');
 
         // Record damage attribution if a player was selected
         if(delta<0&&actualChange>0){

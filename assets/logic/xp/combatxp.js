@@ -118,7 +118,7 @@ function awardEnemyKillXP(combatId, enemyId, killingPlayerId, playerLevels, play
     const rawShare = perPlayerBase + (playerId === killingPlayerId ? excess : 0);
 
     // Apply Intelligence XP multiplier (from fallout_stat_bonuses.js)
-    const intStat = (playerIntelligences && playerIntelligences[playerId]) != null
+    const intStat = (playerIntelligences?.[playerId] != null)
       ? playerIntelligences[playerId]
       : 5;
     const intBonus = typeof getIntXPMultiplier === 'function'
