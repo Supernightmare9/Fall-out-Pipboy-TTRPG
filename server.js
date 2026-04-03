@@ -539,6 +539,27 @@ io.on('connection', (socket) => {
     console.log(`[overseer:award-combat-xp] session ${sessionCode} | ${awards.length} award(s)`);
   });
 
+  // ── OVERSEER: broadcast mutation event to all players ─────────────────────
+  // Payload: { enemyName, effectName, effectDescription }
+  // The Overseer calls this after selecting a mutation effect.  The server
+  // broadcasts `enemy:mutation-event` to every socket in the session room so
+  // all players see the dramatic mutation announcement in their combat feed.
+  socket.on('overseer:announce-mutation', ({ enemyName, effectName, effectDescription } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const payload = {
+      enemyName:         String(enemyName         || '').trim(),
+      effectName:        String(effectName        || '').trim(),
+      effectDescription: String(effectDescription || '').trim()
+    };
+
+    io.to(sessionCode).emit('enemy:mutation-event', payload);
+    console.log(`[overseer:announce-mutation] session ${sessionCode} | ${payload.enemyName} → ${payload.effectName}`);
+  });
+
   // ── COMBAT: request current state (any connected role) ────────────────────
   socket.on('combat:request-state', () => {
     const { sessionCode } = socket.data || {};

@@ -213,6 +213,25 @@
     },
 
     /**
+     * Broadcast a mutation event to all players in the session.
+     * Call this after the Overseer selects a mutation effect.
+     * The server emits `enemy:mutation-event` to all connected sockets.
+     *
+     * @param {string} enemyName         Display name of the mutated enemy.
+     * @param {string} effectName        Name of the chosen mutation effect.
+     * @param {string} effectDescription Short description of the effect.
+     */
+    announceMutation: function (enemyName, effectName, effectDescription) {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:announce-mutation', {
+        enemyName:         String(enemyName         || ''),
+        effectName:        String(effectName        || ''),
+        effectDescription: String(effectDescription || '')
+      });
+      _flashSync();
+    },
+
+    /**
      * Push a data change to a specific player.
      * @param {string} playerHandle  Target player name
      * @param {string} field         Field to update, or 'all'

@@ -235,6 +235,13 @@
         }
       });
 
+      // Mutation event broadcast from Overseer — enemy survived and mutated
+      _socket.on('enemy:mutation-event', function (payload) {
+        if (typeof _opts.onMutationEvent === 'function') {
+          _opts.onMutationEvent(payload || {});
+        }
+      });
+
       _socket.on('disconnect', function () {
         _connected = false;
         _setStatus('disconnected', '⬤ SYNC: DISCONNECTED — reconnecting…');
