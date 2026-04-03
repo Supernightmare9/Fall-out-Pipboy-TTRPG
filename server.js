@@ -560,6 +560,78 @@ io.on('connection', (socket) => {
     console.log(`[overseer:announce-mutation] session ${sessionCode} | ${payload.enemyName} → ${payload.effectName}`);
   });
 
+  // ── MESSAGING: roster ──────────────────────────────────────────────────────
+  // Returns the list of player handles in the session and whether the Overseer
+  // is currently connected.  Any authenticated role may call this.
+  socket.on('msg:get-roster', () => {
+    const { sessionCode } = socket.data || {};
+    if (!sessionCode) return;
+    const session = sessions[sessionCode];
+    if (!session) return;
+    socket.emit('msg:roster', {
+      players: Object.keys(session.players),
+      overseerOnline: !!session.overseerSocketId
+    });
+  });
+
+  // ── MESSAGING: send ────────────────────────────────────────────────────────
+  // Payload: { to: string[], text: string }
+  // Routes a private message to every participant (sender + `to` list).
+  // `to` may include player handles and/or the special handle 'overseer'.
+  // The server enforces session membership before delivery; it does NOT store
+  // messages — each client persists its own log in localStorage.
+  socket.on('msg:send', ({ to, text } = {}) => {
+    const { role, sessionCode, handle } = socket.data || {};
+    if (!sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const fromHandle = role === 'overseer' ? 'overseer' : (handle || '');
+    if (!fromHandle) return;
+
+    const rawText = String(text || '').trim();
+    if (!rawText) return;
+
+    // All valid handles in this session (players + overseer sentinel)
+    const validHandles = new Set([...Object.keys(session.players), 'overseer']);
+
+    // Filter recipients: must be valid, non-empty, and not the sender
+    const toHandles = (Array.isArray(to) ? to : [])
+      .map(h => String(h).trim())
+      .filter(h => h && h !== fromHandle && validHandles.has(h));
+
+    if (toHandles.length === 0) return;
+
+    // Sorted participant list → stable, deterministic conversation ID
+    const participants = [...new Set([fromHandle, ...toHandles])].sort();
+    const convId = participants.join('::');
+
+    const payload = {
+      convId,
+      participants,
+      from:      fromHandle,
+      text:      rawText,
+      timestamp: Date.now()
+    };
+
+    // Deliver only to participants — uninvolved sockets never receive this event
+    participants.forEach(ph => {
+      if (ph === 'overseer') {
+        if (session.overseerSocketId) {
+          io.to(session.overseerSocketId).emit('msg:incoming', payload);
+        }
+      } else {
+        const p = session.players[ph];
+        if (p && p.socketId) {
+          io.to(p.socketId).emit('msg:incoming', payload);
+        }
+      }
+    });
+
+    console.log(`[msg:send] ${fromHandle} → [${toHandles.join(', ')}] session=${sessionCode}`);
+  });
+
   // ── COMBAT: request current state (any connected role) ────────────────────
   socket.on('combat:request-state', () => {
     const { sessionCode } = socket.data || {};
