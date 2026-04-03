@@ -647,15 +647,14 @@
     <div class="player-selector-bar">
         <span class="player-selector-label">SELECT PLAYER:</span>
         <select class="player-select-input" id="poPlayerSelect" onchange="poLoadPlayer()">
-            <option value="">— Choose a Player —</option>
-            <option value="vault_runner_01">Vault_Runner_01 (Marcus Cole)</option>
-            <option value="ghoul_slayer">GhoulSlayer99 (Dex "Deadeye" Walsh)</option>
-            <option value="wasteland_wanderer">WastelandWanderer (Sera Voss)</option>
+            <option value="">— No players connected —</option>
         </select>
         <span class="player-status-badge" id="poPlayerStatusBadge" style="display:none;">&#x25CF; ONLINE</span>
-        <span style="font-size:10px;color:rgba(232,232,232,.4);margin-left:auto;">Placeholder &#x2014; will connect to player data later</span>
         <button class="cmd-btn success" onclick="poGiftItems()" title="Gift items to the selected player from the item pool">&#x1F381; GIFT ITEMS</button>
         <button class="cmd-btn danger" onclick="poConfirmReset()" title="Reset the current section for the selected player">&#x21BA; RESET SECTION</button>
+    </div>
+    <div id="poNoPlayersMsg" style="padding:18px 0 0;color:rgba(232,232,232,.45);font-size:12px;letter-spacing:1px;text-align:center;display:none;">
+        No players are currently connected to this session. Waiting for players to join&#x2026;
     </div>
 
     <!-- 1. BASIC INFO -->
@@ -668,11 +667,11 @@
             <div class="po-form-grid">
                 <div class="po-form-group">
                     <label class="po-form-label">Character Name</label>
-                    <input class="po-form-input" type="text" id="poCharName" value="Marcus Cole">
+                    <input class="po-form-input" type="text" id="poCharName" value="">
                 </div>
                 <div class="po-form-group">
                     <label class="po-form-label">Player Username</label>
-                    <input class="po-form-input" type="text" id="poPlayerUsername" value="Vault_Runner_01" readonly>
+                    <input class="po-form-input" type="text" id="poPlayerUsername" value="" readonly>
                 </div>
                 <div class="po-form-group">
                     <label class="po-form-label">Class</label>
@@ -711,7 +710,7 @@
                 </div>
                 <div class="po-form-group">
                     <label class="po-form-label">Background</label>
-                    <input class="po-form-input" type="text" id="poCharBackground" value="Former Vault Security Guard">
+                    <input class="po-form-input" type="text" id="poCharBackground" value="">
                 </div>
             </div>
             <div class="po-section-actions">
@@ -731,24 +730,24 @@
             <div class="po-form-grid-4">
                 <div class="po-form-group">
                     <label class="po-form-label">Level</label>
-                    <input class="po-form-input" type="number" id="poCharLevel" value="5" min="1">
+                    <input class="po-form-input" type="number" id="poCharLevel" value="1" min="1">
                 </div>
                 <div class="po-form-group">
                     <label class="po-form-label">Current XP</label>
-                    <input class="po-form-input" type="number" id="poCharXP" value="4200" min="0">
+                    <input class="po-form-input" type="number" id="poCharXP" value="0" min="0">
                 </div>
                 <div class="po-form-group">
                     <label class="po-form-label">XP to Next Level</label>
-                    <input class="po-form-input" type="number" id="poCharXPNext" value="5000" min="0">
+                    <input class="po-form-input" type="number" id="poCharXPNext" value="1000" min="0">
                 </div>
                 <div class="po-form-group">
                     <label class="po-form-label">Perk Points Available</label>
-                    <input class="po-form-input" type="number" id="poCharPerkPts" value="2" min="0">
+                    <input class="po-form-input" type="number" id="poCharPerkPts" value="0" min="0">
                 </div>
             </div>
             <div class="po-bar-wrapper" style="margin-top:10px;">
-                <div style="font-size:9px;color:var(--overseer-gold);margin-bottom:4px;letter-spacing:1px;">XP PROGRESS &#x2014; 4200 / 5000</div>
-                <div class="po-bar-track"><div class="po-bar-fill po-bar-xp" style="width:84%;"></div></div>
+                <div id="poXPBarLabel" style="font-size:9px;color:var(--overseer-gold);margin-bottom:4px;letter-spacing:1px;">XP PROGRESS &#x2014; 0 / 1000</div>
+                <div class="po-bar-track"><div class="po-bar-fill po-bar-xp" id="poXPBarFill" style="width:0%;"></div></div>
             </div>
             <div class="po-section-actions">
                 <button class="cmd-btn" onclick="poAddXP()">+ ADD XP</button>
@@ -769,43 +768,43 @@
                 <div>
                     <div class="po-form-group">
                         <label class="po-form-label">Current HP</label>
-                        <input class="po-form-input" type="number" id="poCharHP" value="72" min="0">
+                        <input class="po-form-input" type="number" id="poCharHP" value="100" min="0">
                     </div>
                     <div class="po-form-group" style="margin-top:8px;">
                         <label class="po-form-label">Max HP</label>
-                        <input class="po-form-input" type="number" id="poCharMaxHP" value="90" min="1">
+                        <input class="po-form-input" type="number" id="poCharMaxHP" value="100" min="1">
                     </div>
                     <div class="po-bar-wrapper" style="margin-top:8px;">
-                        <div style="font-size:9px;color:var(--overseer-green);margin-bottom:3px;">HP &#x2014; 72/90</div>
-                        <div class="po-bar-track"><div class="po-bar-fill po-bar-hp" style="width:80%;"></div></div>
+                        <div id="poHPBarLabel" style="font-size:9px;color:var(--overseer-green);margin-bottom:3px;">HP &#x2014; 100/100</div>
+                        <div class="po-bar-track"><div class="po-bar-fill po-bar-hp" id="poHPBarFill" style="width:100%;"></div></div>
                     </div>
                 </div>
                 <div>
                     <div class="po-form-group">
                         <label class="po-form-label">Action Points (AP)</label>
-                        <input class="po-form-input" type="number" id="poCharAP" value="7" min="0">
+                        <input class="po-form-input" type="number" id="poCharAP" value="10" min="0">
                     </div>
                     <div class="po-form-group" style="margin-top:8px;">
                         <label class="po-form-label">Max AP</label>
                         <input class="po-form-input" type="number" id="poCharMaxAP" value="10" min="1">
                     </div>
                     <div class="po-bar-wrapper" style="margin-top:8px;">
-                        <div style="font-size:9px;color:#60a5fa;margin-bottom:3px;">AP &#x2014; 7/10</div>
-                        <div class="po-bar-track"><div class="po-bar-fill po-bar-ap" style="width:70%;"></div></div>
+                        <div id="poAPBarLabel" style="font-size:9px;color:#60a5fa;margin-bottom:3px;">AP &#x2014; 10/10</div>
+                        <div class="po-bar-track"><div class="po-bar-fill po-bar-ap" id="poAPBarFill" style="width:100%;"></div></div>
                     </div>
                 </div>
                 <div>
                     <div class="po-form-group">
                         <label class="po-form-label">Radiation (rads)</label>
-                        <input class="po-form-input" type="number" id="poCharRad" value="120" min="0">
+                        <input class="po-form-input" type="number" id="poCharRad" value="0" min="0">
                     </div>
                     <div class="po-form-group" style="margin-top:8px;">
                         <label class="po-form-label">Max Rads (lethal)</label>
                         <input class="po-form-input" type="number" id="poCharMaxRad" value="1000" min="1">
                     </div>
                     <div class="po-bar-wrapper" style="margin-top:8px;">
-                        <div style="font-size:9px;color:var(--overseer-red-bright);margin-bottom:3px;">RADIATION &#x2014; 120/1000</div>
-                        <div class="po-bar-track"><div class="po-bar-fill po-bar-rad" style="width:12%;"></div></div>
+                        <div id="poRadBarLabel" style="font-size:9px;color:var(--overseer-red-bright);margin-bottom:3px;">RADIATION &#x2014; 0/1000</div>
+                        <div class="po-bar-track"><div class="po-bar-fill po-bar-rad" id="poRadBarFill" style="width:0%;"></div></div>
                     </div>
                 </div>
             </div>
@@ -825,13 +824,13 @@
         </div>
         <div class="po-accordion-body open">
             <div class="po-form-grid-7">
-                <div class="po-special-box"><div class="po-special-label">STR</div><input class="po-special-input" type="number" id="poSStr" value="6" min="1" max="10"></div>
-                <div class="po-special-box"><div class="po-special-label">PER</div><input class="po-special-input" type="number" id="poSPer" value="7" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">STR</div><input class="po-special-input" type="number" id="poSStr" value="5" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">PER</div><input class="po-special-input" type="number" id="poSPer" value="5" min="1" max="10"></div>
                 <div class="po-special-box"><div class="po-special-label">END</div><input class="po-special-input" type="number" id="poSEnd" value="5" min="1" max="10"></div>
-                <div class="po-special-box"><div class="po-special-label">CHA</div><input class="po-special-input" type="number" id="poSCha" value="4" min="1" max="10"></div>
-                <div class="po-special-box"><div class="po-special-label">INT</div><input class="po-special-input" type="number" id="poSInt" value="8" min="1" max="10"></div>
-                <div class="po-special-box"><div class="po-special-label">AGI</div><input class="po-special-input" type="number" id="poSAgi" value="7" min="1" max="10"></div>
-                <div class="po-special-box"><div class="po-special-label">LCK</div><input class="po-special-input" type="number" id="poSLck" value="3" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">CHA</div><input class="po-special-input" type="number" id="poSCha" value="5" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">INT</div><input class="po-special-input" type="number" id="poSInt" value="5" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">AGI</div><input class="po-special-input" type="number" id="poSAgi" value="5" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">LCK</div><input class="po-special-input" type="number" id="poSLck" value="5" min="1" max="10"></div>
             </div>
             <div style="font-size:9px;color:rgba(232,232,232,.35);margin-top:8px;letter-spacing:1px;">Range: 1&#x2013;10 per attribute. Modifiers calculated automatically when wired to data.</div>
             <div class="po-section-actions">
@@ -850,22 +849,22 @@
         <div class="po-accordion-body">
             <div class="po-form-grid-2">
                 <div>
-                    <div class="po-skill-item"><span class="po-skill-name">Barter</span><span class="po-skill-tag">CHA</span><input class="po-skill-input" type="number" value="35" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Big Guns</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" value="20" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Energy Weapons</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" value="40" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Explosives</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" value="25" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Lockpick</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" value="55" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Medicine</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" value="60" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Melee Weapons</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" value="30" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Barter</span><span class="po-skill-tag">CHA</span><input class="po-skill-input" type="number" data-skill="Barter" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Big Guns</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" data-skill="Big Guns" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Energy Weapons</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" data-skill="Energy Weapons" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Explosives</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" data-skill="Explosives" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Lockpick</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" data-skill="Lockpick" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Medicine</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" data-skill="Medicine" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Melee Weapons</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" data-skill="Melee Weapons" value="0" min="0" max="100"></div>
                 </div>
                 <div>
-                    <div class="po-skill-item"><span class="po-skill-name">Repair</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" value="45" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Science</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" value="70" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Small Guns</span><span class="po-skill-tag">AGI</span><input class="po-skill-input" type="number" value="65" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Sneak</span><span class="po-skill-tag">AGI</span><input class="po-skill-input" type="number" value="50" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Speech</span><span class="po-skill-tag">CHA</span><input class="po-skill-input" type="number" value="40" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Survival</span><span class="po-skill-tag">END</span><input class="po-skill-input" type="number" value="55" min="0" max="100"></div>
-                    <div class="po-skill-item"><span class="po-skill-name">Unarmed</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" value="20" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Repair</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" data-skill="Repair" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Science</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" data-skill="Science" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Small Guns</span><span class="po-skill-tag">AGI</span><input class="po-skill-input" type="number" data-skill="Small Guns" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Sneak</span><span class="po-skill-tag">AGI</span><input class="po-skill-input" type="number" data-skill="Sneak" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Speech</span><span class="po-skill-tag">CHA</span><input class="po-skill-input" type="number" data-skill="Speech" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Survival</span><span class="po-skill-tag">END</span><input class="po-skill-input" type="number" data-skill="Survival" value="0" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Unarmed</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" data-skill="Unarmed" value="0" min="0" max="100"></div>
                 </div>
             </div>
             <div class="po-section-actions">
@@ -885,7 +884,7 @@
             <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
                 <button class="cmd-btn success" onclick="poAddInventoryItem()">+ ADD ITEM</button>
                 <button class="cmd-btn" onclick="poGiftItems()">&#x1F381; GIFT FROM POOL</button>
-                <span style="margin-left:auto;font-size:10px;color:rgba(232,232,232,.4);align-self:center;">Carry Weight: 87 / 150 lbs</span>
+                <span style="margin-left:auto;font-size:10px;color:rgba(232,232,232,.4);align-self:center;" id="poCarryWeightLabel">Carry Weight: &#x2014;</span>
             </div>
             <table class="po-inv-table" id="poInventoryTable">
                 <thead>
@@ -894,33 +893,7 @@
                     </tr>
                 </thead>
                 <tbody id="poInventoryBody">
-                    <tr>
-                        <td>10mm Pistol</td><td>Weapon</td>
-                        <td><input class="po-skill-input" type="number" value="1" min="0" style="width:45px;"></td>
-                        <td>2.5</td><td>75 caps</td>
-                        <td class="td-action">
-                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poEquipItem(this)">&#x2694; EQUIP</button>
-                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Stimpak</td><td>Consumable</td>
-                        <td><input class="po-skill-input" type="number" value="3" min="0" style="width:45px;"></td>
-                        <td>0.3</td><td>75 caps</td>
-                        <td class="td-action">
-                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poEquipItem(this)">&#x2694; EQUIP</button>
-                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Rad-Away</td><td>Consumable</td>
-                        <td><input class="po-skill-input" type="number" value="2" min="0" style="width:45px;"></td>
-                        <td>0.5</td><td>40 caps</td>
-                        <td class="td-action">
-                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poEquipItem(this)">&#x2694; EQUIP</button>
-                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
-                        </td>
-                    </tr>
+                    <tr id="poInventoryEmpty"><td colspan="6" style="text-align:center;color:rgba(232,232,232,.35);font-size:11px;padding:12px;">No items in inventory. Select a player or add items manually.</td></tr>
                 </tbody>
             </table>
             <div class="po-section-actions">
@@ -937,7 +910,7 @@
         </div>
         <div class="po-accordion-body">
             <div class="po-form-grid-2">
-                <div class="po-form-group"><label class="po-form-label">Main Hand</label><input class="po-form-input" type="text" id="poEquip_mainHand" value="10mm Pistol"></div>
+                <div class="po-form-group"><label class="po-form-label">Main Hand</label><input class="po-form-input" type="text" id="poEquip_mainHand" value=""></div>
                 <div class="po-form-group"><label class="po-form-label">Off Hand</label><input class="po-form-input" type="text" id="poEquip_offHand" placeholder="Empty"></div>
                 <div class="po-form-group"><label class="po-form-label">Head</label><input class="po-form-input" type="text" id="poEquip_head" placeholder="Empty"></div>
                 <div class="po-form-group"><label class="po-form-label">Chest Armor</label><input class="po-form-input" type="text" id="poEquip_chest" value="Leather Chest Piece"></div>
@@ -959,10 +932,6 @@
         </div>
         <div class="po-accordion-body">
             <div class="po-tag-grid" id="poPerksContainer">
-                <span class="po-tag">Pack Rat <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
-                <span class="po-tag">Scrounger <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
-                <span class="po-tag">Gun Nut <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
-                <span class="po-tag">Science! <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
             </div>
             <div class="po-tag-input-row">
                 <input class="po-tag-input" type="text" id="poPerkInput" placeholder="Add perk or ability&#x2026;">
@@ -982,8 +951,6 @@
         </div>
         <div class="po-accordion-body">
             <div class="po-tag-grid" id="poConditionsContainer">
-                <span class="po-tag" style="border-color:rgba(255,51,0,.4);color:var(--overseer-red-bright);">Fatigued <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
-                <span class="po-tag" style="border-color:rgba(96,165,250,.4);color:#60a5fa;">Rad Sick (Mild) <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
             </div>
             <div class="po-tag-input-row">
                 <input class="po-tag-input" type="text" id="poConditionInput" placeholder="Add condition or effect&#x2026;">
@@ -1009,27 +976,8 @@
                         <th>Quest Name</th><th>Status</th><th>Stage</th><th>Notes</th><th>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>Into the Wastes</td>
-                        <td><span style="color:var(--overseer-green-bright);font-size:10px;">ACTIVE</span></td>
-                        <td><input class="po-skill-input" type="text" value="Stage 2" style="width:80px;font-size:10px;"></td>
-                        <td><input class="po-form-input" type="text" value="Reached the outpost." style="font-size:10px;padding:3px 6px;"></td>
-                        <td class="td-action">
-                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poCompleteQuest(this)">&#x2713; COMPLETE</button>
-                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>The Merchant's Debt</td>
-                        <td><span style="color:rgba(232,232,232,.4);font-size:10px;">INACTIVE</span></td>
-                        <td><input class="po-skill-input" type="text" value="Stage 0" style="width:80px;font-size:10px;"></td>
-                        <td><input class="po-form-input" type="text" placeholder="Notes&#x2026;" style="font-size:10px;padding:3px 6px;"></td>
-                        <td class="td-action">
-                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poActivateQuest(this)">&#x25B6; ACTIVATE</button>
-                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
-                        </td>
-                    </tr>
+                <tbody id="poQuestBody">
+                    <tr id="poQuestEmpty"><td colspan="5" style="text-align:center;color:rgba(232,232,232,.35);font-size:11px;padding:12px;">No quests tracked. Select a player or add quests manually.</td></tr>
                 </tbody>
             </table>
             <div style="margin-top:8px;">
@@ -1046,7 +994,7 @@
 
 <!-- PLAYERS TAB: SAVE FOOTER -->
 <div class="po-save-footer">
-    <span class="po-save-footer-info" id="poLastSavedInfo">All changes are placeholder. Logic will be wired in a subsequent PR.</span>
+    <span class="po-save-footer-info" id="poLastSavedInfo">Select a connected player to view and edit their data.</span>
     <div style="display:flex;gap:8px;">
         <button class="cmd-btn danger" onclick="poConfirmReset()">&#x21BA; RESET ALL SECTIONS</button>
         <button class="cmd-btn success" onclick="poSaveAllSections()">&#x1F4BE; SAVE ALL CHANGES</button>
@@ -3124,6 +3072,7 @@
 
     // ── In-memory caches for live sync ──────────────────────────────────────
     var _syncPlayers  = {};   // handle → data snapshot
+    window._overseerLivePlayers = _syncPlayers;   // expose reference for Players Tab
     var _combatState  = { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] };
     var _syncConnected = false;
 
@@ -3182,6 +3131,7 @@
             empty.className = 'sync-offline-msg';
             empty.textContent = 'No players connected. Waiting for players to join the session…';
             _grid.appendChild(empty);
+            if (typeof window.poPopulatePlayerSelect === 'function') window.poPopulatePlayerSelect();
             return;
         }
 
@@ -3335,6 +3285,9 @@
 
             _grid.appendChild(card);
         });
+
+        // Keep the Players Tab dropdown in sync with live player list
+        if (typeof window.poPopulatePlayerSelect === 'function') window.poPopulatePlayerSelect();
     }
 
     // ── Overseer HP/AP adjust helpers ─────────────────────────────────────────
@@ -3589,75 +3542,516 @@
 ══════════════════════════════════════════════════════════════════ -->
 <script>
 (function() {
+    // ── Current player handle being viewed ───────────────────────────────────
+    var _currentHandle = null;
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function poShowToast(msg, isError) {
+        var t = document.getElementById('statusToast');
+        if (!t) return;
+        t.textContent = msg;
+        t.className = isError ? 'error visible' : 'visible';
+        clearTimeout(t._poTimer);
+        t._poTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+    }
+
+    function _getLivePlayers() {
+        return window._overseerLivePlayers || {};
+    }
+
+    function _getCurrentData() {
+        if (!_currentHandle) return null;
+        return _getLivePlayers()[_currentHandle] || null;
+    }
+
+    // ── Accordion ─────────────────────────────────────────────────────────────
     window.poToggleAccordion = function(header) {
         header.classList.toggle('open');
         var body = header.nextElementSibling;
         body.classList.toggle('open');
     };
 
+    // ── Populate the player dropdown from live connected players ──────────────
+    window.poPopulatePlayerSelect = function() {
+        var sel = document.getElementById('poPlayerSelect');
+        var noMsg = document.getElementById('poNoPlayersMsg');
+        if (!sel) return;
+
+        var players = _getLivePlayers();
+        var handles = Object.keys(players);
+
+        // Rebuild options preserving the current selection
+        var prev = sel.value;
+        while (sel.options.length > 1) sel.remove(1);
+        handles.forEach(function(h) {
+            var opt = document.createElement('option');
+            opt.value = h;
+            opt.textContent = h;
+            sel.appendChild(opt);
+        });
+
+        // Show/hide "no players" message
+        if (noMsg) noMsg.style.display = handles.length === 0 ? '' : 'none';
+
+        // Update placeholder text in the first option
+        sel.options[0].textContent = handles.length === 0
+            ? '— No players connected —'
+            : '— Select a player —';
+
+        // If previously selected player is still connected, keep them selected
+        if (prev && players[prev]) {
+            sel.value = prev;
+        } else if (prev && !players[prev] && prev === _currentHandle) {
+            // Selected player disconnected — clear form
+            _currentHandle = null;
+            sel.value = '';
+            poClearPlayerForm();
+            poShowToast('Player disconnected.', true);
+        }
+    };
+
+    // ── Load a player's live data into the form ───────────────────────────────
     window.poLoadPlayer = function() {
         var sel = document.getElementById('poPlayerSelect');
         if (!sel || !sel.value) {
+            _currentHandle = null;
+            poClearPlayerForm();
             var badge = document.getElementById('poPlayerStatusBadge');
             if (badge) badge.style.display = 'none';
             return;
         }
+
+        var handle = sel.value;
+        var players = _getLivePlayers();
+        var data = players[handle];
+
+        if (!data) {
+            poShowToast('Player data not available. They may have just disconnected.', true);
+            return;
+        }
+
+        _currentHandle = handle;
         var badge = document.getElementById('poPlayerStatusBadge');
         if (badge) badge.style.display = '';
-        poShowToast('Loaded player "' + sel.options[sel.selectedIndex].text + '". (Placeholder — data to wire later)');
+
+        _fillForm(handle, data);
+        _updateFooter('Viewing: ' + handle + ' — loaded at ' + new Date().toLocaleTimeString());
+        poShowToast('Loaded player: ' + handle);
     };
 
-    window.poSaveSection = function(section) {
-        poShowToast('Section "' + section.toUpperCase() + '" saved. (Placeholder — logic to wire later)');
+    // ── Fill all form sections with a player's live data ─────────────────────
+    function _fillForm(handle, data) {
+        // ── Basic Info ───────────────────────────────────────────────────────
+        _set('poPlayerUsername', handle);
+        _set('poCharName', data.characterName || handle);
+
+        // ── Level & XP ───────────────────────────────────────────────────────
+        var lvl  = typeof data.level === 'number' ? data.level : 1;
+        var xp   = typeof data.xp    === 'number' ? data.xp    : 0;
+        var xpNext = typeof data.xpNextLevel === 'number' ? data.xpNextLevel : (lvl * 1000);
+        _set('poCharLevel',   lvl);
+        _set('poCharXP',      xp);
+        _set('poCharXPNext',  xpNext);
+        _set('poCharPerkPts', typeof data.perkPointsAvailable === 'number' ? data.perkPointsAvailable : 0);
+        _updateXPBar(xp, xpNext);
+
+        // ── Vitals ───────────────────────────────────────────────────────────
+        var hp    = typeof data.hp    === 'number' ? data.hp    : 100;
+        var maxHp = typeof data.maxHp === 'number' ? data.maxHp : 100;
+        var ap    = typeof data.actionPoints    === 'number' ? data.actionPoints    : 10;
+        var maxAp = typeof data.maxActionPoints === 'number' ? data.maxActionPoints : 10;
+        var rad   = typeof data.radiation === 'number' ? data.radiation : 0;
+        _set('poCharHP',     hp);
+        _set('poCharMaxHP',  maxHp);
+        _set('poCharAP',     ap);
+        _set('poCharMaxAP',  maxAp);
+        _set('poCharRad',    rad);
+        _set('poCharMaxRad', 1000);
+        _updateVitalBars(hp, maxHp, ap, maxAp, rad, 1000);
+
+        // ── S.P.E.C.I.A.L. ───────────────────────────────────────────────────
+        var sp = data.special || {};
+        _set('poSStr', sp.strength    || 5);
+        _set('poSPer', sp.perception  || 5);
+        _set('poSEnd', sp.endurance   || 5);
+        _set('poSCha', sp.charisma    || 5);
+        _set('poSInt', sp.intelligence|| 5);
+        _set('poSAgi', sp.agility     || 5);
+        _set('poSLck', sp.luck        || 5);
+
+        // ── Skills ───────────────────────────────────────────────────────────
+        var skills = data.skills || {};
+        document.querySelectorAll('.po-skill-input[data-skill]').forEach(function(inp) {
+            var key = inp.getAttribute('data-skill');
+            inp.value = typeof skills[key] === 'number' ? skills[key] : 0;
+        });
+
+        // ── Perks ────────────────────────────────────────────────────────────
+        var perksEl = document.getElementById('poPerksContainer');
+        if (perksEl) {
+            perksEl.innerHTML = '';
+            (data.perks || []).forEach(function(p) {
+                var name = typeof p === 'string' ? p : (p.name || p.id || '');
+                if (!name) return;
+                var span = document.createElement('span');
+                span.className = 'po-tag';
+                span.innerHTML = name + ' <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button>';
+                perksEl.appendChild(span);
+            });
+        }
+
+        // ── Conditions (debuffs + boosts) ────────────────────────────────────
+        var condEl = document.getElementById('poConditionsContainer');
+        if (condEl) {
+            condEl.innerHTML = '';
+            var effects = (data.debuffs || []).concat(data.boosts || []);
+            effects.forEach(function(e) {
+                var name = typeof e === 'string' ? e : (e.name || e.id || '');
+                if (!name) return;
+                var span = document.createElement('span');
+                span.className = 'po-tag';
+                span.innerHTML = name + ' <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button>';
+                condEl.appendChild(span);
+            });
+        }
+
+        // ── Inventory ────────────────────────────────────────────────────────
+        _renderInventory(data.inventory || []);
+
+        // ── Equipment ────────────────────────────────────────────────────────
+        var eq = data.equipment || {};
+        _set('poEquip_mainHand', eq.mainHand || '');
+        _set('poEquip_offHand',  eq.offHand  || '');
+        _set('poEquip_head',     eq.head     || '');
+        _set('poEquip_chest',    eq.chest    || '');
+        _set('poEquip_legs',     eq.legs     || '');
+        _set('poEquip_access',   eq.accessory|| '');
+
+        // ── Quests ───────────────────────────────────────────────────────────
+        _renderQuests(data.quests || []);
+    }
+
+    // ── Clear the form when no player is selected ─────────────────────────────
+    function poClearPlayerForm() {
+        // Basic info
+        _set('poPlayerUsername', '');
+        _set('poCharName', '');
+        // Level/XP
+        _set('poCharLevel', 1); _set('poCharXP', 0); _set('poCharXPNext', 1000); _set('poCharPerkPts', 0);
+        _updateXPBar(0, 1000);
+        // Vitals
+        _set('poCharHP', 100); _set('poCharMaxHP', 100);
+        _set('poCharAP', 10);  _set('poCharMaxAP', 10);
+        _set('poCharRad', 0);  _set('poCharMaxRad', 1000);
+        _updateVitalBars(100, 100, 10, 10, 0, 1000);
+        // SPECIAL
+        ['poSStr','poSPer','poSEnd','poSCha','poSInt','poSAgi','poSLck'].forEach(function(id){ _set(id, 5); });
+        // Skills
+        document.querySelectorAll('.po-skill-input[data-skill]').forEach(function(inp){ inp.value = 0; });
+        // Perks / Conditions
+        var perksEl = document.getElementById('poPerksContainer');
+        if (perksEl) perksEl.innerHTML = '';
+        var condEl = document.getElementById('poConditionsContainer');
+        if (condEl) condEl.innerHTML = '';
+        // Inventory / Quests / Equipment
+        _renderInventory([]);
+        _renderQuests([]);
+        ['poEquip_mainHand','poEquip_offHand','poEquip_head','poEquip_chest','poEquip_legs','poEquip_access'].forEach(function(id){ _set(id, ''); });
+        _updateFooter('Select a connected player to view and edit their data.');
+    }
+
+    // ── DOM helpers ───────────────────────────────────────────────────────────
+    function _set(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.value = val;
+    }
+
+    function _updateXPBar(xp, xpNext) {
+        var pct = xpNext > 0 ? Math.min(100, Math.round((xp / xpNext) * 100)) : 0;
+        var lbl = document.getElementById('poXPBarLabel');
+        var fill = document.getElementById('poXPBarFill');
+        if (lbl)  lbl.textContent = 'XP PROGRESS \u2014 ' + xp + ' / ' + xpNext;
+        if (fill) fill.style.width = pct + '%';
+    }
+
+    function _updateVitalBars(hp, maxHp, ap, maxAp, rad, maxRad) {
+        var hpPct  = maxHp  > 0 ? Math.min(100, Math.round((hp  / maxHp)  * 100)) : 0;
+        var apPct  = maxAp  > 0 ? Math.min(100, Math.round((ap  / maxAp)  * 100)) : 0;
+        var radPct = maxRad > 0 ? Math.min(100, Math.round((rad / maxRad) * 100)) : 0;
+        var hpLbl  = document.getElementById('poHPBarLabel');
+        var apLbl  = document.getElementById('poAPBarLabel');
+        var radLbl = document.getElementById('poRadBarLabel');
+        var hpFill  = document.getElementById('poHPBarFill');
+        var apFill  = document.getElementById('poAPBarFill');
+        var radFill = document.getElementById('poRadBarFill');
+        if (hpLbl)  hpLbl.textContent  = 'HP \u2014 ' + hp  + '/' + maxHp;
+        if (apLbl)  apLbl.textContent  = 'AP \u2014 ' + ap  + '/' + maxAp;
+        if (radLbl) radLbl.textContent = 'RADIATION \u2014 ' + rad + '/' + maxRad;
+        if (hpFill)  hpFill.style.width  = hpPct  + '%';
+        if (apFill)  apFill.style.width  = apPct  + '%';
+        if (radFill) radFill.style.width = radPct + '%';
+    }
+
+    function _updateFooter(msg) {
         var el = document.getElementById('poLastSavedInfo');
-        if (el) el.textContent = 'Last placeholder save: ' + section.toUpperCase() + ' — ' + new Date().toLocaleTimeString();
+        if (el) el.textContent = msg;
+    }
+
+    function _renderInventory(items) {
+        var tbody = document.getElementById('poInventoryBody');
+        var emptyRow = document.getElementById('poInventoryEmpty');
+        if (!tbody) return;
+        // Remove non-empty rows
+        Array.prototype.slice.call(tbody.querySelectorAll('tr:not(#poInventoryEmpty)')).forEach(function(r){ r.parentNode.removeChild(r); });
+        if (!items || items.length === 0) {
+            if (emptyRow) emptyRow.style.display = '';
+            return;
+        }
+        if (emptyRow) emptyRow.style.display = 'none';
+        items.forEach(function(item) {
+            var name = item.name || item.id || '(unknown)';
+            var type = item.type || '—';
+            var qty  = item.qty  || item.quantity || 1;
+            var wt   = item.weight || '—';
+            var val  = item.value  ? (item.value + ' caps') : '—';
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + _esc(name) + '</td><td>' + _esc(type) + '</td>' +
+                '<td><input class="po-skill-input" type="number" value="' + qty + '" min="0" style="width:45px;"></td>' +
+                '<td>' + _esc(String(wt)) + '</td><td>' + _esc(val) + '</td>' +
+                '<td class="td-action">' +
+                '<button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poEquipItem(this)">&#x2694; EQUIP</button>' +
+                '<button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function _renderQuests(quests) {
+        var tbody = document.getElementById('poQuestBody');
+        var emptyRow = document.getElementById('poQuestEmpty');
+        if (!tbody) return;
+        Array.prototype.slice.call(tbody.querySelectorAll('tr:not(#poQuestEmpty)')).forEach(function(r){ r.parentNode.removeChild(r); });
+        if (!quests || quests.length === 0) {
+            if (emptyRow) emptyRow.style.display = '';
+            return;
+        }
+        if (emptyRow) emptyRow.style.display = 'none';
+        quests.forEach(function(q) {
+            var name  = q.name  || '(unnamed)';
+            var state = q.state || q.status || 'inactive';
+            var stage = q.stage || 'Stage 0';
+            var notes = q.notes || '';
+            var stateHtml = state.toLowerCase() === 'active'
+                ? '<span style="color:var(--overseer-green-bright);font-size:10px;">ACTIVE</span>'
+                : state.toLowerCase() === 'complete'
+                    ? '<span style="color:var(--overseer-gold-bright);font-size:10px;">COMPLETE</span>'
+                    : '<span style="color:rgba(232,232,232,.4);font-size:10px;">INACTIVE</span>';
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td>' + _esc(name) + '</td><td>' + stateHtml + '</td>' +
+                '<td><input class="po-skill-input" type="text" value="' + _esc(stage) + '" style="width:80px;font-size:10px;"></td>' +
+                '<td><input class="po-form-input" type="text" value="' + _esc(notes) + '" style="font-size:10px;padding:3px 6px;"></td>' +
+                '<td class="td-action">' +
+                (state.toLowerCase() !== 'complete' ? '<button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poCompleteQuest(this)">&#x2713; COMPLETE</button>' : '') +
+                '<button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>' +
+                '</td>';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function _esc(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Collect current form values and push to server ────────────────────────
+    function _requireHandle() {
+        if (!_currentHandle) {
+            poShowToast('No player selected. Choose a connected player first.', true);
+            return null;
+        }
+        return _currentHandle;
+    }
+
+    window.poSaveSection = function(section) {
+        var handle = _requireHandle();
+        if (!handle) return;
+
+        if (section === 'basic') {
+            OverseerSync.updatePlayer(handle, 'characterName', document.getElementById('poCharName').value.trim());
+        } else if (section === 'level') {
+            OverseerSync.updatePlayer(handle, 'level',               parseInt(document.getElementById('poCharLevel').value,   10) || 1);
+            OverseerSync.updatePlayer(handle, 'xp',                  parseInt(document.getElementById('poCharXP').value,      10) || 0);
+            OverseerSync.updatePlayer(handle, 'xpNextLevel',         parseInt(document.getElementById('poCharXPNext').value,  10) || 1000);
+            OverseerSync.updatePlayer(handle, 'perkPointsAvailable', parseInt(document.getElementById('poCharPerkPts').value, 10) || 0);
+        } else if (section === 'vitals') {
+            OverseerSync.updatePlayer(handle, 'hp',             parseInt(document.getElementById('poCharHP').value,     10) || 0);
+            OverseerSync.updatePlayer(handle, 'maxHp',          parseInt(document.getElementById('poCharMaxHP').value,  10) || 100);
+            OverseerSync.updatePlayer(handle, 'actionPoints',   parseInt(document.getElementById('poCharAP').value,     10) || 0);
+            OverseerSync.updatePlayer(handle, 'maxActionPoints',parseInt(document.getElementById('poCharMaxAP').value,  10) || 10);
+            OverseerSync.updatePlayer(handle, 'radiation',      parseInt(document.getElementById('poCharRad').value,    10) || 0);
+        } else if (section === 'special') {
+            OverseerSync.updatePlayer(handle, 'special', {
+                strength:    parseInt(document.getElementById('poSStr').value, 10) || 5,
+                perception:  parseInt(document.getElementById('poSPer').value, 10) || 5,
+                endurance:   parseInt(document.getElementById('poSEnd').value, 10) || 5,
+                charisma:    parseInt(document.getElementById('poSCha').value, 10) || 5,
+                intelligence:parseInt(document.getElementById('poSInt').value, 10) || 5,
+                agility:     parseInt(document.getElementById('poSAgi').value, 10) || 5,
+                luck:        parseInt(document.getElementById('poSLck').value, 10) || 5
+            });
+        } else if (section === 'skills') {
+            var skillsObj = {};
+            document.querySelectorAll('.po-skill-input[data-skill]').forEach(function(inp) {
+                skillsObj[inp.getAttribute('data-skill')] = parseInt(inp.value, 10) || 0;
+            });
+            OverseerSync.updatePlayer(handle, 'skills', skillsObj);
+        } else if (section === 'perks') {
+            var perks = [];
+            document.querySelectorAll('#poPerksContainer .po-tag').forEach(function(tag) {
+                var name = tag.childNodes[0] ? tag.childNodes[0].textContent.trim() : '';
+                if (name) perks.push(name);
+            });
+            OverseerSync.updatePlayer(handle, 'perks', perks);
+        } else if (section === 'conditions') {
+            var debuffs = [];
+            document.querySelectorAll('#poConditionsContainer .po-tag').forEach(function(tag) {
+                var name = tag.childNodes[0] ? tag.childNodes[0].textContent.trim() : '';
+                if (name) debuffs.push(name);
+            });
+            OverseerSync.updatePlayer(handle, 'debuffs', debuffs);
+        } else if (section === 'equipment') {
+            OverseerSync.updatePlayer(handle, 'equipment', {
+                mainHand:  document.getElementById('poEquip_mainHand').value.trim(),
+                offHand:   document.getElementById('poEquip_offHand').value.trim(),
+                head:      document.getElementById('poEquip_head').value.trim(),
+                chest:     document.getElementById('poEquip_chest').value.trim(),
+                legs:      document.getElementById('poEquip_legs').value.trim(),
+                accessory: document.getElementById('poEquip_access').value.trim()
+            });
+        } else if (section === 'inventory') {
+            // Collect visible inventory rows and persist to player record
+            var items = [];
+            var tbody = document.getElementById('poInventoryBody');
+            if (tbody) {
+                Array.prototype.slice.call(tbody.querySelectorAll('tr:not(#poInventoryEmpty)')).forEach(function(row) {
+                    var cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        var qtyInp = cells[2].querySelector('input');
+                        items.push({
+                            name:   cells[0].textContent.trim(),
+                            type:   cells[1].textContent.trim(),
+                            qty:    qtyInp ? parseInt(qtyInp.value, 10) || 1 : 1,
+                            weight: cells[3].textContent.trim(),
+                            value:  cells[4].textContent.trim().replace(' caps', '')
+                        });
+                    }
+                });
+            }
+            OverseerSync.updatePlayer(handle, 'inventory', items);
+        } else if (section === 'quests') {
+            var quests = [];
+            var qtbody = document.getElementById('poQuestBody');
+            if (qtbody) {
+                Array.prototype.slice.call(qtbody.querySelectorAll('tr:not(#poQuestEmpty)')).forEach(function(row) {
+                    var cells = row.querySelectorAll('td');
+                    if (cells.length >= 4) {
+                        var stateEl = cells[1].querySelector('span');
+                        var stageInp = cells[2].querySelector('input');
+                        var notesInp = cells[3].querySelector('input');
+                        quests.push({
+                            name:  cells[0].textContent.trim(),
+                            state: stateEl ? stateEl.textContent.trim().toLowerCase() : 'inactive',
+                            stage: stageInp ? stageInp.value.trim() : 'Stage 0',
+                            notes: notesInp ? notesInp.value.trim() : ''
+                        });
+                    }
+                });
+            }
+            OverseerSync.updatePlayer(handle, 'quests', quests);
+        }
+
+        _updateFooter(section.toUpperCase() + ' saved — ' + new Date().toLocaleTimeString());
+        poShowToast(section.toUpperCase() + ' saved for ' + handle);
     };
 
     window.poResetSection = function(section) {
-        if (confirm('Reset "' + section + '" to last saved state? (Placeholder — not wired yet)')) {
-            poShowToast('"' + section.toUpperCase() + '" reset. (Placeholder)');
+        var data = _getCurrentData();
+        if (!data) { poShowToast('No player loaded.', true); return; }
+        if (confirm('Reload "' + section + '" from server for ' + _currentHandle + '?')) {
+            _fillForm(_currentHandle, data);
+            poShowToast('"' + section.toUpperCase() + '" reloaded from live data.');
         }
     };
 
     window.poSaveAllSections = function() {
-        poShowToast('All sections saved. (Placeholder — logic to wire later)');
-        var el = document.getElementById('poLastSavedInfo');
-        if (el) el.textContent = 'All placeholder save — ' + new Date().toLocaleTimeString();
+        var handle = _requireHandle();
+        if (!handle) return;
+        ['basic','level','vitals','special','skills','perks','conditions','equipment','inventory','quests'].forEach(function(s) {
+            window.poSaveSection(s);
+        });
+        _updateFooter('All sections saved — ' + new Date().toLocaleTimeString());
+        poShowToast('All sections saved for ' + handle);
     };
 
     window.poConfirmReset = function() {
-        if (confirm('Reset ALL sections to last saved state? (Placeholder — not wired yet)')) {
-            poShowToast('All sections reset. (Placeholder)');
+        var data = _getCurrentData();
+        if (!data) { poShowToast('No player loaded.', true); return; }
+        if (confirm('Reload ALL sections from live server data for ' + _currentHandle + '?')) {
+            _fillForm(_currentHandle, data);
+            poShowToast('All sections reloaded from live data.');
         }
     };
 
     window.poGiftItems = function() {
-        poShowToast('Gift Items: Select player first. (Placeholder — logic to wire later)');
+        if (!_currentHandle) { poShowToast('Select a player first.', true); return; }
+        poShowToast('Gift Items: feature coming soon for ' + _currentHandle + '.');
     };
 
     window.poAddXP = function() {
-        poShowToast('Add XP: (Placeholder — logic to wire later)');
+        var handle = _requireHandle();
+        if (!handle) return;
+        var amount = parseInt(prompt('XP to add to ' + handle + ':'), 10);
+        if (isNaN(amount) || amount <= 0) return;
+        var cur = parseInt(document.getElementById('poCharXP').value, 10) || 0;
+        var next = cur + amount;
+        document.getElementById('poCharXP').value = next;
+        var xpNext = parseInt(document.getElementById('poCharXPNext').value, 10) || 1000;
+        _updateXPBar(next, xpNext);
+        OverseerSync.updatePlayer(handle, 'xp', next);
+        poShowToast('Added ' + amount + ' XP to ' + handle + ' (now ' + next + ')');
     };
 
     window.poHealFull = function() {
-        var hp = document.getElementById('poCharMaxHP');
-        var cur = document.getElementById('poCharHP');
-        if (hp && cur) cur.value = hp.value;
-        poShowToast('Player fully healed. (Placeholder)');
+        var handle = _requireHandle();
+        if (!handle) return;
+        var maxHp = parseInt(document.getElementById('poCharMaxHP').value, 10) || 100;
+        document.getElementById('poCharHP').value = maxHp;
+        var maxAp = parseInt(document.getElementById('poCharMaxAP').value, 10) || 10;
+        var rad   = parseInt(document.getElementById('poCharRad').value,   10) || 0;
+        _updateVitalBars(maxHp, maxHp, maxAp, maxAp, rad, 1000);
+        OverseerSync.updatePlayer(handle, 'hp', maxHp);
+        poShowToast(handle + ' fully healed to ' + maxHp + ' HP.');
     };
 
     window.poClearRads = function() {
-        var rad = document.getElementById('poCharRad');
-        if (rad) rad.value = '0';
-        poShowToast('Radiation cleared. (Placeholder)');
+        var handle = _requireHandle();
+        if (!handle) return;
+        document.getElementById('poCharRad').value = 0;
+        var hp = parseInt(document.getElementById('poCharHP').value, 10) || 0;
+        var maxHp = parseInt(document.getElementById('poCharMaxHP').value, 10) || 100;
+        var ap = parseInt(document.getElementById('poCharAP').value, 10) || 0;
+        var maxAp = parseInt(document.getElementById('poCharMaxAP').value, 10) || 10;
+        _updateVitalBars(hp, maxHp, ap, maxAp, 0, 1000);
+        OverseerSync.updatePlayer(handle, 'radiation', 0);
+        poShowToast('Radiation cleared for ' + handle + '.');
     };
 
     window.poAddInventoryItem = function() {
-        poShowToast('Add Item: (Placeholder — logic to wire later)');
+        if (!_currentHandle) { poShowToast('Select a player first.', true); return; }
+        poShowToast('Add Item: feature coming soon.');
     };
 
     window.poEquipItem = function() {
-        poShowToast('Equip: (Placeholder)');
+        poShowToast('Equip action: feature coming soon.');
     };
 
     window.poRemoveItem = function(btn) {
@@ -3672,7 +4066,7 @@
             var el = document.getElementById(id);
             if (el) el.value = '';
         });
-        poShowToast('Equipment cleared. (Placeholder)');
+        poShowToast('Equipment cleared.');
     };
 
     window.poAddPerk = function() {
@@ -3684,7 +4078,6 @@
         span.innerHTML = input.value.trim() + ' <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button>';
         container.appendChild(span);
         input.value = '';
-        poShowToast('Perk added. (Placeholder)');
     };
 
     window.poRemoveTag = function(btn) {
@@ -3701,39 +4094,31 @@
         span.innerHTML = input.value.trim() + ' <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button>';
         container.appendChild(span);
         input.value = '';
-        poShowToast('Condition added. (Placeholder)');
     };
 
     window.poClearAllConditions = function() {
         var container = document.getElementById('poConditionsContainer');
         if (container) container.innerHTML = '';
-        poShowToast('All conditions cleared. (Placeholder)');
+        poShowToast('All conditions cleared.');
     };
 
     window.poAddQuest = function() {
-        poShowToast('Add Quest: (Placeholder — logic to wire later)');
+        if (!_currentHandle) { poShowToast('Select a player first.', true); return; }
+        poShowToast('Add Quest: feature coming soon.');
     };
 
     window.poCompleteQuest = function(btn) {
         var td = btn.closest('tr').querySelector('td:nth-child(2)');
         if (td) td.innerHTML = '<span style="color:var(--overseer-gold-bright);font-size:10px;">COMPLETE</span>';
-        poShowToast('Quest marked complete. (Placeholder)');
+        btn.parentNode.removeChild(btn);
+        poShowToast('Quest marked complete.');
     };
 
     window.poActivateQuest = function(btn) {
         var td = btn.closest('tr').querySelector('td:nth-child(2)');
         if (td) td.innerHTML = '<span style="color:var(--overseer-green-bright);font-size:10px;">ACTIVE</span>';
-        poShowToast('Quest activated. (Placeholder)');
+        poShowToast('Quest activated.');
     };
-
-    function poShowToast(msg, isError) {
-        var t = document.getElementById('statusToast');
-        if (!t) return;
-        t.textContent = msg;
-        t.className = isError ? 'error visible' : 'visible';
-        clearTimeout(t._poTimer);
-        t._poTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
-    }
 }());
 </script>
 
