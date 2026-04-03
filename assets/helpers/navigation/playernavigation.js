@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <li><a href="stats.html" class="nav-link" data-page="stats">📊 STATS</a></li>
                 <li><a href="inventory.html" class="nav-link" data-page="inventory">🎒 INVENTORY</a></li>
                 <li><a href="data.html" class="nav-link" data-page="data">📋 DATA</a></li>
-                <li><a href="messages.html" class="nav-link" data-page="messages">📻 MESSAGES</a></li>
+                <li><a href="messages.html" class="nav-link" data-page="messages">📻 MESSAGES <span id="nav-messages-badge" class="nav-msg-badge" style="display:none">0</span></a></li>
                 <li><a href="settings.html" class="nav-link" data-page="settings">⚙ SETTINGS</a></li>
                 <li><a href="../terminal.html" class="nav-link" data-page="terminal">🖥️ TERMINAL</a></li>
             </ul>
@@ -348,6 +348,20 @@ document.addEventListener('DOMContentLoaded', function() {
             text-shadow: 0 0 10px var(--vault-gold);
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
         }
+
+        /* Unread message badge on the MESSAGES nav link */
+        .nav-msg-badge {
+            background: var(--vault-gold);
+            color: #000;
+            font-size: 0.6rem;
+            font-weight: bold;
+            padding: 1px 5px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
     `;
     document.head.appendChild(styleSheet);
 
@@ -424,6 +438,37 @@ document.addEventListener('DOMContentLoaded', function() {
             navCampaignEl.textContent = '⚑ ' + (sessionStorage.getItem('campaignName') || campaignId);
         }
     }
+
+    // ── Unread message badge ──────────────────────────────────────────────────
+    // Reads total unread count from localStorage and shows a badge on the
+    // MESSAGES nav link.  Refreshes whenever the storage changes (e.g. a
+    // message arrives on another tab).
+    function refreshMsgBadge() {
+        var handle = localStorage.getItem('PIPBOY_PLAYER_HANDLE') || '';
+        if (!handle) return;
+        var total = 0;
+        try {
+            var raw = localStorage.getItem('vault_msgs_v1_' + handle);
+            if (raw) {
+                var data = JSON.parse(raw);
+                Object.values(data.conversations || {}).forEach(function(c) {
+                    total += (c.unreadCount || 0);
+                });
+            }
+        } catch(e) {}
+        var badge = document.getElementById('nav-messages-badge');
+        if (badge) {
+            badge.textContent = total > 99 ? '99+' : String(total);
+            badge.style.display = total > 0 ? 'inline-block' : 'none';
+        }
+    }
+
+    refreshMsgBadge();
+
+    // Update badge when localStorage changes (messages received in background tabs)
+    window.addEventListener('storage', function(e) {
+        if (e.key && e.key.startsWith('vault_msgs_v1_')) refreshMsgBadge();
+    });
 
     // Close menu with Escape key
     document.addEventListener('keydown', function(e) {
