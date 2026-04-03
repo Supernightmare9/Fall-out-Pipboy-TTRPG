@@ -193,12 +193,47 @@
         ::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
 
         @media(max-width:768px){.command-bar{padding-left:70px;}}
+        /* ── PENDING REQUEST PANEL ───────────────────────────── */
+        .pending-panel{background:rgba(204,34,0,.08);border:1px solid var(--overseer-red-bright);margin-bottom:16px;}
+        .pending-panel .panel-header{background:rgba(204,34,0,.2);border-bottom:2px solid var(--overseer-red-bright);}
+        .pending-panel .panel-title{color:var(--overseer-red-bright);}
+        .req-badge{
+            background:var(--overseer-red-bright);color:#fff;font-size:10px;font-weight:bold;
+            padding:2px 8px;border-radius:10px;min-width:20px;text-align:center;display:inline-block;
+        }
+        .req-list{display:flex;flex-direction:column;gap:6px;}
+        .req-row{
+            display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+            background:rgba(255,51,0,.05);border:1px solid rgba(255,51,0,.25);
+            cursor:pointer;transition:background .15s;
+        }
+        .req-row:hover{background:rgba(255,51,0,.12);}
+        .req-row.active{background:rgba(255,51,0,.18);border-color:var(--overseer-red-bright);}
+        .req-row-info{flex:1;min-width:0;}
+        .req-row-name{font-size:12px;font-weight:bold;color:var(--overseer-white);letter-spacing:1px;text-transform:uppercase;}
+        .req-row-meta{font-size:10px;color:rgba(232,232,232,.5);margin-top:2px;}
+        .req-row-from{font-size:10px;color:var(--overseer-gold);margin-top:2px;}
+
+        /* ── APPROVAL EDITOR ─────────────────────────────────── */
+        .approval-panel{background:rgba(212,160,23,.06);border:1px solid var(--overseer-gold);}
+        .approval-panel .panel-header{background:rgba(212,160,23,.12);border-bottom:2px solid var(--overseer-gold);}
+        .approval-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap;}
+        .approve-btn{background:rgba(0,204,102,.15);border:1px solid var(--overseer-green);color:var(--overseer-green-bright);font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;padding:8px 18px;cursor:pointer;transition:all .2s;}
+        .approve-btn:hover{background:rgba(0,204,102,.3);}
+        .reject-btn{background:rgba(204,34,0,.15);border:1px solid var(--overseer-red-bright);color:var(--overseer-red-bright);font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;padding:8px 18px;cursor:pointer;transition:all .2s;}
+        .reject-btn:hover{background:rgba(204,34,0,.3);}
+
+        /* ── STATUS INDICATOR ────────────────────────────────── */
+        #connStatus{font-size:10px;letter-spacing:1px;padding:4px 10px;border:1px solid currentColor;color:var(--overseer-gold);}
+        #connStatus.live{color:var(--overseer-green-bright);border-color:var(--overseer-green);}
+        #connStatus.offline{color:rgba(232,232,232,.4);border-color:rgba(232,232,232,.2);}
+
+        /* ── MASTER RECIPE ROWS ──────────────────────────────── */
+        .master-badge{font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(212,160,23,.2);color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
+        .master-badge.custom{background:rgba(0,204,102,.2);color:var(--overseer-green-bright);}
     </style>
 </head>
 <body>
-<!-- fallout_stat_bonuses.js provides all S.P.E.C.I.A.L. derived-stat functions used
-     by crafting logic (getCraftingBonusFromLuck, getLegendaryCraftChance, etc.).
-     Load it before any crafting scripts. -->
 <script src="../../assets/logic/fallout_stat_bonuses.js"></script>
 <script src="../../assets/helpers/navigation/overseer-navigation.js"></script>
 
@@ -213,7 +248,8 @@
         </div>
         <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
     </div>
-    <div style="display:flex;gap:8px;">
+    <div style="display:flex;gap:8px;align-items:center;">
+        <span id="connStatus" class="offline">⬤ OFFLINE</span>
         <button class="cmd-btn success" onclick="showNewRecipeForm()" title="Create a new crafting recipe">+ NEW RECIPE</button>
         <button class="cmd-btn" onclick="exportRecipes()" title="Export all recipes as JSON">⬇ EXPORT</button>
     </div>
@@ -223,14 +259,26 @@
      MAIN CONTENT
 ══════════════════════════════════════════════════════════════════ -->
 <div class="page-content">
+
+    <!-- PENDING APPROVAL REQUESTS (shown only when requests exist) -->
+    <div class="panel pending-panel" id="pendingPanel" style="display:none">
+        <div class="panel-header">
+            <span class="panel-title">⚠ PENDING CRAFT APPROVALS</span>
+            <span class="req-badge" id="pendingBadge">0</span>
+        </div>
+        <div class="panel-body">
+            <div class="req-list" id="pendingList"></div>
+        </div>
+    </div>
+
     <div class="two-col">
 
         <!-- LEFT: Recipe List -->
         <div>
             <div class="panel">
                 <div class="panel-header">
-                    <span class="panel-title">📜 RECIPE LIBRARY</span>
-                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="recipeCount">3 recipes</span>
+                    <span class="panel-title">📜 MASTER RECIPE LIBRARY</span>
+                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="recipeCount">0 recipes</span>
                 </div>
                 <div class="panel-body">
                     <div class="filter-row">
@@ -241,104 +289,87 @@
                             <option value="consumable">Consumable</option>
                             <option value="armor">Armor</option>
                             <option value="explosive">Explosive</option>
+                            <option value="tool">Tool</option>
                             <option value="misc">Misc</option>
                         </select>
                     </div>
-                    <div class="recipe-list" id="recipeList">
-                        <!-- Placeholder recipes -->
-                        <div class="recipe-item active" onclick="selectRecipe(this,'Baseball Grenade')" data-type="explosive">
-                            <div class="recipe-item-info">
-                                <div class="recipe-name">Baseball Grenade</div>
-                                <div class="recipe-meta">Explosive · 3 ingredients · 65% success</div>
-                            </div>
-                            <span class="recipe-badge badge-uncommon">EXPLOSIVE</span>
-                        </div>
-                        <div class="recipe-item" onclick="selectRecipe(this,'Stimpak')" data-type="consumable">
-                            <div class="recipe-item-info">
-                                <div class="recipe-name">Stimpak</div>
-                                <div class="recipe-meta">Consumable · 4 ingredients · 80% success</div>
-                            </div>
-                            <span class="recipe-badge badge-common">CONSUMABLE</span>
-                        </div>
-                        <div class="recipe-item" onclick="selectRecipe(this,'Leather Armor Piece')" data-type="armor">
-                            <div class="recipe-item-info">
-                                <div class="recipe-name">Leather Armor Piece</div>
-                                <div class="recipe-meta">Armor · 2 ingredients · 90% success</div>
-                            </div>
-                            <span class="recipe-badge badge-common">ARMOR</span>
-                        </div>
-                    </div>
+                    <div class="recipe-list" id="recipeList"></div>
                 </div>
             </div>
         </div>
 
-        <!-- RIGHT: Recipe Detail / Editor -->
+        <!-- RIGHT: Panels -->
         <div>
+
+            <!-- Approval Review Panel (hidden by default) -->
+            <div class="panel approval-panel hidden" id="approvalPanel">
+                <div class="panel-header">
+                    <span class="panel-title">📋 REVIEW CRAFT REQUEST — <span id="approvalPlayerName"></span></span>
+                    <button class="cmd-btn" onclick="dismissApproval()">✕ DISMISS</button>
+                </div>
+                <div class="panel-body">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                        <div class="form-group">
+                            <label class="form-label">Item Name (editable)</label>
+                            <input class="form-input" type="text" id="apName">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Item Type (editable)</label>
+                            <select class="form-select" id="apType">
+                                <option value="weapon">Weapon</option>
+                                <option value="armor">Armor</option>
+                                <option value="consumable">Consumable</option>
+                                <option value="tool">Tool</option>
+                                <option value="explosive">Explosive</option>
+                                <option value="misc" selected>Misc</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description (editable)</label>
+                        <textarea class="form-textarea" id="apDescription"></textarea>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div class="form-group">
+                            <label class="form-label">Weight (lb) — auto-calc, editable</label>
+                            <input class="form-input" type="number" id="apWeight" min="0" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Value (¢) — auto-calc, editable</label>
+                            <input class="form-input" type="number" id="apValue" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ingredients Requested</label>
+                        <div id="apIngredients" style="display:flex;flex-direction:column;gap:5px;margin-top:5px;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Overseer Notes (optional)</label>
+                        <textarea class="form-textarea" id="apNotes" placeholder="Add notes for the player's recipe book…"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Rejection Reason (if rejecting)</label>
+                        <input class="form-input" type="text" id="apRejectReason" placeholder="e.g. Item is overpowered — rebalance ingredients">
+                    </div>
+                    <div class="approval-actions">
+                        <button class="reject-btn" onclick="rejectRequest()">✕ REJECT</button>
+                        <button class="approve-btn" onclick="approveRequest()">✓ APPROVE & CRAFT</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- Recipe Detail View -->
             <div class="panel" id="recipeDetailPanel">
                 <div class="panel-header">
-                    <span class="panel-title">📋 RECIPE DETAILS — <span id="detailRecipeName">BASEBALL GRENADE</span></span>
+                    <span class="panel-title">📋 RECIPE DETAILS — <span id="detailRecipeName">SELECT A RECIPE</span></span>
                     <div style="display:flex;gap:6px;">
-                        <button class="cmd-btn" onclick="editRecipe()" title="Save changes to this recipe">✏ EDIT</button>
-                        <button class="cmd-btn danger" onclick="deleteRecipe()" title="Permanently delete this recipe">🗑 DELETE</button>
+                        <button class="cmd-btn" onclick="editRecipe()" title="Edit this recipe">✏ EDIT</button>
+                        <button class="cmd-btn danger" onclick="deleteRecipe()" title="Delete this recipe">🗑 DELETE</button>
                     </div>
                 </div>
-                <div class="panel-body">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                        <div>
-                            <div class="detail-section">
-                                <div class="detail-label">Recipe Name</div>
-                                <div class="detail-value" id="dRecipeName">Baseball Grenade</div>
-                            </div>
-                            <div class="detail-section">
-                                <div class="detail-label">Type</div>
-                                <div class="detail-value" id="dRecipeType">Explosive</div>
-                            </div>
-                            <div class="detail-section">
-                                <div class="detail-label">Outcome / Product</div>
-                                <div class="detail-value" id="dRecipeOutcome">1× Baseball Grenade</div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="detail-section">
-                                <div class="detail-label">Success Chance</div>
-                                <div class="detail-value" id="dSuccessChance" style="color:var(--overseer-green-bright);font-size:18px;font-weight:bold;">65%</div>
-                                <div class="success-pct-bar"><div class="success-pct-fill" id="dSuccessBar" style="width:65%;"></div></div>
-                            </div>
-                            <div class="detail-section" style="margin-top:12px;">
-                                <div class="detail-label">Crafting Skill Required</div>
-                                <div class="detail-value" id="dSkillReq">Explosives 25</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="detail-section" style="margin-top:8px;">
-                        <div class="detail-label">Required Ingredients (from Junk Pool)</div>
-                        <div id="dIngredients" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;">
-                            <div class="ingredient-row" style="cursor:default;">
-                                <span style="font-size:10px;color:var(--overseer-gold);min-width:30px;">1×</span>
-                                <span class="ingredient-name">Duct Tape</span>
-                                <span style="font-size:9px;color:rgba(232,232,232,.4);">junk</span>
-                            </div>
-                            <div class="ingredient-row" style="cursor:default;">
-                                <span style="font-size:10px;color:var(--overseer-gold);min-width:30px;">1×</span>
-                                <span class="ingredient-name">Baseball</span>
-                                <span style="font-size:9px;color:rgba(232,232,232,.4);">junk</span>
-                            </div>
-                            <div class="ingredient-row" style="cursor:default;">
-                                <span style="font-size:10px;color:var(--overseer-gold);min-width:30px;">1×</span>
-                                <span class="ingredient-name">Grenade (Inert)</span>
-                                <span style="font-size:9px;color:rgba(232,232,232,.4);">junk</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="detail-section" style="margin-top:12px;">
-                        <div class="detail-label">Notes</div>
-                        <div class="detail-value" id="dNotes" style="color:rgba(232,232,232,.6);font-style:italic;">
-                            Combines inert hardware into a functional thrown explosive. Overseer must confirm crafting attempt.
-                        </div>
+                <div class="panel-body" id="recipeDetailBody">
+                    <div style="font-size:11px;color:rgba(232,232,232,.4);text-align:center;padding:20px;">
+                        [ SELECT A RECIPE FROM THE LIBRARY ]
                     </div>
                 </div>
             </div>
@@ -361,8 +392,9 @@
                                 <option value="weapon">Weapon</option>
                                 <option value="consumable">Consumable</option>
                                 <option value="armor">Armor</option>
-                                <option value="explosive" selected>Explosive</option>
-                                <option value="misc">Misc</option>
+                                <option value="explosive">Explosive</option>
+                                <option value="tool">Tool</option>
+                                <option value="misc" selected>Misc</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -372,48 +404,26 @@
                     </div>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                         <div class="form-group">
-                            <label class="form-label">Outcome / Product</label>
-                            <input class="form-input" type="text" id="editOutcome" placeholder="e.g. 1× Baseball Grenade">
+                            <label class="form-label">Weight (lb)</label>
+                            <input class="form-input" type="number" id="editWeight" min="0" step="0.1" placeholder="0">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Success Chance (%) — ref crafting.js</label>
-                            <input class="form-input" type="number" id="editSuccess" min="0" max="100" placeholder="65">
+                            <label class="form-label">Value (¢)</label>
+                            <input class="form-input" type="number" id="editValue" min="0" placeholder="0">
                         </div>
                     </div>
-
                     <div class="form-group">
-                        <label class="form-label">Ingredients (from Junk Pool)</label>
-                        <div id="editIngredients" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;">
-                            <div class="ingredient-row">
-                                <input class="ingredient-qty" type="number" value="1" min="1" style="width:55px;">
-                                <select class="form-select" style="flex:1;">
-                                    <option>Duct Tape</option>
-                                    <option>Baseball</option>
-                                    <option>Grenade (Inert)</option>
-                                    <option>Adhesive</option>
-                                    <option>Steel Scrap</option>
-                                    <option>Copper Wire</option>
-                                    <option>Rubber</option>
-                                    <option>Glass Shard</option>
-                                    <option>Cloth</option>
-                                    <option>Aluminum Can</option>
-                                    <option>Spring</option>
-                                    <option>Gear</option>
-                                </select>
-                                <button class="ingredient-remove" onclick="this.closest('.ingredient-row').remove()">✕</button>
-                            </div>
-                        </div>
+                        <label class="form-label">Ingredients</label>
+                        <div id="editIngredients" style="display:flex;flex-direction:column;gap:6px;margin-bottom:8px;"></div>
                         <button class="cmd-btn" onclick="addIngredientRow()" style="font-size:10px;padding:5px 12px;">+ ADD INGREDIENT</button>
                     </div>
-
                     <div class="form-group">
                         <label class="form-label">Notes / Description</label>
                         <textarea class="form-textarea" id="editNotes" placeholder="Overseer notes about this recipe…"></textarea>
                     </div>
-
                     <div class="form-actions">
                         <button class="cmd-btn danger" onclick="cancelEdit()">CANCEL</button>
-                        <button class="cmd-btn success" onclick="saveRecipe()" title="Save changes to this recipe">💾 SAVE RECIPE</button>
+                        <button class="cmd-btn success" onclick="saveRecipe()">💾 SAVE RECIPE</button>
                     </div>
                 </div>
             </div>
@@ -425,57 +435,183 @@
 <!-- STATUS TOAST -->
 <div id="statusToast"></div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
 (function() {
-    // Auth guard — only admin role may access this page
+    // ── Auth guard ────────────────────────────────────────────────────────────
     var _role = sessionStorage.getItem('role');
     if (_role !== 'admin') { window.location.replace('../login.html'); return; }
 
-    // Placeholder data array for export
-    var recipes = [];
+    // ── Credentials ───────────────────────────────────────────────────────────
+    var _sessionCode = localStorage.getItem('OVERSEER_SESSION_CODE') || sessionStorage.getItem('sessionCode') || 'VAULT01';
+    var _adminCode   = localStorage.getItem('OVERSEER_ADMIN_CODE')   || sessionStorage.getItem('adminCode')   || 'OVERSEER215';
 
-    // Show campaign name
+    // ── Campaign display ──────────────────────────────────────────────────────
     var cname = sessionStorage.getItem('campaignName') || sessionStorage.getItem('campaignId') || '';
     if (cname) {
         var el = document.getElementById('campaignDisplay');
         if (el) el.textContent = '⚑ ' + cname;
     }
 
-    window.selectRecipe = function(el, name) {
-        document.querySelectorAll('.recipe-item').forEach(function(r){ r.classList.remove('active'); });
-        el.classList.add('active');
-        document.getElementById('detailRecipeName').textContent = name.toUpperCase();
-        document.getElementById('dRecipeName').textContent = name;
+    // ── escape ────────────────────────────────────────────────────────────────
+    function escapeHtml(t) {
+        if (t === null || t === undefined) return '';
+        return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  MASTER RECIPE BOOK  (localStorage)
+    // ═══════════════════════════════════════════════════════════════════════════
+    var LS_MASTER = 'vault_recipes_v1_overseer';
+    var masterRecipes = [];
+    var selectedRecipeId = null;
+
+    function loadMasterRecipes() {
+        try { masterRecipes = JSON.parse(localStorage.getItem(LS_MASTER) || '[]'); } catch(e) { masterRecipes = []; }
+        // Seed built-in recipes on first load
+        if (masterRecipes.length === 0) {
+            masterRecipes = [
+                { recipeId:'builtin_molotov', name:'Molotov Cocktail', type:'weapon', weight:0.5, value:50,
+                  description:'Improvised incendiary. Nuka-Cola bottle + cloth.', ingredients:[], notes:'', source:'builtin' },
+                { recipeId:'builtin_medkit',  name:'Field Medkit',     type:'consumable', weight:1, value:100,
+                  description:'Jury-rigged medkit from Stimpaks and RadAway.', ingredients:[], notes:'', source:'builtin' }
+            ];
+            saveMasterRecipes();
+        }
+    }
+
+    function saveMasterRecipes() {
+        try { localStorage.setItem(LS_MASTER, JSON.stringify(masterRecipes)); } catch(e) {}
+    }
+
+    function addToMasterRecipes(recipe) {
+        for (var i = 0; i < masterRecipes.length; i++) {
+            if (masterRecipes[i].recipeId === recipe.recipeId) { masterRecipes[i] = recipe; saveMasterRecipes(); return; }
+        }
+        masterRecipes.push(recipe);
+        saveMasterRecipes();
+    }
+
+    function deleteMasterRecipe(recipeId) {
+        masterRecipes = masterRecipes.filter(function(r){ return r.recipeId !== recipeId; });
+        saveMasterRecipes();
+    }
+
+    // ── Render Recipe Library ─────────────────────────────────────────────────
+    function renderRecipeList() {
+        var listEl   = document.getElementById('recipeList');
+        var countEl  = document.getElementById('recipeCount');
+        if (!listEl) return;
+
+        var q = (document.getElementById('recipeSearch') || {value:''}).value.toLowerCase();
+        var t = (document.getElementById('recipeTypeFilter') || {value:''}).value;
+
+        var filtered = masterRecipes.filter(function(r){
+            return (!q || r.name.toLowerCase().includes(q)) && (!t || r.type === t);
+        });
+
+        if (countEl) countEl.textContent = masterRecipes.length + ' recipe' + (masterRecipes.length !== 1 ? 's' : '');
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<div style="padding:12px;font-size:11px;color:rgba(232,232,232,.4);text-align:center;">[ NO RECIPES ]</div>';
+            return;
+        }
+
+        var html = '';
+        filtered.forEach(function(r) {
+            var isActive = selectedRecipeId === r.recipeId;
+            var isCustom = r.source === 'approved-request';
+            html += '<div class="recipe-item' + (isActive ? ' active' : '') + '" onclick="selectMasterRecipe(\'' + escapeHtml(r.recipeId) + '\')" data-type="' + escapeHtml(r.type) + '">' +
+                '<div class="recipe-item-info">' +
+                    '<div class="recipe-name">' + escapeHtml(r.name) + '</div>' +
+                    '<div class="recipe-meta">' + escapeHtml(r.type || 'misc').toUpperCase() + ' · Wt:' + (r.weight || 0) + ' Val:' + (r.value || 0) + (r.createdBy ? ' · by ' + escapeHtml(r.createdBy) : '') + '</div>' +
+                '</div>' +
+                '<span class="master-badge' + (isCustom ? ' custom' : '') + '">' + (isCustom ? 'CUSTOM' : 'STANDARD') + '</span>' +
+            '</div>';
+        });
+        listEl.innerHTML = html;
+    }
+
+    window.selectMasterRecipe = function(recipeId) {
+        selectedRecipeId = recipeId;
+        var recipe = null;
+        for (var i = 0; i < masterRecipes.length; i++) {
+            if (masterRecipes[i].recipeId === recipeId) { recipe = masterRecipes[i]; break; }
+        }
+        renderRecipeList();
         document.getElementById('recipeDetailPanel').classList.remove('hidden');
+        document.getElementById('approvalPanel').classList.add('hidden');
         document.getElementById('recipeEditorPanel').classList.add('hidden');
+
+        var nameEl   = document.getElementById('detailRecipeName');
+        var bodyEl   = document.getElementById('recipeDetailBody');
+        if (!recipe) { if (nameEl) nameEl.textContent = '—'; return; }
+        if (nameEl) nameEl.textContent = recipe.name.toUpperCase();
+
+        var ingsHtml = '';
+        (recipe.ingredients || []).forEach(function(ing) {
+            ingsHtml += '<div class="ingredient-row" style="cursor:default;"><span style="font-size:10px;color:var(--overseer-gold);min-width:30px;">1×</span><span class="ingredient-name">' + escapeHtml(ing.name) + '</span></div>';
+        });
+        if (!ingsHtml) ingsHtml = '<div style="font-size:11px;color:rgba(232,232,232,.4);">None listed.</div>';
+
+        bodyEl.innerHTML =
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">' +
+                '<div>' +
+                    '<div class="detail-section"><div class="detail-label">Recipe Name</div><div class="detail-value">' + escapeHtml(recipe.name) + '</div></div>' +
+                    '<div class="detail-section"><div class="detail-label">Type</div><div class="detail-value">' + escapeHtml(recipe.type || 'misc').toUpperCase() + '</div></div>' +
+                    (recipe.createdBy ? '<div class="detail-section"><div class="detail-label">Created By</div><div class="detail-value">' + escapeHtml(recipe.createdBy) + '</div></div>' : '') +
+                '</div>' +
+                '<div>' +
+                    '<div class="detail-section"><div class="detail-label">Weight</div><div class="detail-value">' + (recipe.weight || 0) + ' lb</div></div>' +
+                    '<div class="detail-section"><div class="detail-label">Value</div><div class="detail-value">' + (recipe.value || 0) + '¢</div></div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="detail-section" style="margin-top:8px;"><div class="detail-label">Description</div><div class="detail-value" style="color:rgba(232,232,232,.7);font-style:italic;">' + escapeHtml(recipe.description || '—') + '</div></div>' +
+            '<div class="detail-section" style="margin-top:8px;"><div class="detail-label">Ingredients</div><div style="margin-top:6px;display:flex;flex-direction:column;gap:5px;">' + ingsHtml + '</div></div>' +
+            (recipe.notes ? '<div class="detail-section" style="margin-top:8px;"><div class="detail-label">Notes</div><div class="detail-value" style="color:rgba(212,160,23,.8);font-style:italic;">' + escapeHtml(recipe.notes) + '</div></div>' : '');
     };
 
-    window.filterRecipes = function() {
-        var q = document.getElementById('recipeSearch').value.toLowerCase();
-        var t = document.getElementById('recipeTypeFilter').value;
-        document.querySelectorAll('.recipe-item').forEach(function(item) {
-            var nm = item.querySelector('.recipe-name').textContent.toLowerCase();
-            var tp = item.getAttribute('data-type') || '';
-            var show = nm.includes(q) && (t === '' || tp === t);
-            item.style.display = show ? '' : 'none';
-        });
-    };
+    window.filterRecipes = function() { renderRecipeList(); };
+
+    // ── Recipe Editor ─────────────────────────────────────────────────────────
+    var editingRecipeId = null;
 
     window.showNewRecipeForm = function() {
+        editingRecipeId = null;
         document.getElementById('editorTitle').textContent = '+ NEW RECIPE';
         document.getElementById('editName').value = '';
         document.getElementById('editSkill').value = '';
-        document.getElementById('editOutcome').value = '';
-        document.getElementById('editSuccess').value = '';
+        document.getElementById('editWeight').value = '';
+        document.getElementById('editValue').value = '';
         document.getElementById('editNotes').value = '';
+        document.getElementById('editIngredients').innerHTML = '';
         document.getElementById('recipeDetailPanel').classList.add('hidden');
+        document.getElementById('approvalPanel').classList.add('hidden');
         document.getElementById('recipeEditorPanel').classList.remove('hidden');
     };
 
     window.editRecipe = function() {
-        var name = document.getElementById('dRecipeName').textContent;
-        document.getElementById('editorTitle').textContent = '✏ EDIT RECIPE — ' + name.toUpperCase();
-        document.getElementById('editName').value = name;
+        if (!selectedRecipeId) return;
+        var recipe = null;
+        for (var i = 0; i < masterRecipes.length; i++) {
+            if (masterRecipes[i].recipeId === selectedRecipeId) { recipe = masterRecipes[i]; break; }
+        }
+        if (!recipe) return;
+        editingRecipeId = recipe.recipeId;
+        document.getElementById('editorTitle').textContent = '✏ EDIT — ' + recipe.name.toUpperCase();
+        document.getElementById('editName').value   = recipe.name;
+        document.getElementById('editWeight').value = recipe.weight || 0;
+        document.getElementById('editValue').value  = recipe.value  || 0;
+        document.getElementById('editNotes').value  = recipe.notes  || '';
+        // Populate ingredients
+        var ingsEl = document.getElementById('editIngredients');
+        ingsEl.innerHTML = '';
+        (recipe.ingredients || []).forEach(function(ing) { addIngredientRowWith(ing.name); });
+        // Set type select
+        var typeEl = document.getElementById('editType');
+        if (typeEl) typeEl.value = recipe.type || 'misc';
+        document.getElementById('recipeDetailPanel').classList.add('hidden');
+        document.getElementById('approvalPanel').classList.add('hidden');
         document.getElementById('recipeEditorPanel').classList.remove('hidden');
     };
 
@@ -487,50 +623,255 @@
     window.saveRecipe = function() {
         var name = document.getElementById('editName').value.trim();
         if (!name) { showToast('Recipe name is required.', true); return; }
-        showToast('Recipe "' + name + '" saved. (Placeholder — logic to wire later)');
+        var ings = [];
+        document.querySelectorAll('#editIngredients .ing-name-input').forEach(function(inp) {
+            var n = inp.value.trim();
+            if (n) ings.push({ name: n });
+        });
+        var recipe = {
+            recipeId:    editingRecipeId || ('recipe_' + Date.now() + '_' + Math.random().toString(36).slice(2,6)),
+            name:        name,
+            type:        document.getElementById('editType').value || 'misc',
+            weight:      parseFloat(document.getElementById('editWeight').value) || 0,
+            value:       parseFloat(document.getElementById('editValue').value)  || 0,
+            description: '',
+            notes:       document.getElementById('editNotes').value.trim(),
+            ingredients: ings,
+            source:      'overseer'
+        };
+        addToMasterRecipes(recipe);
+        selectedRecipeId = recipe.recipeId;
+        renderRecipeList();
         cancelEdit();
+        window.selectMasterRecipe(recipe.recipeId);
+        showToast('Recipe "' + name + '" saved.');
     };
 
     window.deleteRecipe = function() {
-        var name = document.getElementById('dRecipeName').textContent;
-        if (confirm('Delete recipe "' + name + '"? (Placeholder — not wired yet)')) {
-            showToast('Recipe "' + name + '" deleted. (Placeholder)');
+        if (!selectedRecipeId) return;
+        var recipe = null;
+        for (var i = 0; i < masterRecipes.length; i++) {
+            if (masterRecipes[i].recipeId === selectedRecipeId) { recipe = masterRecipes[i]; break; }
+        }
+        if (!recipe) return;
+        if (confirm('Delete recipe "' + recipe.name + '"? This cannot be undone.')) {
+            deleteMasterRecipe(selectedRecipeId);
+            selectedRecipeId = null;
+            renderRecipeList();
+            var bodyEl = document.getElementById('recipeDetailBody');
+            if (bodyEl) bodyEl.innerHTML = '<div style="font-size:11px;color:rgba(232,232,232,.4);text-align:center;padding:20px;">[ SELECT A RECIPE FROM THE LIBRARY ]</div>';
+            document.getElementById('detailRecipeName').textContent = 'SELECT A RECIPE';
+            showToast('Recipe deleted.');
         }
     };
 
+    function addIngredientRowWith(name) {
+        var row = document.createElement('div');
+        row.className = 'ingredient-row';
+        row.innerHTML = '<input class="form-input ing-name-input" type="text" placeholder="Ingredient name" value="' + escapeHtml(name || '') + '" style="flex:1;">' +
+            '<button class="ingredient-remove" onclick="this.closest(\'.ingredient-row\').remove()" type="button">✕</button>';
+        document.getElementById('editIngredients').appendChild(row);
+    }
+
+    window.addIngredientRow = function() { addIngredientRowWith(''); };
+
+    // ── Export ────────────────────────────────────────────────────────────────
     window.exportRecipes = function() {
         try {
-            var data = JSON.stringify(recipes, null, 2);
-            var blob = new Blob([data], {type:'application/json'});
-            var url = URL.createObjectURL(blob);
-            var a = document.createElement('a');
+            var blob = new Blob([JSON.stringify(masterRecipes, null, 2)], {type:'application/json'});
+            var url  = URL.createObjectURL(blob);
+            var a    = document.createElement('a');
             a.href = url; a.download = 'crafting-recipes.json'; a.click();
             URL.revokeObjectURL(url);
-            showToast('Recipes exported successfully.');
+            showToast('Recipes exported.');
         } catch(e) { showToast('Export failed: ' + e.message, true); }
     };
 
-    window.addIngredientRow = function() {
-        var row = document.createElement('div');
-        row.className = 'ingredient-row';
-        row.innerHTML = '<input class="ingredient-qty" type="number" value="1" min="1" style="width:55px;">' +
-            '<select class="form-select" style="flex:1;">' +
-            '<option>Duct Tape</option><option>Baseball</option><option>Adhesive</option>' +
-            '<option>Steel Scrap</option><option>Copper Wire</option><option>Rubber</option>' +
-            '<option>Glass Shard</option><option>Cloth</option><option>Aluminum Can</option>' +
-            '<option>Spring</option><option>Gear</option>' +
-            '</select>' +
-            '<button class="ingredient-remove" onclick="this.closest(\'.ingredient-row\').remove()">✕</button>';
-        document.getElementById('editIngredients').appendChild(row);
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  PENDING CRAFT REQUEST APPROVAL
+    // ═══════════════════════════════════════════════════════════════════════════
+    var pendingRequests  = [];   // { requestId, fromHandle, name, description, type, ingredients, totalWeight, totalValue, timestamp }
+    var activeRequestId  = null;
+    var _socket          = null;
+
+    function renderPendingPanel() {
+        var panelEl  = document.getElementById('pendingPanel');
+        var listEl   = document.getElementById('pendingList');
+        var badgeEl  = document.getElementById('pendingBadge');
+        if (!panelEl || !listEl) return;
+
+        if (pendingRequests.length === 0) {
+            panelEl.style.display = 'none';
+            return;
+        }
+        panelEl.style.display = '';
+        if (badgeEl) badgeEl.textContent = pendingRequests.length;
+
+        var html = '';
+        pendingRequests.forEach(function(req) {
+            var isActive = activeRequestId === req.requestId;
+            html += '<div class="req-row' + (isActive ? ' active' : '') + '" onclick="reviewRequest(\'' + escapeHtml(req.requestId) + '\')">' +
+                '<div class="req-row-info">' +
+                    '<div class="req-row-name">' + escapeHtml(req.name) + '</div>' +
+                    '<div class="req-row-from">From: ' + escapeHtml(req.fromHandle) + '</div>' +
+                    '<div class="req-row-meta">' + escapeHtml(req.type || 'misc').toUpperCase() + ' · ' + (req.ingredients || []).length + ' ingredient(s) · Wt:' + (req.totalWeight || 0) + ' Val:' + (req.totalValue || 0) + '</div>' +
+                '</div>' +
+            '</div>';
+        });
+        listEl.innerHTML = html;
+    }
+
+    window.reviewRequest = function(requestId) {
+        var req = null;
+        for (var i = 0; i < pendingRequests.length; i++) {
+            if (pendingRequests[i].requestId === requestId) { req = pendingRequests[i]; break; }
+        }
+        if (!req) return;
+        activeRequestId = requestId;
+        renderPendingPanel();
+
+        // Populate approval form
+        document.getElementById('approvalPlayerName').textContent = req.fromHandle.toUpperCase();
+        document.getElementById('apName').value        = req.name;
+        document.getElementById('apDescription').value = req.description || '';
+        document.getElementById('apWeight').value      = req.totalWeight || 0;
+        document.getElementById('apValue').value       = req.totalValue  || 0;
+        document.getElementById('apNotes').value       = '';
+        document.getElementById('apRejectReason').value = '';
+
+        // Set type select
+        var typeEl = document.getElementById('apType');
+        if (typeEl) typeEl.value = req.type || 'misc';
+
+        // Show ingredients
+        var ingsEl = document.getElementById('apIngredients');
+        var ingsHtml = '';
+        (req.ingredients || []).forEach(function(ing) {
+            ingsHtml += '<div class="ingredient-row" style="cursor:default;">' +
+                '<span class="ingredient-name">' + escapeHtml(ing.name) + '</span>' +
+                '<span style="font-size:9px;color:rgba(232,232,232,.4);">Wt:' + (ing.weight||0) + ' Val:' + (ing.value||0) + '</span>' +
+            '</div>';
+        });
+        ingsEl.innerHTML = ingsHtml || '<div style="font-size:11px;color:rgba(232,232,232,.4);">No ingredients specified.</div>';
+
+        document.getElementById('approvalPanel').classList.remove('hidden');
+        document.getElementById('recipeDetailPanel').classList.add('hidden');
+        document.getElementById('recipeEditorPanel').classList.add('hidden');
     };
 
+    window.dismissApproval = function() {
+        activeRequestId = null;
+        renderPendingPanel();
+        document.getElementById('approvalPanel').classList.add('hidden');
+        document.getElementById('recipeDetailPanel').classList.remove('hidden');
+    };
+
+    window.approveRequest = function() {
+        if (!activeRequestId || !_socket) return;
+        var name        = document.getElementById('apName').value.trim();
+        var description = document.getElementById('apDescription').value.trim();
+        var type        = document.getElementById('apType').value;
+        var weight      = parseFloat(document.getElementById('apWeight').value) || 0;
+        var value       = parseFloat(document.getElementById('apValue').value)  || 0;
+        var notes       = document.getElementById('apNotes').value.trim();
+        if (!name) { showToast('Item name is required.', true); return; }
+        _socket.emit('craft:approve', { requestId: activeRequestId, name: name, description: description, type: type, totalWeight: weight, totalValue: value, notes: notes });
+        // Optimistically remove from pending
+        pendingRequests = pendingRequests.filter(function(r){ return r.requestId !== activeRequestId; });
+        activeRequestId = null;
+        renderPendingPanel();
+        document.getElementById('approvalPanel').classList.add('hidden');
+        document.getElementById('recipeDetailPanel').classList.remove('hidden');
+        showToast('Request approved! Item crafted for player.');
+    };
+
+    window.rejectRequest = function() {
+        if (!activeRequestId || !_socket) return;
+        var reason = document.getElementById('apRejectReason').value.trim() || 'Request was not approved.';
+        _socket.emit('craft:reject', { requestId: activeRequestId, reason: reason });
+        pendingRequests = pendingRequests.filter(function(r){ return r.requestId !== activeRequestId; });
+        activeRequestId = null;
+        renderPendingPanel();
+        document.getElementById('approvalPanel').classList.add('hidden');
+        document.getElementById('recipeDetailPanel').classList.remove('hidden');
+        showToast('Request rejected. Player notified.');
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    //  SOCKET.IO
+    // ═══════════════════════════════════════════════════════════════════════════
+    function setConnStatus(cls, txt) {
+        var el = document.getElementById('connStatus');
+        if (el) { el.className = cls; el.textContent = txt; }
+    }
+
+    function initSocket() {
+        if (typeof io === 'undefined') return;
+        try { _socket = io('', { transports: ['websocket', 'polling'] }); } catch(e) { return; }
+
+        _socket.on('connect', function() {
+            setConnStatus('', '⬤ CONNECTING…');
+            _socket.emit('overseer:join', { sessionCode: _sessionCode, adminCode: _adminCode });
+        });
+
+        _socket.on('session:joined', function() {
+            setConnStatus('live', '⬤ LIVE');
+        });
+
+        _socket.on('disconnect', function() {
+            setConnStatus('offline', '⬤ OFFLINE');
+        });
+
+        // Server sends all pending requests when overseer connects mid-session
+        _socket.on('craft:pending-requests-sync', function(payload) {
+            var reqs = Array.isArray(payload.requests) ? payload.requests : [];
+            reqs.forEach(function(req) {
+                var exists = false;
+                for (var i = 0; i < pendingRequests.length; i++) {
+                    if (pendingRequests[i].requestId === req.requestId) { exists = true; break; }
+                }
+                if (!exists) pendingRequests.push(req);
+            });
+            renderPendingPanel();
+        });
+
+        // New craft request from a player
+        _socket.on('craft:pending-request', function(req) {
+            if (!req || !req.requestId) return;
+            // Avoid duplicates
+            for (var i = 0; i < pendingRequests.length; i++) {
+                if (pendingRequests[i].requestId === req.requestId) return;
+            }
+            pendingRequests.push(req);
+            renderPendingPanel();
+            showToast('⚠ New craft request from ' + req.fromHandle + ': "' + req.name + '"');
+        });
+
+        // Server echoes approved recipe back to Overseer → save to master book
+        _socket.on('craft:recipe-saved', function(payload) {
+            var recipe = payload && payload.recipe;
+            if (!recipe) return;
+            addToMasterRecipes(recipe);
+            renderRecipeList();
+        });
+    }
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
     function showToast(msg, isError) {
         var t = document.getElementById('statusToast');
+        if (!t) return;
         t.textContent = msg;
-        t.className = isError ? 'error visible' : 'visible';
+        t.className   = isError ? 'error visible' : 'visible';
         clearTimeout(t._timer);
-        t._timer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+        t._timer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 4000);
     }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    loadMasterRecipes();
+    renderRecipeList();
+    renderPendingPanel();
+    initSocket();
+
 })();
 </script>
 </body>

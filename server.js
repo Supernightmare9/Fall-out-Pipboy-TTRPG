@@ -92,9 +92,12 @@ function getOrCreateSession(code) {
       campaignActive: false,
       campaignId: null,
       players: {},
-      combat: { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] }
+      combat: { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] },
+      craftRequests: {}   // { [requestId]: craftRequestObject }
     };
   }
+  // Back-fill craftRequests for sessions created before this field existed
+  if (!sessions[code].craftRequests) sessions[code].craftRequests = {};
   return sessions[code];
 }
 
@@ -268,6 +271,12 @@ io.on('connection', (socket) => {
       campaignId: session.campaignId,
       players: allPlayersSnapshot(session)
     });
+
+    // Send any pending craft requests so the Overseer sees them immediately
+    const pendingRequests = Object.values(session.craftRequests || {});
+    if (pendingRequests.length > 0) {
+      socket.emit('craft:pending-requests-sync', { requests: pendingRequests });
+    }
 
     console.log(`[overseer:join] → session ${code}`);
   });
@@ -716,6 +725,128 @@ io.on('connection', (socket) => {
     if (isNaN(idx) || idx < 0 || idx >= len) return;
     session.combat.currentTurnIndex = idx;
     io.to(sessionCode).emit('combat:state-updated', session.combat);
+  });
+
+  // ── CRAFTING: player submits custom item for Overseer approval ────────────
+  // Payload: { name, description, type, ingredients, totalWeight, totalValue }
+  // Creates a pending request stored in session.craftRequests and notifies
+  // the Overseer in real-time.
+  socket.on('craft:submit-request', ({ name, description, type, ingredients, totalWeight, totalValue } = {}) => {
+    const { role, sessionCode, handle } = socket.data || {};
+    if (role !== 'player' || !sessionCode || !handle) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const itemName = String(name || '').trim();
+    if (!itemName) return;
+
+    const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    const request = {
+      requestId,
+      fromHandle:  handle,
+      name:        itemName,
+      description: String(description || '').trim(),
+      type:        String(type || 'misc').trim(),
+      ingredients: Array.isArray(ingredients) ? ingredients : [],
+      totalWeight: Number(totalWeight) || 0,
+      totalValue:  Number(totalValue)  || 0,
+      timestamp:   Date.now(),
+      status:      'pending'
+    };
+
+    session.craftRequests[requestId] = request;
+
+    // Notify Overseer immediately if connected
+    if (session.overseerSocketId) {
+      io.to(session.overseerSocketId).emit('craft:pending-request', request);
+    }
+
+    // Acknowledge to player
+    socket.emit('craft:request-submitted', { requestId, message: 'Custom craft request sent to Overseer for approval.' });
+    console.log(`[craft:submit-request] ${handle} → "${itemName}" (${requestId}) session=${sessionCode}`);
+  });
+
+  // ── CRAFTING: Overseer approves a pending request ─────────────────────────
+  // Payload: { requestId, name, description, type, totalWeight, totalValue, notes }
+  // Delivers the approved item to the player and saves the recipe for both.
+  socket.on('craft:approve', ({ requestId, name, description, type, totalWeight, totalValue, notes } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const request = session.craftRequests[requestId];
+    if (!request || request.status !== 'pending') return;
+
+    // Build final recipe with any Overseer edits
+    const finalName        = String(name        || request.name).trim()        || request.name;
+    const finalDescription = String(description || request.description).trim() || request.description;
+    const finalType        = String(type        || request.type).trim()        || request.type;
+    const finalWeight      = isNaN(Number(totalWeight)) ? request.totalWeight : Number(totalWeight);
+    const finalValue       = isNaN(Number(totalValue))  ? request.totalValue  : Number(totalValue);
+
+    const recipe = {
+      recipeId:    'recipe_custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      name:        finalName,
+      description: finalDescription,
+      type:        finalType,
+      ingredients: request.ingredients,
+      weight:      finalWeight,
+      value:       finalValue,
+      createdBy:   request.fromHandle,
+      notes:       String(notes || '').trim(),
+      approvedAt:  Date.now()
+    };
+
+    request.status = 'approved';
+    request.recipe = recipe;
+
+    // Deliver approval + item + recipe to the player
+    const playerEntry = session.players[request.fromHandle];
+    if (playerEntry && playerEntry.socketId) {
+      io.to(playerEntry.socketId).emit('craft:request-approved', {
+        requestId,
+        recipe,
+        message: 'Your custom craft request was approved!'
+      });
+    }
+
+    // Also send recipe to Overseer for their master recipe book
+    socket.emit('craft:recipe-saved', { recipe, source: 'approved-request' });
+
+    // Clean up
+    delete session.craftRequests[requestId];
+    console.log(`[craft:approve] requestId=${requestId} for ${request.fromHandle} → "${finalName}" session=${sessionCode}`);
+  });
+
+  // ── CRAFTING: Overseer rejects a pending request ──────────────────────────
+  // Payload: { requestId, reason }
+  socket.on('craft:reject', ({ requestId, reason } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const request = session.craftRequests[requestId];
+    if (!request || request.status !== 'pending') return;
+
+    request.status = 'rejected';
+
+    const playerEntry = session.players[request.fromHandle];
+    if (playerEntry && playerEntry.socketId) {
+      io.to(playerEntry.socketId).emit('craft:request-rejected', {
+        requestId,
+        itemName: request.name,
+        reason:   String(reason || 'Request was not approved.').trim()
+      });
+    }
+
+    // Clean up
+    delete session.craftRequests[requestId];
+    console.log(`[craft:reject] requestId=${requestId} for ${request.fromHandle} session=${sessionCode}`);
   });
 
   // ── Disconnect ─────────────────────────────────────────────────────────────
