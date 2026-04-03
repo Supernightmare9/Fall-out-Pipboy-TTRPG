@@ -460,7 +460,11 @@
     }
     function jsStr(t) {
         if (t === null || t === undefined) return '';
-        return String(t).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        return String(t)
+            .replace(/\\/g,'\\\\')
+            .replace(/'/g,"\\'")
+            .replace(/\n/g,'\\n')
+            .replace(/\r/g,'\\r');
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -698,6 +702,15 @@
     var activeRequestId  = null;
     var _socket          = null;
 
+    function addUniqueRequest(req) {
+        if (!req || !req.requestId) return false;
+        for (var i = 0; i < pendingRequests.length; i++) {
+            if (pendingRequests[i].requestId === req.requestId) return false;
+        }
+        pendingRequests.push(req);
+        return true;
+    }
+
     function renderPendingPanel() {
         var panelEl  = document.getElementById('pendingPanel');
         var listEl   = document.getElementById('pendingList');
@@ -829,24 +842,13 @@
         // Server sends all pending requests when overseer connects mid-session
         _socket.on('craft:pending-requests-sync', function(payload) {
             var reqs = Array.isArray(payload.requests) ? payload.requests : [];
-            reqs.forEach(function(req) {
-                var exists = false;
-                for (var i = 0; i < pendingRequests.length; i++) {
-                    if (pendingRequests[i].requestId === req.requestId) { exists = true; break; }
-                }
-                if (!exists) pendingRequests.push(req);
-            });
+            reqs.forEach(function(req) { addUniqueRequest(req); });
             renderPendingPanel();
         });
 
         // New craft request from a player
         _socket.on('craft:pending-request', function(req) {
-            if (!req || !req.requestId) return;
-            // Avoid duplicates
-            for (var i = 0; i < pendingRequests.length; i++) {
-                if (pendingRequests[i].requestId === req.requestId) return;
-            }
-            pendingRequests.push(req);
+            if (!addUniqueRequest(req)) return;
             renderPendingPanel();
             showToast('⚠ New craft request from ' + req.fromHandle + ': "' + req.name + '"');
         });

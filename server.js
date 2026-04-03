@@ -95,9 +95,10 @@ function getOrCreateSession(code) {
       combat: { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] },
       craftRequests: {}   // { [requestId]: craftRequestObject }
     };
+  } else if (!sessions[code].craftRequests) {
+    // Back-fill for sessions created before this field existed
+    sessions[code].craftRequests = {};
   }
-  // Back-fill craftRequests for sessions created before this field existed
-  if (!sessions[code].craftRequests) sessions[code].craftRequests = {};
   return sessions[code];
 }
 

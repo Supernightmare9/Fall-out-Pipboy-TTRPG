@@ -952,7 +952,11 @@ function escapeHtml(text) {
 /* Escape a string for safe embedding in a JS string literal inside an HTML attribute */
 function jsStr(text) {
     if (text === null || text === undefined) return '';
-    return String(text).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return String(text)
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r');
 }
 
 /* ── Persistence ──────────────────────────────────────────── */
@@ -2027,10 +2031,12 @@ function renderRecipeBookDetail(recipe) {
     } else {
         for (var i = 0; i < ingredients.length; i++) {
             var ing = ingredients[i];
-            // Check if player has this in inventory
+            // Check if player has this in inventory (prefer uid, fall back to id for recipe flexibility)
             var haveIt = false;
             for (var j = 0; j < inventory.length; j++) {
-                if (inventory[j].uid === ing.uid || inventory[j].id === ing.id) { haveIt = true; break; }
+                var matchUid = ing.uid && inventory[j].uid === ing.uid;
+                var matchId  = !matchUid && ing.id && inventory[j].id === ing.id;
+                if (matchUid || matchId) { haveIt = true; break; }
             }
             ingsHtml += '<div class="rb-ing-row">' +
                 '<span class="rb-ing-name">' + escapeHtml(ing.name) + '</span>' +
@@ -2046,7 +2052,9 @@ function renderRecipeBookDetail(recipe) {
     for (var k = 0; k < ingredients.length; k++) {
         var have = false;
         for (var m = 0; m < inventory.length; m++) {
-            if (inventory[m].uid === ingredients[k].uid || inventory[m].id === ingredients[k].id) { have = true; break; }
+            var mUid = ingredients[k].uid && inventory[m].uid === ingredients[k].uid;
+            var mId  = !mUid && ingredients[k].id && inventory[m].id === ingredients[k].id;
+            if (mUid || mId) { have = true; break; }
         }
         if (!have) { canCraft = false; break; }
     }
@@ -2075,16 +2083,21 @@ function craftFromRecipe(recipeId) {
     }
     if (!recipe) return;
 
-    // Consume ingredients
+    // Consume ingredients (match by uid first, fall back to id for recipe-based crafting)
     var consumed = [];
     for (var j = 0; j < (recipe.ingredients || []).length; j++) {
         var ing = recipe.ingredients[j];
-        for (var k = 0; k < inventory.length; k++) {
-            var match = inventory[k].uid === ing.uid || inventory[k].id === ing.id;
-            if (match) {
+        for (var k = inventory.length - 1; k >= 0; k--) {
+            var matchUid = ing.uid && inventory[k].uid === ing.uid;
+            var matchId  = !matchUid && ing.id && inventory[k].id === ing.id;
+            if (matchUid || matchId) {
                 consumed.push(inventory[k].name);
-                inventory[k].quantity = (inventory[k].quantity || 1) - 1;
-                if (inventory[k].quantity <= 0) { inventory.splice(k, 1); }
+                var qty = (inventory[k].quantity !== undefined ? inventory[k].quantity : 1) - 1;
+                if (qty <= 0) {
+                    inventory.splice(k, 1);
+                } else {
+                    inventory[k].quantity = qty;
+                }
                 break;
             }
         }
