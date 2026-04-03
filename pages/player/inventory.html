@@ -949,6 +949,11 @@ function escapeHtml(text) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
+/* Escape a string for safe embedding in a JS string literal inside an HTML attribute */
+function jsStr(text) {
+    if (text === null || text === undefined) return '';
+    return String(text).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
 
 /* ── Persistence ──────────────────────────────────────────── */
 function saveData() {
@@ -1836,7 +1841,7 @@ function renderCustomRequestInvList() {
     for (var i = 0; i < inventory.length; i++) {
         var item = inventory[i];
         var isSel = crSelectedItems.indexOf(item.uid) !== -1;
-        html += '<div class="cr-inv-row' + (isSel ? ' selected' : '') + '" onclick="toggleCrItem(\'' + escapeHtml(item.uid) + '\')">' +
+        html += '<div class="cr-inv-row' + (isSel ? ' selected' : '') + '" onclick="toggleCrItem(\'' + jsStr(item.uid) + '\')">' +
             '<span class="cr-item-name">' + escapeHtml(item.name) + '</span>' +
             '<span class="cr-item-meta">Wt:' + (item.weight || 0) + ' Val:' + (item.value || 0) + '</span>' +
         '</div>';
@@ -1977,7 +1982,7 @@ function renderRecipeBook() {
     if (!listEl) return;
 
     if (playerRecipes.length === 0) {
-        listEl.innerHTML = '<div class="rb-empty">[ NO RECIPES KNOWN ]\n\nGet items approved by the Overseer to unlock recipes.]</div>';
+        listEl.innerHTML = '<div class="rb-empty">[ NO RECIPES KNOWN ]\n\nGet items approved by the Overseer to unlock recipes.</div>';
         renderRecipeBookDetail(null);
         return;
     }
@@ -1986,7 +1991,7 @@ function renderRecipeBook() {
     for (var i = 0; i < playerRecipes.length; i++) {
         var r = playerRecipes[i];
         var isActive = selectedRecipeId === r.recipeId;
-        html += '<div class="rb-recipe-row' + (isActive ? ' active' : '') + '" onclick="selectRbRecipe(\'' + escapeHtml(r.recipeId) + '\')">' +
+        html += '<div class="rb-recipe-row' + (isActive ? ' active' : '') + '" onclick="selectRbRecipe(\'' + jsStr(r.recipeId) + '\')">' +
             '<div class="rb-recipe-name">' + escapeHtml(r.name) + '</div>' +
             '<div class="rb-recipe-meta">' + escapeHtml(r.type || 'misc').toUpperCase() + ' · Wt:' + (r.weight || 0) + ' Val:' + (r.value || 0) + '</div>' +
         '</div>';
@@ -2058,7 +2063,7 @@ function renderRecipeBookDetail(recipe) {
         '<div class="rb-detail-label">INGREDIENTS</div>' +
         ingsHtml +
         (recipe.notes ? '<div class="rb-detail-label" style="margin-top:8px">OVERSEER NOTES</div><div class="rb-detail-value" style="color:rgba(212,160,23,0.8);font-style:italic">' + escapeHtml(recipe.notes) + '</div>' : '') +
-        '<button class="rb-craft-btn" ' + (canCraft ? 'onclick="craftFromRecipe(\'' + escapeHtml(recipe.recipeId) + '\')"' : 'disabled') + '>' +
+        '<button class="rb-craft-btn" ' + (canCraft ? 'onclick="craftFromRecipe(\'' + jsStr(recipe.recipeId) + '\')"' : 'disabled') + '>' +
             (canCraft ? '&#9881; CRAFT THIS ITEM' : '&#9881; CRAFT (MISSING INGREDIENTS)') +
         '</button>';
 }

@@ -458,6 +458,10 @@
         if (t === null || t === undefined) return '';
         return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
     }
+    function jsStr(t) {
+        if (t === null || t === undefined) return '';
+        return String(t).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    }
 
     // ═══════════════════════════════════════════════════════════════════════════
     //  MASTER RECIPE BOOK  (localStorage)
@@ -521,7 +525,7 @@
         filtered.forEach(function(r) {
             var isActive = selectedRecipeId === r.recipeId;
             var isCustom = r.source === 'approved-request';
-            html += '<div class="recipe-item' + (isActive ? ' active' : '') + '" onclick="selectMasterRecipe(\'' + escapeHtml(r.recipeId) + '\')" data-type="' + escapeHtml(r.type) + '">' +
+            html += '<div class="recipe-item' + (isActive ? ' active' : '') + '" onclick="selectMasterRecipe(\'' + jsStr(r.recipeId) + '\')" data-type="' + escapeHtml(r.type) + '">' +
                 '<div class="recipe-item-info">' +
                     '<div class="recipe-name">' + escapeHtml(r.name) + '</div>' +
                     '<div class="recipe-meta">' + escapeHtml(r.type || 'misc').toUpperCase() + ' · Wt:' + (r.weight || 0) + ' Val:' + (r.value || 0) + (r.createdBy ? ' · by ' + escapeHtml(r.createdBy) : '') + '</div>' +
@@ -710,7 +714,7 @@
         var html = '';
         pendingRequests.forEach(function(req) {
             var isActive = activeRequestId === req.requestId;
-            html += '<div class="req-row' + (isActive ? ' active' : '') + '" onclick="reviewRequest(\'' + escapeHtml(req.requestId) + '\')">' +
+            html += '<div class="req-row' + (isActive ? ' active' : '') + '" onclick="reviewRequest(\'' + jsStr(req.requestId) + '\')">' +
                 '<div class="req-row-info">' +
                     '<div class="req-row-name">' + escapeHtml(req.name) + '</div>' +
                     '<div class="req-row-from">From: ' + escapeHtml(req.fromHandle) + '</div>' +
