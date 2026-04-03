@@ -3487,7 +3487,8 @@
         if (!el) return;
         el.style.display    = 'block';
         el.style.animation  = 'none';
-        void el.offsetWidth; // trigger reflow — intentional no-op
+        // Force reflow to reset CSS animation so it plays from the start each call
+        void el.offsetWidth; // intentional — triggers layout flush
         el.style.animation  = 'fadeMsg 3s ease forwards';
         setTimeout(function() { el.style.display = 'none'; }, 3200);
     }

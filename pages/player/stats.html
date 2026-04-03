@@ -554,10 +554,11 @@
     //  values change.
     // ================================================================
 
-    // Base stats (kept for potential use by external scripts/future features)
-    var BASE_HEALTH        = 100;
-    var BASE_AP            = 10;
-    var MAX_RAD            = 1000;
+    // Base stats kept for compatibility with external scripts that may reference them.
+    // Vitals logic has moved to combat.html; these are no longer used on this page.
+    var BASE_HEALTH = 100;
+    var BASE_AP     = 10;
+    var MAX_RAD     = 1000;
     var MAX_TAG_SKILLS    = 3;
     var TAG_SKILL_BONUS   = 15;
     var SKILL_POINTS_PER_LEVEL = 13;
