@@ -307,6 +307,270 @@
         .spc-adj-cancel{background:transparent;border:1px solid rgba(204,34,0,.4);color:var(--overseer-red-bright);font-family:'Courier New',monospace;font-size:9px;padding:3px 7px;cursor:pointer;}
 
         .sync-offline-msg{padding:20px;text-align:center;color:rgba(232,232,232,.35);font-size:11px;letter-spacing:1px;}
+
+        /* ── HUB TOP-TAB NAVIGATION ──────────────────────────────────── */
+        .hub-tab-nav-bar{
+            display:flex;gap:0;
+            border-bottom:2px solid var(--overseer-gold);
+            background:var(--overseer-blue-mid);
+            padding:0 24px 0 80px;
+            flex-wrap:wrap;
+        }
+        .hub-tab-btn{
+            background:var(--overseer-blue-mid);
+            border:1px solid var(--overseer-border);
+            border-bottom:none;
+            color:rgba(232,232,232,.55);
+            font-family:'Courier New',monospace;
+            font-size:12px;font-weight:bold;
+            padding:10px 22px;
+            cursor:pointer;letter-spacing:1px;
+            text-transform:uppercase;
+            transition:all .2s;
+            margin-bottom:-2px;
+        }
+        .hub-tab-btn:hover{
+            color:var(--overseer-gold-bright);
+            background:var(--overseer-blue-bright);
+        }
+        .hub-tab-btn.active{
+            background:var(--overseer-blue-bright);
+            border-color:var(--overseer-gold);
+            color:var(--overseer-gold-bright);
+            text-shadow:0 0 8px rgba(240,192,64,.5);
+        }
+        .hub-tab-panel{display:none;}
+        .hub-tab-panel.active{display:block;}
+
+        /* ── PLAYERS TAB STYLES ───────────────────────────────────────── */
+        .player-selector-bar{
+            background:var(--overseer-blue-mid);border:1px solid var(--overseer-border);
+            padding:14px 18px;margin-bottom:20px;
+            display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+        }
+        .player-selector-label{font-size:10px;color:var(--overseer-gold);letter-spacing:2px;text-transform:uppercase;white-space:nowrap;}
+        .player-select-input{
+            background:var(--overseer-dark);border:2px solid var(--overseer-gold);
+            color:var(--overseer-gold-bright);font-family:'Courier New',monospace;font-size:13px;
+            font-weight:bold;padding:8px 14px;cursor:pointer;outline:none;flex:1;max-width:360px;
+        }
+        .player-select-input:focus{border-color:var(--overseer-gold-bright);}
+        .player-status-badge{
+            font-size:10px;padding:4px 10px;letter-spacing:1px;text-transform:uppercase;border-radius:2px;
+            background:rgba(0,204,102,.15);border:1px solid rgba(0,204,102,.4);color:var(--overseer-green-bright);
+        }
+        .po-accordion-section{background:var(--overseer-blue-mid);border:1px solid var(--overseer-border);margin-bottom:10px;}
+        .po-accordion-header{
+            background:var(--overseer-blue-bright);border-bottom:1px solid var(--overseer-border);
+            padding:10px 16px;display:flex;align-items:center;justify-content:space-between;
+            cursor:pointer;user-select:none;transition:background .15s;
+        }
+        .po-accordion-header:hover{background:rgba(42,82,152,.8);}
+        .po-accordion-header.open{border-bottom:2px solid var(--overseer-gold);}
+        .po-accordion-title{font-size:12px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;text-shadow:0 0 6px var(--overseer-glow-gold);}
+        .po-accordion-toggle{color:var(--overseer-gold);font-size:14px;font-weight:bold;transition:transform .2s;}
+        .po-accordion-header.open .po-accordion-toggle{transform:rotate(180deg);}
+        .po-accordion-body{padding:16px;display:none;}
+        .po-accordion-body.open{display:block;}
+        .po-form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+        .po-form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+        .po-form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+        .po-form-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+        .po-form-grid-7{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
+        @media(max-width:900px){.po-form-grid-7{grid-template-columns:repeat(4,1fr);}.po-form-grid-4{grid-template-columns:1fr 1fr;}.po-form-grid-3{grid-template-columns:1fr 1fr;}}
+        @media(max-width:600px){.po-form-grid-7,.po-form-grid-4,.po-form-grid-3,.po-form-grid-2{grid-template-columns:1fr;}}
+        .po-form-group{margin-bottom:0;}
+        .po-form-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:block;}
+        .po-form-input{
+            width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:12px;
+            padding:7px 10px;outline:none;
+        }
+        .po-form-input:focus{border-color:var(--overseer-gold);}
+        .po-form-input::placeholder{color:rgba(232,232,232,.3);}
+        .po-form-input[readonly]{color:rgba(232,232,232,.45);cursor:not-allowed;}
+        .po-form-select{
+            width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:12px;
+            padding:7px 10px;cursor:pointer;outline:none;
+        }
+        .po-form-select:focus{border-color:var(--overseer-gold);}
+        .po-special-box{background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:10px 8px;text-align:center;}
+        .po-special-label{font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+        .po-special-input{
+            width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold-bright);font-family:'Courier New',monospace;
+            font-size:20px;font-weight:bold;text-align:center;padding:6px 4px;outline:none;
+        }
+        .po-special-input:focus{border-color:var(--overseer-gold);}
+        .po-skill-item{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(42,82,152,.25);}
+        .po-skill-item:last-child{border-bottom:none;}
+        .po-skill-name{flex:1;font-size:11px;color:var(--overseer-white);}
+        .po-skill-input{
+            width:55px;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold-bright);font-family:'Courier New',monospace;font-size:12px;
+            font-weight:bold;text-align:center;padding:4px 6px;outline:none;
+        }
+        .po-skill-input:focus{border-color:var(--overseer-gold);}
+        .po-skill-tag{font-size:9px;color:rgba(232,232,232,.4);min-width:50px;text-transform:uppercase;}
+        .po-inv-table{width:100%;border-collapse:collapse;margin-top:8px;}
+        .po-inv-table th{
+            background:var(--overseer-blue-bright);color:var(--overseer-gold);
+            font-size:9px;letter-spacing:1px;text-transform:uppercase;
+            padding:7px 10px;text-align:left;border-bottom:2px solid var(--overseer-gold);
+        }
+        .po-inv-table td{
+            padding:7px 10px;border-bottom:1px solid rgba(42,82,152,.3);
+            font-size:11px;color:var(--overseer-white);
+        }
+        .po-inv-table tr:hover td{background:rgba(212,160,23,.04);}
+        .po-inv-table .td-action{display:flex;gap:4px;}
+        .po-tag-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+        .po-tag{background:rgba(42,82,152,.5);border:1px solid var(--overseer-border);color:var(--overseer-white);font-size:10px;padding:4px 10px;display:flex;align-items:center;gap:6px;}
+        .po-tag .po-tag-remove{background:none;border:none;color:var(--overseer-red-bright);cursor:pointer;font-size:12px;padding:0;line-height:1;}
+        .po-tag-input-row{display:flex;gap:8px;margin-top:8px;}
+        .po-tag-input{
+            flex:1;background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;
+            padding:6px 9px;outline:none;
+        }
+        .po-tag-input:focus{border-color:var(--overseer-gold);}
+        .po-section-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(42,82,152,.4);}
+        .po-bar-wrapper{margin-top:4px;}
+        .po-bar-track{width:100%;height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+        .po-bar-fill{height:100%;border-radius:4px;transition:width .4s;}
+        .po-bar-hp{background:var(--overseer-green);box-shadow:0 0 6px var(--overseer-green);}
+        .po-bar-ap{background:#60a5fa;box-shadow:0 0 6px #60a5fa;}
+        .po-bar-rad{background:var(--overseer-red-bright);box-shadow:0 0 6px var(--overseer-red-bright);}
+        .po-bar-xp{background:var(--overseer-gold);box-shadow:0 0 6px var(--overseer-gold);}
+        .po-save-footer{
+            position:sticky;bottom:0;z-index:50;
+            background:var(--overseer-blue-mid);border-top:2px solid var(--overseer-gold);
+            padding:12px 24px;display:flex;align-items:center;justify-content:space-between;
+            box-shadow:0 -4px 20px rgba(212,160,23,.2);
+        }
+        .po-save-footer-info{font-size:10px;color:rgba(232,232,232,.45);letter-spacing:1px;}
+
+        /* ── ENEMIES TAB STYLES ───────────────────────────────────────── */
+        .ep-three-col{display:grid;grid-template-columns:300px 1fr 340px;gap:16px;align-items:start;}
+        @media(max-width:1400px){.ep-three-col{grid-template-columns:260px 1fr 300px;}}
+        @media(max-width:1100px){.ep-three-col{grid-template-columns:1fr 1fr;}}
+        @media(max-width:768px){.ep-three-col{grid-template-columns:1fr;}}
+        .ep-filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+        .ep-filter-input{
+            flex:1;min-width:80px;
+            background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;
+            padding:5px 8px;outline:none;
+        }
+        .ep-filter-input:focus{border-color:var(--overseer-gold);}
+        .ep-filter-input::placeholder{color:rgba(232,232,232,.35);}
+        .ep-filter-select{
+            background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:11px;
+            padding:5px 7px;cursor:pointer;outline:none;
+        }
+        .ep-enemy-list{max-height:600px;overflow-y:auto;}
+        .ep-enemy-list::-webkit-scrollbar{width:5px;}
+        .ep-enemy-list::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        .ep-enemy-list::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+        .ep-enemy-list-item{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:9px 12px;border-bottom:1px solid rgba(42,82,152,.35);
+            cursor:pointer;gap:8px;transition:background .15s;
+        }
+        .ep-enemy-list-item:last-child{border-bottom:none;}
+        .ep-enemy-list-item:hover{background:rgba(212,160,23,.06);}
+        .ep-enemy-list-item.active{background:rgba(212,160,23,.12);border-left:3px solid var(--overseer-gold);}
+        .ep-enemy-list-name{font-size:12px;font-weight:bold;color:var(--overseer-white);text-transform:uppercase;letter-spacing:.5px;}
+        .ep-enemy-list-sub{font-size:9px;color:rgba(232,232,232,.45);margin-top:1px;}
+        .ep-diff-badge{font-size:9px;padding:2px 6px;border-radius:2px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0;}
+        .ep-diff-common{background:rgba(232,232,232,.12);color:var(--overseer-white);}
+        .ep-diff-uncommon{background:rgba(96,165,250,.2);color:#60a5fa;}
+        .ep-diff-rare{background:rgba(212,160,23,.2);color:var(--overseer-gold-bright);}
+        .ep-diff-legendary{background:rgba(204,34,0,.25);color:var(--overseer-red-bright);}
+        .ep-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+        .ep-stat-box{background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:8px 10px;text-align:center;}
+        .ep-stat-box-label{font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+        .ep-stat-box-val{font-size:15px;font-weight:bold;color:var(--overseer-white);}
+        .ep-detail-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+        .ep-detail-value{font-size:12px;color:var(--overseer-white);line-height:1.5;}
+        .ep-detail-section{margin-bottom:14px;}
+        .ep-tag-list{display:flex;flex-wrap:wrap;gap:5px;}
+        .ep-tag{background:rgba(42,82,152,.5);border:1px solid var(--overseer-border);color:var(--overseer-white);font-size:10px;padding:3px 8px;}
+        .ep-tag.perk{background:rgba(0,204,102,.12);border-color:rgba(0,204,102,.3);color:var(--overseer-green-bright);}
+        .ep-tag.loot{background:rgba(212,160,23,.12);border-color:var(--overseer-gold-dim);color:var(--overseer-gold-bright);}
+        .ep-form-group{margin-bottom:10px;}
+        .ep-form-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:block;}
+        .ep-form-input{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;outline:none;}
+        .ep-form-input:focus{border-color:var(--overseer-gold);}
+        .ep-form-input::placeholder{color:rgba(232,232,232,.3);}
+        .ep-form-select{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;cursor:pointer;outline:none;}
+        .ep-form-textarea{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;resize:vertical;min-height:55px;outline:none;line-height:1.5;}
+        .ep-form-textarea:focus{border-color:var(--overseer-gold);}
+        .ep-form-textarea::placeholder{color:rgba(232,232,232,.3);}
+        .ep-two-col-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .ep-form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap;}
+
+        /* ── ITEMS TAB STYLES ─────────────────────────────────────────── */
+        .ip-three-col{display:grid;grid-template-columns:300px 1fr 340px;gap:16px;align-items:start;}
+        @media(max-width:1400px){.ip-three-col{grid-template-columns:260px 1fr 300px;}}
+        @media(max-width:1100px){.ip-three-col{grid-template-columns:1fr 1fr;}}
+        @media(max-width:768px){.ip-three-col{grid-template-columns:1fr;}}
+        .ip-filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+        .ip-filter-input{
+            flex:1;min-width:80px;
+            background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;
+            padding:5px 8px;outline:none;
+        }
+        .ip-filter-input:focus{border-color:var(--overseer-gold);}
+        .ip-filter-input::placeholder{color:rgba(232,232,232,.35);}
+        .ip-filter-select{
+            background:var(--overseer-dark);border:1px solid var(--overseer-border);
+            color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:11px;
+            padding:5px 7px;cursor:pointer;outline:none;
+        }
+        .ip-item-list{max-height:600px;overflow-y:auto;}
+        .ip-item-list::-webkit-scrollbar{width:5px;}
+        .ip-item-list::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        .ip-item-list::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+        .ip-item-list-row{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:9px 12px;border-bottom:1px solid rgba(42,82,152,.35);
+            cursor:pointer;gap:8px;transition:background .15s;
+        }
+        .ip-item-list-row:last-child{border-bottom:none;}
+        .ip-item-list-row:hover{background:rgba(212,160,23,.06);}
+        .ip-item-list-row.active{background:rgba(212,160,23,.12);border-left:3px solid var(--overseer-gold);}
+        .ip-item-list-name{font-size:12px;font-weight:bold;color:var(--overseer-white);text-transform:uppercase;letter-spacing:.5px;}
+        .ip-item-list-sub{font-size:9px;color:rgba(232,232,232,.45);margin-top:1px;}
+        .ip-rarity-badge{font-size:9px;padding:2px 6px;border-radius:2px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;flex-shrink:0;}
+        .ip-rarity-common{background:rgba(232,232,232,.12);color:var(--overseer-white);}
+        .ip-rarity-uncommon{background:rgba(96,165,250,.2);color:#60a5fa;}
+        .ip-rarity-rare{background:rgba(212,160,23,.2);color:var(--overseer-gold-bright);}
+        .ip-rarity-legendary{background:rgba(204,34,0,.25);color:var(--overseer-red-bright);}
+        .ip-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+        .ip-stat-box{background:var(--overseer-blue);border:1px solid var(--overseer-border);padding:8px 10px;text-align:center;}
+        .ip-stat-box-label{font-size:9px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+        .ip-stat-box-val{font-size:15px;font-weight:bold;color:var(--overseer-white);}
+        .ip-detail-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+        .ip-detail-value{font-size:12px;color:var(--overseer-white);line-height:1.5;}
+        .ip-detail-section{margin-bottom:14px;}
+        .ip-tag-list{display:flex;flex-wrap:wrap;gap:5px;}
+        .ip-tag{background:rgba(42,82,152,.5);border:1px solid var(--overseer-border);color:var(--overseer-white);font-size:10px;padding:3px 8px;}
+        .ip-tag.effect{background:rgba(212,160,23,.12);border-color:var(--overseer-gold-dim);color:var(--overseer-gold-bright);}
+        .ip-form-group{margin-bottom:10px;}
+        .ip-form-label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:block;}
+        .ip-form-input{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;outline:none;}
+        .ip-form-input:focus{border-color:var(--overseer-gold);}
+        .ip-form-input::placeholder{color:rgba(232,232,232,.3);}
+        .ip-form-select{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;cursor:pointer;outline:none;}
+        .ip-form-textarea{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;padding:6px 9px;resize:vertical;min-height:55px;outline:none;line-height:1.5;}
+        .ip-form-textarea:focus{border-color:var(--overseer-gold);}
+        .ip-form-textarea::placeholder{color:rgba(232,232,232,.3);}
+        .ip-two-col-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+        .ip-form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap;}
     </style>
 
     <script src="../../assets/data/accounts.js"></script>
@@ -362,6 +626,835 @@
     </div>
 </div>
 
+<!-- HUB TOP-TAB NAVIGATION -->
+<div class="hub-tab-nav-bar" role="tablist" aria-label="Overseer Hub Sections">
+    <button class="hub-tab-btn" data-tab="players" onclick="switchHubTab('players',this)" role="tab" aria-selected="false">&#x1F465; PLAYERS</button>
+    <button class="hub-tab-btn" data-tab="enemies" onclick="switchHubTab('enemies',this)" role="tab" aria-selected="false">&#x1F479; ENEMIES</button>
+    <button class="hub-tab-btn" data-tab="items"   onclick="switchHubTab('items',this)"   role="tab" aria-selected="false">&#x1F4E6; ITEMS</button>
+    <button class="hub-tab-btn" data-tab="combat"  onclick="switchHubTab('combat',this)"  role="tab" aria-selected="false">&#x2694; COMBAT</button>
+</div>
+
+<!-- HUB TAB PANELS WRAPPER -->
+<div class="hub-tab-panels">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     PLAYERS TAB
+══════════════════════════════════════════════════════════════════ -->
+<div id="hub-tab-players" class="hub-tab-panel" role="tabpanel">
+<div style="padding:20px 24px;max-width:1400px;margin:0 auto;">
+
+    <!-- PLAYER SELECTOR -->
+    <div class="player-selector-bar">
+        <span class="player-selector-label">SELECT PLAYER:</span>
+        <select class="player-select-input" id="poPlayerSelect" onchange="poLoadPlayer()">
+            <option value="">— Choose a Player —</option>
+            <option value="vault_runner_01">Vault_Runner_01 (Marcus Cole)</option>
+            <option value="ghoul_slayer">GhoulSlayer99 (Dex "Deadeye" Walsh)</option>
+            <option value="wasteland_wanderer">WastelandWanderer (Sera Voss)</option>
+        </select>
+        <span class="player-status-badge" id="poPlayerStatusBadge" style="display:none;">&#x25CF; ONLINE</span>
+        <span style="font-size:10px;color:rgba(232,232,232,.4);margin-left:auto;">Placeholder &#x2014; will connect to player data later</span>
+        <button class="cmd-btn success" onclick="poGiftItems()" title="Gift items to the selected player from the item pool">&#x1F381; GIFT ITEMS</button>
+        <button class="cmd-btn danger" onclick="poConfirmReset()" title="Reset the current section for the selected player">&#x21BA; RESET SECTION</button>
+    </div>
+
+    <!-- 1. BASIC INFO -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header open" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x1FAAA; BASIC INFORMATION</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body open">
+            <div class="po-form-grid">
+                <div class="po-form-group">
+                    <label class="po-form-label">Character Name</label>
+                    <input class="po-form-input" type="text" id="poCharName" value="Marcus Cole">
+                </div>
+                <div class="po-form-group">
+                    <label class="po-form-label">Player Username</label>
+                    <input class="po-form-input" type="text" id="poPlayerUsername" value="Vault_Runner_01" readonly>
+                </div>
+                <div class="po-form-group">
+                    <label class="po-form-label">Class</label>
+                    <select class="po-form-select" id="poCharClass">
+                        <option selected>Scavenger</option>
+                        <option>Soldier</option>
+                        <option>Medic</option>
+                        <option>Technician</option>
+                        <option>Rogue</option>
+                        <option>Ghoul</option>
+                        <option>Super Mutant</option>
+                    </select>
+                </div>
+                <div class="po-form-group">
+                    <label class="po-form-label">Race</label>
+                    <select class="po-form-select" id="poCharRace">
+                        <option selected>Human</option>
+                        <option>Ghoul</option>
+                        <option>Super Mutant</option>
+                        <option>Synth</option>
+                    </select>
+                </div>
+                <div class="po-form-group">
+                    <label class="po-form-label">Alignment</label>
+                    <select class="po-form-select" id="poCharAlignment">
+                        <option>Lawful Good</option>
+                        <option selected>Neutral Good</option>
+                        <option>Chaotic Good</option>
+                        <option>Lawful Neutral</option>
+                        <option>True Neutral</option>
+                        <option>Chaotic Neutral</option>
+                        <option>Lawful Evil</option>
+                        <option>Neutral Evil</option>
+                        <option>Chaotic Evil</option>
+                    </select>
+                </div>
+                <div class="po-form-group">
+                    <label class="po-form-label">Background</label>
+                    <input class="po-form-input" type="text" id="poCharBackground" value="Former Vault Security Guard">
+                </div>
+            </div>
+            <div class="po-section-actions">
+                <button class="cmd-btn" onclick="poResetSection('basic')">&#x21BA; RESET</button>
+                <button class="cmd-btn success" onclick="poSaveSection('basic')">&#x1F4BE; SAVE BASIC INFO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. LEVEL & XP -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header open" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x2B50; LEVEL &amp; EXPERIENCE</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body open">
+            <div class="po-form-grid-4">
+                <div class="po-form-group">
+                    <label class="po-form-label">Level</label>
+                    <input class="po-form-input" type="number" id="poCharLevel" value="5" min="1">
+                </div>
+                <div class="po-form-group">
+                    <label class="po-form-label">Current XP</label>
+                    <input class="po-form-input" type="number" id="poCharXP" value="4200" min="0">
+                </div>
+                <div class="po-form-group">
+                    <label class="po-form-label">XP to Next Level</label>
+                    <input class="po-form-input" type="number" id="poCharXPNext" value="5000" min="0">
+                </div>
+                <div class="po-form-group">
+                    <label class="po-form-label">Perk Points Available</label>
+                    <input class="po-form-input" type="number" id="poCharPerkPts" value="2" min="0">
+                </div>
+            </div>
+            <div class="po-bar-wrapper" style="margin-top:10px;">
+                <div style="font-size:9px;color:var(--overseer-gold);margin-bottom:4px;letter-spacing:1px;">XP PROGRESS &#x2014; 4200 / 5000</div>
+                <div class="po-bar-track"><div class="po-bar-fill po-bar-xp" style="width:84%;"></div></div>
+            </div>
+            <div class="po-section-actions">
+                <button class="cmd-btn" onclick="poAddXP()">+ ADD XP</button>
+                <button class="cmd-btn" onclick="poResetSection('level')">&#x21BA; RESET</button>
+                <button class="cmd-btn success" onclick="poSaveSection('level')">&#x1F4BE; SAVE LEVEL/XP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. VITALS -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header open" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x2764;&#xFE0F; VITALS &#x2014; HP / AP / RADIATION</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body open">
+            <div class="po-form-grid-3">
+                <div>
+                    <div class="po-form-group">
+                        <label class="po-form-label">Current HP</label>
+                        <input class="po-form-input" type="number" id="poCharHP" value="72" min="0">
+                    </div>
+                    <div class="po-form-group" style="margin-top:8px;">
+                        <label class="po-form-label">Max HP</label>
+                        <input class="po-form-input" type="number" id="poCharMaxHP" value="90" min="1">
+                    </div>
+                    <div class="po-bar-wrapper" style="margin-top:8px;">
+                        <div style="font-size:9px;color:var(--overseer-green);margin-bottom:3px;">HP &#x2014; 72/90</div>
+                        <div class="po-bar-track"><div class="po-bar-fill po-bar-hp" style="width:80%;"></div></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="po-form-group">
+                        <label class="po-form-label">Action Points (AP)</label>
+                        <input class="po-form-input" type="number" id="poCharAP" value="7" min="0">
+                    </div>
+                    <div class="po-form-group" style="margin-top:8px;">
+                        <label class="po-form-label">Max AP</label>
+                        <input class="po-form-input" type="number" id="poCharMaxAP" value="10" min="1">
+                    </div>
+                    <div class="po-bar-wrapper" style="margin-top:8px;">
+                        <div style="font-size:9px;color:#60a5fa;margin-bottom:3px;">AP &#x2014; 7/10</div>
+                        <div class="po-bar-track"><div class="po-bar-fill po-bar-ap" style="width:70%;"></div></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="po-form-group">
+                        <label class="po-form-label">Radiation (rads)</label>
+                        <input class="po-form-input" type="number" id="poCharRad" value="120" min="0">
+                    </div>
+                    <div class="po-form-group" style="margin-top:8px;">
+                        <label class="po-form-label">Max Rads (lethal)</label>
+                        <input class="po-form-input" type="number" id="poCharMaxRad" value="1000" min="1">
+                    </div>
+                    <div class="po-bar-wrapper" style="margin-top:8px;">
+                        <div style="font-size:9px;color:var(--overseer-red-bright);margin-bottom:3px;">RADIATION &#x2014; 120/1000</div>
+                        <div class="po-bar-track"><div class="po-bar-fill po-bar-rad" style="width:12%;"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="po-section-actions">
+                <button class="cmd-btn" onclick="poHealFull()">&#x1F489; FULL HEAL</button>
+                <button class="cmd-btn" onclick="poClearRads()">&#x2622; CLEAR RADS</button>
+                <button class="cmd-btn success" onclick="poSaveSection('vitals')">&#x1F4BE; SAVE VITALS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. S.P.E.C.I.A.L. -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header open" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x1F4CA; S.P.E.C.I.A.L. ATTRIBUTES</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body open">
+            <div class="po-form-grid-7">
+                <div class="po-special-box"><div class="po-special-label">STR</div><input class="po-special-input" type="number" id="poSStr" value="6" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">PER</div><input class="po-special-input" type="number" id="poSPer" value="7" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">END</div><input class="po-special-input" type="number" id="poSEnd" value="5" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">CHA</div><input class="po-special-input" type="number" id="poSCha" value="4" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">INT</div><input class="po-special-input" type="number" id="poSInt" value="8" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">AGI</div><input class="po-special-input" type="number" id="poSAgi" value="7" min="1" max="10"></div>
+                <div class="po-special-box"><div class="po-special-label">LCK</div><input class="po-special-input" type="number" id="poSLck" value="3" min="1" max="10"></div>
+            </div>
+            <div style="font-size:9px;color:rgba(232,232,232,.35);margin-top:8px;letter-spacing:1px;">Range: 1&#x2013;10 per attribute. Modifiers calculated automatically when wired to data.</div>
+            <div class="po-section-actions">
+                <button class="cmd-btn" onclick="poResetSection('special')">&#x21BA; RESET</button>
+                <button class="cmd-btn success" onclick="poSaveSection('special')">&#x1F4BE; SAVE S.P.E.C.I.A.L.</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. SKILLS -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x1F3AF; SKILLS</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body">
+            <div class="po-form-grid-2">
+                <div>
+                    <div class="po-skill-item"><span class="po-skill-name">Barter</span><span class="po-skill-tag">CHA</span><input class="po-skill-input" type="number" value="35" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Big Guns</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" value="20" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Energy Weapons</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" value="40" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Explosives</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" value="25" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Lockpick</span><span class="po-skill-tag">PER</span><input class="po-skill-input" type="number" value="55" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Medicine</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" value="60" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Melee Weapons</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" value="30" min="0" max="100"></div>
+                </div>
+                <div>
+                    <div class="po-skill-item"><span class="po-skill-name">Repair</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" value="45" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Science</span><span class="po-skill-tag">INT</span><input class="po-skill-input" type="number" value="70" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Small Guns</span><span class="po-skill-tag">AGI</span><input class="po-skill-input" type="number" value="65" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Sneak</span><span class="po-skill-tag">AGI</span><input class="po-skill-input" type="number" value="50" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Speech</span><span class="po-skill-tag">CHA</span><input class="po-skill-input" type="number" value="40" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Survival</span><span class="po-skill-tag">END</span><input class="po-skill-input" type="number" value="55" min="0" max="100"></div>
+                    <div class="po-skill-item"><span class="po-skill-name">Unarmed</span><span class="po-skill-tag">STR</span><input class="po-skill-input" type="number" value="20" min="0" max="100"></div>
+                </div>
+            </div>
+            <div class="po-section-actions">
+                <button class="cmd-btn" onclick="poResetSection('skills')">&#x21BA; RESET</button>
+                <button class="cmd-btn success" onclick="poSaveSection('skills')">&#x1F4BE; SAVE SKILLS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. INVENTORY -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x1F392; INVENTORY</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body">
+            <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+                <button class="cmd-btn success" onclick="poAddInventoryItem()">+ ADD ITEM</button>
+                <button class="cmd-btn" onclick="poGiftItems()">&#x1F381; GIFT FROM POOL</button>
+                <span style="margin-left:auto;font-size:10px;color:rgba(232,232,232,.4);align-self:center;">Carry Weight: 87 / 150 lbs</span>
+            </div>
+            <table class="po-inv-table" id="poInventoryTable">
+                <thead>
+                    <tr>
+                        <th>Item</th><th>Type</th><th>Qty</th><th>Weight</th><th>Value</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="poInventoryBody">
+                    <tr>
+                        <td>10mm Pistol</td><td>Weapon</td>
+                        <td><input class="po-skill-input" type="number" value="1" min="0" style="width:45px;"></td>
+                        <td>2.5</td><td>75 caps</td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poEquipItem(this)">&#x2694; EQUIP</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Stimpak</td><td>Consumable</td>
+                        <td><input class="po-skill-input" type="number" value="3" min="0" style="width:45px;"></td>
+                        <td>0.3</td><td>75 caps</td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poEquipItem(this)">&#x2694; EQUIP</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Rad-Away</td><td>Consumable</td>
+                        <td><input class="po-skill-input" type="number" value="2" min="0" style="width:45px;"></td>
+                        <td>0.5</td><td>40 caps</td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poEquipItem(this)">&#x2694; EQUIP</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="po-section-actions">
+                <button class="cmd-btn success" onclick="poSaveSection('inventory')">&#x1F4BE; SAVE INVENTORY</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. EQUIPPED ITEMS -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x2694; EQUIPPED ITEMS</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body">
+            <div class="po-form-grid-2">
+                <div class="po-form-group"><label class="po-form-label">Main Hand</label><input class="po-form-input" type="text" id="poEquip_mainHand" value="10mm Pistol"></div>
+                <div class="po-form-group"><label class="po-form-label">Off Hand</label><input class="po-form-input" type="text" id="poEquip_offHand" placeholder="Empty"></div>
+                <div class="po-form-group"><label class="po-form-label">Head</label><input class="po-form-input" type="text" id="poEquip_head" placeholder="Empty"></div>
+                <div class="po-form-group"><label class="po-form-label">Chest Armor</label><input class="po-form-input" type="text" id="poEquip_chest" value="Leather Chest Piece"></div>
+                <div class="po-form-group"><label class="po-form-label">Legs</label><input class="po-form-input" type="text" id="poEquip_legs" placeholder="Empty"></div>
+                <div class="po-form-group"><label class="po-form-label">Accessory</label><input class="po-form-input" type="text" id="poEquip_access" placeholder="Empty"></div>
+            </div>
+            <div class="po-section-actions">
+                <button class="cmd-btn" onclick="poClearEquipment()">&#x2715; CLEAR ALL</button>
+                <button class="cmd-btn success" onclick="poSaveSection('equipment')">&#x1F4BE; SAVE EQUIPMENT</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. PERKS & ABILITIES -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x2728; PERKS &amp; ABILITIES</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body">
+            <div class="po-tag-grid" id="poPerksContainer">
+                <span class="po-tag">Pack Rat <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
+                <span class="po-tag">Scrounger <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
+                <span class="po-tag">Gun Nut <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
+                <span class="po-tag">Science! <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
+            </div>
+            <div class="po-tag-input-row">
+                <input class="po-tag-input" type="text" id="poPerkInput" placeholder="Add perk or ability&#x2026;">
+                <button class="cmd-btn success" onclick="poAddPerk()">+ ADD PERK</button>
+            </div>
+            <div class="po-section-actions">
+                <button class="cmd-btn success" onclick="poSaveSection('perks')">&#x1F4BE; SAVE PERKS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9. CONDITIONS & EFFECTS -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x26A0; CONDITIONS &amp; ACTIVE EFFECTS</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body">
+            <div class="po-tag-grid" id="poConditionsContainer">
+                <span class="po-tag" style="border-color:rgba(255,51,0,.4);color:var(--overseer-red-bright);">Fatigued <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
+                <span class="po-tag" style="border-color:rgba(96,165,250,.4);color:#60a5fa;">Rad Sick (Mild) <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button></span>
+            </div>
+            <div class="po-tag-input-row">
+                <input class="po-tag-input" type="text" id="poConditionInput" placeholder="Add condition or effect&#x2026;">
+                <button class="cmd-btn success" onclick="poAddCondition()">+ ADD</button>
+            </div>
+            <div class="po-section-actions">
+                <button class="cmd-btn danger" onclick="poClearAllConditions()">&#x2715; CLEAR ALL CONDITIONS</button>
+                <button class="cmd-btn success" onclick="poSaveSection('conditions')">&#x1F4BE; SAVE CONDITIONS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 10. QUEST PROGRESS -->
+    <div class="po-accordion-section">
+        <div class="po-accordion-header" onclick="poToggleAccordion(this)">
+            <span class="po-accordion-title">&#x1F4DC; QUEST PROGRESS</span>
+            <span class="po-accordion-toggle">&#x25BC;</span>
+        </div>
+        <div class="po-accordion-body">
+            <table class="po-inv-table" id="poQuestTable">
+                <thead>
+                    <tr>
+                        <th>Quest Name</th><th>Status</th><th>Stage</th><th>Notes</th><th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Into the Wastes</td>
+                        <td><span style="color:var(--overseer-green-bright);font-size:10px;">ACTIVE</span></td>
+                        <td><input class="po-skill-input" type="text" value="Stage 2" style="width:80px;font-size:10px;"></td>
+                        <td><input class="po-form-input" type="text" value="Reached the outpost." style="font-size:10px;padding:3px 6px;"></td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poCompleteQuest(this)">&#x2713; COMPLETE</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>The Merchant's Debt</td>
+                        <td><span style="color:rgba(232,232,232,.4);font-size:10px;">INACTIVE</span></td>
+                        <td><input class="po-skill-input" type="text" value="Stage 0" style="width:80px;font-size:10px;"></td>
+                        <td><input class="po-form-input" type="text" placeholder="Notes&#x2026;" style="font-size:10px;padding:3px 6px;"></td>
+                        <td class="td-action">
+                            <button class="cmd-btn" style="font-size:9px;padding:3px 8px;" onclick="poActivateQuest(this)">&#x25B6; ACTIVATE</button>
+                            <button class="cmd-btn danger" style="font-size:9px;padding:3px 8px;" onclick="poRemoveItem(this)">&#x2715;</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top:8px;">
+                <button class="cmd-btn success" onclick="poAddQuest()">+ ADD QUEST</button>
+            </div>
+            <div class="po-section-actions">
+                <button class="cmd-btn success" onclick="poSaveSection('quests')">&#x1F4BE; SAVE QUESTS</button>
+            </div>
+        </div>
+    </div>
+
+    <div style="height:20px;"></div>
+</div><!-- /players page-content -->
+
+<!-- PLAYERS TAB: SAVE FOOTER -->
+<div class="po-save-footer">
+    <span class="po-save-footer-info" id="poLastSavedInfo">All changes are placeholder. Logic will be wired in a subsequent PR.</span>
+    <div style="display:flex;gap:8px;">
+        <button class="cmd-btn danger" onclick="poConfirmReset()">&#x21BA; RESET ALL SECTIONS</button>
+        <button class="cmd-btn success" onclick="poSaveAllSections()">&#x1F4BE; SAVE ALL CHANGES</button>
+    </div>
+</div>
+</div><!-- /hub-tab-players -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ENEMIES TAB
+══════════════════════════════════════════════════════════════════ -->
+<div id="hub-tab-enemies" class="hub-tab-panel" role="tabpanel">
+<div style="padding:20px 24px;max-width:1800px;margin:0 auto;">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px;">
+        <button class="cmd-btn success" onclick="epShowNewEnemyForm()" title="Add a new enemy to the pool">+ NEW ENEMY</button>
+        <button class="cmd-btn" onclick="epExportPool()" title="Export enemy pool as JSON">&#x2B07; EXPORT POOL</button>
+    </div>
+    <div class="ep-three-col">
+
+        <!-- COL 1: Enemy List -->
+        <div>
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">&#x1F4CB; ENEMY POOL</span>
+                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="epEnemyCount">4 entries</span>
+                </div>
+                <div class="panel-body">
+                    <div class="ep-filter-row">
+                        <input class="ep-filter-input" type="text" id="epEnemySearch" placeholder="Search&#x2026;" oninput="epFilterEnemies()">
+                    </div>
+                    <div class="ep-filter-row">
+                        <select class="ep-filter-select" id="epTypeFilter" onchange="epFilterEnemies()" style="flex:1;">
+                            <option value="">All Types</option>
+                            <option value="ghoul">Ghoul</option>
+                            <option value="insect">Insect</option>
+                            <option value="human">Human</option>
+                            <option value="animal">Animal</option>
+                            <option value="robot">Robot</option>
+                            <option value="super mutant">Super Mutant</option>
+                        </select>
+                        <select class="ep-filter-select" id="epDiffFilter" onchange="epFilterEnemies()" style="flex:1;">
+                            <option value="">All Diff.</option>
+                            <option value="common">Common</option>
+                            <option value="uncommon">Uncommon</option>
+                            <option value="rare">Rare</option>
+                            <option value="legendary">Legendary</option>
+                        </select>
+                    </div>
+                    <div class="ep-enemy-list" id="epEnemyList">
+                        <div class="ep-enemy-list-item active" onclick="epSelectEnemy(this)" data-type="ghoul" data-diff="common">
+                            <div>
+                                <div class="ep-enemy-list-name">Feral Ghoul</div>
+                                <div class="ep-enemy-list-sub">GHOUL &#xB7; HP 30 &#xB7; AC 11</div>
+                            </div>
+                            <span class="ep-diff-badge ep-diff-common">COMMON</span>
+                        </div>
+                        <div class="ep-enemy-list-item" onclick="epSelectEnemy(this)" data-type="insect" data-diff="common">
+                            <div>
+                                <div class="ep-enemy-list-name">Radroach</div>
+                                <div class="ep-enemy-list-sub">INSECT &#xB7; HP 10 &#xB7; AC 9</div>
+                            </div>
+                            <span class="ep-diff-badge ep-diff-common">COMMON</span>
+                        </div>
+                        <div class="ep-enemy-list-item" onclick="epSelectEnemy(this)" data-type="human" data-diff="common">
+                            <div>
+                                <div class="ep-enemy-list-name">Raider</div>
+                                <div class="ep-enemy-list-sub">HUMAN &#xB7; HP 40 &#xB7; AC 12</div>
+                            </div>
+                            <span class="ep-diff-badge ep-diff-common">COMMON</span>
+                        </div>
+                        <div class="ep-enemy-list-item" onclick="epSelectEnemy(this)" data-type="super mutant" data-diff="uncommon">
+                            <div>
+                                <div class="ep-enemy-list-name">Super Mutant</div>
+                                <div class="ep-enemy-list-sub">SUPER MUTANT &#xB7; HP 80 &#xB7; AC 14</div>
+                            </div>
+                            <span class="ep-diff-badge ep-diff-uncommon">UNCOMMON</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 2: Enemy Detail -->
+        <div>
+            <div class="panel" id="epEnemyDetailPanel">
+                <div class="panel-header">
+                    <span class="panel-title">&#x1F50E; ENEMY DETAILS &#x2014; <span id="epDetailEnemyName">FERAL GHOUL</span></span>
+                    <div style="display:flex;gap:6px;">
+                        <button class="cmd-btn" onclick="epEditEnemy()">&#x270F; EDIT</button>
+                        <button class="cmd-btn danger" onclick="epDeleteEnemy()">&#x1F5D1; DELETE</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="ep-stat-grid">
+                        <div class="ep-stat-box"><div class="ep-stat-box-label">HP</div><div class="ep-stat-box-val" id="epDHP">30</div></div>
+                        <div class="ep-stat-box"><div class="ep-stat-box-label">MAX HP</div><div class="ep-stat-box-val" id="epDMaxHP">30</div></div>
+                        <div class="ep-stat-box"><div class="ep-stat-box-label">AC</div><div class="ep-stat-box-val" id="epDAC">11</div></div>
+                        <div class="ep-stat-box"><div class="ep-stat-box-label">Initiative</div><div class="ep-stat-box-val" id="epDInit">3</div></div>
+                        <div class="ep-stat-box"><div class="ep-stat-box-label">Type</div><div class="ep-stat-box-val" style="font-size:11px;" id="epDType">GHOUL</div></div>
+                        <div class="ep-stat-box"><div class="ep-stat-box-label">Difficulty</div><div class="ep-stat-box-val" style="font-size:11px;" id="epDDiff">COMMON</div></div>
+                    </div>
+                    <div class="ep-detail-section">
+                        <div class="ep-detail-label">Description</div>
+                        <div class="ep-detail-value" id="epDDesc">A radiation-warped former human driven mad by prolonged exposure. Fast, relentless, and nearly mindless.</div>
+                    </div>
+                    <div class="ep-detail-section">
+                        <div class="ep-detail-label">Abilities / Perks</div>
+                        <div class="ep-tag-list" id="epDAbilities">
+                            <span class="ep-tag perk">Feral Charge</span>
+                            <span class="ep-tag perk">Radiation Scratch</span>
+                        </div>
+                    </div>
+                    <div class="ep-detail-section">
+                        <div class="ep-detail-label">Loot Pool</div>
+                        <div class="ep-tag-list" id="epDLoot">
+                            <span class="ep-tag loot">Caps &#xD7;1d10</span>
+                            <span class="ep-tag loot">Rad-Away</span>
+                        </div>
+                    </div>
+                    <div class="ep-detail-section">
+                        <div class="ep-detail-label">Notes / Special Rules</div>
+                        <div class="ep-detail-value" id="epDNotes" style="color:rgba(232,232,232,.6);font-style:italic;">No special rules.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 3: Enemy Editor -->
+        <div>
+            <div class="panel" id="epEnemyEditorPanel">
+                <div class="panel-header">
+                    <span class="panel-title" id="epEditorTitle">&#x270F; EDIT ENEMY</span>
+                    <button class="cmd-btn" onclick="epCancelEdit()">&#x2715;</button>
+                </div>
+                <div class="panel-body">
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Name *</label>
+                        <input class="ep-form-input" type="text" id="epEditName" placeholder="e.g. Feral Ghoul" value="Feral Ghoul">
+                    </div>
+                    <div class="ep-two-col-form">
+                        <div class="ep-form-group">
+                            <label class="ep-form-label">Type</label>
+                            <select class="ep-form-select" id="epEditType">
+                                <option value="ghoul" selected>Ghoul</option>
+                                <option value="insect">Insect</option>
+                                <option value="human">Human</option>
+                                <option value="animal">Animal</option>
+                                <option value="robot">Robot</option>
+                                <option value="super mutant">Super Mutant</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="ep-form-group">
+                            <label class="ep-form-label">Difficulty</label>
+                            <select class="ep-form-select" id="epEditDiff">
+                                <option value="common" selected>Common</option>
+                                <option value="uncommon">Uncommon</option>
+                                <option value="rare">Rare</option>
+                                <option value="legendary">Legendary</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ep-two-col-form">
+                        <div class="ep-form-group">
+                            <label class="ep-form-label">HP</label>
+                            <input class="ep-form-input" type="number" id="epEditHP" value="30" min="1">
+                        </div>
+                        <div class="ep-form-group">
+                            <label class="ep-form-label">AC</label>
+                            <input class="ep-form-input" type="number" id="epEditAC" value="11" min="0">
+                        </div>
+                    </div>
+                    <div class="ep-two-col-form">
+                        <div class="ep-form-group">
+                            <label class="ep-form-label">Initiative</label>
+                            <input class="ep-form-input" type="number" id="epEditInit" value="3" min="0">
+                        </div>
+                        <div class="ep-form-group">
+                            <label class="ep-form-label">Damage</label>
+                            <input class="ep-form-input" type="text" id="epEditDmg" placeholder="e.g. 1d6" value="1d6">
+                        </div>
+                    </div>
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Abilities (comma-separated)</label>
+                        <input class="ep-form-input" type="text" id="epEditAbilities" placeholder="e.g. Feral Charge, Radiation Scratch" value="Feral Charge, Radiation Scratch">
+                    </div>
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Loot Pool (comma-separated)</label>
+                        <input class="ep-form-input" type="text" id="epEditLoot" placeholder="e.g. item_caps_1, item_rad_away_1" value="item_caps_1, item_rad_away_1">
+                    </div>
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Description</label>
+                        <textarea class="ep-form-textarea" id="epEditDesc" placeholder="Enemy description&#x2026;">A radiation-warped former human driven mad by prolonged exposure.</textarea>
+                    </div>
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Notes / Special Rules</label>
+                        <textarea class="ep-form-textarea" id="epEditNotes" placeholder="Overseer notes&#x2026;"></textarea>
+                    </div>
+                    <div class="ep-form-actions">
+                        <button class="cmd-btn danger" onclick="epCancelEdit()">CANCEL</button>
+                        <button class="cmd-btn success" onclick="epSaveEnemy()">&#x1F4BE; SAVE ENEMY</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div><!-- /enemies page-content -->
+</div><!-- /hub-tab-enemies -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ITEMS TAB
+══════════════════════════════════════════════════════════════════ -->
+<div id="hub-tab-items" class="hub-tab-panel" role="tabpanel">
+<div style="padding:20px 24px;max-width:1800px;margin:0 auto;">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px;">
+        <button class="cmd-btn success" onclick="ipShowNewItemForm()" title="Add a new item to the pool">+ NEW ITEM</button>
+        <button class="cmd-btn" onclick="ipExportPool()" title="Export items pool as JSON">&#x2B07; EXPORT POOL</button>
+    </div>
+    <div class="ip-three-col">
+
+        <!-- COL 1: Item List -->
+        <div>
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">&#x1F4CB; ITEM DATABASE</span>
+                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="ipItemCount">4 entries</span>
+                </div>
+                <div class="panel-body">
+                    <div class="ip-filter-row">
+                        <input class="ip-filter-input" type="text" id="ipItemSearch" placeholder="Search items&#x2026;" oninput="ipFilterItems()">
+                    </div>
+                    <div class="ip-filter-row">
+                        <select class="ip-filter-select" id="ipTypeFilter" onchange="ipFilterItems()" style="flex:1;">
+                            <option value="">All Types</option>
+                            <option value="weapon">Weapon</option>
+                            <option value="armor">Armor</option>
+                            <option value="consumable">Consumable</option>
+                            <option value="misc">Misc</option>
+                            <option value="ammo">Ammo</option>
+                        </select>
+                        <select class="ip-filter-select" id="ipRarityFilter" onchange="ipFilterItems()" style="flex:1;">
+                            <option value="">All Rarity</option>
+                            <option value="common">Common</option>
+                            <option value="uncommon">Uncommon</option>
+                            <option value="rare">Rare</option>
+                            <option value="legendary">Legendary</option>
+                        </select>
+                    </div>
+                    <div class="ip-item-list" id="ipItemList">
+                        <div class="ip-item-list-row active" onclick="ipSelectItem(this)" data-type="weapon" data-rarity="common">
+                            <div>
+                                <div class="ip-item-list-name">10mm Pistol</div>
+                                <div class="ip-item-list-sub">WEAPON &#xB7; Wt 2.5 &#xB7; Val 75</div>
+                            </div>
+                            <span class="ip-rarity-badge ip-rarity-common">COMMON</span>
+                        </div>
+                        <div class="ip-item-list-row" onclick="ipSelectItem(this)" data-type="weapon" data-rarity="uncommon">
+                            <div>
+                                <div class="ip-item-list-name">Combat Rifle</div>
+                                <div class="ip-item-list-sub">WEAPON &#xB7; Wt 8 &#xB7; Val 350</div>
+                            </div>
+                            <span class="ip-rarity-badge ip-rarity-uncommon">UNCOMMON</span>
+                        </div>
+                        <div class="ip-item-list-row" onclick="ipSelectItem(this)" data-type="consumable" data-rarity="common">
+                            <div>
+                                <div class="ip-item-list-name">Stimpak</div>
+                                <div class="ip-item-list-sub">CONSUMABLE &#xB7; Wt 0.1 &#xB7; Val 75</div>
+                            </div>
+                            <span class="ip-rarity-badge ip-rarity-common">COMMON</span>
+                        </div>
+                        <div class="ip-item-list-row" onclick="ipSelectItem(this)" data-type="weapon" data-rarity="rare">
+                            <div>
+                                <div class="ip-item-list-name">Minigun</div>
+                                <div class="ip-item-list-sub">WEAPON &#xB7; Wt 27 &#xB7; Val 1200</div>
+                            </div>
+                            <span class="ip-rarity-badge ip-rarity-rare">RARE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 2: Item Detail -->
+        <div>
+            <div class="panel" id="ipItemDetailPanel">
+                <div class="panel-header">
+                    <span class="panel-title">&#x1F50E; ITEM DETAILS &#x2014; <span id="ipDetailItemName">10MM PISTOL</span></span>
+                    <div style="display:flex;gap:6px;">
+                        <button class="cmd-btn" onclick="ipEditItem()">&#x270F; EDIT</button>
+                        <button class="cmd-btn danger" onclick="ipDeleteItem()">&#x1F5D1; DELETE</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="ip-stat-grid">
+                        <div class="ip-stat-box"><div class="ip-stat-box-label">Weight</div><div class="ip-stat-box-val" id="ipDWeight">2.5</div></div>
+                        <div class="ip-stat-box"><div class="ip-stat-box-label">Value</div><div class="ip-stat-box-val" id="ipDValue">75</div></div>
+                        <div class="ip-stat-box"><div class="ip-stat-box-label">Damage</div><div class="ip-stat-box-val" id="ipDDmg">1d8</div></div>
+                        <div class="ip-stat-box"><div class="ip-stat-box-label">Type</div><div class="ip-stat-box-val" style="font-size:11px;" id="ipDType">WEAPON</div></div>
+                        <div class="ip-stat-box"><div class="ip-stat-box-label">Rarity</div><div class="ip-stat-box-val" style="font-size:11px;" id="ipDRarity">COMMON</div></div>
+                        <div class="ip-stat-box"><div class="ip-stat-box-label">ID</div><div class="ip-stat-box-val" style="font-size:9px;color:rgba(232,232,232,.5);" id="ipDID">item_10mm_pistol_1</div></div>
+                    </div>
+                    <div class="ip-detail-section">
+                        <div class="ip-detail-label">Description</div>
+                        <div class="ip-detail-value" id="ipDDesc">A reliable semi-automatic pistol chambered in 10mm. A staple sidearm of the wasteland.</div>
+                    </div>
+                    <div class="ip-detail-section">
+                        <div class="ip-detail-label">Properties / Tags</div>
+                        <div class="ip-tag-list" id="ipDProperties">
+                            <span class="ip-tag">Ranged</span>
+                            <span class="ip-tag">Semi-Auto</span>
+                            <span class="ip-tag">10mm Ammo</span>
+                        </div>
+                    </div>
+                    <div class="ip-detail-section">
+                        <div class="ip-detail-label">Special Effects</div>
+                        <div class="ip-detail-value" id="ipDEffects" style="color:rgba(232,232,232,.5);font-style:italic;">None.</div>
+                    </div>
+                    <div class="ip-detail-section">
+                        <div class="ip-detail-label">Notes</div>
+                        <div class="ip-detail-value" id="ipDNotes" style="color:rgba(232,232,232,.5);font-style:italic;">&#x2014;</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 3: Item Editor -->
+        <div>
+            <div class="panel" id="ipItemEditorPanel">
+                <div class="panel-header">
+                    <span class="panel-title" id="ipEditorTitle">&#x270F; EDIT ITEM</span>
+                    <button class="cmd-btn" onclick="ipCancelEdit()">&#x2715;</button>
+                </div>
+                <div class="panel-body">
+                    <div class="ip-form-group">
+                        <label class="ip-form-label">Item Name *</label>
+                        <input class="ip-form-input" type="text" id="ipEditName" placeholder="e.g. 10mm Pistol" value="10mm Pistol">
+                    </div>
+                    <div class="ip-form-group">
+                        <label class="ip-form-label">Item ID</label>
+                        <input class="ip-form-input" type="text" id="ipEditID" placeholder="e.g. item_10mm_pistol_1" value="item_10mm_pistol_1">
+                    </div>
+                    <div class="ip-two-col-form">
+                        <div class="ip-form-group">
+                            <label class="ip-form-label">Type</label>
+                            <select class="ip-form-select" id="ipEditType">
+                                <option value="weapon" selected>Weapon</option>
+                                <option value="armor">Armor</option>
+                                <option value="consumable">Consumable</option>
+                                <option value="misc">Misc</option>
+                                <option value="ammo">Ammo</option>
+                            </select>
+                        </div>
+                        <div class="ip-form-group">
+                            <label class="ip-form-label">Rarity</label>
+                            <select class="ip-form-select" id="ipEditRarity">
+                                <option value="common" selected>Common</option>
+                                <option value="uncommon">Uncommon</option>
+                                <option value="rare">Rare</option>
+                                <option value="legendary">Legendary</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="ip-two-col-form">
+                        <div class="ip-form-group">
+                            <label class="ip-form-label">Weight</label>
+                            <input class="ip-form-input" type="number" id="ipEditWeight" value="2.5" min="0" step="0.1">
+                        </div>
+                        <div class="ip-form-group">
+                            <label class="ip-form-label">Value (caps)</label>
+                            <input class="ip-form-input" type="number" id="ipEditValue" value="75" min="0">
+                        </div>
+                    </div>
+                    <div class="ip-form-group">
+                        <label class="ip-form-label">Damage (weapons only)</label>
+                        <input class="ip-form-input" type="text" id="ipEditDmg" placeholder="e.g. 1d8" value="1d8">
+                    </div>
+                    <div class="ip-form-group">
+                        <label class="ip-form-label">Properties (comma-separated)</label>
+                        <input class="ip-form-input" type="text" id="ipEditProps" placeholder="e.g. Ranged, Semi-Auto, 10mm Ammo" value="Ranged, Semi-Auto, 10mm Ammo">
+                    </div>
+                    <div class="ip-form-group">
+                        <label class="ip-form-label">Special Effects</label>
+                        <input class="ip-form-input" type="text" id="ipEditEffects" placeholder="e.g. +2 Perception while equipped">
+                    </div>
+                    <div class="ip-form-group">
+                        <label class="ip-form-label">Description</label>
+                        <textarea class="ip-form-textarea" id="ipEditDesc" placeholder="Item description&#x2026;">A reliable semi-automatic pistol chambered in 10mm.</textarea>
+                    </div>
+                    <div class="ip-form-group">
+                        <label class="ip-form-label">Notes</label>
+                        <textarea class="ip-form-textarea" id="ipEditNotes" placeholder="Overseer notes&#x2026;"></textarea>
+                    </div>
+                    <div class="ip-form-actions">
+                        <button class="cmd-btn danger" onclick="ipCancelEdit()">CANCEL</button>
+                        <button class="cmd-btn success" onclick="ipSaveItem()">&#x1F4BE; SAVE ITEM</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div><!-- /items page-content -->
+</div><!-- /hub-tab-items -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     COMBAT TAB
+══════════════════════════════════════════════════════════════════ -->
+<div id="hub-tab-combat" class="hub-tab-panel" role="tabpanel">
 <!-- MAIN DASHBOARD -->
 <div class="dashboard-content">
 
@@ -571,7 +1664,9 @@
         </div>
     </div>
 
-</div>
+</div><!-- /dashboard-content -->
+</div><!-- /hub-tab-combat -->
+</div><!-- /hub-tab-panels -->
 
 <!-- ADD ENEMY MODAL -->
 <div id="addEnemyModal" class="modal-backdrop hidden">
@@ -2450,6 +3545,358 @@
             renderSyncPlayers();
         }
     });
+}());
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     HUB TAB SWITCHING
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    // Default tab: Players
+    var DEFAULT_TAB = 'players';
+
+    window.switchHubTab = function(tabId, btn) {
+        // Hide all panels
+        document.querySelectorAll('.hub-tab-panel').forEach(function(p) {
+            p.classList.remove('active');
+        });
+        // Deactivate all tab buttons
+        document.querySelectorAll('.hub-tab-btn').forEach(function(b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+        });
+        // Show selected panel
+        var panel = document.getElementById('hub-tab-' + tabId);
+        if (panel) panel.classList.add('active');
+        // Activate selected button
+        if (btn) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+        }
+    };
+
+    // Activate default tab on load
+    document.addEventListener('DOMContentLoaded', function() {
+        var defaultBtn = document.querySelector('.hub-tab-btn[data-tab="' + DEFAULT_TAB + '"]');
+        switchHubTab(DEFAULT_TAB, defaultBtn);
+    });
+}());
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     PLAYERS TAB JAVASCRIPT
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    window.poToggleAccordion = function(header) {
+        header.classList.toggle('open');
+        var body = header.nextElementSibling;
+        body.classList.toggle('open');
+    };
+
+    window.poLoadPlayer = function() {
+        var sel = document.getElementById('poPlayerSelect');
+        if (!sel || !sel.value) {
+            var badge = document.getElementById('poPlayerStatusBadge');
+            if (badge) badge.style.display = 'none';
+            return;
+        }
+        var badge = document.getElementById('poPlayerStatusBadge');
+        if (badge) badge.style.display = '';
+        poShowToast('Loaded player "' + sel.options[sel.selectedIndex].text + '". (Placeholder — data to wire later)');
+    };
+
+    window.poSaveSection = function(section) {
+        poShowToast('Section "' + section.toUpperCase() + '" saved. (Placeholder — logic to wire later)');
+        var el = document.getElementById('poLastSavedInfo');
+        if (el) el.textContent = 'Last placeholder save: ' + section.toUpperCase() + ' — ' + new Date().toLocaleTimeString();
+    };
+
+    window.poResetSection = function(section) {
+        if (confirm('Reset "' + section + '" to last saved state? (Placeholder — not wired yet)')) {
+            poShowToast('"' + section.toUpperCase() + '" reset. (Placeholder)');
+        }
+    };
+
+    window.poSaveAllSections = function() {
+        poShowToast('All sections saved. (Placeholder — logic to wire later)');
+        var el = document.getElementById('poLastSavedInfo');
+        if (el) el.textContent = 'All placeholder save — ' + new Date().toLocaleTimeString();
+    };
+
+    window.poConfirmReset = function() {
+        if (confirm('Reset ALL sections to last saved state? (Placeholder — not wired yet)')) {
+            poShowToast('All sections reset. (Placeholder)');
+        }
+    };
+
+    window.poGiftItems = function() {
+        poShowToast('Gift Items: Select player first. (Placeholder — logic to wire later)');
+    };
+
+    window.poAddXP = function() {
+        poShowToast('Add XP: (Placeholder — logic to wire later)');
+    };
+
+    window.poHealFull = function() {
+        var hp = document.getElementById('poCharMaxHP');
+        var cur = document.getElementById('poCharHP');
+        if (hp && cur) cur.value = hp.value;
+        poShowToast('Player fully healed. (Placeholder)');
+    };
+
+    window.poClearRads = function() {
+        var rad = document.getElementById('poCharRad');
+        if (rad) rad.value = '0';
+        poShowToast('Radiation cleared. (Placeholder)');
+    };
+
+    window.poAddInventoryItem = function() {
+        poShowToast('Add Item: (Placeholder — logic to wire later)');
+    };
+
+    window.poEquipItem = function() {
+        poShowToast('Equip: (Placeholder)');
+    };
+
+    window.poRemoveItem = function(btn) {
+        if (confirm('Remove this item?')) {
+            var row = btn.closest('tr');
+            if (row) row.parentNode.removeChild(row);
+        }
+    };
+
+    window.poClearEquipment = function() {
+        ['poEquip_mainHand','poEquip_offHand','poEquip_head','poEquip_chest','poEquip_legs','poEquip_access'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        poShowToast('Equipment cleared. (Placeholder)');
+    };
+
+    window.poAddPerk = function() {
+        var input = document.getElementById('poPerkInput');
+        if (!input || !input.value.trim()) return;
+        var container = document.getElementById('poPerksContainer');
+        var span = document.createElement('span');
+        span.className = 'po-tag';
+        span.innerHTML = input.value.trim() + ' <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button>';
+        container.appendChild(span);
+        input.value = '';
+        poShowToast('Perk added. (Placeholder)');
+    };
+
+    window.poRemoveTag = function(btn) {
+        var tag = btn.closest('.po-tag');
+        if (tag) tag.parentNode.removeChild(tag);
+    };
+
+    window.poAddCondition = function() {
+        var input = document.getElementById('poConditionInput');
+        if (!input || !input.value.trim()) return;
+        var container = document.getElementById('poConditionsContainer');
+        var span = document.createElement('span');
+        span.className = 'po-tag';
+        span.innerHTML = input.value.trim() + ' <button class="po-tag-remove" onclick="poRemoveTag(this)">&#x2715;</button>';
+        container.appendChild(span);
+        input.value = '';
+        poShowToast('Condition added. (Placeholder)');
+    };
+
+    window.poClearAllConditions = function() {
+        var container = document.getElementById('poConditionsContainer');
+        if (container) container.innerHTML = '';
+        poShowToast('All conditions cleared. (Placeholder)');
+    };
+
+    window.poAddQuest = function() {
+        poShowToast('Add Quest: (Placeholder — logic to wire later)');
+    };
+
+    window.poCompleteQuest = function(btn) {
+        var td = btn.closest('tr').querySelector('td:nth-child(2)');
+        if (td) td.innerHTML = '<span style="color:var(--overseer-gold-bright);font-size:10px;">COMPLETE</span>';
+        poShowToast('Quest marked complete. (Placeholder)');
+    };
+
+    window.poActivateQuest = function(btn) {
+        var td = btn.closest('tr').querySelector('td:nth-child(2)');
+        if (td) td.innerHTML = '<span style="color:var(--overseer-green-bright);font-size:10px;">ACTIVE</span>';
+        poShowToast('Quest activated. (Placeholder)');
+    };
+
+    function poShowToast(msg, isError) {
+        var t = document.getElementById('statusToast');
+        if (!t) return;
+        t.textContent = msg;
+        t.className = isError ? 'error visible' : 'visible';
+        clearTimeout(t._poTimer);
+        t._poTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+    }
+}());
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ENEMIES TAB JAVASCRIPT
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    var _epEnemies = [];
+
+    window.epSelectEnemy = function(el) {
+        document.querySelectorAll('.ep-enemy-list-item').forEach(function(i){ i.classList.remove('active'); });
+        el.classList.add('active');
+        var name = el.querySelector('.ep-enemy-list-name').textContent;
+        document.getElementById('epDetailEnemyName').textContent = name.toUpperCase();
+        document.getElementById('epEditName').value = name;
+    };
+
+    window.epFilterEnemies = function() {
+        var q = document.getElementById('epEnemySearch').value.toLowerCase();
+        var t = document.getElementById('epTypeFilter').value;
+        var d = document.getElementById('epDiffFilter').value;
+        document.querySelectorAll('.ep-enemy-list-item').forEach(function(item) {
+            var nm = item.querySelector('.ep-enemy-list-name').textContent.toLowerCase();
+            var tp = item.getAttribute('data-type') || '';
+            var df = item.getAttribute('data-diff') || '';
+            var show = nm.includes(q) && (t === '' || tp === t) && (d === '' || df === d);
+            item.style.display = show ? '' : 'none';
+        });
+    };
+
+    window.epShowNewEnemyForm = function() {
+        document.getElementById('epEditorTitle').textContent = '+ NEW ENEMY';
+        ['epEditName','epEditAbilities','epEditLoot','epEditDesc','epEditNotes','epEditDmg'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        var hp = document.getElementById('epEditHP'); if (hp) hp.value = 20;
+        var ac = document.getElementById('epEditAC'); if (ac) ac.value = 10;
+        var init = document.getElementById('epEditInit'); if (init) init.value = 5;
+    };
+
+    window.epEditEnemy = function() {
+        var name = document.getElementById('epDetailEnemyName').textContent;
+        document.getElementById('epEditorTitle').textContent = '&#x270F; EDIT &#x2014; ' + name;
+    };
+
+    window.epCancelEdit = function() { /* both panels remain visible */ };
+
+    window.epSaveEnemy = function() {
+        var name = document.getElementById('epEditName').value.trim();
+        if (!name) { epShowToast('Enemy name is required.', true); return; }
+        epShowToast('Enemy "' + name + '" saved. (Placeholder &#x2014; logic to wire later)');
+    };
+
+    window.epDeleteEnemy = function() {
+        var name = document.getElementById('epDetailEnemyName').textContent;
+        if (confirm('Delete "' + name + '"? (Placeholder &#x2014; not wired yet)')) {
+            epShowToast('"' + name + '" deleted. (Placeholder)');
+        }
+    };
+
+    window.epExportPool = function() {
+        try {
+            var data = JSON.stringify(_epEnemies, null, 2);
+            var blob = new Blob([data], {type:'application/json'});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = 'enemy-pool.json'; a.click();
+            URL.revokeObjectURL(url);
+            epShowToast('Enemy pool exported successfully.');
+        } catch(e) { epShowToast('Export failed: ' + e.message, true); }
+    };
+
+    function epShowToast(msg, isError) {
+        var t = document.getElementById('statusToast');
+        if (!t) return;
+        t.textContent = msg;
+        t.className = isError ? 'error visible' : 'visible';
+        clearTimeout(t._epTimer);
+        t._epTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+    }
+}());
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ITEMS TAB JAVASCRIPT
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    var _ipItems = [];
+
+    window.ipSelectItem = function(el) {
+        document.querySelectorAll('.ip-item-list-row').forEach(function(i){ i.classList.remove('active'); });
+        el.classList.add('active');
+        var name = el.querySelector('.ip-item-list-name').textContent;
+        document.getElementById('ipDetailItemName').textContent = name.toUpperCase();
+        document.getElementById('ipEditName').value = name;
+    };
+
+    window.ipFilterItems = function() {
+        var q = document.getElementById('ipItemSearch').value.toLowerCase();
+        var t = document.getElementById('ipTypeFilter').value;
+        var r = document.getElementById('ipRarityFilter').value;
+        document.querySelectorAll('.ip-item-list-row').forEach(function(item) {
+            var nm = item.querySelector('.ip-item-list-name').textContent.toLowerCase();
+            var tp = item.getAttribute('data-type') || '';
+            var ry = item.getAttribute('data-rarity') || '';
+            var show = nm.includes(q) && (t === '' || tp === t) && (r === '' || ry === r);
+            item.style.display = show ? '' : 'none';
+        });
+    };
+
+    window.ipShowNewItemForm = function() {
+        document.getElementById('ipEditorTitle').textContent = '+ NEW ITEM';
+        ['ipEditName','ipEditID','ipEditDmg','ipEditProps','ipEditEffects','ipEditDesc','ipEditNotes'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        var w = document.getElementById('ipEditWeight'); if (w) w.value = '0';
+        var v = document.getElementById('ipEditValue');  if (v) v.value = '0';
+    };
+
+    window.ipEditItem = function() {
+        var name = document.getElementById('ipDetailItemName').textContent;
+        document.getElementById('ipEditorTitle').textContent = '&#x270F; EDIT &#x2014; ' + name;
+    };
+
+    window.ipCancelEdit = function() { /* both panels visible */ };
+
+    window.ipSaveItem = function() {
+        var name = document.getElementById('ipEditName').value.trim();
+        if (!name) { ipShowToast('Item name is required.', true); return; }
+        ipShowToast('Item "' + name + '" saved. (Placeholder &#x2014; logic to wire later)');
+    };
+
+    window.ipDeleteItem = function() {
+        var name = document.getElementById('ipDetailItemName').textContent;
+        if (confirm('Delete "' + name + '"? (Placeholder &#x2014; not wired yet)')) {
+            ipShowToast('"' + name + '" deleted. (Placeholder)');
+        }
+    };
+
+    window.ipExportPool = function() {
+        try {
+            var data = JSON.stringify(_ipItems, null, 2);
+            var blob = new Blob([data], {type:'application/json'});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = 'items-pool.json'; a.click();
+            URL.revokeObjectURL(url);
+            ipShowToast('Items pool exported successfully.');
+        } catch(e) { ipShowToast('Export failed: ' + e.message, true); }
+    };
+
+    function ipShowToast(msg, isError) {
+        var t = document.getElementById('statusToast');
+        if (!t) return;
+        t.textContent = msg;
+        t.className = isError ? 'error visible' : 'visible';
+        clearTimeout(t._ipTimer);
+        t._ipTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+    }
 }());
 </script>
 </body>

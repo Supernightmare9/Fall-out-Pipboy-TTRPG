@@ -24,10 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <ul class="nav-list">
                 <li><a href="overseerhub.html" class="nav-link" data-page="overseerhub">🖥️ OVERSEER HUB</a></li>
                 <li><a href="overseercrafting.html" class="nav-link" data-page="overseercrafting">🛠️ CRAFTING</a></li>
-                <li><a href="overseerenemypool.html" class="nav-link" data-page="overseerenemypool">👹 ENEMY POOL</a></li>
-                <li><a href="overseeritemspool.html" class="nav-link" data-page="overseeritemspool">📦 ITEMS POOL</a></li>
                 <li><a href="overseermessages.html" class="nav-link" data-page="overseermessages">📻 MESSAGES</a></li>
-                <li><a href="overseerplayeroverview.html" class="nav-link" data-page="overseerplayeroverview">👥 PLAYER OVERVIEW</a></li>
                 <li><a href="overseersetting.html" class="nav-link" data-page="overseersetting">⚙️ SETTINGS</a></li>
             </ul>
             <div class="logout-container">
@@ -406,10 +403,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Determine current page
     function getCurrentPage() {
         const path = window.location.pathname;
-        if (path.includes('overseerplayeroverview')) return 'overseerplayeroverview';
         if (path.includes('overseercrafting')) return 'overseercrafting';
-        if (path.includes('overseerenemypool')) return 'overseerenemypool';
-        if (path.includes('overseeritemspool')) return 'overseeritemspool';
         if (path.includes('overseermessages')) return 'overseermessages';
         if (path.includes('overseersetting')) return 'overseersetting';
         if (path.includes('overseerhub')) return 'overseerhub';
