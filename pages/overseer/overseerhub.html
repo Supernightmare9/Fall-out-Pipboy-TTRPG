@@ -3479,7 +3479,16 @@
         },
 
         onPlayerWaiting: function (handle, data) {
-            if (!_syncPlayers[handle]) _syncPlayers[handle] = data || {};
+            // _waiting is an internal UI flag: set when a player connects before the
+            // campaign is started (pending state on server). Cleared automatically
+            // when onPlayerJoined fires (campaign admitted them) or onCampaignStarted
+            // replaces the entry with server-authoritative data.
+            if (!_syncPlayers[handle]) {
+                if (!data) {
+                    console.warn('[OverseerHub] Waiting player "' + handle + '" has no initial data — card will show defaults');
+                }
+                _syncPlayers[handle] = data || {};
+            }
             _syncPlayers[handle]._waiting = true;
             addLog('SYNC: ' + handle + ' is waiting — start the campaign session to admit them', 'yellow');
             renderSyncPlayers();
