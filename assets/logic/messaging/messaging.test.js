@@ -258,8 +258,8 @@ describe('privacy — messages not visible to non-participants', () => {
     const aliceHandle = 'alice';
     const bobHandle   = 'bob';
 
-    const aliceSystemConvId = 'system::' + aliceHandle;
-    const bobSystemConvId   = 'system::' + bobHandle;
+    const aliceSystemConvId = mkConvId(['system', aliceHandle]);
+    const bobSystemConvId   = mkConvId(['system', bobHandle]);
 
     // Simulate alice receiving an XP award system message
     const aliceConvs = {};

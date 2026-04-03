@@ -195,9 +195,9 @@
 </div>
 
 <!-- New conversation modal -->
-<div id="compose-modal" role="dialog" aria-modal="true" aria-label="New conversation">
+<div id="compose-modal" role="dialog" aria-modal="true" aria-labelledby="compose-modal-title">
     <div id="compose-modal-box">
-        <h3>NEW CONVERSATION</h3>
+        <h3 id="compose-modal-title">NEW CONVERSATION</h3>
         <p>Select one or more recipients:</p>
         <div id="recipient-list"></div>
         <div id="no-roster-msg" style="display:none">No other players online yet. Try refreshing after others join.</div>
@@ -396,7 +396,7 @@ function handleIncomingMsg(payload) {
 
 // ── System message handler ────────────────────────────────────────────────────
 function handleSystemMsg(payload) {
-    var SYSTEM_CONV_ID = 'system::' + _myHandle.toLowerCase();
+    var SYSTEM_CONV_ID = mkConvId(['system', _myHandle]);
     var conv = appData.conversations[SYSTEM_CONV_ID];
 
     if (!conv) {
