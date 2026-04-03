@@ -359,8 +359,8 @@
         <div class="vault-header">
             <div class="vault-badge">VAULT-TEC INDUSTRIES PIP-BOY 3000</div>
             <div class="vault-title">STATS &amp; ABILITIES</div>
-            <div class="vault-subtitle">STATISTICAL ANALYSIS SYSTEM</div>
-            <div class="vault-info" id="characterName">Vault 215 Resident &bull; Stats Module</div>
+            <div class="vault-subtitle">SKILLS &amp; PERKS MODULE</div>
+            <div class="vault-info" id="characterName">Vault 215 Resident &bull; Skills &amp; Perks</div>
             <div style="margin-top:10px;">
                 <a href="combat.html" class="back-to-char-btn" aria-label="Back to Character Status page">&larr; Back to Character</a>
             </div>
@@ -378,221 +378,33 @@
 
         <!-- TABS NAV -->
         <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('stats', this)">&#128202; STATS</button>
-            <button class="tab-btn"        onclick="switchTab('skills', this)">&#127919; SKILLS</button>
+            <button class="tab-btn active" onclick="switchTab('skills', this)">&#127919; SKILLS</button>
             <button class="tab-btn"        onclick="switchTab('perks', this)">&#11088; PERKS</button>
             <button class="tab-btn"        onclick="switchTab('effects', this)">&#10022; EFFECTS</button>
             <button class="tab-btn level-up-tab-btn" id="levelUpTabBtn" onclick="switchTab('levelup', this)" style="display:none;border-color:rgba(251,191,36,0.6);color:#fbbf24;animation:blinkText 1s ease-in-out infinite;">&#11014; LEVEL UP</button>
         </div>
 
-        <!-- TAB 1: STATS - Three Column Dashboard -->
-        <div class="tab-content active" id="tab-stats">
-            <div class="stats-three-col">
+        <!-- Compact Level & XP summary (element IDs kept for JS compatibility) -->
+        <div style="background:var(--vault-darker);border:1px solid rgba(251,191,36,0.3);padding:10px 16px;margin-bottom:0;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:9px;color:var(--vault-gold);letter-spacing:1px;">LEVEL</span>
+                <span style="font-size:22px;font-weight:bold;color:var(--vault-gold);text-shadow:0 0 6px rgba(251,191,36,0.5);" id="level">1</span>
+            </div>
+            <div style="flex:1;min-width:160px;">
+                <div style="display:flex;justify-content:space-between;font-size:9px;color:rgba(74,222,128,0.6);margin-bottom:3px;">
+                    <span>XP: <span id="xp">0</span></span>
+                    <span id="xpToNext">— to next</span>
+                </div>
+                <div class="bar-wrap" style="margin:0;">
+                    <div class="bar-bg"><div class="bar-fill bar-high" id="xpBar" style="width:0%"></div></div>
+                </div>
+                <div style="font-size:8px;color:rgba(74,222,128,0.4);text-align:right;margin-top:2px;" id="xpPercent">0%</div>
+            </div>
+            <div id="levelUpMessage" style="display:none;font-size:10px;letter-spacing:1px;padding:4px 8px;border:1px solid rgba(251,191,36,0.4);background:rgba(251,191,36,0.05);color:#fbbf24;animation:blinkBorder 1.5s ease-in-out infinite;" aria-live="polite"></div>
+        </div>
 
-                <!-- LEFT: VITALS & HEALTH -->
-                <div class="panel">
-                    <div class="panel-title">&#9881; Vitals &amp; Health</div>
-                    <div class="stat-help-text">Tracks your current hit points, radiation exposure, action points, and armor protection. Radiation reduces your maximum HP — cure it to restore your full health pool.</div>
-
-                    <!-- Character Info display -->
-                    <div id="charInfoDisplay" style="margin-bottom:14px;"></div>
-
-                    <!-- HP Display -->
-                    <div class="hp-display" aria-label="Hit Points">
-                        <span class="hp-current" id="health" aria-label="Current HP">100</span>
-                        <span class="hp-sep">/</span>
-                        <span class="hp-max" id="maxHealth" aria-label="Maximum HP">100</span>
-                        <span class="hp-label">HP</span>
-                        <span style="font-size:11px;color:var(--vault-info);margin-left:6px;" id="tempHealthDisplay" aria-label="Temporary HP"></span>
-                    </div>
-                    <div class="bar-wrap">
-                        <div class="bar-bg" role="progressbar" aria-label="HP bar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="healthBarContainer">
-                            <div class="bar-fill bar-high" id="healthBar" style="width:100%"></div>
-                            <div id="radDamageBar" style="position:absolute;right:0;top:0;height:100%;width:0%;background:#ff6b6b;box-shadow:0 0 4px #ff6b6b;border-radius:2px;transition:width 0.4s;" aria-label="Radiation damage overlay"></div>
-                        </div>
-                    </div>
-                    <div id="radReductionNote" style="font-size:9px;color:#ff6b6b;letter-spacing:1px;margin-bottom:4px;display:none;" aria-label="Warning: Radiation is reducing your maximum health">&#9762; RADIATION REDUCING MAX HP</div>
-
-                    <!-- HP Quick Buttons -->
-                    <div class="hp-controls">
-                        <button class="hp-btn minus" onclick="adjustHP(-5)">&minus; 5</button>
-                        <button class="hp-btn minus" onclick="adjustHP(-1)">&minus; 1</button>
-                        <button class="hp-btn"       onclick="adjustHP(1)">+ 1</button>
-                        <button class="hp-btn"       onclick="adjustHP(5)">+ 5</button>
-                    </div>
-
-                    <!-- HP Manual Input -->
-                    <div class="input-row">
-                        <input type="number" id="healthInput" class="compact-input" placeholder="HP (&plusmn;)" min="-9999" max="9999">
-                        <button class="update-btn" onclick="updateHealth()">Update</button>
-                        <button class="update-btn btn-temp" onclick="addTempHealth()">+Temp HP</button>
-                        <button class="update-btn btn-danger" onclick="removeTempHealth()">&minus;Temp HP</button>
-                    </div>
-                    <div class="timestamp-text" id="hpTimestamp">Last updated: &mdash;</div>
-                    <div class="success-msg" id="hpSuccessMsg">&#10003; HP UPDATED</div>
-                    <div class="msg-box" id="healthMessage"></div>
-
-                    <!-- Radiation (tied to HP) -->
-                    <div class="panel-title" style="margin-top:16px;">&#9762; Radiation</div>
-                    <div class="stat-help-text">Radiation (RAD) reduces your maximum HP proportionally. 1000 RAD = 100% max HP lost. Use Rad-Away or medical treatment to reduce radiation.</div>
-                    <div class="resource-label-row">
-                        <span class="resource-label">RAD</span>
-                        <span class="resource-value"><span id="radiationCurrent">0</span> / 1000 RAD</span>
-                    </div>
-                    <div class="bar-wrap">
-                        <div class="bar-bg"><div class="bar-fill bar-rad-green" id="radiationBar" style="width:0%"></div></div>
-                    </div>
-                    <div class="input-row">
-                        <input type="number" id="radiationInput" class="compact-input" placeholder="RAD value" min="0" max="1000">
-                        <button class="update-btn" onclick="updateRadiation()">Update RAD</button>
-                    </div>
-                    <div class="msg-box" id="radiationMessage"></div>
-
-                    <!-- Action Points (moved to Vitals & Health) -->
-                    <div class="panel-title" style="margin-top:16px;">&#9889; Action Points</div>
-                    <div class="stat-help-text">AP fuels actions in combat (attacks, sprints, special moves). Restored by Short/Long Rest or abilities. Your maximum AP is fixed at 20.</div>
-                    <div class="resource-label-row">
-                        <span class="resource-label">AP</span>
-                        <span class="resource-value">
-                            <span id="actionPoints">10</span> / <span id="maxActionPoints">20</span>
-                            <span style="color:var(--vault-info);margin-left:4px;" id="tempActionPointsDisplay"></span>
-                        </span>
-                    </div>
-                    <div class="bar-wrap">
-                        <div class="bar-bg"><div class="bar-fill bar-high" id="apBar" style="width:50%"></div></div>
-                    </div>
-                    <div class="input-row">
-                        <input type="number" id="apInput" class="compact-input" placeholder="AP (&plusmn;)" min="-9999" max="9999">
-                        <button class="update-btn" onclick="updateActionPoints()">Update</button>
-                        <button class="update-btn btn-temp" onclick="addTempAP()">+Temp AP</button>
-                        <button class="update-btn btn-danger" onclick="removeTempAP()">&minus;Temp AP</button>
-                    </div>
-                    <div class="msg-box" id="apMessage"></div>
-
-                    <!-- Armor Class -->
-                    <div class="panel-title" style="margin-top:16px;">&#128737; Armor Class</div>
-                    <div class="stat-help-text">AC determines how hard you are to hit. Attackers must beat your AC on their roll to deal damage. Higher is better (min 10, max 30).</div>
-                    <div class="ac-display" id="armorClass">10</div>
-                    <div class="input-row">
-                        <button class="update-btn btn-danger" onclick="decreaseAC()">&minus;</button>
-                        <input type="number" id="acInput" class="compact-input" placeholder="Set AC" min="10" max="30">
-                        <button class="update-btn" onclick="setAC()">Set</button>
-                        <button class="update-btn" onclick="increaseAC()">+</button>
-                    </div>
-                    <div class="msg-box" id="acMessage"></div>
-
-                    <!-- Rest -->
-                    <div class="rest-row">
-                        <button class="update-btn btn-temp" onclick="shortRest()">Short Rest</button>
-                        <button class="update-btn" onclick="longRest()">Long Rest</button>
-                    </div>
-                    <div class="msg-box" id="restMessage"></div>
-                </div><!-- /LEFT -->
-
-                <!-- MIDDLE: SPECIAL STATS & RESOURCES -->
-                <div class="panel">
-                    <div class="panel-title">&#128170; S.P.E.C.I.A.L. Stats</div>
-                    <div class="stat-help-text">Your seven core attributes governing all gameplay. Each stat (1–10) grants bonuses to related skills and mechanics. Click a stat to edit its value.</div>
-
-                    <div class="special-grid">
-                        <div class="special-stat" onclick="editSpecial('strength')" title="Strength (1–10): Governs melee damage, carry weight, and Melee Weapons / Big Guns / Unarmed skill bonuses." aria-label="Strength — click to edit">
-                            <span class="special-letter">S</span>
-                            <span class="special-value" id="special-strength">5</span>
-                            <span class="special-name">Strength</span>
-                        </div>
-                        <div class="special-stat" onclick="editSpecial('perception')" title="Perception (1–10): Governs ranged accuracy, awareness, and Small Guns / Energy Weapons skill bonuses." aria-label="Perception — click to edit">
-                            <span class="special-letter">P</span>
-                            <span class="special-value" id="special-perception">5</span>
-                            <span class="special-name">Perception</span>
-                        </div>
-                        <div class="special-stat" onclick="editSpecial('endurance')" title="Endurance (1–10): Governs maximum HP, radiation resistance, and Survival / Explosives skill bonuses." aria-label="Endurance — click to edit">
-                            <span class="special-letter">E</span>
-                            <span class="special-value" id="special-endurance">5</span>
-                            <span class="special-name">Endurance</span>
-                        </div>
-                        <div class="special-stat" onclick="editSpecial('charisma')" title="Charisma (1–10): Governs speech checks, barter prices, and Barter / Speech skill bonuses." aria-label="Charisma — click to edit">
-                            <span class="special-letter">C</span>
-                            <span class="special-value" id="special-charisma">5</span>
-                            <span class="special-name">Charisma</span>
-                        </div>
-                        <div class="special-stat" onclick="editSpecial('intelligence')" title="Intelligence (1–10): Governs skill points per level, hacking ability, and Science / Repair / Medicine skill bonuses." aria-label="Intelligence — click to edit">
-                            <span class="special-letter">I</span>
-                            <span class="special-value" id="special-intelligence">5</span>
-                            <span class="special-name">Intelligence</span>
-                        </div>
-                        <div class="special-stat" onclick="editSpecial('agility')" title="Agility (1–10): Governs maximum Action Points, movement speed, and Sneak / Lockpick skill bonuses." aria-label="Agility — click to edit">
-                            <span class="special-letter">A</span>
-                            <span class="special-value" id="special-agility">5</span>
-                            <span class="special-name">Agility</span>
-                        </div>
-                        <div class="special-stat" onclick="editSpecial('luck')" title="Luck (1–10): Influences critical hit chance, random encounter outcomes, and all skill checks slightly." aria-label="Luck — click to edit">
-                            <span class="special-letter">L</span>
-                            <span class="special-value" id="special-luck">5</span>
-                            <span class="special-name">Luck</span>
-                        </div>
-                    </div>
-
-                    <!-- Proficiencies Placeholder (Future) -->
-                    <div class="tracker-box" style="margin-top:14px;border-color:rgba(96,165,250,0.3);">
-                      <div class="tracker-title" style="color:rgba(96,165,250,0.7);">&#128203; Proficiencies <span style="font-size:8px;opacity:0.6;">[FUTURE]</span></div>
-                      <div style="font-size:9px;color:rgba(96,165,250,0.5);font-style:italic;">Weapon and tool proficiency bonuses from your SPECIAL stats will appear here in a future update. Stub reserved for Overseer configuration.</div>
-                    </div>
-
-                    <!-- XP Section -->
-                    <div class="panel-title" style="margin-top:16px;">&#11088; Experience</div>
-                    <div class="stat-help-text">XP is awarded for quests, combat, exploration, and learning. Earn enough to level up and gain skill points to spend in the Skills tab.</div>
-                    <div class="stat-row"><span class="stat-label">Level</span><span class="stat-value" id="level">1</span></div>
-                    <div class="stat-row"><span class="stat-label">Total XP</span><span class="stat-value" id="xp">0</span></div>
-                    <div class="stat-row" style="margin-bottom:8px;"><span class="stat-label">XP to Next</span><span class="stat-value" id="xpToNext">320</span></div>
-                    <div class="bar-wrap">
-                        <div class="bar-bg"><div class="bar-fill bar-high" id="xpBar" style="width:0%"></div></div>
-                    </div>
-                    <div style="font-size:9px;color:rgba(74,222,128,0.5);text-align:right;margin-bottom:8px;" id="xpPercent">0%</div>
-                    <div id="levelUpMessage" style="display:none;font-size:10px;letter-spacing:1px;margin-top:4px;padding:4px 8px;border:1px solid rgba(251,191,36,0.4);background:rgba(251,191,36,0.05);color:#fbbf24;animation:blinkBorder 1.5s ease-in-out infinite;" aria-live="polite"></div>
-                </div><!-- /MIDDLE -->
-
-                <!-- RIGHT: EFFECTS & STATUS -->
-                <div class="panel">
-                    <div class="panel-title">&#10022; Active Effects</div>
-                    <div class="stat-help-text">Temporary buffs and debuffs affecting your character. Manage them in the EFFECTS tab below; use "Turn" to count down duration.</div>
-
-                    <div class="effect-section-label debuff-label">&#9760; Debuffs</div>
-                    <div id="debuffsPreview" class="effects-list">
-                        <div class="empty-state">No active debuffs</div>
-                    </div>
-
-                    <div class="effect-section-label boost-label" style="margin-top:10px;">&#10003; Boosts</div>
-                    <div id="boostsPreview" class="effects-list">
-                        <div class="empty-state">No active boosts</div>
-                    </div>
-
-                    <div style="font-size:9px;color:rgba(74,222,128,0.35);margin:6px 0 14px;">
-                        Manage effects in the EFFECTS tab &darr;
-                    </div>
-
-                    <!-- Critical Hit Chance (NEW) -->
-                    <div class="tracker-box">
-                        <div class="tracker-title">&#127919; Critical Hit Chance</div>
-                        <div class="stat-help-text" style="margin-bottom:8px;">Tracks your critical hit gauge (0–100%). When the gauge reaches 100%, you may use the USE CRIT button to trigger a critical hit and reset the gauge.</div>
-                        <div class="tracker-current-val" id="critChanceDisplay" style="color:#4ade80;">0%</div>
-                        <div class="bar-wrap">
-                            <div class="bar-bg"><div class="bar-fill bar-crit-green" id="critChanceBar" style="width:0%"></div></div>
-                        </div>
-                        <div class="input-row">
-                            <input type="number" id="critChanceInput" class="compact-input" placeholder="0-100" min="0" max="100">
-                            <button class="update-btn" onclick="updateCritChance()">Update Crit</button>
-                            <button class="update-btn" id="useCritBtn" onclick="useCrit()" style="display:none;background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.5);color:#ff6b6b;">USE CRIT</button>
-                        </div>
-                        <div class="msg-box" id="critChanceMessage"></div>
-                    </div>
-
-                </div><!-- /RIGHT -->
-
-            </div><!-- /stats-three-col -->
-        </div><!-- /tab-stats -->
-
-        <!-- TAB 2: SKILLS -->
-        <div class="tab-content" id="tab-skills">
+        <!-- TAB 1: SKILLS (default active — vitals moved to combat page) -->
+        <div class="tab-content active" id="tab-skills">
             <div class="stat-help-text" style="margin-bottom:12px;">Skills represent your character's proficiencies (0–100). Check up to 3 skills as Tag Skills for a permanent +15 bonus. Spend skill points (earned on level-up) using the + / − buttons. Lock in your allocation when done.</div>
             <div class="tag-header">
                 TAG SKILLS: <span class="tag-count-badge" id="tagBadge">0/3</span>
@@ -688,11 +500,11 @@
       <div class="vault-dialog" style="max-width:560px;">
         <div class="vault-dialog-title" id="onboardingTitle">&#127968; Welcome to Your Pip-Boy Stats Module</div>
         <div class="vault-dialog-body" style="font-size:11px;line-height:1.7;color:rgba(74,222,128,0.85);">
-          <p><strong style="color:#fbbf24;">STATS TAB:</strong> View and manage your HP, AP, AC, SPECIAL attributes, radiation, and active effects.</p>
-          <p style="margin-top:6px;"><strong style="color:#fbbf24;">SKILLS TAB:</strong> View your 14 skills. Tag up to 3 skills for +15 bonus. Spend skill points here after leveling up.</p>
+          <p><strong style="color:#fbbf24;">SKILLS TAB:</strong> View your 14 Fallout skills. Tag up to 3 skills for a permanent +15 bonus. Spend skill points (earned on level-up) using the + / &minus; buttons.</p>
           <p style="margin-top:6px;"><strong style="color:#fbbf24;">PERKS TAB:</strong> View all perks you have earned so far.</p>
+          <p style="margin-top:6px;"><strong style="color:#fbbf24;">EFFECTS TAB:</strong> Track active debuffs and boosts, and manage their durations.</p>
           <p style="margin-top:6px;"><strong style="color:#fbbf24;">LEVEL UP TAB:</strong> Appears when you gain a level. Allocate skill points and choose a new perk from the available pool.</p>
-          <p style="margin-top:6px;"><strong style="color:#fbbf24;">XP:</strong> Experience is tracked by the Overseer &mdash; you cannot edit it directly.</p>
+          <p style="margin-top:6px;"><strong style="color:#fbbf24;">COMBAT PAGE:</strong> HP, radiation, action points, armor class, and all combat vitals have moved to the Combat page for live tracking during encounters.</p>
           <p style="margin-top:10px;font-size:9px;opacity:0.6;">This message will not appear again. You can re-read it from the Settings page.</p>
         </div>
         <div class="vault-dialog-footer">
@@ -742,16 +554,10 @@
     //  values change.
     // ================================================================
 
-    // Base stats before S.P.E.C.I.A.L. bonuses are applied.
-    // These are passed to the functions in fallout_stat_bonuses.js.
-    var BASE_HEALTH        = 100; // HP before Endurance bonus
-    var BASE_AP            = 10;  // AP before Agility bonus
-
-    // MAX_HEALTH and MAX_ACTION_POINTS are computed by recalcDerivedStats()
-    // at page load and whenever S.P.E.C.I.A.L. values change.
-    var MAX_HEALTH        = BASE_HEALTH;
-    var MAX_ACTION_POINTS = BASE_AP;
-    var MAX_RAD           = 1000;
+    // Base stats (kept for potential use by external scripts/future features)
+    var BASE_HEALTH        = 100;
+    var BASE_AP            = 10;
+    var MAX_RAD            = 1000;
     var MAX_TAG_SKILLS    = 3;
     var TAG_SKILL_BONUS   = 15;
     var SKILL_POINTS_PER_LEVEL = 13;
@@ -779,10 +585,9 @@
                   'Explosives','Lockpick','Medicine','Science','Repair',
                   'Sneak','Speech','Unarmed','Survival'];
 
-    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, health:MAX_HEALTH, actionPoints:10, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, perkPointsAvailable:0, selectedPerks:[], perkSelectionActive:false, skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false };
+    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, perkPointsAvailable:0, selectedPerks:[], perkSelectionActive:false, skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false };
     var debuffs    = [];
     var boosts     = [];
-    var hpLastUpdated = null;
 
     SKILLS.forEach(function(s){ playerData.skills[s] = 0; });
 
@@ -808,10 +613,10 @@
     // ---- SAVE / LOAD ----
     function savePlayerData() {
         localStorage.setItem(lsKey('pipboyPlayerData'), JSON.stringify(playerData));
-        localStorage.setItem(lsKey('pipboyXP'),           parseInt(document.getElementById('xp').textContent.replace(/,/g,'')) || 0);
-        localStorage.setItem(lsKey('pipboyLevel'),         document.getElementById('level').textContent);
-        localStorage.setItem(lsKey('pipboyHealth'),        document.getElementById('health').textContent);
-        localStorage.setItem(lsKey('pipboyActionPoints'),  document.getElementById('actionPoints').textContent);
+        var xpEl    = document.getElementById('xp');
+        var levelEl = document.getElementById('level');
+        if (xpEl)    localStorage.setItem(lsKey('pipboyXP'),    parseInt(xpEl.textContent.replace(/,/g,'')) || 0);
+        if (levelEl) localStorage.setItem(lsKey('pipboyLevel'), levelEl.textContent);
     }
 
     function loadPlayerData() {
@@ -827,73 +632,11 @@
             playerData.skillsLockBaseline = deepCopy(playerData.skills || {});
         }
         // Guard: ensure skills is always a plain object with a numeric value for every skill
-        // (handles new saves, legacy saves, and corrupted localStorage data)
         ensureValidSkills();
         // Migration: initialize skillsAllocationActive for existing saves
         if (playerData.skillsAllocationActive === undefined) {
             playerData.skillsAllocationActive = ((playerData.skillPointsAvailable || 0) > 0 && !playerData.skillsLocked);
         }
-        var sH = localStorage.getItem(lsKey('pipboyHealth'));
-        var sAP = localStorage.getItem(lsKey('pipboyActionPoints'));
-        if (sH)  document.getElementById('health').textContent        = sH;
-        if (sAP) document.getElementById('actionPoints').textContent  = sAP;
-        // Max HP and AP are derived from S.P.E.C.I.A.L. via fallout_stat_bonuses.js;
-        // recalcDerivedStats() is called by loadSpecialStats() which runs after this.
-        refreshHpBar();
-        refreshApBar();
-    }
-
-    function saveSpecialStats() {
-        var s = {};
-        ['strength','perception','endurance','charisma','intelligence','agility','luck'].forEach(function(k){
-            s[k] = parseInt(document.getElementById('special-'+k).textContent) || 5;
-        });
-        localStorage.setItem(lsKey('pipboySpecial'), JSON.stringify(s));
-        // Recalculate all S.P.E.C.I.A.L.-derived stats whenever values change.
-        recalcDerivedStats();
-    }
-
-    function loadSpecialStats() {
-        var saved = localStorage.getItem(lsKey('pipboySpecial'));
-        if (!saved) return;
-        try {
-            var s = JSON.parse(saved);
-            ['strength','perception','endurance','charisma','intelligence','agility','luck'].forEach(function(k){
-                if (s[k] !== undefined) document.getElementById('special-'+k).textContent = s[k];
-            });
-        } catch(e){}
-        // Recalculate all S.P.E.C.I.A.L.-derived stats after loading saved values.
-        recalcDerivedStats();
-    }
-
-    // ---- DERIVED STAT RECALCULATION ----
-    // Uses functions from fallout_stat_bonuses.js — the single source of truth for
-    // all S.P.E.C.I.A.L.-based derived stats.  Call this whenever S.P.E.C.I.A.L.
-    // values change (level up, injury, item effects, etc.).
-    function recalcDerivedStats() {
-        var endurance = parseInt(document.getElementById('special-endurance').textContent) || 5;
-        var agility   = parseInt(document.getElementById('special-agility').textContent)   || 5;
-
-        // Recompute max HP and max AP using shared formulas from fallout_stat_bonuses.js
-        MAX_HEALTH        = getHealth(BASE_HEALTH, endurance);
-        MAX_ACTION_POINTS = getAP(BASE_AP, agility);
-
-        // Update DOM displays
-        document.getElementById('maxHealth').textContent       = MAX_HEALTH;
-        document.getElementById('maxActionPoints').textContent = MAX_ACTION_POINTS;
-
-        // Clamp current HP/AP to new maximums so they stay valid
-        var curHP = parseInt(document.getElementById('health').textContent) || 0;
-        if (curHP > MAX_HEALTH) {
-            document.getElementById('health').textContent = MAX_HEALTH;
-        }
-        var curAP = parseInt(document.getElementById('actionPoints').textContent) || 0;
-        if (curAP > MAX_ACTION_POINTS) {
-            document.getElementById('actionPoints').textContent = MAX_ACTION_POINTS;
-        }
-
-        refreshHpBar();
-        refreshApBar();
     }
 
     function saveEffects() {
@@ -913,94 +656,8 @@
         if (!cd) return;
         try {
             var ch = JSON.parse(cd);
-            if (ch.name) document.getElementById('characterName').textContent = ch.name + ' • Stats Module';
-            var infoDiv = document.getElementById('charInfoDisplay');
-            var rows = [];
-            if (ch.name)      rows.push(['Name',      ch.name]);
-            if (ch.race)      rows.push(['Race',      ch.race]);
-            if (ch.class)     rows.push(['Class',     ch.class]);
-            if (ch.alignment) rows.push(['Alignment', ch.alignment]);
-            infoDiv.innerHTML = rows.map(function(r){
-                return '<div class="char-info-row"><span class="char-info-label">'+r[0]+'</span><span class="char-info-value">'+escHtml(r[1])+'</span></div>';
-            }).join('');
+            if (ch.name) document.getElementById('characterName').textContent = ch.name + ' \u2022 Skills & Perks';
         } catch(e){}
-    }
-
-    function loadAC() {
-        var s = localStorage.getItem(lsKey('pipboyAC'));
-        if (s) document.getElementById('armorClass').textContent = parseInt(s);
-    }
-
-    function saveAC() {
-        localStorage.setItem(lsKey('pipboyAC'), parseInt(document.getElementById('armorClass').textContent) || 10);
-    }
-
-    // ---- BARS ----
-    function getEffectiveMaxHP() {
-        var rad = parseInt(localStorage.getItem(lsKey('pipboyRadiation')) || '0');
-        var radReduction = Math.min(MAX_HEALTH, Math.round((rad / MAX_RAD) * MAX_HEALTH));
-        return MAX_HEALTH - radReduction;
-    }
-
-    function refreshHpBar() {
-        var cur = parseInt(document.getElementById('health').textContent) || 0;
-        var effectiveMaxHP = getEffectiveMaxHP();
-        var rad = parseInt(localStorage.getItem(lsKey('pipboyRadiation')) || '0');
-
-        // Update max HP display to show effective max
-        document.getElementById('maxHealth').textContent = effectiveMaxHP;
-
-        // clamp current HP to effective max (radiation damage does NOT heal HP, only caps it)
-        if (cur > effectiveMaxHP) {
-            cur = effectiveMaxHP;
-            document.getElementById('health').textContent = cur;
-        }
-
-        // Green bar: current HP as percent of MAX_HEALTH (total bar width)
-        var greenPct = Math.min(100, Math.max(0, Math.round((cur / MAX_HEALTH) * 100)));
-        var fill = document.getElementById('healthBar');
-        fill.style.width = greenPct + '%';
-        var hpRatio = effectiveMaxHP > 0 ? cur / effectiveMaxHP : 0;
-        fill.className = 'bar-fill ' + (hpRatio >= 0.75 ? 'bar-high' : hpRatio >= 0.25 ? 'bar-mid' : 'bar-low');
-
-        // Update aria-valuenow for screen readers
-        var container = document.getElementById('healthBarContainer');
-        if (container) container.setAttribute('aria-valuenow', greenPct);
-
-        // Red bar: radiation damage as percent of total bar (from right)
-        var redPct = Math.min(100, Math.round((rad / MAX_RAD) * 100));
-        var radFill = document.getElementById('radDamageBar');
-        if (radFill) radFill.style.width = redPct + '%';
-
-        // Show/hide radiation warning note
-        var radNote = document.getElementById('radReductionNote');
-        if (radNote) radNote.style.display = rad > 0 ? 'block' : 'none';
-    }
-
-    function refreshApBar() {
-        var cur = parseInt(document.getElementById('actionPoints').textContent) || 0;
-        var pct = Math.min(100, Math.max(0, Math.round((cur / MAX_ACTION_POINTS) * 100)));
-        var fill = document.getElementById('apBar');
-        fill.style.width  = pct + '%';
-        fill.className    = 'bar-fill ' + (pct >= 75 ? 'bar-high' : pct >= 25 ? 'bar-mid' : 'bar-low');
-    }
-
-    function updateHpTimestamp() {
-        var el = document.getElementById('hpTimestamp');
-        if (!hpLastUpdated) { el.textContent = 'Last updated: —'; return; }
-        var secs = Math.floor((Date.now() - hpLastUpdated.getTime()) / 1000);
-        el.textContent = 'Last updated: ' + (secs < 60 ? secs + 's ago' : Math.floor(secs/60) + 'm ago');
-    }
-
-    setInterval(updateHpTimestamp, 1000);
-
-    function flashHpMsg() {
-        var msg = document.getElementById('hpSuccessMsg');
-        msg.style.display   = 'block';
-        msg.style.animation = 'none';
-        void msg.offsetWidth;
-        msg.style.animation = 'fadeMsg 3s ease forwards';
-        setTimeout(function(){ msg.style.display = 'none'; }, 3200);
     }
 
     function showMsg(id, text, isOk) {
@@ -1009,226 +666,6 @@
         el.textContent = text;
         el.className   = 'msg-box ' + (isOk ? 'ok' : 'err');
         setTimeout(function(){ el.textContent = ''; el.className = 'msg-box'; }, 3500);
-    }
-
-    // ---- HP ----
-    function adjustHP(delta) {
-        var cur = parseInt(document.getElementById('health').textContent) || 0;
-        var effectiveMaxHP = getEffectiveMaxHP();
-        var nv  = Math.min(effectiveMaxHP, Math.max(0, cur + delta));
-        document.getElementById('health').textContent = nv;
-        hpLastUpdated = new Date();
-        refreshHpBar();
-        savePlayerData();
-        flashHpMsg();
-    }
-
-    function updateHealth() {
-        var inp    = document.getElementById('healthInput');
-        var change = parseInt(inp.value);
-        if (!inp.value || isNaN(change)) { showMsg('healthMessage', '⚠ Enter a valid number', false); return; }
-        var effectiveMaxHP = getEffectiveMaxHP();
-        var nv = Math.min(effectiveMaxHP, Math.max(0, (parseInt(document.getElementById('health').textContent)||0) + change));
-        document.getElementById('health').textContent = nv;
-        inp.value = '';
-        hpLastUpdated = new Date();
-        refreshHpBar();
-        savePlayerData();
-        flashHpMsg();
-        showMsg('healthMessage', '✓ HP → ' + nv + '/' + effectiveMaxHP, true);
-    }
-
-    function addTempHealth() {
-        showInputModal('Add Temporary HP','Temporary health amount:', '', function(v) {
-            if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
-                playerData.tempHealth = (playerData.tempHealth||0) + parseInt(v);
-                updateTempDisplays(); savePlayerData();
-            }
-        });
-    }
-
-    function removeTempHealth() {
-        showInputModal('Remove Temporary HP','Temporary health to remove:', '', function(v) {
-            if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
-                playerData.tempHealth = Math.max(0, (playerData.tempHealth||0) - parseInt(v));
-                updateTempDisplays(); savePlayerData();
-            }
-        });
-    }
-
-    // ---- ACTION POINTS ----
-    function updateActionPoints() {
-        var inp    = document.getElementById('apInput');
-        var change = parseInt(inp.value);
-        if (!inp.value || isNaN(change)) { showMsg('apMessage', '⚠ Enter a valid number', false); return; }
-        var nv = Math.min(MAX_ACTION_POINTS, Math.max(0, (parseInt(document.getElementById('actionPoints').textContent)||0) + change));
-        document.getElementById('actionPoints').textContent = nv;
-        inp.value = '';
-        refreshApBar();
-        savePlayerData();
-        showMsg('apMessage', '✓ AP → ' + nv + '/' + MAX_ACTION_POINTS, true);
-    }
-
-    function addTempAP() {
-        showInputModal('Add Temporary AP','Temporary AP amount:', '', function(v) {
-            if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
-                playerData.tempActionPoints = (playerData.tempActionPoints||0) + parseInt(v);
-                updateTempDisplays(); savePlayerData();
-            }
-        });
-    }
-
-    function removeTempAP() {
-        showInputModal('Remove Temporary AP','Temporary AP to remove:', '', function(v) {
-            if (v && !isNaN(parseInt(v)) && parseInt(v) > 0) {
-                playerData.tempActionPoints = Math.max(0, (playerData.tempActionPoints||0) - parseInt(v));
-                updateTempDisplays(); savePlayerData();
-            }
-        });
-    }
-
-    function updateTempDisplays() {
-        document.getElementById('tempHealthDisplay').textContent       = playerData.tempHealth > 0 ? '(+'+playerData.tempHealth+')' : '';
-        document.getElementById('tempActionPointsDisplay').textContent = playerData.tempActionPoints > 0 ? '(+'+playerData.tempActionPoints+')' : '';
-    }
-
-    // ---- AC ----
-    function setAC() {
-        var inp = document.getElementById('acInput');
-        var nv  = parseInt(inp.value);
-        if (!inp.value || isNaN(nv)) { showMsg('acMessage', '⚠ Enter a valid number', false); return; }
-        nv = Math.max(10, Math.min(30, nv));
-        document.getElementById('armorClass').textContent = nv;
-        inp.value = '';
-        saveAC();
-        showMsg('acMessage', '✓ AC set to ' + nv, true);
-    }
-
-    function increaseAC() {
-        var nv = Math.min(30, (parseInt(document.getElementById('armorClass').textContent)||10) + 1);
-        document.getElementById('armorClass').textContent = nv;
-        saveAC();
-        showMsg('acMessage', nv === 30 ? '⚠ AC at max (30)' : '✓ AC → ' + nv, nv !== 30);
-    }
-
-    function decreaseAC() {
-        var nv = Math.max(10, (parseInt(document.getElementById('armorClass').textContent)||10) - 1);
-        document.getElementById('armorClass').textContent = nv;
-        saveAC();
-        showMsg('acMessage', nv === 10 ? '⚠ AC at min (10)' : '✓ AC → ' + nv, nv !== 10);
-    }
-
-    // ---- REST ----
-    function shortRest() {
-        var effectiveMaxHP = getEffectiveMaxHP();
-        var halfHP = Math.floor(effectiveMaxHP / 2);
-        var halfAP = Math.floor(MAX_ACTION_POINTS / 2);
-        var nHP = Math.max(parseInt(document.getElementById('health').textContent)||0, halfHP);
-        var nAP = Math.max(parseInt(document.getElementById('actionPoints').textContent)||0, halfAP);
-        document.getElementById('health').textContent        = nHP;
-        document.getElementById('actionPoints').textContent  = nAP;
-        refreshHpBar(); refreshApBar();
-        hpLastUpdated = new Date();
-        savePlayerData();
-        showMsg('restMessage', '✓ Short Rest: HP→'+nHP+'/'+effectiveMaxHP+', AP→'+nAP+'/'+MAX_ACTION_POINTS, true);
-    }
-
-    function longRest() {
-        var effectiveMaxHP = getEffectiveMaxHP();
-        document.getElementById('health').textContent        = effectiveMaxHP;
-        document.getElementById('actionPoints').textContent  = MAX_ACTION_POINTS;
-        refreshHpBar(); refreshApBar();
-        hpLastUpdated = new Date();
-        flashHpMsg();
-        savePlayerData();
-        showMsg('restMessage', '✓ Long Rest: HP→'+effectiveMaxHP+'/'+effectiveMaxHP+', AP fully restored!', true);
-    }
-
-    // ---- SPECIAL STATS ----
-    function editSpecial(statName) {
-        var el  = document.getElementById('special-' + statName);
-        var cur = parseInt(el.textContent) || 0;
-        showInputModal('Edit ' + statName.charAt(0).toUpperCase() + statName.slice(1),
-            'Set ' + statName.charAt(0).toUpperCase() + statName.slice(1) + ' (1-10):', cur,
-            function(nv) {
-                var parsed = parseInt(nv);
-                if (isNaN(parsed)) return;
-                el.textContent = Math.max(1, Math.min(10, parsed));
-                saveSpecialStats();
-            });
-    }
-
-    // ---- RADIATION TRACKER ----
-    function updateRadiation() {
-        var inp = document.getElementById('radiationInput');
-        var nv  = parseInt(inp.value);
-        if (inp.value === '' || isNaN(nv)) { showMsg('radiationMessage', '⚠ Enter a valid number (0-1000)', false); return; }
-        nv = Math.max(0, Math.min(MAX_RAD, nv));
-        localStorage.setItem(lsKey('pipboyRadiation'), nv);
-        inp.value = '';
-        refreshRadiationDisplay(nv);
-        refreshHpBar();
-        showMsg('radiationMessage', '✓ Radiation → ' + nv + ' RAD', true);
-    }
-
-    function refreshRadiationDisplay(val) {
-        document.getElementById('radiationCurrent').textContent = val;
-        var pct  = Math.min(100, Math.round((val / MAX_RAD) * 100));
-        var fill = document.getElementById('radiationBar');
-        fill.style.width = pct + '%';
-        fill.className   = 'bar-fill ' + (val <= 250 ? 'bar-rad-green' : val <= 500 ? 'bar-rad-yellow' : val <= 750 ? 'bar-rad-orange' : 'bar-rad-red');
-    }
-
-    function loadRadiation() {
-        var radVal = parseInt(localStorage.getItem(lsKey('pipboyRadiation')) || '0');
-        refreshRadiationDisplay(radVal);
-        refreshHpBar();
-    }
-
-    // ---- CRITICAL HIT CHANCE TRACKER ----
-    function updateCritChance() {
-        var inp = document.getElementById('critChanceInput');
-        var nv  = parseInt(inp.value);
-        if (inp.value === '' || isNaN(nv)) { showMsg('critChanceMessage', '⚠ Enter a value 0-100', false); return; }
-        nv = Math.max(0, Math.min(100, nv));
-        localStorage.setItem(lsKey('pipboyCriticalChance'), nv);
-        inp.value = '';
-        refreshCritDisplay(nv);
-        showMsg('critChanceMessage', '✓ Crit Chance → ' + nv + '%', true);
-    }
-
-    function refreshCritDisplay(val) {
-        var dispEl = document.getElementById('critChanceDisplay');
-        var fill   = document.getElementById('critChanceBar');
-        // Clamp display at 100
-        var displayVal = Math.min(100, val);
-        dispEl.textContent = displayVal + '%';
-        fill.style.width   = displayVal + '%';
-        if (val <= 25) {
-            fill.className      = 'bar-fill bar-crit-green';
-            dispEl.style.color  = '#4ade80';
-        } else if (val <= 75) {
-            fill.className      = 'bar-fill bar-crit-gold';
-            dispEl.style.color  = '#fbbf24';
-        } else {
-            fill.className      = 'bar-fill bar-crit-red';
-            dispEl.style.color  = '#ff6b6b';
-        }
-        // Show "USE CRIT" button when gauge reaches 100
-        var useBtn = document.getElementById('useCritBtn');
-        if (useBtn) useBtn.style.display = val >= 100 ? 'inline-block' : 'none';
-    }
-
-    function useCrit() {
-        var val = parseInt(localStorage.getItem(lsKey('pipboyCriticalChance')) || '0');
-        if (val < 100) { showMsg('critChanceMessage', '⚠ Critical gauge is not at 100 yet.', false); return; }
-        localStorage.setItem(lsKey('pipboyCriticalChance'), 0);
-        refreshCritDisplay(0);
-        showMsg('critChanceMessage', '✓ Critical used! Gauge reset to 0.', true);
-    }
-
-    function loadCritChance() {
-        refreshCritDisplay(parseInt(localStorage.getItem(lsKey('pipboyCriticalChance')) || '0'));
     }
 
     // ---- EFFECTS ----
@@ -1287,7 +724,6 @@
     }
 
     function updateEffectsDisplay() {
-        // Full tab lists
         document.getElementById('debuffsList').innerHTML = debuffs.length === 0
             ? '<div class="empty-state">No active debuffs</div>'
             : debuffs.map(function(d){ return renderEffectItem(d,'debuff'); }).join('');
@@ -1295,17 +731,6 @@
         document.getElementById('boostsList').innerHTML = boosts.length === 0
             ? '<div class="empty-state">No active boosts</div>'
             : boosts.map(function(b){ return renderEffectItem(b,'boost'); }).join('');
-
-        // Preview in stats tab (up to 3 each)
-        document.getElementById('debuffsPreview').innerHTML = debuffs.length === 0
-            ? '<div class="empty-state">No active debuffs</div>'
-            : debuffs.slice(0,3).map(function(d){ return renderEffectItem(d,'debuff'); }).join('') +
-              (debuffs.length > 3 ? '<div class="empty-state">+'+(debuffs.length-3)+' more &mdash; see EFFECTS tab</div>' : '');
-
-        document.getElementById('boostsPreview').innerHTML = boosts.length === 0
-            ? '<div class="empty-state">No active boosts</div>'
-            : boosts.slice(0,3).map(function(b){ return renderEffectItem(b,'boost'); }).join('') +
-              (boosts.length > 3 ? '<div class="empty-state">+'+(boosts.length-3)+' more &mdash; see EFFECTS tab</div>' : '');
     }
 
     // ---- SKILLS ----
@@ -1600,8 +1025,15 @@
     function getSpecialValue(code) {
         var map = { ST:'strength', PE:'perception', EN:'endurance', CH:'charisma', IN:'intelligence', AG:'agility', LK:'luck' };
         var domName = map[code];
-        if (!domName) return 0;
-        return parseInt(document.getElementById('special-' + domName).textContent) || 0;
+        if (!domName) return 5; // default neutral SPECIAL value
+        try {
+            var saved = localStorage.getItem(lsKey('pipboySpecial'));
+            if (saved) {
+                var s = JSON.parse(saved);
+                if (typeof s[domName] === 'number') return s[domName];
+            }
+        } catch(e){}
+        return 5; // default neutral SPECIAL value
     }
 
     function checkPerkPrereqs(perk) {
@@ -1628,7 +1060,7 @@
     }
 
     function renderLevelUpPerks() {
-        var currentLevel = parseInt(document.getElementById('level').textContent) || 1;
+        var currentLevel = parseInt(localStorage.getItem(lsKey('pipboyLevel')) || '1') || 1;
         var perkPts = playerData.perkPointsAvailable || 0;
         var grid = document.getElementById('luPerkGrid');
         if (!grid) return;
@@ -1815,7 +1247,7 @@
         updateDisplay();
         updatePerksDisplay();
         refreshLevelUpTabVisibility();
-        switchTab('stats', document.querySelector('.tab-btn.active') || document.querySelector('.tab-btn'));
+        switchTab('skills', document.querySelector('.tab-btn.active') || document.querySelector('.tab-btn'));
         showInfoModal('Level Up Complete', 'Your level-up choices have been saved. Well done, Vault Dweller!');
     }
 
@@ -1852,16 +1284,11 @@
     // ---- INIT ----
     window.addEventListener('DOMContentLoaded', function() {
         loadPlayerData();
-        loadSpecialStats();
         loadEffects();
         loadCharacterName();
-        loadAC();
-        loadRadiation();
-        loadCritChance();
         updateDisplay();
         updatePerksDisplay();
         updateEffectsDisplay();
-        updateTempDisplays();
         var storedXP = parseInt(localStorage.getItem(lsKey('pipboyXP'))||'0');
         checkAndHandleLevelUp(storedXP);
         updateXPDisplay(storedXP);

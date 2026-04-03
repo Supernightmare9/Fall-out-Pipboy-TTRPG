@@ -1721,7 +1721,9 @@
                     <span class="hp-sep">/</span>
                     <span class="hp-max" id="hpMax">—</span>
                     <span class="hp-label">HP</span>
+                    <span style="font-size:11px;color:var(--vault-info);margin-left:6px;" id="tempHpDisplay"></span>
                 </div>
+                <div id="radReductionNote" style="font-size:9px;color:#ff6b6b;letter-spacing:1px;margin-bottom:4px;display:none;">☢ RADIATION REDUCING MAX HP</div>
 
                 <!-- Health bar -->
                 <div class="hp-bar-wrap">
@@ -1747,20 +1749,85 @@
                 <div class="hp-timestamp" id="hpTimestamp">Last updated: —</div>
                 <div class="hp-success-msg" id="hpSuccessMsg">✓ HP UPDATED!</div>
 
-                <!-- Stats Section -->
-                <div class="panel-title" style="margin-top:16px;">S.P.E.C.I.A.L. STATS</div>
-                <div class="stats-grid" id="statsGrid">
-                    <!-- populated by JS -->
+                <!-- Radiation Section -->
+                <div class="panel-title" style="margin-top:14px;">☢ Radiation</div>
+                <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;">
+                    <span style="color:var(--vault-gold);font-weight:bold;letter-spacing:1px;">RAD</span>
+                    <span style="color:var(--vault-green);"><span id="radCurrent">0</span> / 1000 RAD</span>
+                </div>
+                <div class="hp-bar-wrap" style="margin:4px 0 8px;">
+                    <div class="hp-bar-bg"><div id="radBarFill" class="hp-bar-fill hp-high" style="width:0%"></div></div>
+                </div>
+                <div class="hp-input-row">
+                    <input type="number" id="radInput" class="hp-manual-input" placeholder="RAD value" min="0" max="1000">
+                    <button class="hp-update-btn" onclick="updateRadCombat()">Update RAD</button>
+                </div>
+                <div class="hp-success-msg" id="radMsg">✓ RAD UPDATED!</div>
+
+                <!-- Action Points Section -->
+                <div class="panel-title" style="margin-top:14px;">⚡ Action Points</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;margin-bottom:4px;">
+                    <span style="color:var(--vault-gold);font-weight:bold;letter-spacing:1px;">AP</span>
+                    <span style="color:var(--vault-green);">
+                        <span id="charProf" aria-label="Action Points">—</span>
+                        <span id="tempApDisplay" style="color:var(--vault-info);margin-left:4px;"></span>
+                    </span>
+                </div>
+                <div class="hp-bar-wrap" style="margin:4px 0 8px;">
+                    <div class="hp-bar-bg"><div id="apBarFill" class="hp-bar-fill hp-high" style="width:50%"></div></div>
+                </div>
+                <div class="hp-input-row" style="flex-wrap:wrap;">
+                    <input type="number" id="apInputCombat" class="hp-manual-input" placeholder="AP (±)" min="-9999" max="9999">
+                    <button class="hp-update-btn" onclick="updateApCombat()">Update</button>
+                    <button class="hp-update-btn" onclick="addTempApCombat()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;">+Temp AP</button>
+                    <button class="hp-update-btn" onclick="removeTempApCombat()" style="border-color:rgba(255,107,107,0.5);color:#ff6b6b;">−Temp AP</button>
+                </div>
+                <div class="hp-success-msg" id="apCombatMsg">✓ AP UPDATED!</div>
+
+                <!-- Temp HP Controls -->
+                <div class="panel-title" style="margin-top:14px;">💊 Temporary HP</div>
+                <div class="hp-input-row">
+                    <button class="hp-update-btn" onclick="addTempHpCombat()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;flex:1;">+Temp HP</button>
+                    <button class="hp-update-btn" onclick="removeTempHpCombat()" style="border-color:rgba(255,107,107,0.5);color:#ff6b6b;flex:1;">−Temp HP</button>
                 </div>
 
-                <div class="stat-row" style="margin-top:10px;">
-                    <span class="stat-label">Armor Class</span>
-                    <span class="stat-value" id="charAc">—</span>
+                <!-- Armor Class Section -->
+                <div class="panel-title" style="margin-top:14px;">🛡 Armor Class</div>
+                <div style="font-size:32px;font-weight:bold;color:var(--vault-green);text-shadow:0 0 8px var(--vault-green);text-align:center;padding:6px 0;" id="charAc">—</div>
+                <div class="hp-input-row" style="justify-content:center;flex-wrap:wrap;">
+                    <button class="hp-update-btn" onclick="decreaseAcCombat()" style="border-color:rgba(255,107,107,0.5);color:#ff6b6b;">−</button>
+                    <input type="number" id="acInputCombat" class="hp-manual-input" placeholder="Set AC" min="10" max="30">
+                    <button class="hp-update-btn" onclick="setAcCombat()">Set</button>
+                    <button class="hp-update-btn" onclick="increaseAcCombat()">+</button>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Action Points</span>
-                    <span class="stat-value" id="charProf" aria-label="Action Points">—</span>
+                <div class="hp-success-msg" id="acCombatMsg">✓ AC UPDATED!</div>
+
+                <!-- Rest Buttons -->
+                <div style="display:flex;gap:6px;margin-top:14px;flex-wrap:wrap;">
+                    <button class="hp-update-btn" onclick="shortRestCombat()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;flex:1;">Short Rest</button>
+                    <button class="hp-update-btn" onclick="longRestCombat()" style="flex:1;">Long Rest</button>
                 </div>
+                <div class="hp-success-msg" id="restCombatMsg">✓ REST COMPLETE!</div>
+
+                <!-- Active Effects Preview -->
+                <div class="panel-title" style="margin-top:14px;">✦ Active Effects</div>
+                <div style="font-size:9px;color:#ff6b6b;letter-spacing:1px;margin-bottom:6px;">☠ Debuffs</div>
+                <div id="combatDebuffsPreview"><div class="empty-state">No active debuffs</div></div>
+                <div style="font-size:9px;color:var(--vault-green);letter-spacing:1px;margin-top:8px;margin-bottom:6px;">✓ Boosts</div>
+                <div id="combatBoostsPreview"><div class="empty-state">No active boosts</div></div>
+
+                <!-- Critical Hit Chance -->
+                <div class="panel-title" style="margin-top:14px;">🎯 Critical Hit Chance</div>
+                <div style="font-size:28px;font-weight:bold;color:var(--vault-green);text-align:center;padding:4px 0;" id="combatCritDisplay">0%</div>
+                <div class="hp-bar-wrap" style="margin:4px 0 8px;">
+                    <div class="hp-bar-bg"><div id="combatCritBar" class="hp-bar-fill hp-high" style="width:0%"></div></div>
+                </div>
+                <div class="hp-input-row">
+                    <input type="number" id="combatCritInput" class="hp-manual-input" placeholder="0–100" min="0" max="100">
+                    <button class="hp-update-btn" onclick="updateCritCombat()">Update Crit</button>
+                    <button class="hp-update-btn" id="combatUseCritBtn" onclick="useCritCombat()" style="display:none;border-color:rgba(255,107,107,0.5);color:#ff6b6b;">USE CRIT</button>
+                </div>
+                <div class="hp-success-msg" id="combatCritMsg">✓ CRIT UPDATED!</div>
 
                 <!-- PROGRESSION PANEL -->
                 <div class="progression-panel" id="progressionPanel">
@@ -2030,6 +2097,7 @@
         });
 
         initSkillSelector();
+        initVitalsCombat();
     });
 
     // Final save on page unload
@@ -2210,8 +2278,10 @@
             updateHpBar(myEntry.currentHp, myEntry.maxHp);
         }
         updateProgressionDisplay();
-        // Refresh S.P.E.C.I.A.L. and skills/perks panels from live playerData
-        renderStats();
+        // Refresh vitals and skills/perks panels from live playerData
+        refreshApCombatDisplay();
+        refreshTempHpCombatDisplay();
+        loadEffectsCombat();
         renderAbilities();
     }
 
@@ -2251,55 +2321,16 @@
         document.getElementById('hpMax').textContent     = myEntry.maxHp;
         updateHpBar(myEntry.currentHp, myEntry.maxHp);
 
-        // S.P.E.C.I.A.L. stats — always pulled from live Socket.IO playerData (see renderStats)
-        renderStats();
-
-        // AC / AP — prefer live Socket.IO playerData for AP
-        var liveData = (window._livePlayerCache && window._liveMyHandle)
-                       ? window._livePlayerCache[window._liveMyHandle]
-                       : null;
-        document.getElementById('charAc').textContent   = myEntry.ac   !== undefined ? myEntry.ac   : '—';
-        // Show Action Points from live data; fall back to '—' if not yet connected
-        var apDisplay = liveData && typeof liveData.actionPoints === 'number'
-            ? liveData.actionPoints + ' / ' + (liveData.maxActionPoints || DEFAULT_MAX_ACTION_POINTS)
-            : '—';
-        document.getElementById('charProf').textContent = apDisplay;
+        // Refresh live-data vitals displays
+        refreshApCombatDisplay();
+        refreshTempHpCombatDisplay();
+        loadAcCombat();
     }
 
     // ── S.P.E.C.I.A.L. STATS ────────────────────────────────────
-    // Always pulls from live Socket.IO playerData (_livePlayerCache) which is the
-    // single source of truth shared with stats.html and the Overseer dashboard.
-    // Never uses D&D stats (str/dex/con/int/wis/cha) from campaigns.js.
-    function renderStats() {
-        var grid = document.getElementById('statsGrid');
-        var liveData = (window._livePlayerCache && window._liveMyHandle)
-                       ? window._livePlayerCache[window._liveMyHandle]
-                       : null;
-        var special = liveData && liveData.special ? liveData.special : null;
-        var specialOrder = [
-            { key: 'strength',     letter: 'S', label: 'Strength'     },
-            { key: 'perception',   letter: 'P', label: 'Perception'   },
-            { key: 'endurance',    letter: 'E', label: 'Endurance'    },
-            { key: 'charisma',     letter: 'C', label: 'Charisma'     },
-            { key: 'intelligence', letter: 'I', label: 'Intelligence' },
-            { key: 'agility',      letter: 'A', label: 'Agility'      },
-            { key: 'luck',         letter: 'L', label: 'Luck'         }
-        ];
-
-        if (!special) {
-            grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;font-size:9px;">Connect to sync server to view S.P.E.C.I.A.L. stats</div>';
-            return;
-        }
-
-        grid.innerHTML = specialOrder.map(function(s) {
-            var val = special[s.key] !== undefined ? special[s.key] : '—';
-            return '<div class="stat-box">' +
-                '<span class="stat-box-label">' + s.letter + '</span>' +
-                '<span class="stat-box-value">' + val + '</span>' +
-                '<span class="stat-box-mod">' + escHtml(s.label) + '</span>' +
-                '</div>';
-        }).join('');
-    }
+    // S.P.E.C.I.A.L. display has been moved to the Stats page (stats.html).
+    // This function is kept as a no-op for backward compatibility with any callers.
+    function renderStats() {}
 
     // ── HP BAR ────────────────────────────────────────────────────
     function updateHpBar(current, max) {
@@ -2939,16 +2970,19 @@
     }
 
     function updateACDisplay(campaign) {
-        var acDisplay = document.getElementById('charAc');
-        if (!acDisplay) return;
-
         var myEntry = campaign.players.find(function(p) {
             return p.username === sessionStorage.getItem('username');
         });
         if (!myEntry) return;
 
+        // Calculate AC from equipped items — store as baseline if no manual override exists
         var ac = InventoryManager.calculateArmorClass(myEntry, campaign.inventory || []);
-        acDisplay.textContent = ac;
+        var stored = parseInt(localStorage.getItem(lsVitalsKey('pipboyAC')));
+        if (isNaN(stored)) {
+            // No manual override; seed localStorage with calculated value
+            localStorage.setItem(lsVitalsKey('pipboyAC'), ac);
+        }
+        refreshAcCombatDisplay();
 
         var carryDisplay = document.getElementById('carryDisplay');
         if (carryDisplay) {
@@ -3434,6 +3468,407 @@
         saveCampaignData(activeCampaign);
         renderQuestLog(activeCampaign);
     };
+
+    // ── VITALS PANEL — player-scoped localStorage helpers ────────────────────
+    // Mirrors the lsKey() namespace used by stats.html so data stays in sync.
+    var _lsVitalsHandle = (sessionStorage.getItem('username') ||
+                           localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
+    function lsVitalsKey(k) { return k + '_' + _lsVitalsHandle; }
+
+    var COMBAT_MAX_RAD          = 1000;
+    var COMBAT_MAX_AP           = 20;   // fallback; actual max from live playerData if available
+    var COMBAT_DEFAULT_AP       = 10;
+    var COMBAT_DEFAULT_MAX_HP   = 100;
+    var COMBAT_DEFAULT_AC       = 10;
+
+    // ── Flash helper ──────────────────────────────────────────────────────────
+    function flashVitalsMsg(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.style.display    = 'block';
+        el.style.animation  = 'none';
+        void el.offsetWidth; // trigger reflow — intentional no-op
+        el.style.animation  = 'fadeMsg 3s ease forwards';
+        setTimeout(function() { el.style.display = 'none'; }, 3200);
+    }
+
+    // ── RADIATION ─────────────────────────────────────────────────────────────
+    function refreshRadCombatDisplay(val) {
+        var cur  = Math.max(0, Math.min(COMBAT_MAX_RAD, val));
+        var el   = document.getElementById('radCurrent');
+        var fill = document.getElementById('radBarFill');
+        var note = document.getElementById('radReductionNote');
+        if (el)   el.textContent  = cur;
+        if (fill) {
+            var pct = Math.min(100, Math.round((cur / COMBAT_MAX_RAD) * 100));
+            fill.style.width = pct + '%';
+            fill.className = 'hp-bar-fill ' +
+                (cur <= 250 ? 'hp-high' : cur <= 500 ? 'hp-mid' : 'hp-low');
+        }
+        if (note) note.style.display = cur > 0 ? 'block' : 'none';
+        // Also update temp HP display in case max HP changed
+        refreshTempHpCombatDisplay();
+    }
+
+    function loadRadCombat() {
+        var val = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0');
+        refreshRadCombatDisplay(val);
+    }
+
+    window.updateRadCombat = function() {
+        var inp = document.getElementById('radInput');
+        if (!inp) return;
+        var nv = parseInt(inp.value);
+        if (inp.value === '' || isNaN(nv)) return;
+        nv = Math.max(0, Math.min(COMBAT_MAX_RAD, nv));
+        localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
+        inp.value = '';
+        refreshRadCombatDisplay(nv);
+        flashVitalsMsg('radMsg');
+    };
+
+    // ── TEMP HP ───────────────────────────────────────────────────────────────
+    function getCombatTempHp() {
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        return (liveData && typeof liveData.tempHealth === 'number') ? liveData.tempHealth : 0;
+    }
+
+    function refreshTempHpCombatDisplay() {
+        var val = getCombatTempHp();
+        var el  = document.getElementById('tempHpDisplay');
+        if (el) el.textContent = val > 0 ? '(+' + val + ' temp)' : '';
+    }
+
+    window.addTempHpCombat = function() {
+        showCombatInputModal('Add Temporary HP', 'Amount of temporary HP to add:', function(v) {
+            var amount = parseInt(v);
+            if (!amount || amount <= 0) return;
+            var liveData = (window._livePlayerCache && window._liveMyHandle)
+                           ? window._livePlayerCache[window._liveMyHandle] : null;
+            if (liveData) {
+                liveData.tempHealth = (liveData.tempHealth || 0) + amount;
+                if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+                    PlayerSync.push('tempHealth', liveData.tempHealth);
+                }
+                refreshTempHpCombatDisplay();
+            }
+        });
+    };
+
+    window.removeTempHpCombat = function() {
+        showCombatInputModal('Remove Temporary HP', 'Amount of temporary HP to remove:', function(v) {
+            var amount = parseInt(v);
+            if (!amount || amount <= 0) return;
+            var liveData = (window._livePlayerCache && window._liveMyHandle)
+                           ? window._livePlayerCache[window._liveMyHandle] : null;
+            if (liveData) {
+                liveData.tempHealth = Math.max(0, (liveData.tempHealth || 0) - amount);
+                if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+                    PlayerSync.push('tempHealth', liveData.tempHealth);
+                }
+                refreshTempHpCombatDisplay();
+            }
+        });
+    };
+
+    // ── ACTION POINTS ─────────────────────────────────────────────────────────
+    function getCombatMaxAp() {
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        return (liveData && typeof liveData.maxActionPoints === 'number')
+            ? liveData.maxActionPoints : COMBAT_MAX_AP;
+    }
+
+    function getCombatCurrentAp() {
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        return (liveData && typeof liveData.actionPoints === 'number')
+            ? liveData.actionPoints : COMBAT_DEFAULT_AP;
+    }
+
+    function refreshApCombatDisplay() {
+        var cur  = getCombatCurrentAp();
+        var max  = getCombatMaxAp();
+        var el   = document.getElementById('charProf');
+        var fill = document.getElementById('apBarFill');
+        if (el) el.textContent = cur + ' / ' + max;
+        if (fill) {
+            var pct = max > 0 ? Math.min(100, Math.round((cur / max) * 100)) : 0;
+            fill.style.width = pct + '%';
+            fill.className = 'hp-bar-fill ' + (pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low');
+        }
+        var tempEl = document.getElementById('tempApDisplay');
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        var tempAp = (liveData && typeof liveData.tempActionPoints === 'number' && liveData.tempActionPoints > 0)
+            ? liveData.tempActionPoints : 0;
+        if (tempEl) tempEl.textContent = tempAp > 0 ? '(+' + tempAp + ')' : '';
+    }
+
+    window.updateApCombat = function() {
+        var inp = document.getElementById('apInputCombat');
+        if (!inp || inp.value === '') return;
+        var change = parseInt(inp.value);
+        if (isNaN(change)) return;
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        if (!liveData) return;
+        var maxAp = getCombatMaxAp();
+        liveData.actionPoints = Math.min(maxAp, Math.max(0, (liveData.actionPoints || 0) + change));
+        inp.value = '';
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            PlayerSync.push('actionPoints', liveData.actionPoints);
+        }
+        refreshApCombatDisplay();
+        flashVitalsMsg('apCombatMsg');
+    };
+
+    window.addTempApCombat = function() {
+        showCombatInputModal('Add Temporary AP', 'Amount of temporary AP to add:', function(v) {
+            var amount = parseInt(v);
+            if (!amount || amount <= 0) return;
+            var liveData = (window._livePlayerCache && window._liveMyHandle)
+                           ? window._livePlayerCache[window._liveMyHandle] : null;
+            if (liveData) {
+                liveData.tempActionPoints = (liveData.tempActionPoints || 0) + amount;
+                if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+                    PlayerSync.push('tempActionPoints', liveData.tempActionPoints);
+                }
+                refreshApCombatDisplay();
+            }
+        });
+    };
+
+    window.removeTempApCombat = function() {
+        showCombatInputModal('Remove Temporary AP', 'Amount of temporary AP to remove:', function(v) {
+            var amount = parseInt(v);
+            if (!amount || amount <= 0) return;
+            var liveData = (window._livePlayerCache && window._liveMyHandle)
+                           ? window._livePlayerCache[window._liveMyHandle] : null;
+            if (liveData) {
+                liveData.tempActionPoints = Math.max(0, (liveData.tempActionPoints || 0) - amount);
+                if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+                    PlayerSync.push('tempActionPoints', liveData.tempActionPoints);
+                }
+                refreshApCombatDisplay();
+            }
+        });
+    };
+
+    // ── ARMOR CLASS ───────────────────────────────────────────────────────────
+    function getCombatAc() {
+        var stored = parseInt(localStorage.getItem(lsVitalsKey('pipboyAC')));
+        if (!isNaN(stored)) return stored;
+        // Fall back to campaign-calculated AC
+        if (activeCampaign) {
+            var me = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+            if (me && typeof me.ac === 'number') return me.ac;
+        }
+        return COMBAT_DEFAULT_AC;
+    }
+
+    function refreshAcCombatDisplay() {
+        var el = document.getElementById('charAc');
+        if (el) el.textContent = getCombatAc();
+    }
+
+    function saveAcCombat(val) {
+        localStorage.setItem(lsVitalsKey('pipboyAC'), val);
+        // Also sync to campaign player entry if available
+        if (activeCampaign) {
+            var me = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+            if (me) {
+                me.ac = val;
+                saveCampaignData(activeCampaign);
+            }
+        }
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            PlayerSync.push('ac', val);
+        }
+    }
+
+    window.setAcCombat = function() {
+        var inp = document.getElementById('acInputCombat');
+        if (!inp || inp.value === '') return;
+        var nv = parseInt(inp.value);
+        if (isNaN(nv)) return;
+        nv = Math.max(10, Math.min(30, nv));
+        inp.value = '';
+        saveAcCombat(nv);
+        refreshAcCombatDisplay();
+        flashVitalsMsg('acCombatMsg');
+    };
+
+    window.increaseAcCombat = function() {
+        var nv = Math.min(30, getCombatAc() + 1);
+        saveAcCombat(nv);
+        refreshAcCombatDisplay();
+        flashVitalsMsg('acCombatMsg');
+    };
+
+    window.decreaseAcCombat = function() {
+        var nv = Math.max(10, getCombatAc() - 1);
+        saveAcCombat(nv);
+        refreshAcCombatDisplay();
+        flashVitalsMsg('acCombatMsg');
+    };
+
+    function loadAcCombat() {
+        // Prefer localStorage override, else sync from campaign data
+        var stored = parseInt(localStorage.getItem(lsVitalsKey('pipboyAC')));
+        if (isNaN(stored) && activeCampaign) {
+            var me = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+            if (me && typeof me.ac === 'number') {
+                localStorage.setItem(lsVitalsKey('pipboyAC'), me.ac);
+            }
+        }
+        refreshAcCombatDisplay();
+    }
+
+    // ── REST ──────────────────────────────────────────────────────────────────
+    window.shortRestCombat = function() {
+        if (!activeCampaign) return;
+        var me = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+        if (!me) return;
+        var halfHp = Math.floor(me.maxHp / 2);
+        me.currentHp = Math.max(me.currentHp, halfHp);
+        var maxAp    = getCombatMaxAp();
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        if (liveData) {
+            liveData.actionPoints = Math.max(liveData.actionPoints || 0, Math.floor(maxAp / 2));
+        }
+        commitHpUpdate(me);
+        if (liveData && typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            PlayerSync.push('actionPoints', liveData.actionPoints);
+        }
+        refreshApCombatDisplay();
+        flashVitalsMsg('restCombatMsg');
+    };
+
+    window.longRestCombat = function() {
+        if (!activeCampaign) return;
+        var me = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+        if (!me) return;
+        me.currentHp = me.maxHp;
+        var maxAp    = getCombatMaxAp();
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        if (liveData) liveData.actionPoints = maxAp;
+        commitHpUpdate(me);
+        if (liveData && typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            PlayerSync.push('actionPoints', maxAp);
+        }
+        refreshApCombatDisplay();
+        flashVitalsMsg('restCombatMsg');
+    };
+
+    // ── ACTIVE EFFECTS PREVIEW ────────────────────────────────────────────────
+    function loadEffectsCombat() {
+        var debuffs = [];
+        var boosts  = [];
+        try { debuffs = JSON.parse(localStorage.getItem(lsVitalsKey('pipboyDebuffs')) || '[]'); } catch(e){}
+        try { boosts  = JSON.parse(localStorage.getItem(lsVitalsKey('pipboyBoosts'))  || '[]'); } catch(e){}
+
+        var dbEl = document.getElementById('combatDebuffsPreview');
+        var bsEl = document.getElementById('combatBoostsPreview');
+
+        if (dbEl) {
+            dbEl.innerHTML = debuffs.length === 0
+                ? '<div class="empty-state">No active debuffs</div>'
+                : debuffs.slice(0, 4).map(function(d) {
+                    return '<div style="font-size:10px;padding:4px 8px;margin-bottom:4px;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.3);">' +
+                        '<span style="color:#ff6b6b;font-weight:bold;">' + escHtml(d.name || '?') + '</span>' +
+                        '<span style="color:rgba(74,222,128,0.5);font-size:9px;margin-left:6px;">' + (d.duration || 0) + ' turn(s)</span>' +
+                        '</div>';
+                }).join('') + (debuffs.length > 4 ? '<div class="empty-state">+' + (debuffs.length - 4) + ' more — see Stats page</div>' : '');
+        }
+
+        if (bsEl) {
+            bsEl.innerHTML = boosts.length === 0
+                ? '<div class="empty-state">No active boosts</div>'
+                : boosts.slice(0, 4).map(function(b) {
+                    return '<div style="font-size:10px;padding:4px 8px;margin-bottom:4px;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);">' +
+                        '<span style="color:var(--vault-green);font-weight:bold;">' + escHtml(b.name || '?') + '</span>' +
+                        '<span style="color:rgba(74,222,128,0.5);font-size:9px;margin-left:6px;">' + (b.duration || 0) + ' turn(s)</span>' +
+                        '</div>';
+                }).join('') + (boosts.length > 4 ? '<div class="empty-state">+' + (boosts.length - 4) + ' more — see Stats page</div>' : '');
+        }
+    }
+
+    // ── CRITICAL HIT CHANCE ───────────────────────────────────────────────────
+    function refreshCritCombatDisplay(val) {
+        var displayVal = Math.min(100, val);
+        var el   = document.getElementById('combatCritDisplay');
+        var fill = document.getElementById('combatCritBar');
+        var btn  = document.getElementById('combatUseCritBtn');
+        if (el) {
+            el.textContent  = displayVal + '%';
+            el.style.color  = val >= 100 ? '#ff6b6b' : val >= 75 ? '#fbbf24' : '#4ade80';
+        }
+        if (fill) {
+            fill.style.width = displayVal + '%';
+            fill.className = 'hp-bar-fill ' + (val >= 100 ? 'hp-low' : val >= 75 ? 'hp-mid' : 'hp-high');
+        }
+        if (btn) btn.style.display = val >= 100 ? 'inline-block' : 'none';
+    }
+
+    function loadCritCombat() {
+        refreshCritCombatDisplay(parseInt(localStorage.getItem(lsVitalsKey('pipboyCriticalChance')) || '0'));
+    }
+
+    window.updateCritCombat = function() {
+        var inp = document.getElementById('combatCritInput');
+        if (!inp || inp.value === '') return;
+        var nv = Math.max(0, Math.min(100, parseInt(inp.value)));
+        if (isNaN(nv)) return;
+        localStorage.setItem(lsVitalsKey('pipboyCriticalChance'), nv);
+        inp.value = '';
+        refreshCritCombatDisplay(nv);
+        flashVitalsMsg('combatCritMsg');
+    };
+
+    window.useCritCombat = function() {
+        var val = parseInt(localStorage.getItem(lsVitalsKey('pipboyCriticalChance')) || '0');
+        if (val < 100) return;
+        localStorage.setItem(lsVitalsKey('pipboyCriticalChance'), 0);
+        refreshCritCombatDisplay(0);
+        flashVitalsMsg('combatCritMsg');
+    };
+
+    // ── SIMPLE INPUT MODAL ────────────────────────────────────────────────────
+    // Used for Temp HP / Temp AP modals; reuses the existing combat modal if available.
+    function showCombatInputModal(title, prompt, onOk) {
+        var val = window.prompt(title + '\n' + prompt);
+        if (val !== null) onOk(val);
+    }
+
+    // ── INIT VITALS ───────────────────────────────────────────────────────────
+    function initVitalsCombat() {
+        loadRadCombat();
+        loadAcCombat();
+        loadCritCombat();
+        refreshApCombatDisplay();
+        refreshTempHpCombatDisplay();
+        loadEffectsCombat();
+    }
+
+    // Reload effects when stats.html updates localStorage (they share the same keys)
+    window.addEventListener('storage', function(e) {
+        if (e.key && (
+            e.key.startsWith('pipboyDebuffs_') ||
+            e.key.startsWith('pipboyBoosts_') ||
+            e.key.startsWith('pipboyRadiation_') ||
+            e.key.startsWith('pipboyCriticalChance_') ||
+            e.key.startsWith('pipboyAC_')
+        )) {
+            loadRadCombat();
+            loadCritCombat();
+            refreshAcCombatDisplay();
+            loadEffectsCombat();
+        }
+    });
     </script>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
@@ -3787,8 +4222,10 @@
             renderCombat();
             // Re-render left-panel stats and abilities tab with fresh live data
             if (handle === _myHandle) {
-                if (typeof renderStats === 'function')      renderStats();
-                if (typeof renderAbilities === 'function')  renderAbilities();
+                if (typeof renderStats === 'function')           renderStats();
+                if (typeof renderAbilities === 'function')       renderAbilities();
+                if (typeof refreshApCombatDisplay === 'function') refreshApCombatDisplay();
+                if (typeof refreshTempHpCombatDisplay === 'function') refreshTempHpCombatDisplay();
             }
         }
 
