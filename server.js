@@ -884,7 +884,7 @@ io.on('connection', (socket) => {
 });
 
 // ── Start ──────────────────────────────────────────────────────────────────────
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`Vault 215 sync server running on http://localhost:${PORT}`);
   console.log(`Admin code loaded: ${ADMIN_CODE ? '✓ (set)' : '✗ (using default)'}`);
 });
