@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div id="navCampaignName" class="nav-campaign-display"></div>
             </div>
             <ul class="nav-list">
-                <li><a href="combat.html" class="nav-link" data-page="combat">⚔ CHARACTER</a></li>
+                <li><a href="combat.html" class="nav-link" data-page="combat">⚔ COMBAT</a></li>
                 <li><a href="stats.html" class="nav-link" data-page="stats">📊 STATS</a></li>
                 <li><a href="inventory.html" class="nav-link" data-page="inventory">🎒 INVENTORY</a></li>
                 <li><a href="data.html" class="nav-link" data-page="data">📋 DATA</a></li>
