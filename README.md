@@ -235,7 +235,39 @@ Each player's device also saves to **browser localStorage** via `StorageManager`
 
 This means player data is doubly protected: once in the server-side `campaigns/` files and once in each browser's local storage.
 
-## System Requirements
+## Persistent Campaign Resource Pools
+
+Each campaign maintains its own **resource pools** that survive server restarts and page reloads. Pools are stored as part of the campaign's `.json` file in the `campaigns/` directory.
+
+### Available pools
+
+| Pool | Tab | Description |
+|---|---|---|
+| **Enemies** | Overseer Hub → ENEMIES | Custom enemies the Overseer can create and reuse across encounters |
+| **Items** | Overseer Hub → ITEMS | Custom items and weapons available in the campaign |
+| **Crafting Recipes** | Overseer Crafting | Master recipe book, auto-synced alongside localStorage |
+| **Perks** | Overseer Hub → PERKS | Custom campaign-specific perks and abilities |
+
+### How it works
+
+- **Autosave**: Every add, edit, or delete in a pool immediately calls `PUT /api/campaigns/:code/pools/:type` on the server, which persists the full pool array to the campaign's `.json` file.
+- **Autoload**: When a campaign is loaded (via the campaign selector or page load), the Overseer Hub fetches `GET /api/campaigns/:code/pools` and populates each tab with the stored entries.
+- **New campaigns** start with empty pools. You can add content from day one and it will persist automatically.
+- **Export**: Each pool tab has an "EXPORT POOL" button to download the pool as a standalone `.json` file for backup or sharing.
+
+### REST API
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/campaigns/:code/pools` | Return all pools for a campaign session |
+| `PUT` | `/api/campaigns/:code/pools/enemies` | Replace the enemies pool array |
+| `PUT` | `/api/campaigns/:code/pools/items` | Replace the items pool array |
+| `PUT` | `/api/campaigns/:code/pools/recipes` | Replace the crafting recipes pool array |
+| `PUT` | `/api/campaigns/:code/pools/perks` | Replace the perks pool array |
+
+---
+
+
 
 - Modern web browser (Chrome, Firefox, Safari, Edge)
 - JavaScript enabled

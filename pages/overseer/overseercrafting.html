@@ -468,13 +468,34 @@
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
-    //  MASTER RECIPE BOOK  (localStorage)
+    //  MASTER RECIPE BOOK  (localStorage + server-side campaign pool)
     // ═══════════════════════════════════════════════════════════════════════════
     var LS_MASTER = 'vault_recipes_v1_overseer';
     var masterRecipes = [];
     var selectedRecipeId = null;
 
+    function _getSessionCode() {
+        return (localStorage.getItem('PIPBOY_SESSION_CODE') || '').toUpperCase().trim() ||
+               (sessionStorage.getItem('campaignId') || '').toUpperCase().trim() || 'VAULT01';
+    }
+
     function loadMasterRecipes() {
+        // Try loading from server first; fall back to localStorage
+        var code = _getSessionCode();
+        fetch('/api/campaigns/' + code + '/pools')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data && data.pools && Array.isArray(data.pools.recipes) && data.pools.recipes.length > 0) {
+                    masterRecipes = data.pools.recipes;
+                    renderRecipeList();
+                } else {
+                    _loadRecipesFromLocalStorage();
+                }
+            })
+            .catch(function() { _loadRecipesFromLocalStorage(); });
+    }
+
+    function _loadRecipesFromLocalStorage() {
         try { masterRecipes = JSON.parse(localStorage.getItem(LS_MASTER) || '[]'); } catch(e) { masterRecipes = []; }
         // Seed built-in recipes on first load
         if (masterRecipes.length === 0) {
@@ -484,12 +505,23 @@
                 { recipeId:'builtin_medkit',  name:'Field Medkit',     type:'consumable', weight:1, value:100,
                   description:'Jury-rigged medkit from Stimpaks and RadAway.', ingredients:[], notes:'', source:'builtin' }
             ];
-            saveMasterRecipes();
         }
+        saveMasterRecipes();
+        renderRecipeList();
     }
 
     function saveMasterRecipes() {
+        // Save to localStorage (immediate, works offline)
         try { localStorage.setItem(LS_MASTER, JSON.stringify(masterRecipes)); } catch(e) {}
+        // Mirror to server-side campaign pool (persistent across devices/restarts)
+        var code = _getSessionCode();
+        if (code) {
+            fetch('/api/campaigns/' + code + '/pools/recipes', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: masterRecipes })
+            }).catch(function(e) { console.warn('[recipes autosave] failed:', e.message); });
+        }
     }
 
     function addToMasterRecipes(recipe) {
@@ -874,7 +906,6 @@
 
     // ── Init ──────────────────────────────────────────────────────────────────
     loadMasterRecipes();
-    renderRecipeList();
     renderPendingPanel();
     initSocket();
 
