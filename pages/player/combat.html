@@ -4042,8 +4042,7 @@
                 var data     = _playerCache[handle] || {};
                 var turnIdx  = _combatState.turnOrder.indexOf(handle);
                 var isCurrent = _combatState.active && turnIdx !== -1 && turnIdx === _combatState.currentTurnIndex;
-                var isMe     = true;
-                var isMyTurn = isCurrent && isMe;
+                var isMyTurn = isCurrent;
 
                 var special = data.special || {};
                 var debuffs = data.debuffs || [];
@@ -4068,7 +4067,7 @@
                 turnIcon.textContent = isCurrent ? '▶' : (turnIdx !== -1 ? String(turnIdx + 1) : '');
 
                 var nameEl = document.createElement('span');
-                nameEl.className = 'cpc-name' + (isMe ? ' self' : '');
+                nameEl.className = 'cpc-name self';
                 // Show character name; fall back to player handle as placeholder
                 var charName = null;
                 if (typeof activeCampaign !== 'undefined' && activeCampaign) {
@@ -4178,8 +4177,8 @@
                     card.appendChild(effectsRow);
                 }
 
-                // Action buttons (only for self, or all for overseer role which won't show here)
-                if (isMe) {
+                // Action buttons (always shown — this card is always the player's own)
+                {
                     var actions = document.createElement('div');
                     actions.className = 'cpc-actions';
 
