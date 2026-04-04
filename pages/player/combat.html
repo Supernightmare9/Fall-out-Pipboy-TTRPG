@@ -224,78 +224,6 @@
         }
         .panel-body-collapsed { display: none; }
 
-        /* ===== INITIATIVE TRACKER ===== */
-        .initiative-tracker {
-            margin-top: 6px;
-            max-height: 320px;
-            overflow-y: auto;
-        }
-        .initiative-tracker::-webkit-scrollbar { width: 4px; }
-        .initiative-tracker::-webkit-scrollbar-track { background: var(--vault-dark); }
-        .initiative-tracker::-webkit-scrollbar-thumb { background: rgba(74,222,128,0.3); border-radius: 2px; }
-
-        .initiative-row {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 7px;
-            margin-bottom: 4px;
-            background: var(--vault-dark);
-            border: 1px solid rgba(74,222,128,0.15);
-        }
-        .initiative-row.initiative-current {
-            border-color: var(--vault-gold);
-            background: rgba(251,191,36,0.06);
-            box-shadow: 0 0 8px rgba(251,191,36,0.2);
-        }
-        .initiative-num {
-            font-size: 13px;
-            font-weight: bold;
-            color: var(--vault-gold);
-            min-width: 24px;
-            text-align: center;
-        }
-        .initiative-info { flex: 1; min-width: 0; }
-        .initiative-name {
-            font-size: 11px;
-            font-weight: bold;
-            display: block;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .initiative-player { color: var(--vault-green); }
-        .initiative-enemy  { color: var(--vault-error); }
-        .initiative-hp-bar {
-            height: 4px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(74,222,128,0.1);
-            margin: 2px 0;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        .initiative-hp-text {
-            font-size: 9px;
-            color: rgba(74,222,128,0.55);
-        }
-        .initiative-controls {
-            display: flex;
-            gap: 3px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-        .initiative-hp-input {
-            background: var(--vault-dark);
-            border: 1px solid rgba(74,222,128,0.3);
-            color: var(--vault-green);
-            font-family: 'Courier New', monospace;
-            font-size: 10px;
-            padding: 3px 5px;
-            width: 46px;
-            outline: none;
-        }
-        .initiative-hp-input:focus { border-color: var(--vault-gold); }
-
         /* ===== LEVEL UP TAB ===== */
         .levelup-award-row {
             display: flex;
@@ -1661,92 +1589,6 @@
             cursor: pointer;
         }
 
-        /* ===== INITIATIVE BANNER (top, wide) ===== */
-        .initiative-banner {
-            background: var(--vault-darker);
-            border: 1px solid rgba(74,222,128,0.3);
-            padding: 12px 18px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .initiative-banner-your {
-            flex-shrink: 0;
-            min-width: 130px;
-            border-right: 1px solid rgba(74,222,128,0.2);
-            padding-right: 20px;
-        }
-        .initiative-banner-label {
-            font-size: 9px;
-            color: var(--vault-gold);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .initiative-banner-number {
-            font-size: 38px;
-            font-weight: bold;
-            color: var(--vault-green);
-            text-shadow: 0 0 12px var(--vault-green);
-            line-height: 1;
-        }
-        .initiative-banner-formula {
-            font-size: 9px;
-            color: rgba(74,222,128,0.5);
-            letter-spacing: 1px;
-            margin-top: 4px;
-        }
-        .initiative-banner-party {
-            flex: 1;
-            min-width: 0;
-        }
-        .initiative-party-title {
-            font-size: 9px;
-            color: var(--vault-gold);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        .initiative-party-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .initiative-party-card {
-            background: var(--vault-dark);
-            border: 1px solid rgba(74,222,128,0.2);
-            padding: 6px 10px;
-            min-width: 90px;
-            flex: 1;
-            max-width: 170px;
-        }
-        .initiative-party-card.self-card { border-color: rgba(251,191,36,0.5); }
-        .initiative-party-name {
-            font-size: 10px;
-            font-weight: bold;
-            color: var(--vault-green);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 2px;
-        }
-        .initiative-party-name.self-name { color: var(--vault-gold); }
-        .initiative-party-hp-text {
-            font-size: 9px;
-            color: rgba(74,222,128,0.6);
-            margin-bottom: 3px;
-        }
-        .initiative-party-hp-bg {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(74,222,128,0.15);
-            height: 5px;
-            border-radius: 1px;
-            overflow: hidden;
-        }
-        .initiative-party-hp-fill { height: 100%; border-radius: 1px; }
-
         /* ===== HP RAD ZONE (anti-health overlay) ===== */
         .hp-bar-bg { position: relative; overflow: hidden; }
         .hp-bar-rad-zone {
@@ -1902,21 +1744,6 @@
             </div>
         </div>
 
-        <!-- ── INITIATIVE & PARTY BANNER (wide, top) ─────── -->
-        <div class="initiative-banner" id="initiativeBanner">
-            <div class="initiative-banner-your">
-                <div class="initiative-banner-label">⚔ Your Initiative</div>
-                <div class="initiative-banner-number" id="myInitiativeDisplay">—</div>
-                <div class="initiative-banner-formula" id="myInitiativeFormula"></div>
-            </div>
-            <div class="initiative-banner-party">
-                <div class="initiative-party-title">👥 Party Status</div>
-                <div class="initiative-party-row" id="initiativePartyRow">
-                    <div class="empty-state">Load a campaign to view party.</div>
-                </div>
-            </div>
-        </div>
-
         <!-- ── THREE-COLUMN GRID ──────────────────────────── -->
         <div class="character-grid">
 
@@ -1984,12 +1811,14 @@
                 <!-- Rad bar fills right-to-left (anti-health: more rad = less effective max HP) -->
                 <div class="hp-bar-wrap" style="margin:4px 0 8px;">
                     <div class="hp-bar-bg" style="direction:rtl;">
-                        <div id="radBarFill" class="hp-bar-fill hp-high" style="width:0%;background:rgba(255,107,107,0.7);box-shadow:0 0 6px rgba(255,107,107,0.5);"></div>
+                <div id="radBarFill" class="hp-bar-fill hp-high" style="width:0%;background:#ef4444;box-shadow:0 0 8px rgba(239,68,68,0.6);"></div>
                     </div>
                 </div>
-                <div class="hp-input-row">
-                    <input type="number" id="radInput" class="hp-manual-input" placeholder="RAD value" min="0" max="1000">
-                    <button class="hp-update-btn" onclick="updateRadCombat()">Update RAD</button>
+                <div class="hp-input-row" style="justify-content:center;flex-wrap:wrap;">
+                    <button class="hp-update-btn" onclick="decreaseRadCombat()" style="border-color:rgba(239,68,68,0.5);color:#ef4444;">−</button>
+                    <input type="number" id="radInput" class="hp-manual-input" placeholder="Set RAD" min="0" max="1000">
+                    <button class="hp-update-btn" onclick="setRadCombat()">Set</button>
+                    <button class="hp-update-btn" onclick="increaseRadCombat()" style="border-color:rgba(239,68,68,0.5);color:#ef4444;">+</button>
                 </div>
                 <div class="hp-success-msg" id="radMsg">✓ RAD UPDATED!</div>
 
@@ -2462,7 +2291,6 @@
         document.getElementById('pageSubtitle').textContent = 'VAULT 215 • ' + campaign.status.toUpperCase();
 
         renderCharacterInfo(campaign);
-        renderInitiativeBanner(campaign);
         renderCombatStatus(campaign);
         updateConditionsDisplay(campaign);
         renderInventory(campaign);
@@ -2485,7 +2313,6 @@
         if (!fresh) return;
         activeCampaign = fresh;
         renderCharacterInfo(fresh);
-        renderInitiativeBanner(fresh);
         renderCombatStatus(fresh);
         updateConditionsDisplay(fresh);
         renderInventory(fresh);
@@ -2553,85 +2380,6 @@
     // S.P.E.C.I.A.L. display has been moved to the Stats page (stats.html).
     // This function is kept as a no-op for backward compatibility with any callers.
     function renderStats() {}
-
-    // ── INITIATIVE CALCULATION ───────────────────────────────────
-    // Formula: floor((AGI + PER) / 4) + getInitiativeBonusFromPerception(PER)
-    // Uses fallout_stat_bonuses.js as the single source of truth for PER bonus.
-    function calculateMyInitiative() {
-        var liveData = (window._livePlayerCache && window._liveMyHandle)
-                       ? window._livePlayerCache[window._liveMyHandle] : null;
-        var agi = (liveData && liveData.special && typeof liveData.special.agility === 'number')
-                  ? liveData.special.agility : DEFAULT_SPECIAL_VALUE;
-        var per = (liveData && liveData.special && typeof liveData.special.perception === 'number')
-                  ? liveData.special.perception : DEFAULT_SPECIAL_VALUE;
-        var perBonus = (typeof getInitiativeBonusFromPerception === 'function')
-                       ? getInitiativeBonusFromPerception(per) : 0;
-        var base = Math.floor((agi + per) / 4);
-        return { total: base + perBonus, base: base, perBonus: perBonus, agi: agi, per: per };
-    }
-
-    // ── INITIATIVE BANNER ────────────────────────────────────────
-    // Renders the wide initiative + party-status banner above the grid.
-    function renderInitiativeBanner(campaign) {
-        var initData = calculateMyInitiative();
-        var numEl    = document.getElementById('myInitiativeDisplay');
-        var fmlaEl   = document.getElementById('myInitiativeFormula');
-        if (numEl) {
-            numEl.textContent = String(initData.total);
-            numEl.style.color = initData.total >= 0 ? 'var(--vault-green)' : 'var(--vault-error)';
-            numEl.style.textShadow = initData.total >= 0
-                ? '0 0 12px var(--vault-green)' : '0 0 12px var(--vault-error)';
-        }
-        if (fmlaEl) {
-            var bonusPart = '';
-            if (initData.perBonus > 0) bonusPart = ' + ' + initData.perBonus + ' PER bonus';
-            else if (initData.perBonus < 0) bonusPart = ' - ' + Math.abs(initData.perBonus) + ' PER bonus';
-            fmlaEl.textContent = 'floor((' + initData.agi + ' AGI + ' + initData.per +
-                                 ' PER) / 4) = ' + initData.base + bonusPart;
-        }
-
-        var partyRow = document.getElementById('initiativePartyRow');
-        if (!partyRow || !campaign) return;
-
-        var players = campaign.players || [];
-        if (players.length === 0) {
-            partyRow.innerHTML = '<div class="empty-state">No players in campaign.</div>';
-            return;
-        }
-
-        partyRow.innerHTML = players.map(function(p) {
-            var pct    = p.maxHp > 0 ? Math.min(100, Math.round((p.currentHp / p.maxHp) * 100)) : 0;
-            var hpCls  = pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low';
-            var isSelf = (p.username === sessionUsername);
-            var status = p.status || 'alive';
-            var statusColor = status === 'alive' ? '' : status === 'unconscious' ? 'color:#fbbf24;' : 'color:#ff6b6b;';
-
-            // Get player account color
-            var color = '#4ade80';
-            var pAcc = ACCOUNTS.find(function(a) { return a.username === p.username; });
-            if (pAcc && pAcc.characters) {
-                var pCh = pAcc.characters.find(function(c) { return c.campaignId === campaign.id; });
-                if (pCh && pCh.displayColor) color = pCh.displayColor;
-            }
-            if (isSelf && typeof SettingsManager !== 'undefined') {
-                color = SettingsManager.getCharacterColor(campaign.id) || color;
-            }
-
-            return '<div class="initiative-party-card' + (isSelf ? ' self-card' : '') + '">' +
-                '<div class="initiative-party-name' + (isSelf ? ' self-name' : '') + '" style="color:' + escHtml(color) + ';">' +
-                    escHtml(p.characterName || p.username) + (isSelf ? ' ★' : '') +
-                    (p.inInitiative ? ' ⚔' : '') +
-                '</div>' +
-                '<div class="initiative-party-hp-text" style="' + statusColor + '">' +
-                    p.currentHp + '/' + p.maxHp + ' HP' +
-                    (status !== 'alive' ? ' [' + status + ']' : '') +
-                '</div>' +
-                '<div class="initiative-party-hp-bg">' +
-                    '<div class="initiative-party-hp-fill ' + hpCls + '" style="width:' + pct + '%;"></div>' +
-                '</div>' +
-                '</div>';
-        }).join('');
-    }
 
     // ── HP BAR ────────────────────────────────────────────────────
     function updateHpBar(current, max) {
@@ -2764,13 +2512,6 @@
     // Update the timestamp text every second
     setInterval(updateHpTimestamp, 1000);
 
-    // ── PARTY STATUS ─────────────────────────────────────────────
-    // Now renders to the initiative banner. Kept as a stub for backward
-    // compatibility — calls renderInitiativeBanner which owns the display.
-    function renderPartyStatus(campaign) {
-        renderInitiativeBanner(campaign);
-    }
-
     // ── COMBAT STATUS (MIDDLE) ───────────────────────────────────
     function renderCombatStatus(campaign) {
         var sec = document.getElementById('combatStatusSection');
@@ -2787,110 +2528,15 @@
         if (currentIdx === -1) currentIdx = 0;
         var currentTurn = combatants.length > 0 ? combatants[currentIdx] : null;
 
-        // Find MY initiative
-        var myEntry = campaign.players.find(function(p) { return p.username === sessionUsername; });
-        var myInitiative = (myEntry && myEntry.inInitiative) ? myEntry.initiative : null;
-
-        // Show Perception initiative bonus alongside the stored initiative value.
-        // Bonus is calculated by getInitiativeBonusFromPerception() from
-        // fallout_stat_bonuses.js — the single source of truth for S.P.E.C.I.A.L. bonuses.
-        var liveDataForInit = (window._livePlayerCache && window._liveMyHandle)
-                              ? window._livePlayerCache[window._liveMyHandle]
-                              : null;
-        var myPerception = (liveDataForInit && liveDataForInit.special &&
-                            typeof liveDataForInit.special.perception === 'number')
-                           ? liveDataForInit.special.perception : 5;
-        var perceptionInitBonus = (typeof getInitiativeBonusFromPerception === 'function')
-                                  ? getInitiativeBonusFromPerception(myPerception) : 0;
-        var initiativeDisplay = myInitiative !== null ? myInitiative : '—';
-        if (perceptionInitBonus > 0 && myInitiative !== null) {
-            initiativeDisplay = myInitiative + ' <span style="color:var(--vault-gold);font-size:9px;">(PER +' + perceptionInitBonus + ')</span>';
-        }
-
         var currentTurnText = currentTurn ? escHtml(currentTurn.name || currentTurn.id) : '—';
 
         var html =
             '<div class="combat-indicator combat-active-badge">⚔ COMBAT ACTIVE</div>' +
             '<div class="combat-detail-row"><span class="stat-label">Round</span><span class="stat-value">' + (enc.round || 1) + '</span></div>' +
-            '<div class="combat-detail-row"><span class="stat-label">Current Turn</span><span class="stat-value" style="color:var(--vault-gold);">' + currentTurnText + '</span></div>' +
-            '<div class="combat-detail-row"><span class="stat-label">Your Initiative</span><span class="stat-value">' + initiativeDisplay + '</span></div>' +
-            '<div class="combat-detail-row"><span class="stat-label">In Initiative</span><span class="stat-value">' + (myEntry && myEntry.inInitiative ? '<span style="color:var(--vault-green);">YES</span>' : '<span style="color:rgba(74,222,128,0.4);">NO</span>') + '</span></div>';
-
-        // ── Initiative order tracker ──
-        if (combatants.length > 0) {
-            html += '<div class="panel-title" style="margin-top:14px;cursor:default;">⚔ Initiative Order</div>';
-            html += '<div class="initiative-tracker">';
-            combatants.forEach(function(c, idx) {
-                var isCurrent  = (idx === currentIdx);
-                var isPlayer   = c.type === 'player';
-                var curHp      = typeof c.currentHp === 'number' ? c.currentHp : 0;
-                var maxHp      = typeof c.maxHp     === 'number' ? c.maxHp     : curHp;
-                var hpPct      = maxHp > 0 ? Math.min(100, Math.round((curHp / maxHp) * 100)) : 0;
-                var hpCls      = hpPct >= 75 ? 'hp-high' : hpPct >= 25 ? 'hp-mid' : 'hp-low';
-                var safeId     = escHtml(c.id || String(idx));
-                var nameCls    = isPlayer ? 'initiative-player' : 'initiative-enemy';
-
-                html += '<div class="initiative-row' + (isCurrent ? ' initiative-current' : '') + '">' +
-                    '<span class="initiative-num">' + (c.initiative || 0) + '</span>' +
-                    '<div class="initiative-info">' +
-                        '<span class="initiative-name ' + nameCls + '">' + escHtml(c.name || c.id) + '</span>' +
-                        '<div class="initiative-hp-bar"><div class="player-hp-bar-fill ' + hpCls + '" style="width:' + hpPct + '%"></div></div>' +
-                        '<span class="initiative-hp-text">' + curHp + '/' + maxHp + ' HP</span>' +
-                    '</div>' +
-                    '<div class="initiative-controls">' +
-                        '<input type="number" class="initiative-hp-input" id="hpInput_' + safeId + '" placeholder="amt" min="1"' +
-                            ' aria-label="HP adjustment for ' + escHtml(c.name || c.id) + '">' +
-                        '<button class="hp-btn" title="Heal" onclick="applyCombatantHp(\'' + safeId + '\', true)">+</button>' +
-                        '<button class="hp-btn minus" title="Damage" onclick="applyCombatantHp(\'' + safeId + '\', false)">−</button>' +
-                    '</div>' +
-                    '</div>';
-            });
-            html += '</div>';
-        }
+            '<div class="combat-detail-row"><span class="stat-label">Current Turn</span><span class="stat-value" style="color:var(--vault-gold);">' + currentTurnText + '</span></div>';
 
         sec.innerHTML = html;
     }
-
-    // ── COMBATANT HP ADJUSTMENT (initiative tracker) ─────────────
-    window.applyCombatantHp = function(combatantId, isHeal) {
-        if (!activeCampaign) return;
-        var enc = activeCampaign.activeEncounter;
-        if (!enc || enc.status !== 'active') return;
-
-        var inputEl = document.getElementById('hpInput_' + combatantId);
-        var amount  = inputEl ? parseInt(inputEl.value, 10) : 0;
-        if (!amount || amount <= 0) return;
-
-        var combatants = enc.combatants || [];
-        var combatant  = combatants.find(function(c) { return (c.id || '') === combatantId; });
-        if (!combatant) return;
-
-        var maxHp = typeof combatant.maxHp === 'number' ? combatant.maxHp : combatant.currentHp;
-        if (isHeal) {
-            combatant.currentHp = Math.min(maxHp, (combatant.currentHp || 0) + amount);
-        } else {
-            combatant.currentHp = Math.max(0, (combatant.currentHp || 0) - amount);
-        }
-
-        // Sync to players array when a player combatant is adjusted
-        if (combatant.type === 'player') {
-            var player = activeCampaign.players.find(function(p) {
-                return p.characterId === combatant.characterId;
-            });
-            if (player) {
-                player.currentHp = combatant.currentHp;
-                if (player.username === sessionUsername) {
-                    document.getElementById('hpCurrent').textContent = player.currentHp;
-                    updateHpBar(player.currentHp, player.maxHp);
-                }
-            }
-        }
-
-        if (inputEl) inputEl.value = '';
-        saveCampaignData(activeCampaign);
-        renderCombatStatus(activeCampaign);
-        renderPartyStatus(activeCampaign);
-    };
 
     // ── COLLAPSIBLE PANEL TOGGLE ─────────────────────────────────
     function togglePanelCollapse(bodyId, titleEl) {
@@ -3102,7 +2748,7 @@
                 if (Array.isArray(parsed) && parsed.length > 0) return parsed;
             }
         } catch(e) {}
-        return campaign.inventory || [];
+        return []; // Inventory pools not yet connected — show empty until linked
     }
 
     // Returns equipment from vault_equipment localStorage (inventory.html slot names)
@@ -3661,7 +3307,6 @@
             if (data.activeEncounter) {
                 activeCampaign.activeEncounter = data.activeEncounter;
                 renderCombatStatus(activeCampaign);
-                renderPartyStatus(activeCampaign);
             }
             // Sync inventory when overseer awards loot
             if (Array.isArray(data.inventory)) {
@@ -3683,7 +3328,6 @@
                 });
                 updateConditionsDisplay(activeCampaign);
                 renderCharacterInfo(activeCampaign);
-                renderPartyStatus(activeCampaign);
             }
         } catch (ex) { /* ignore malformed */ }
     });
@@ -3722,7 +3366,6 @@
         if (e.detail.campaignId !== activeCampaign.id) return;
         activeCampaign.activeEncounter = e.detail.encounter;
         renderCombatStatus(activeCampaign);
-        renderPartyStatus(activeCampaign);
     });
 
     // ── DICE ROLLER ──────────────────────────────────────────────
@@ -3890,17 +3533,9 @@
             // Rad bar fills right-to-left: use pct directly (bar has direction:rtl)
             var pct = Math.min(100, Math.round((cur / COMBAT_MAX_RAD) * 100));
             fill.style.width = pct + '%';
-            // Color scales red as radiation increases
-            if (cur <= 250) {
-                fill.style.background = 'rgba(255,193,7,0.7)';
-                fill.style.boxShadow  = '0 0 6px rgba(255,193,7,0.5)';
-            } else if (cur <= 600) {
-                fill.style.background = 'rgba(255,107,107,0.7)';
-                fill.style.boxShadow  = '0 0 6px rgba(255,107,107,0.5)';
-            } else {
-                fill.style.background = 'rgba(200,0,0,0.9)';
-                fill.style.boxShadow  = '0 0 8px rgba(200,0,0,0.7)';
-            }
+            // Always bright red — radiation clearly signals it is reducing max HP
+            fill.style.background = '#ef4444';
+            fill.style.boxShadow  = '0 0 8px rgba(239,68,68,0.6)';
         }
         if (note) note.style.display = cur > 0 ? 'block' : 'none';
 
@@ -3920,7 +3555,7 @@
         refreshRadCombatDisplay(val);
     }
 
-    window.updateRadCombat = function() {
+    window.setRadCombat = function() {
         var inp = document.getElementById('radInput');
         if (!inp) return;
         var nv = parseInt(inp.value);
@@ -3928,6 +3563,28 @@
         nv = Math.max(0, Math.min(COMBAT_MAX_RAD, nv));
         localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
         inp.value = '';
+        refreshRadCombatDisplay(nv);
+        flashVitalsMsg('radMsg');
+    };
+
+    window.increaseRadCombat = function() {
+        var cur = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0');
+        var inp = document.getElementById('radInput');
+        var step = (inp && inp.value !== '') ? (parseInt(inp.value) || 1) : 1;
+        var nv = Math.min(COMBAT_MAX_RAD, (isNaN(cur) ? 0 : cur) + step);
+        if (inp) inp.value = '';
+        localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
+        refreshRadCombatDisplay(nv);
+        flashVitalsMsg('radMsg');
+    };
+
+    window.decreaseRadCombat = function() {
+        var cur = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0');
+        var inp = document.getElementById('radInput');
+        var step = (inp && inp.value !== '') ? (parseInt(inp.value) || 1) : 1;
+        var nv = Math.max(0, (isNaN(cur) ? 0 : cur) - step);
+        if (inp) inp.value = '';
+        localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
         refreshRadCombatDisplay(nv);
         flashVitalsMsg('radMsg');
     };
@@ -4264,8 +3921,6 @@
         refreshApCombatDisplay();
         refreshTempHpCombatDisplay();
         loadEffectsCombat();
-        // Render initiative banner with whatever data is available at init time
-        if (activeCampaign) renderInitiativeBanner(activeCampaign);
     }
 
     // Reload effects when stats.html updates localStorage (they share the same keys)
@@ -4295,8 +3950,8 @@
     <!-- ═══════════════════════════════════════════════════════════════════════
          LIVE COMBAT REAL-TIME SYNC
          Activates when PIPBOY_SERVER_URL + PIPBOY_SESSION_CODE are set in localStorage.
-         Connects via PlayerSync (Socket.IO) to show the live initiative tracker,
-         all player stats, and Take Damage / Heal controls for your own turn.
+         Connects via PlayerSync (Socket.IO) to show the player's own stats and
+         Take Damage / Heal controls for their own turn.
     ════════════════════════════════════════════════════════════════════════ -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
     <script src="../../assets/helpers/sync/playerSync.js"></script>
@@ -4382,10 +4037,12 @@
 
             handles.forEach(function (handle, idx) {
                 if (!handle) return;
+                // Players only see their own card — HP bars for others are hidden
+                if (handle !== _myHandle) return;
                 var data     = _playerCache[handle] || {};
                 var turnIdx  = _combatState.turnOrder.indexOf(handle);
                 var isCurrent = _combatState.active && turnIdx !== -1 && turnIdx === _combatState.currentTurnIndex;
-                var isMe     = handle === _myHandle;
+                var isMe     = true;
                 var isMyTurn = isCurrent && isMe;
 
                 var special = data.special || {};
@@ -4393,15 +4050,13 @@
                 var boosts  = data.boosts  || [];
                 var effects = debuffs.concat(boosts);
 
-                var hp    = typeof data.hp    === 'number' ? data.hp    : (isMe ? _getMyHp()    : 0);
-                var maxHp = typeof data.maxHp === 'number' ? data.maxHp : (isMe ? _getMyMaxHp() : 100);
+                var hp    = typeof data.hp    === 'number' ? data.hp    : _getMyHp();
+                var maxHp = typeof data.maxHp === 'number' ? data.maxHp : _getMyMaxHp();
                 var ap    = typeof data.actionPoints === 'number' ? data.actionPoints : 0;
                 var maxAp = typeof data.maxActionPoints === 'number' ? data.maxActionPoints : 10;
 
                 var card = document.createElement('div');
-                card.className = 'combat-player-card' +
-                    (isMyTurn          ? ' my-turn'              : '') +
-                    (isCurrent && !isMe? ' current-turn-global'  : '');
+                card.className = 'combat-player-card' + (isMyTurn ? ' my-turn' : '');
                 card.id = 'cpc-' + handle.replace(/\s+/g, '_');
 
                 // Header row
@@ -4414,7 +4069,13 @@
 
                 var nameEl = document.createElement('span');
                 nameEl.className = 'cpc-name' + (isMe ? ' self' : '');
-                nameEl.textContent = handle + (isMe ? ' (YOU)' : '');
+                // Show character name; fall back to player handle as placeholder
+                var charName = null;
+                if (typeof activeCampaign !== 'undefined' && activeCampaign) {
+                    var campEntry = activeCampaign.players.find(function(p) { return p.username === handle; });
+                    charName = campEntry ? (campEntry.characterName || null) : null;
+                }
+                nameEl.textContent = (charName || handle) + ' (YOU)';
 
                 hdr.appendChild(turnIcon);
                 hdr.appendChild(nameEl);
@@ -4647,10 +4308,6 @@
                 if (typeof renderAbilities === 'function')           renderAbilities();
                 if (typeof refreshApCombatDisplay === 'function')    refreshApCombatDisplay();
                 if (typeof refreshTempHpCombatDisplay === 'function') refreshTempHpCombatDisplay();
-                // Refresh initiative banner whenever SPECIAL data updates
-                if (typeof renderInitiativeBanner === 'function' && activeCampaign) {
-                    renderInitiativeBanner(activeCampaign);
-                }
             }
         }
 
