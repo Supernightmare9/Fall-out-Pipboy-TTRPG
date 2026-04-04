@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pip-Boy Character — Vault 215</title>
+    <title>Pip-Boy Combat — Vault 215</title>
     <link rel="stylesheet" href="../../css/branding.css">
     <link rel="stylesheet" href="../../css/player/playerstyle.css">
     <style>
@@ -1660,6 +1660,210 @@
             padding: 4px 8px;
             cursor: pointer;
         }
+
+        /* ===== INITIATIVE BANNER (top, wide) ===== */
+        .initiative-banner {
+            background: var(--vault-darker);
+            border: 1px solid rgba(74,222,128,0.3);
+            padding: 12px 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .initiative-banner-your {
+            flex-shrink: 0;
+            min-width: 130px;
+            border-right: 1px solid rgba(74,222,128,0.2);
+            padding-right: 20px;
+        }
+        .initiative-banner-label {
+            font-size: 9px;
+            color: var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .initiative-banner-number {
+            font-size: 38px;
+            font-weight: bold;
+            color: var(--vault-green);
+            text-shadow: 0 0 12px var(--vault-green);
+            line-height: 1;
+        }
+        .initiative-banner-formula {
+            font-size: 9px;
+            color: rgba(74,222,128,0.5);
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        .initiative-banner-party {
+            flex: 1;
+            min-width: 0;
+        }
+        .initiative-party-title {
+            font-size: 9px;
+            color: var(--vault-gold);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .initiative-party-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .initiative-party-card {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 6px 10px;
+            min-width: 90px;
+            flex: 1;
+            max-width: 170px;
+        }
+        .initiative-party-card.self-card { border-color: rgba(251,191,36,0.5); }
+        .initiative-party-name {
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--vault-green);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .initiative-party-name.self-name { color: var(--vault-gold); }
+        .initiative-party-hp-text {
+            font-size: 9px;
+            color: rgba(74,222,128,0.6);
+            margin-bottom: 3px;
+        }
+        .initiative-party-hp-bg {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(74,222,128,0.15);
+            height: 5px;
+            border-radius: 1px;
+            overflow: hidden;
+        }
+        .initiative-party-hp-fill { height: 100%; border-radius: 1px; }
+
+        /* ===== HP RAD ZONE (anti-health overlay) ===== */
+        .hp-bar-bg { position: relative; overflow: hidden; }
+        .hp-bar-rad-zone {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255,107,107,0.35), rgba(255,107,107,0.35) 2px,
+                rgba(100,0,0,0.2) 2px, rgba(100,0,0,0.2) 5px
+            );
+            border-left: 1px solid rgba(255,107,107,0.6);
+            transition: width 0.4s;
+            pointer-events: none;
+            width: 0;
+        }
+
+        /* ===== FLOATING DICE ROLLER ===== */
+        .dice-roller-fab {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            z-index: 1001;
+        }
+        .dice-roller-fab-btn {
+            background-color: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 8px var(--vault-green);
+            box-shadow: 0 0 15px rgba(74,222,128,0.3);
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+        .dice-roller-fab-btn:hover {
+            background-color: var(--vault-dark);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            text-shadow: 0 0 12px var(--vault-gold);
+            box-shadow: 0 0 25px rgba(251,191,36,0.5);
+            transform: scale(1.08);
+        }
+        .dice-roller-fab-btn:active { transform: scale(0.95); }
+
+        .dice-roller-overlay-panel {
+            position: fixed;
+            bottom: 142px;
+            right: 20px;
+            z-index: 1002;
+            width: 300px;
+            background: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            box-shadow: 0 0 30px rgba(74,222,128,0.4);
+            padding: 14px;
+            display: none;
+        }
+        .dice-roller-overlay-panel.open { display: block; }
+        .dice-roller-overlay-title {
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--vault-gold);
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(251,191,36,0.3);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dice-roller-close-btn {
+            background: transparent;
+            border: 1px solid rgba(255,107,107,0.4);
+            color: var(--vault-error);
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            padding: 1px 7px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .dice-roller-close-btn:hover { background: rgba(255,107,107,0.1); }
+
+        /* ===== COMPACT EQUIPMENT SLOTS (combat) ===== */
+        .equip-slots-compact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .equip-slot-compact {
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 6px 8px;
+        }
+        .equip-slot-compact-label {
+            font-size: 9px;
+            color: var(--vault-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .equip-slot-compact-value {
+            font-size: 10px;
+            color: var(--vault-green);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .equip-slot-compact-value.empty { color: rgba(74,222,128,0.3); font-style: italic; }
     </style>
 </head>
 <body>
@@ -1698,6 +1902,21 @@
             </div>
         </div>
 
+        <!-- ── INITIATIVE & PARTY BANNER (wide, top) ─────── -->
+        <div class="initiative-banner" id="initiativeBanner">
+            <div class="initiative-banner-your">
+                <div class="initiative-banner-label">⚔ Your Initiative</div>
+                <div class="initiative-banner-number" id="myInitiativeDisplay">—</div>
+                <div class="initiative-banner-formula" id="myInitiativeFormula"></div>
+            </div>
+            <div class="initiative-banner-party">
+                <div class="initiative-party-title">👥 Party Status</div>
+                <div class="initiative-party-row" id="initiativePartyRow">
+                    <div class="empty-state">Load a campaign to view party.</div>
+                </div>
+            </div>
+        </div>
+
         <!-- ── THREE-COLUMN GRID ──────────────────────────── -->
         <div class="character-grid">
 
@@ -1729,6 +1948,7 @@
                 <div class="hp-bar-wrap">
                     <div class="hp-bar-bg">
                         <div class="hp-bar-fill hp-high" id="hpBarFill" style="width:100%"></div>
+                        <div class="hp-bar-rad-zone" id="hpBarRadZone" role="presentation" aria-hidden="true"></div>
                     </div>
                 </div>
 
@@ -1740,23 +1960,32 @@
                     <button class="hp-btn"       onclick="adjustHp(+5)">+ 5</button>
                 </div>
 
-                <!-- Manual HP Input -->
+                <!-- HP Adjustment Input (+/−) -->
                 <div class="hp-input-row">
-                    <input type="number" id="hpManualInput" class="hp-manual-input" placeholder="Set HP" min="0">
-                    <button class="hp-update-btn" onclick="setHpManual()">Update HP</button>
+                    <input type="number" id="hpAdjustInput" class="hp-manual-input" placeholder="±Amount" title="Enter positive to heal, negative to damage" aria-label="HP adjustment amount">
+                    <button class="hp-update-btn" onclick="applyHpAdjustment()" style="font-size:9px;" aria-label="Apply HP adjustment">Apply ±</button>
+                </div>
+
+                <!-- HP Override Input (set exact value) -->
+                <div class="hp-input-row">
+                    <input type="number" id="hpManualInput" class="hp-manual-input" placeholder="Override HP" min="0" title="Set HP to exact value" aria-label="HP override value">
+                    <button class="hp-update-btn" onclick="setHpManual()" style="font-size:9px;border-color:rgba(251,191,36,0.5);color:var(--vault-gold);" aria-label="Override HP to exact value">Override</button>
                 </div>
 
                 <div class="hp-timestamp" id="hpTimestamp">Last updated: —</div>
                 <div class="hp-success-msg" id="hpSuccessMsg">✓ HP UPDATED!</div>
 
                 <!-- Radiation Section -->
-                <div class="panel-title" style="margin-top:14px;">☢ Radiation</div>
+                <div class="panel-title" style="margin-top:14px;">☢ Radiation (Anti-Health)</div>
                 <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;">
-                    <span style="color:var(--vault-gold);font-weight:bold;letter-spacing:1px;">RAD</span>
+                    <span style="color:#ff6b6b;font-weight:bold;letter-spacing:1px;">RAD</span>
                     <span style="color:var(--vault-green);"><span id="radCurrent">0</span> / 1000 RAD</span>
                 </div>
+                <!-- Rad bar fills right-to-left (anti-health: more rad = less effective max HP) -->
                 <div class="hp-bar-wrap" style="margin:4px 0 8px;">
-                    <div class="hp-bar-bg"><div id="radBarFill" class="hp-bar-fill hp-high" style="width:0%"></div></div>
+                    <div class="hp-bar-bg" style="direction:rtl;">
+                        <div id="radBarFill" class="hp-bar-fill hp-high" style="width:0%;background:rgba(255,107,107,0.7);box-shadow:0 0 6px rgba(255,107,107,0.5);"></div>
+                    </div>
                 </div>
                 <div class="hp-input-row">
                     <input type="number" id="radInput" class="hp-manual-input" placeholder="RAD value" min="0" max="1000">
@@ -1864,51 +2093,14 @@
                     </div>
                 </div>
 
-                <!-- DICE ROLLER -->
-                <div class="panel-title" style="margin-top:18px;">🎲 Dice Roller</div>
-                <div id="diceRollerPanel">
-                    <div class="dice-quick-row">
-                        <button class="dice-btn" onclick="quickRoll(4)">d4</button>
-                        <button class="dice-btn" onclick="quickRoll(6)">d6</button>
-                        <button class="dice-btn" onclick="quickRoll(8)">d8</button>
-                        <button class="dice-btn" onclick="quickRoll(10)">d10</button>
-                        <button class="dice-btn" onclick="quickRoll(12)">d12</button>
-                        <button class="dice-btn dice-btn-d20" onclick="quickRoll(20)">d20</button>
-                    </div>
-                    <div class="dice-skill-row" style="margin-top:8px;">
-                        <select id="skillSelector" class="dice-skill-select">
-                            <option value="">-- Select Skill --</option>
-                        </select>
-                        <button class="vault-btn" style="padding:4px 10px;font-size:10px;" onclick="rollSkillCheck()">Roll Check</button>
-                    </div>
-                    <div class="dice-generic-row" style="margin-top:6px;display:flex;gap:4px;">
-                        <input type="text" id="genericDiceInput" class="hp-manual-input" placeholder="e.g. 2d6+3" style="flex:1;font-size:11px;">
-                        <button class="vault-btn" style="padding:4px 10px;font-size:10px;" onclick="rollGenericDice()">Roll</button>
-                    </div>
-                    <div id="rollResults" style="margin-top:8px;max-height:120px;overflow-y:auto;font-size:10px;"></div>
-                </div>
+                <!-- DICE ROLLER moved to floating button (bottom right) -->
                 </div><!-- end leftPanelBody -->
             </div>
 
-            <!-- MIDDLE: PARTY STATUS & COMBAT -->
+            <!-- MIDDLE: COMBAT STATUS & CONDITIONS -->
             <div class="panel" id="middlePanel">
-                <!-- Party Status -->
-                <div class="panel-title panel-collapse-toggle" onclick="togglePanelCollapse('partyStatusBody', this)"
-                     role="button" aria-expanded="true" aria-controls="partyStatusBody">
-                    <span>👥 Party Status</span>
-                    <span style="display:flex;align-items:center;gap:6px;">
-                        <button class="vault-btn" style="padding:2px 8px;font-size:9px;" onclick="handlePartyRefresh(event)">↻</button>
-                        <span class="panel-chevron">▲</span>
-                    </span>
-                </div>
-                <div id="partyStatusBody">
-                    <div id="partyStatusList">
-                        <div class="empty-state">Loading party...</div>
-                    </div>
-                </div>
-
                 <!-- Combat Status -->
-                <div class="panel-title" style="margin-top:18px;">⚔ Combat Status</div>
+                <div class="panel-title">⚔ Combat Status</div>
                 <div id="combatStatusSection">
                     <div class="combat-indicator combat-inactive-badge">
                         ○ NO ACTIVE COMBAT
@@ -1933,10 +2125,10 @@
 
             <!-- TAB 1: INVENTORY -->
             <div class="tab-content active" id="tab-inventory">
-                <!-- Equipment Slots Panel -->
+                <!-- Equipment Slots Panel (compact, 4 slots only) -->
                 <div class="equip-panel">
                     <div class="equip-panel-title">🛡 Equipped Items</div>
-                    <div class="equip-slots-grid" id="equipmentPanel">
+                    <div class="equip-slots-compact" id="equipmentPanel">
                         <!-- populated by JS -->
                     </div>
                 </div>
@@ -1963,6 +2155,36 @@
         </div>
 
     </div><!-- end .container -->
+
+    <!-- ── FLOATING DICE ROLLER (bottom right) ──────────────── -->
+    <div class="dice-roller-fab">
+        <button class="dice-roller-fab-btn" onclick="toggleDiceRollerOverlay()" title="Open Dice Roller" aria-label="Toggle dice roller">🎲</button>
+    </div>
+    <div class="dice-roller-overlay-panel" id="diceRollerOverlayPanel">
+        <div class="dice-roller-overlay-title">
+            <span>🎲 Dice Roller</span>
+            <button class="dice-roller-close-btn" onclick="toggleDiceRollerOverlay()" aria-label="Close dice roller">✕</button>
+        </div>
+        <div class="dice-quick-row">
+            <button class="dice-btn" onclick="quickRoll(4)">d4</button>
+            <button class="dice-btn" onclick="quickRoll(6)">d6</button>
+            <button class="dice-btn" onclick="quickRoll(8)">d8</button>
+            <button class="dice-btn" onclick="quickRoll(10)">d10</button>
+            <button class="dice-btn" onclick="quickRoll(12)">d12</button>
+            <button class="dice-btn dice-btn-d20" onclick="quickRoll(20)">d20</button>
+        </div>
+        <div class="dice-skill-row" style="margin-top:8px;">
+            <select id="skillSelector" class="dice-skill-select">
+                <option value="">-- Select Skill --</option>
+            </select>
+            <button class="vault-btn" style="padding:4px 10px;font-size:10px;" onclick="rollSkillCheck()">Roll Check</button>
+        </div>
+        <div class="dice-generic-row" style="margin-top:6px;display:flex;gap:4px;">
+            <input type="text" id="genericDiceInput" class="hp-manual-input" placeholder="e.g. 2d6+3" style="flex:1;font-size:11px;">
+            <button class="vault-btn" style="padding:4px 10px;font-size:10px;" onclick="rollGenericDice()">Roll</button>
+        </div>
+        <div id="rollResults" style="margin-top:8px;max-height:150px;overflow-y:auto;font-size:10px;"></div>
+    </div>
 
     <script src="../../assets/data/accounts.js"></script>
     <script src="../../assets/data/campaigns.js"></script>
@@ -2240,7 +2462,7 @@
         document.getElementById('pageSubtitle').textContent = 'VAULT 215 • ' + campaign.status.toUpperCase();
 
         renderCharacterInfo(campaign);
-        renderPartyStatus(campaign);
+        renderInitiativeBanner(campaign);
         renderCombatStatus(campaign);
         updateConditionsDisplay(campaign);
         renderInventory(campaign);
@@ -2263,7 +2485,7 @@
         if (!fresh) return;
         activeCampaign = fresh;
         renderCharacterInfo(fresh);
-        renderPartyStatus(fresh);
+        renderInitiativeBanner(fresh);
         renderCombatStatus(fresh);
         updateConditionsDisplay(fresh);
         renderInventory(fresh);
@@ -2332,22 +2554,161 @@
     // This function is kept as a no-op for backward compatibility with any callers.
     function renderStats() {}
 
+    // ── INITIATIVE CALCULATION ───────────────────────────────────
+    // Formula: floor((AGI + PER) / 4) + getInitiativeBonusFromPerception(PER)
+    // Uses fallout_stat_bonuses.js as the single source of truth for PER bonus.
+    function calculateMyInitiative() {
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        var agi = (liveData && liveData.special && typeof liveData.special.agility === 'number')
+                  ? liveData.special.agility : DEFAULT_SPECIAL_VALUE;
+        var per = (liveData && liveData.special && typeof liveData.special.perception === 'number')
+                  ? liveData.special.perception : DEFAULT_SPECIAL_VALUE;
+        var perBonus = (typeof getInitiativeBonusFromPerception === 'function')
+                       ? getInitiativeBonusFromPerception(per) : 0;
+        var base = Math.floor((agi + per) / 4);
+        return { total: base + perBonus, base: base, perBonus: perBonus, agi: agi, per: per };
+    }
+
+    // ── INITIATIVE BANNER ────────────────────────────────────────
+    // Renders the wide initiative + party-status banner above the grid.
+    function renderInitiativeBanner(campaign) {
+        var initData = calculateMyInitiative();
+        var numEl    = document.getElementById('myInitiativeDisplay');
+        var fmlaEl   = document.getElementById('myInitiativeFormula');
+        if (numEl) {
+            numEl.textContent = String(initData.total);
+            numEl.style.color = initData.total >= 0 ? 'var(--vault-green)' : 'var(--vault-error)';
+            numEl.style.textShadow = initData.total >= 0
+                ? '0 0 12px var(--vault-green)' : '0 0 12px var(--vault-error)';
+        }
+        if (fmlaEl) {
+            var bonusPart = '';
+            if (initData.perBonus > 0) bonusPart = ' + ' + initData.perBonus + ' PER bonus';
+            else if (initData.perBonus < 0) bonusPart = ' - ' + Math.abs(initData.perBonus) + ' PER bonus';
+            fmlaEl.textContent = 'floor((' + initData.agi + ' AGI + ' + initData.per +
+                                 ' PER) / 4) = ' + initData.base + bonusPart;
+        }
+
+        var partyRow = document.getElementById('initiativePartyRow');
+        if (!partyRow || !campaign) return;
+
+        var players = campaign.players || [];
+        if (players.length === 0) {
+            partyRow.innerHTML = '<div class="empty-state">No players in campaign.</div>';
+            return;
+        }
+
+        partyRow.innerHTML = players.map(function(p) {
+            var pct    = p.maxHp > 0 ? Math.min(100, Math.round((p.currentHp / p.maxHp) * 100)) : 0;
+            var hpCls  = pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low';
+            var isSelf = (p.username === sessionUsername);
+            var status = p.status || 'alive';
+            var statusColor = status === 'alive' ? '' : status === 'unconscious' ? 'color:#fbbf24;' : 'color:#ff6b6b;';
+
+            // Get player account color
+            var color = '#4ade80';
+            var pAcc = ACCOUNTS.find(function(a) { return a.username === p.username; });
+            if (pAcc && pAcc.characters) {
+                var pCh = pAcc.characters.find(function(c) { return c.campaignId === campaign.id; });
+                if (pCh && pCh.displayColor) color = pCh.displayColor;
+            }
+            if (isSelf && typeof SettingsManager !== 'undefined') {
+                color = SettingsManager.getCharacterColor(campaign.id) || color;
+            }
+
+            return '<div class="initiative-party-card' + (isSelf ? ' self-card' : '') + '">' +
+                '<div class="initiative-party-name' + (isSelf ? ' self-name' : '') + '" style="color:' + escHtml(color) + ';">' +
+                    escHtml(p.characterName || p.username) + (isSelf ? ' ★' : '') +
+                    (p.inInitiative ? ' ⚔' : '') +
+                '</div>' +
+                '<div class="initiative-party-hp-text" style="' + statusColor + '">' +
+                    p.currentHp + '/' + p.maxHp + ' HP' +
+                    (status !== 'alive' ? ' [' + status + ']' : '') +
+                '</div>' +
+                '<div class="initiative-party-hp-bg">' +
+                    '<div class="initiative-party-hp-fill ' + hpCls + '" style="width:' + pct + '%;"></div>' +
+                '</div>' +
+                '</div>';
+        }).join('');
+    }
+
     // ── HP BAR ────────────────────────────────────────────────────
     function updateHpBar(current, max) {
         var pct  = max > 0 ? Math.min(100, Math.max(0, Math.round((current / max) * 100))) : 0;
         var fill = document.getElementById('hpBarFill');
-        fill.style.width = pct + '%';
-        fill.className   = 'hp-bar-fill ' + (pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low');
+        if (fill) {
+            fill.style.width = pct + '%';
+            fill.className   = 'hp-bar-fill ' + (pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low');
+        }
+        // Update radiation zone overlay in HP bar
+        var rad = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
+        var radZone = document.getElementById('hpBarRadZone');
+        if (radZone) {
+            var radPct = Math.min(100, Math.round((rad / 1000) * 100));
+            radZone.style.width = radPct + '%';
+        }
     }
 
     // ── HP ADJUSTMENT ────────────────────────────────────────────
+    // Internal helper: apply damage/healing with automatic temp HP absorption.
+    // When delta < 0 (damage), temp HP is consumed first before real HP is reduced.
     function adjustHp(delta) {
         if (!activeCampaign) return;
         var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
         if (!myEntry) return;
 
+        if (delta < 0) {
+            // Damage: consume temp HP first
+            var tempHp = getCombatTempHp();
+            if (tempHp > 0) {
+                var damage   = Math.abs(delta);
+                var absorbed = Math.min(tempHp, damage);
+                var remaining = damage - absorbed;
+
+                // Reduce tempHP
+                var liveData = (window._livePlayerCache && window._liveMyHandle)
+                               ? window._livePlayerCache[window._liveMyHandle] : null;
+                if (liveData) {
+                    liveData.tempHealth = tempHp - absorbed;
+                    if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+                        PlayerSync.push('tempHealth', liveData.tempHealth);
+                    }
+                    refreshTempHpCombatDisplay();
+                }
+
+                if (remaining <= 0) {
+                    // All damage absorbed by temp HP — show feedback and stop
+                    var msg = document.getElementById('hpSuccessMsg');
+                    if (msg) {
+                        var origText = msg.textContent;
+                        msg.setAttribute('role', 'status');
+                        msg.setAttribute('aria-live', 'polite');
+                        msg.textContent = '🛡 ' + absorbed + ' DMG absorbed by TEMP HP!';
+                        msg.style.display = 'block'; msg.style.animation = 'none';
+                        void msg.offsetWidth;
+                        msg.style.animation = 'fadeMsg 3s ease forwards';
+                        setTimeout(function() { msg.style.display = 'none'; msg.textContent = origText; }, 3200);
+                    }
+                    return;
+                }
+                delta = -remaining; // Remaining damage after temp HP
+            }
+        }
+
         myEntry.currentHp = Math.min(myEntry.maxHp, Math.max(0, myEntry.currentHp + delta));
         commitHpUpdate(myEntry);
+    }
+
+    // Apply +/- HP adjustment from the adjustment input field
+    function applyHpAdjustment() {
+        if (!activeCampaign) return;
+        var inp = document.getElementById('hpAdjustInput');
+        if (!inp || inp.value === '') return;
+        var delta = parseInt(inp.value, 10);
+        if (isNaN(delta)) return;
+        inp.value = '';
+        adjustHp(delta);
     }
 
     function setHpManual() {
@@ -2403,43 +2764,11 @@
     // Update the timestamp text every second
     setInterval(updateHpTimestamp, 1000);
 
-    // ── PARTY STATUS (MIDDLE) ────────────────────────────────────
+    // ── PARTY STATUS ─────────────────────────────────────────────
+    // Now renders to the initiative banner. Kept as a stub for backward
+    // compatibility — calls renderInitiativeBanner which owns the display.
     function renderPartyStatus(campaign) {
-        var div = document.getElementById('partyStatusList');
-        var players = campaign.players;
-
-        if (!players || players.length === 0) {
-            div.innerHTML = '<div class="empty-state">No players in this campaign.</div>';
-            return;
-        }
-
-        div.innerHTML = players.map(function(p) {
-            var pct  = p.maxHp > 0 ? Math.min(100, Math.round((p.currentHp / p.maxHp) * 100)) : 0;
-            var cls  = pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low';
-
-            var pAcc   = ACCOUNTS.find(function(a) { return a.username === p.username; });
-            var color  = '#4ade80';
-            if (pAcc && pAcc.characters) {
-                var pCh = pAcc.characters.find(function(c) { return c.campaignId === campaign.id; });
-                if (pCh && pCh.displayColor) color = pCh.displayColor;
-            }
-
-            var isSelf     = (p.username === sessionUsername);
-            var status     = p.status || 'alive';
-            var badgeCls   = status === 'alive' ? 'badge-alive' : status === 'unconscious' ? 'badge-unconscious' : 'badge-dead';
-            var nameStyle  = isSelf ? 'color:' + color + ';' : '';
-            var inCombat   = p.inInitiative ? '⚔' : '';
-
-            return '<div class="player-row">' +
-                '<div class="player-color-dot" style="background:' + escHtml(color) + ';box-shadow:0 0 4px ' + escHtml(color) + ';"></div>' +
-                '<span class="player-name" style="' + nameStyle + '">' + escHtml(p.characterName) + (isSelf ? ' ★' : '') + inCombat + '</span>' +
-                '<div class="player-hp-bar-wrap">' +
-                    '<div class="player-hp-bar-bg"><div class="player-hp-bar-fill ' + cls + '" style="width:' + pct + '%"></div></div>' +
-                '</div>' +
-                '<span class="player-hp-text">' + p.currentHp + '/' + p.maxHp + '</span>' +
-                '<span class="player-status-badge ' + badgeCls + '">' + escHtml(status) + '</span>' +
-                '</div>';
-        }).join('');
+        renderInitiativeBanner(campaign);
     }
 
     // ── COMBAT STATUS (MIDDLE) ───────────────────────────────────
@@ -2763,49 +3092,74 @@
     }
 
     // ── INVENTORY TAB ────────────────────────────────────────────
+    // Reads from vault_inventory localStorage first (synced with inventory.html),
+    // falling back to campaign.inventory if not set.
+    function getDisplayInventory(campaign) {
+        try {
+            var raw = localStorage.getItem('vault_inventory');
+            if (raw) {
+                var parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+        } catch(e) {}
+        return campaign.inventory || [];
+    }
+
+    // Returns equipment from vault_equipment localStorage (inventory.html slot names)
+    // or falls back to campaign player entry equipment.
+    function getDisplayEquipment(myEntry) {
+        try {
+            var raw = localStorage.getItem('vault_equipment');
+            if (raw) {
+                var parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') return parsed;
+            }
+        } catch(e) {}
+        return myEntry ? (myEntry.equipment || {}) : {};
+    }
+
     function renderInventory(campaign) {
         var grid   = document.getElementById('inventoryGrid');
         var footer = document.getElementById('inventoryFooter');
-        var items  = campaign.inventory || [];
+
+        // Prefer vault_inventory (inventory.html data) for real-time sync
+        var items = getDisplayInventory(campaign);
 
         if (items.length === 0) {
-            grid.innerHTML = '<div class="empty-state">No items in inventory.</div>';
+            grid.innerHTML = '<div class="empty-state">No items in inventory. Add items on the Inventory page.</div>';
             footer.innerHTML = '';
             return;
         }
 
-        var myEntry = campaign.players.find(function(p) {
-            return p.username === sessionStorage.getItem('username');
-        });
         // Use S.P.E.C.I.A.L. Strength from live playerData (single source of truth with stats.html)
         var liveData = (window._livePlayerCache && window._liveMyHandle)
                        ? window._livePlayerCache[window._liveMyHandle]
                        : null;
         var strStat = (liveData && liveData.special && typeof liveData.special.strength === 'number')
                       ? liveData.special.strength
-                      : DEFAULT_SPECIAL_VALUE; // default S.P.E.C.I.A.L. value if not yet connected
+                      : DEFAULT_SPECIAL_VALUE;
+
         var totalWeight = InventoryManager.calculateTotalWeight(items);
         var capacity    = InventoryManager.getCarryingCapacity(strStat);
         var encStatus   = InventoryManager.getEncumbranceStatus(totalWeight, capacity);
-        var equipped    = myEntry ? InventoryManager.getEquippedItems(myEntry) : {};
-        var equippedIds = Object.keys(equipped).map(function(s) { return equipped[s]; }).filter(Boolean);
+
+        // Get equipped item IDs from vault_equipment or campaign entry
+        var myEntry = campaign.players.find(function(p) {
+            return p.username === sessionStorage.getItem('username');
+        });
+        var equippedObj = getDisplayEquipment(myEntry);
+        var equippedIds = Object.values(equippedObj).filter(Boolean);
 
         grid.innerHTML = items.map(function(item) {
             var typeCls     = 'type-' + escHtml(item.type || 'misc');
             var rarityColor = InventoryManager.getRarityColor(item.rarity);
             var rarity      = InventoryManager.getRarityLabel(item.rarity);
-            var isEquipped  = equippedIds.indexOf(item.id) !== -1;
-            var canEquip    = item.type === 'weapon' || item.type === 'armor';
+            var isEquipped  = equippedIds.indexOf(item.id) !== -1 || equippedIds.indexOf(item.uid) !== -1;
             var canUse      = item.type === 'consumable' && item.effects && Object.keys(item.effects).length > 0;
 
             var actionsHtml = '';
             if (canUse) {
-                actionsHtml += '<button class="item-action-btn use-btn" onclick="useItem(\'' + escHtml(item.id) + '\', event)">USE</button>';
-            }
-            if (canEquip) {
-                var equipLabel = isEquipped ? 'UNEQUIP' : 'EQUIP';
-                var equipCls   = isEquipped ? 'equip-btn equipped' : 'equip-btn';
-                actionsHtml += '<button class="item-action-btn ' + equipCls + '" onclick="toggleEquip(\'' + escHtml(item.id) + '\', event)">' + equipLabel + '</button>';
+                actionsHtml += '<button class="item-action-btn use-btn" onclick="useItem(\'' + escHtml(item.id || item.uid || '') + '\', event)">USE</button>';
             }
 
             return '<div class="inventory-item" data-type="' + escHtml(item.type || 'misc') + '" onclick="selectInventoryItem(this)">' +
@@ -2815,9 +3169,9 @@
                 '<div class="item-name">' + escHtml(item.name) + '</div>' +
                 '<div class="item-desc">' + escHtml(item.description || '') + '</div>' +
                 '<div class="item-stats">' +
-                    '<span class="item-stat">QTY: <span>' + (item.quantity || 1) + '</span></span>' +
-                    '<span class="item-stat">WT: <span>' + (item.weight || 0) + ' lbs</span></span>' +
-                    '<span class="item-stat">VAL: <span>' + (item.value || 0) + ' ¢</span></span>' +
+                    '<span class="item-stat">QTY: <span>' + (item.quantity || item.qty || 1) + '</span></span>' +
+                    '<span class="item-stat">WT: <span>' + (item.weight || item.wt || 0) + ' lbs</span></span>' +
+                    '<span class="item-stat">VAL: <span>' + (item.value || item.val || 0) + ' ¢</span></span>' +
                     (item.armorClass ? '<span class="item-stat">AC: <span>+' + item.armorClass + '</span></span>' : '') +
                     (item.damage     ? '<span class="item-stat">DMG: <span>' + escHtml(item.damage) + '</span></span>' : '') +
                 '</div>' +
@@ -2839,7 +3193,7 @@
             });
         }
 
-        // Footer: weight bar + carry info
+        // Footer: weight bar (base 100 + STR×10 from fallout_stat_bonuses.js) + carry info
         var wtPct    = Math.min(100, Math.round((totalWeight / capacity) * 100));
         var barCls   = 'weight-' + encStatus;
         var totalVal = InventoryManager.getTotalInventoryValue(items);
@@ -2945,24 +3299,56 @@
         var myEntry = campaign.players.find(function(p) {
             return p.username === sessionStorage.getItem('username');
         });
-        if (!myEntry) return;
 
-        var equipped = InventoryManager.getEquippedItems(myEntry);
-        var slotLabels = {
-            head: 'Head', chest: 'Chest', hands: 'Hands',
-            legs: 'Legs', feet: 'Feet', mainHand: 'Main Hand', offHand: 'Off Hand'
+        // Read equipment from vault_equipment (inventory.html slots) or campaign entry
+        var equippedObj = getDisplayEquipment(myEntry);
+
+        // Get inventory items for name lookup (vault_inventory first, then campaign)
+        var items = getDisplayInventory(campaign);
+
+        // Only show 4 slots: head, chest (body), main weapon, secondary weapon
+        // Maps inventory.html slot keys to display labels
+        var combatSlots = [
+            { key: 'head',            label: '⛏ Head' },
+            { key: 'body',            label: '🛡 Chest' },
+            { key: 'primaryWeapon',   label: '🔫 Main Weapon' },
+            { key: 'secondaryWeapon', label: '🗡 Secondary' }
+        ];
+
+        // Also check legacy InventoryManager slot names for backward compat
+        var legacyMap = {
+            head:            ['head'],
+            body:            ['chest'],
+            primaryWeapon:   ['mainHand'],
+            secondaryWeapon: ['offHand']
         };
-        var html = '';
 
-        InventoryManager.EQUIPMENT_SLOTS.forEach(function(slot) {
-            var itemId   = equipped[slot];
-            var item     = itemId ? (campaign.inventory || []).find(function(i) { return i.id === itemId; }) : null;
+        var html = '';
+        combatSlots.forEach(function(slot) {
+            var itemId = equippedObj[slot.key] || null;
+            // Check legacy slot names as fallback
+            if (!itemId && legacyMap[slot.key]) {
+                legacyMap[slot.key].forEach(function(leg) {
+                    if (!itemId) itemId = equippedObj[leg] || null;
+                });
+            }
+            // Also check campaign player entry equipment
+            if (!itemId && myEntry && myEntry.equipment) {
+                itemId = myEntry.equipment[slot.key] || null;
+                if (!itemId) {
+                    (legacyMap[slot.key] || []).forEach(function(leg) {
+                        if (!itemId) itemId = myEntry.equipment[leg] || null;
+                    });
+                }
+            }
+
+            var item     = itemId ? items.find(function(i) { return i.id === itemId || i.uid === itemId; }) : null;
             var itemName = item ? item.name : '—';
             var isEmpty  = !item;
 
-            html += '<div class="equip-slot">' +
-                '<div class="equip-slot-label">' + escHtml(slotLabels[slot] || slot) + '</div>' +
-                '<div class="equip-slot-value' + (isEmpty ? ' equip-slot-empty' : '') + '">' + escHtml(itemName) + '</div>' +
+            html += '<div class="equip-slot-compact">' +
+                '<div class="equip-slot-compact-label">' + escHtml(slot.label) + '</div>' +
+                '<div class="equip-slot-compact-value' + (isEmpty ? ' empty' : '') + '">' + escHtml(itemName) + '</div>' +
                 '</div>';
         });
 
@@ -3501,12 +3887,30 @@
         var note = document.getElementById('radReductionNote');
         if (el)   el.textContent  = cur;
         if (fill) {
+            // Rad bar fills right-to-left: use pct directly (bar has direction:rtl)
             var pct = Math.min(100, Math.round((cur / COMBAT_MAX_RAD) * 100));
             fill.style.width = pct + '%';
-            fill.className = 'hp-bar-fill ' +
-                (cur <= 250 ? 'hp-high' : cur <= 500 ? 'hp-mid' : 'hp-low');
+            // Color scales red as radiation increases
+            if (cur <= 250) {
+                fill.style.background = 'rgba(255,193,7,0.7)';
+                fill.style.boxShadow  = '0 0 6px rgba(255,193,7,0.5)';
+            } else if (cur <= 600) {
+                fill.style.background = 'rgba(255,107,107,0.7)';
+                fill.style.boxShadow  = '0 0 6px rgba(255,107,107,0.5)';
+            } else {
+                fill.style.background = 'rgba(200,0,0,0.9)';
+                fill.style.boxShadow  = '0 0 8px rgba(200,0,0,0.7)';
+            }
         }
         if (note) note.style.display = cur > 0 ? 'block' : 'none';
+
+        // Update the HP bar rad zone overlay (anti-health visual)
+        var radZone = document.getElementById('hpBarRadZone');
+        if (radZone) {
+            var radPct = Math.min(100, Math.round((cur / COMBAT_MAX_RAD) * 100));
+            radZone.style.width = radPct + '%';
+        }
+
         // Also update temp HP display in case max HP changed
         refreshTempHpCombatDisplay();
     }
@@ -3845,6 +4249,13 @@
         if (val !== null) onOk(val);
     }
 
+    // ── FLOATING DICE ROLLER TOGGLE ───────────────────────────────────────────
+    window.toggleDiceRollerOverlay = function() {
+        var panel = document.getElementById('diceRollerOverlayPanel');
+        if (!panel) return;
+        panel.classList.toggle('open');
+    };
+
     // ── INIT VITALS ───────────────────────────────────────────────────────────
     function initVitalsCombat() {
         loadRadCombat();
@@ -3853,6 +4264,8 @@
         refreshApCombatDisplay();
         refreshTempHpCombatDisplay();
         loadEffectsCombat();
+        // Render initiative banner with whatever data is available at init time
+        if (activeCampaign) renderInitiativeBanner(activeCampaign);
     }
 
     // Reload effects when stats.html updates localStorage (they share the same keys)
@@ -3868,6 +4281,13 @@
             loadCritCombat();
             refreshAcCombatDisplay();
             loadEffectsCombat();
+        }
+        // Re-render inventory tab when vault_inventory changes (inventory.html sync)
+        if (e.key === 'vault_inventory' || e.key === 'vault_equipment') {
+            if (activeCampaign) {
+                renderInventory(activeCampaign);
+                updateEquipmentPanel(activeCampaign);
+            }
         }
     });
     </script>
@@ -4223,10 +4643,14 @@
             renderCombat();
             // Re-render left-panel stats and abilities tab with fresh live data
             if (handle === _myHandle) {
-                if (typeof renderStats === 'function')           renderStats();
-                if (typeof renderAbilities === 'function')       renderAbilities();
-                if (typeof refreshApCombatDisplay === 'function') refreshApCombatDisplay();
+                if (typeof renderStats === 'function')               renderStats();
+                if (typeof renderAbilities === 'function')           renderAbilities();
+                if (typeof refreshApCombatDisplay === 'function')    refreshApCombatDisplay();
                 if (typeof refreshTempHpCombatDisplay === 'function') refreshTempHpCombatDisplay();
+                // Refresh initiative banner whenever SPECIAL data updates
+                if (typeof renderInitiativeBanner === 'function' && activeCampaign) {
+                    renderInitiativeBanner(activeCampaign);
+                }
             }
         }
 
