@@ -1778,6 +1778,12 @@
                         <div class="hp-bar-rad-zone" id="hpBarRadZone" role="presentation" aria-hidden="true"></div>
                     </div>
                 </div>
+                <!-- Temp HP bar (blue, sits adjacent to HP bar) -->
+                <div id="tempHpBarWrap" class="hp-bar-wrap" style="margin-top:2px;display:none;">
+                    <div class="hp-bar-bg" style="height:4px;">
+                        <div id="tempHpBarFill" class="hp-bar-fill" style="width:0%;background:#60a5fa;box-shadow:0 0 6px rgba(96,165,250,0.6);"></div>
+                    </div>
+                </div>
 
                 <!-- Quick HP Buttons -->
                 <div class="hp-controls">
@@ -1844,10 +1850,25 @@
 
                 <!-- Temp HP Controls -->
                 <div class="panel-title" style="margin-top:14px;">💊 Temporary HP</div>
-                <div class="hp-input-row">
-                    <button class="hp-update-btn" onclick="addTempHpCombat()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;flex:1;">+Temp HP</button>
-                    <button class="hp-update-btn" onclick="removeTempHpCombat()" style="border-color:rgba(255,107,107,0.5);color:#ff6b6b;flex:1;">−Temp HP</button>
+                <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;">
+                    <span style="color:#60a5fa;font-weight:bold;letter-spacing:1px;">TEMP HP</span>
+                    <span style="color:var(--vault-green);">Current: <span id="tempHpCurrentDisplay">0</span></span>
                 </div>
+                <div class="hp-controls">
+                    <button class="hp-btn minus" onclick="adjustTempHpCombat(-5)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">− 5</button>
+                    <button class="hp-btn minus" onclick="adjustTempHpCombat(-1)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">− 1</button>
+                    <button class="hp-btn" onclick="adjustTempHpCombat(+1)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">+ 1</button>
+                    <button class="hp-btn" onclick="adjustTempHpCombat(+5)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">+ 5</button>
+                </div>
+                <div class="hp-input-row">
+                    <input type="number" id="tempHpAdjustInput" class="hp-manual-input" placeholder="±Amount" style="border-color:rgba(96,165,250,0.3);" title="Enter positive to add, negative to remove">
+                    <button class="hp-update-btn" onclick="applyTempHpAdjustment()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;">Apply ±</button>
+                </div>
+                <div class="hp-input-row">
+                    <input type="number" id="tempHpManualInput" class="hp-manual-input" placeholder="Override Temp HP" min="0" style="border-color:rgba(96,165,250,0.3);">
+                    <button class="hp-update-btn" onclick="setTempHpManual()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;">Override</button>
+                </div>
+                <div class="hp-success-msg" id="tempHpMsg">✓ TEMP HP UPDATED!</div>
 
                 <!-- Armor Class Section -->
                 <div class="panel-title" style="margin-top:14px;">🛡 Armor Class</div>
@@ -1961,7 +1982,7 @@
                         <!-- populated by JS -->
                     </div>
                 </div>
-                <div class="filter-bar" id="inventoryFilters">
+                <div class="filter-bar" id="inventoryFilters" style="display:none;">
                     <button class="filter-btn active" onclick="filterInventory('all', this)">All</button>
                     <button class="filter-btn" onclick="filterInventory('weapon', this)">Weapons</button>
                     <button class="filter-btn" onclick="filterInventory('armor', this)">Armor</button>
@@ -1970,7 +1991,7 @@
                     <button class="filter-btn" onclick="filterInventory('misc', this)">Misc</button>
                 </div>
                 <div class="inventory-grid" id="inventoryGrid">
-                    <div class="empty-state">Load a campaign to view inventory.</div>
+                    <div class="empty-state">No items in inventory.</div>
                 </div>
                 <div class="inventory-footer" id="inventoryFooter"></div>
             </div>
@@ -2772,10 +2793,16 @@
         var items = getDisplayInventory(campaign);
 
         if (items.length === 0) {
-            grid.innerHTML = '<div class="empty-state">No items in inventory. Add items on the Inventory page.</div>';
+            grid.innerHTML = '<div class="empty-state">No items in inventory.</div>';
             footer.innerHTML = '';
+            // Hide filter bar when inventory is empty — nothing to filter
+            var filters = document.getElementById('inventoryFilters');
+            if (filters) filters.style.display = 'none';
             return;
         }
+        // Restore filter bar visibility when items are present
+        var filters = document.getElementById('inventoryFilters');
+        if (filters) filters.style.display = '';
 
         // Use S.P.E.C.I.A.L. Strength from live playerData (single source of truth with stats.html)
         var liveData = (window._livePlayerCache && window._liveMyHandle)
@@ -3590,6 +3617,11 @@
     };
 
     // ── TEMP HP ───────────────────────────────────────────────────────────────
+    function getCombatMaxHp() {
+        var el = document.getElementById('hpMax');
+        return el ? (parseInt(el.textContent, 10) || 0) : 0;
+    }
+
     function getCombatTempHp() {
         var liveData = (window._livePlayerCache && window._liveMyHandle)
                        ? window._livePlayerCache[window._liveMyHandle] : null;
@@ -3598,41 +3630,61 @@
 
     function refreshTempHpCombatDisplay() {
         var val = getCombatTempHp();
-        var el  = document.getElementById('tempHpDisplay');
+        // Inline text "(+N temp)" in HP header
+        var el = document.getElementById('tempHpDisplay');
         if (el) el.textContent = val > 0 ? '(+' + val + ' temp)' : '';
+        // Dedicated current value display
+        var curEl = document.getElementById('tempHpCurrentDisplay');
+        if (curEl) curEl.textContent = val;
+        // Blue temp HP bar adjacent to HP bar (relative to max HP)
+        var myMaxHp = getCombatMaxHp();
+        var barFill = document.getElementById('tempHpBarFill');
+        var barWrap = document.getElementById('tempHpBarWrap');
+        if (barFill && barWrap) {
+            var pct = myMaxHp > 0 ? Math.min(100, Math.round((val / myMaxHp) * 100)) : 0;
+            barFill.style.width = pct + '%';
+            barWrap.style.display = val > 0 ? '' : 'none';
+        }
     }
 
-    window.addTempHpCombat = function() {
-        showCombatInputModal('Add Temporary HP', 'Amount of temporary HP to add:', function(v) {
-            var amount = parseInt(v);
-            if (!amount || amount <= 0) return;
-            var liveData = (window._livePlayerCache && window._liveMyHandle)
-                           ? window._livePlayerCache[window._liveMyHandle] : null;
-            if (liveData) {
-                liveData.tempHealth = (liveData.tempHealth || 0) + amount;
-                if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
-                    PlayerSync.push('tempHealth', liveData.tempHealth);
-                }
-                refreshTempHpCombatDisplay();
-            }
-        });
+    function _applyTempHpChange(newVal) {
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        if (!liveData) return;
+        liveData.tempHealth = Math.max(0, newVal);
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            PlayerSync.push('tempHealth', liveData.tempHealth);
+        }
+        refreshTempHpCombatDisplay();
+        flashVitalsMsg('tempHpMsg');
+    }
+
+    window.adjustTempHpCombat = function(amount) {
+        _applyTempHpChange(getCombatTempHp() + amount);
     };
 
-    window.removeTempHpCombat = function() {
-        showCombatInputModal('Remove Temporary HP', 'Amount of temporary HP to remove:', function(v) {
-            var amount = parseInt(v);
-            if (!amount || amount <= 0) return;
-            var liveData = (window._livePlayerCache && window._liveMyHandle)
-                           ? window._livePlayerCache[window._liveMyHandle] : null;
-            if (liveData) {
-                liveData.tempHealth = Math.max(0, (liveData.tempHealth || 0) - amount);
-                if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
-                    PlayerSync.push('tempHealth', liveData.tempHealth);
-                }
-                refreshTempHpCombatDisplay();
-            }
-        });
+    window.applyTempHpAdjustment = function() {
+        var inp = document.getElementById('tempHpAdjustInput');
+        if (!inp) return;
+        var nv = parseInt(inp.value);
+        if (inp.value === '' || isNaN(nv)) return;
+        inp.value = '';
+        _applyTempHpChange(getCombatTempHp() + nv);
     };
+
+    window.setTempHpManual = function() {
+        var inp = document.getElementById('tempHpManualInput');
+        if (!inp) return;
+        var nv = parseInt(inp.value);
+        if (inp.value === '' || isNaN(nv)) return;
+        inp.value = '';
+        _applyTempHpChange(nv);
+    };
+
+    // Legacy aliases — the new UI uses adjustTempHpCombat/applyTempHpAdjustment/setTempHpManual directly.
+    // These are kept so any existing external calls still work (adjust by 1 unit as a safe fallback).
+    window.addTempHpCombat    = function() { window.adjustTempHpCombat(1); };
+    window.removeTempHpCombat = function() { window.adjustTempHpCombat(-1); };
 
     // ── ACTION POINTS ─────────────────────────────────────────────────────────
     function getCombatMaxAp() {
@@ -4135,6 +4187,63 @@
 
                 statsRow.appendChild(hpBlock);
                 statsRow.appendChild(apBlock);
+
+                // Temp HP block (blue) — show only when > 0
+                var tempHp = typeof data.tempHealth === 'number' ? data.tempHealth : getCombatTempHp();
+                if (tempHp > 0) {
+                    var tempHpBlock = document.createElement('div');
+                    tempHpBlock.className = 'cpc-stat-block';
+                    var tempHpLabel = document.createElement('div');
+                    tempHpLabel.className = 'cpc-stat-label';
+                    tempHpLabel.style.color = '#60a5fa';
+                    tempHpLabel.textContent = 'TEMP HP';
+                    var tempHpVal = document.createElement('div');
+                    tempHpVal.className = 'cpc-stat-value';
+                    tempHpVal.style.color = '#60a5fa';
+                    tempHpVal.textContent = '+' + tempHp;
+                    var tempHpBarBg = document.createElement('div');
+                    tempHpBarBg.className = 'cpc-bar-bg';
+                    var tempHpFill = document.createElement('div');
+                    tempHpFill.className = 'cpc-bar-fill';
+                    tempHpFill.style.background = '#60a5fa';
+                    tempHpFill.style.boxShadow = '0 0 6px rgba(96,165,250,0.6)';
+                    var thpPct = maxHp > 0 ? Math.min(100, Math.round((tempHp / maxHp) * 100)) : 0;
+                    tempHpFill.style.width = thpPct + '%';
+                    tempHpBarBg.appendChild(tempHpFill);
+                    tempHpBlock.appendChild(tempHpLabel);
+                    tempHpBlock.appendChild(tempHpVal);
+                    tempHpBlock.appendChild(tempHpBarBg);
+                    statsRow.appendChild(tempHpBlock);
+                }
+
+                // Radiation block (red) — show only when > 0
+                var rad = typeof data.radiation === 'number' ? data.radiation :
+                          parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
+                if (rad > 0) {
+                    var radBlock = document.createElement('div');
+                    radBlock.className = 'cpc-stat-block';
+                    var radLabel = document.createElement('div');
+                    radLabel.className = 'cpc-stat-label';
+                    radLabel.style.color = '#ef4444';
+                    radLabel.textContent = '☢ RAD';
+                    var radVal = document.createElement('div');
+                    radVal.className = 'cpc-stat-value';
+                    radVal.style.color = '#ef4444';
+                    radVal.textContent = rad + ' / 1000';
+                    var radBarBg = document.createElement('div');
+                    radBarBg.className = 'cpc-bar-bg';
+                    var radFill = document.createElement('div');
+                    radFill.className = 'cpc-bar-fill';
+                    radFill.style.background = '#ef4444';
+                    radFill.style.boxShadow = '0 0 6px rgba(239,68,68,0.6)';
+                    radFill.style.width = Math.min(100, Math.round((rad / 1000) * 100)) + '%';
+                    radBarBg.appendChild(radFill);
+                    radBlock.appendChild(radLabel);
+                    radBlock.appendChild(radVal);
+                    radBlock.appendChild(radBarBg);
+                    statsRow.appendChild(radBlock);
+                }
+
                 card.appendChild(statsRow);
 
                 // S.P.E.C.I.A.L. row
