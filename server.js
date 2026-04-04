@@ -88,6 +88,7 @@ function saveSessionToDisk(sessionCode, session) {
     sessionCode,
     campaignId: session.campaignId || null,
     players,
+    pools: session.pools || { enemies: [], items: [], recipes: [], perks: [] },
     savedAt: new Date().toISOString()
   };
   const file = path.join(CAMPAIGNS_DIR, sessionCode + '.json');
@@ -134,6 +135,15 @@ function loadSessionsFromDisk() {
             data: Object.assign(defaultPlayerData(), playerData)
           };
         }
+      }
+      // Restore resource pools if present in the saved file
+      if (data.pools && typeof data.pools === 'object') {
+        session.pools = {
+          enemies: Array.isArray(data.pools.enemies) ? data.pools.enemies : [],
+          items:   Array.isArray(data.pools.items)   ? data.pools.items   : [],
+          recipes: Array.isArray(data.pools.recipes) ? data.pools.recipes : [],
+          perks:   Array.isArray(data.pools.perks)   ? data.pools.perks   : []
+        };
       }
       console.log(`[persist] Loaded session '${code}' (${Object.keys(data.players || {}).length} player(s)) from ${file}`);
     } catch (err) {
@@ -195,6 +205,36 @@ app.post('/api/campaigns/save', (_req, res) => {
   res.json({ ok: true, savedAt: new Date().toISOString() });
 });
 
+// ── Campaign resource pool endpoints ──────────────────────────────────────────
+// GET  /api/campaigns/:code/pools        → return all pools for a session
+// PUT  /api/campaigns/:code/pools/:type  → replace a single pool array and save to disk
+
+const VALID_POOL_TYPES = new Set(['enemies', 'items', 'recipes', 'perks']);
+
+app.get('/api/campaigns/:code/pools', (req, res) => {
+  const code    = String(req.params.code || '').toUpperCase().trim();
+  const session = sessions[code];
+  if (!session) {
+    return res.json({ pools: { enemies: [], items: [], recipes: [], perks: [] } });
+  }
+  res.json({ pools: session.pools || { enemies: [], items: [], recipes: [], perks: [] } });
+});
+
+app.put('/api/campaigns/:code/pools/:type', (req, res) => {
+  const code    = String(req.params.code || '').toUpperCase().trim();
+  const type    = String(req.params.type || '').toLowerCase().trim();
+
+  if (!VALID_POOL_TYPES.has(type)) {
+    return res.status(400).json({ ok: false, error: 'Invalid pool type. Must be one of: ' + [...VALID_POOL_TYPES].join(', ') });
+  }
+
+  const session  = getOrCreateSession(code);
+  const poolData = req.body && Array.isArray(req.body.items) ? req.body.items : [];
+  session.pools[type] = poolData;
+  saveSessionToDisk(code, session);
+  res.json({ ok: true, type, count: poolData.length });
+});
+
 // ── In-memory session store ────────────────────────────────────────────────────
 //
 // sessions = {
@@ -205,10 +245,18 @@ app.post('/api/campaigns/save', (_req, res) => {
 //         socketId : string,
 //         data     : { xp, level, skills, perks, effects, hp, actionPoints, special }
 //       }
+//     },
+//     pools : {
+//       enemies  : [...],   // campaign enemy pool
+//       items    : [...],   // campaign item pool
+//       recipes  : [...],   // crafting recipe pool
+//       perks    : [...]    // custom perk pool
 //     }
 //   }
 // }
-const sessions = {};
+// Using Object.create(null) prevents prototype-pollution: a crafted '__proto__'
+// session code cannot modify Object.prototype.
+const sessions = Object.create(null);
 
 function getOrCreateSession(code) {
   if (!sessions[code]) {
@@ -218,11 +266,14 @@ function getOrCreateSession(code) {
       campaignId: null,
       players: {},
       combat: { active: false, round: 1, currentTurnIndex: 0, turnOrder: [] },
-      craftRequests: {}   // { [requestId]: craftRequestObject }
+      craftRequests: {},   // { [requestId]: craftRequestObject }
+      pools: { enemies: [], items: [], recipes: [], perks: [] }
     };
-  } else if (!sessions[code].craftRequests) {
-    // Back-fill for sessions created before this field existed
-    sessions[code].craftRequests = {};
+  } else {
+    // Back-fill for sessions created before these fields existed
+    const s = sessions[code];
+    if (!s.craftRequests) s.craftRequests = {};
+    if (!s.pools) s.pools = { enemies: [], items: [], recipes: [], perks: [] };
   }
   return sessions[code];
 }

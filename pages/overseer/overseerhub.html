@@ -654,6 +654,7 @@
     <button class="hub-tab-btn" data-tab="players" onclick="switchHubTab('players',this)" role="tab" aria-selected="false">&#x1F465; PLAYERS</button>
     <button class="hub-tab-btn" data-tab="enemies" onclick="switchHubTab('enemies',this)" role="tab" aria-selected="false">&#x1F479; ENEMIES</button>
     <button class="hub-tab-btn" data-tab="items"   onclick="switchHubTab('items',this)"   role="tab" aria-selected="false">&#x1F4E6; ITEMS</button>
+    <button class="hub-tab-btn" data-tab="perks"   onclick="switchHubTab('perks',this)"   role="tab" aria-selected="false">&#x2728; PERKS</button>
     <button class="hub-tab-btn" data-tab="combat"  onclick="switchHubTab('combat',this)"  role="tab" aria-selected="false">&#x2694; COMBAT</button>
 </div>
 
@@ -1041,7 +1042,7 @@
             <div class="panel">
                 <div class="panel-header">
                     <span class="panel-title">&#x1F4CB; ENEMY POOL</span>
-                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="epEnemyCount">4 entries</span>
+                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="epEnemyCount">0 entries</span>
                 </div>
                 <div class="panel-body">
                     <div class="ep-filter-row">
@@ -1066,34 +1067,7 @@
                         </select>
                     </div>
                     <div class="ep-enemy-list" id="epEnemyList">
-                        <div class="ep-enemy-list-item active" onclick="epSelectEnemy(this)" data-type="ghoul" data-diff="common">
-                            <div>
-                                <div class="ep-enemy-list-name">Feral Ghoul</div>
-                                <div class="ep-enemy-list-sub">GHOUL &#xB7; HP 30 &#xB7; AC 11</div>
-                            </div>
-                            <span class="ep-diff-badge ep-diff-common">COMMON</span>
-                        </div>
-                        <div class="ep-enemy-list-item" onclick="epSelectEnemy(this)" data-type="insect" data-diff="common">
-                            <div>
-                                <div class="ep-enemy-list-name">Radroach</div>
-                                <div class="ep-enemy-list-sub">INSECT &#xB7; HP 10 &#xB7; AC 9</div>
-                            </div>
-                            <span class="ep-diff-badge ep-diff-common">COMMON</span>
-                        </div>
-                        <div class="ep-enemy-list-item" onclick="epSelectEnemy(this)" data-type="human" data-diff="common">
-                            <div>
-                                <div class="ep-enemy-list-name">Raider</div>
-                                <div class="ep-enemy-list-sub">HUMAN &#xB7; HP 40 &#xB7; AC 12</div>
-                            </div>
-                            <span class="ep-diff-badge ep-diff-common">COMMON</span>
-                        </div>
-                        <div class="ep-enemy-list-item" onclick="epSelectEnemy(this)" data-type="super mutant" data-diff="uncommon">
-                            <div>
-                                <div class="ep-enemy-list-name">Super Mutant</div>
-                                <div class="ep-enemy-list-sub">SUPER MUTANT &#xB7; HP 80 &#xB7; AC 14</div>
-                            </div>
-                            <span class="ep-diff-badge ep-diff-uncommon">UNCOMMON</span>
-                        </div>
+                        <div style="padding:12px;font-size:11px;color:rgba(232,232,232,.4);text-align:center;">[ NO ENEMIES &#x2014; click + NEW ENEMY to add one ]</div>
                     </div>
                 </div>
             </div>
@@ -1243,7 +1217,7 @@
             <div class="panel">
                 <div class="panel-header">
                     <span class="panel-title">&#x1F4CB; ITEM DATABASE</span>
-                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="ipItemCount">4 entries</span>
+                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="ipItemCount">0 entries</span>
                 </div>
                 <div class="panel-body">
                     <div class="ip-filter-row">
@@ -1267,34 +1241,7 @@
                         </select>
                     </div>
                     <div class="ip-item-list" id="ipItemList">
-                        <div class="ip-item-list-row active" onclick="ipSelectItem(this)" data-type="weapon" data-rarity="common">
-                            <div>
-                                <div class="ip-item-list-name">10mm Pistol</div>
-                                <div class="ip-item-list-sub">WEAPON &#xB7; Wt 2.5 &#xB7; Val 75</div>
-                            </div>
-                            <span class="ip-rarity-badge ip-rarity-common">COMMON</span>
-                        </div>
-                        <div class="ip-item-list-row" onclick="ipSelectItem(this)" data-type="weapon" data-rarity="uncommon">
-                            <div>
-                                <div class="ip-item-list-name">Combat Rifle</div>
-                                <div class="ip-item-list-sub">WEAPON &#xB7; Wt 8 &#xB7; Val 350</div>
-                            </div>
-                            <span class="ip-rarity-badge ip-rarity-uncommon">UNCOMMON</span>
-                        </div>
-                        <div class="ip-item-list-row" onclick="ipSelectItem(this)" data-type="consumable" data-rarity="common">
-                            <div>
-                                <div class="ip-item-list-name">Stimpak</div>
-                                <div class="ip-item-list-sub">CONSUMABLE &#xB7; Wt 0.1 &#xB7; Val 75</div>
-                            </div>
-                            <span class="ip-rarity-badge ip-rarity-common">COMMON</span>
-                        </div>
-                        <div class="ip-item-list-row" onclick="ipSelectItem(this)" data-type="weapon" data-rarity="rare">
-                            <div>
-                                <div class="ip-item-list-name">Minigun</div>
-                                <div class="ip-item-list-sub">WEAPON &#xB7; Wt 27 &#xB7; Val 1200</div>
-                            </div>
-                            <span class="ip-rarity-badge ip-rarity-rare">RARE</span>
-                        </div>
+                        <div style="padding:12px;font-size:11px;color:rgba(232,232,232,.4);text-align:center;">[ NO ITEMS &#x2014; click + NEW ITEM to add one ]</div>
                     </div>
                 </div>
             </div>
@@ -1421,6 +1368,112 @@
     </div>
 </div><!-- /items page-content -->
 </div><!-- /hub-tab-items -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     PERKS TAB
+══════════════════════════════════════════════════════════════════ -->
+<div id="hub-tab-perks" class="hub-tab-panel" role="tabpanel">
+<div style="padding:20px 24px;max-width:1800px;margin:0 auto;">
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:14px;">
+        <button class="cmd-btn success" onclick="ppShowNewPerkForm()" title="Add a new custom perk to the pool">+ NEW PERK</button>
+        <button class="cmd-btn" onclick="ppExportPool()" title="Export perks pool as JSON">&#x2B07; EXPORT POOL</button>
+    </div>
+    <div class="ep-three-col">
+
+        <!-- COL 1: Perk List -->
+        <div>
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">&#x2728; PERK POOL</span>
+                    <span style="font-size:10px;color:rgba(232,232,232,.5);" id="ppPerkCount">0 entries</span>
+                </div>
+                <div class="panel-body">
+                    <div class="ep-filter-row">
+                        <input class="ep-filter-input" type="text" id="ppPerkSearch" placeholder="Search&#x2026;" oninput="ppFilterPerks()">
+                    </div>
+                    <div class="ep-enemy-list" id="ppPerkList">
+                        <div style="padding:12px;font-size:11px;color:rgba(232,232,232,.4);text-align:center;">[ NO PERKS &#x2014; click + NEW PERK to add one ]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 2: Perk Detail -->
+        <div>
+            <div class="panel" id="ppPerkDetailPanel">
+                <div class="panel-header">
+                    <span class="panel-title">&#x1F50E; PERK DETAILS &#x2014; <span id="ppDetailPerkName">&#x2014;</span></span>
+                    <div style="display:flex;gap:6px;">
+                        <button class="cmd-btn" onclick="ppEditPerk()">&#x270F; EDIT</button>
+                        <button class="cmd-btn danger" onclick="ppDeletePerk()">&#x1F5D1; DELETE</button>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="ep-stat-grid">
+                        <div class="ep-stat-box"><div class="ep-stat-box-label">Level Req</div><div class="ep-stat-box-val" id="ppDLvl">1</div></div>
+                        <div class="ep-stat-box"><div class="ep-stat-box-label">Rank</div><div class="ep-stat-box-val" id="ppDRank">1</div></div>
+                    </div>
+                    <div class="ep-detail-section">
+                        <div class="ep-detail-label">Description / Benefit</div>
+                        <div class="ep-detail-value" id="ppDDesc">&#x2014;</div>
+                    </div>
+                    <div class="ep-detail-section">
+                        <div class="ep-detail-label">Prerequisites</div>
+                        <div class="ep-detail-value" id="ppDPrereqs" style="color:rgba(232,232,232,.5);font-style:italic;">None.</div>
+                    </div>
+                    <div class="ep-detail-section">
+                        <div class="ep-detail-label">Notes</div>
+                        <div class="ep-detail-value" id="ppDNotes" style="color:rgba(232,232,232,.5);font-style:italic;">&#x2014;</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- COL 3: Perk Editor -->
+        <div>
+            <div class="panel" id="ppPerkEditorPanel">
+                <div class="panel-header">
+                    <span class="panel-title" id="ppEditorTitle">&#x270F; EDIT PERK</span>
+                    <button class="cmd-btn" onclick="ppCancelEdit()">&#x2715;</button>
+                </div>
+                <div class="panel-body">
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Perk Name *</label>
+                        <input class="ep-form-input" type="text" id="ppEditName" placeholder="e.g. Rad Resistance">
+                    </div>
+                    <div class="ep-two-col-form">
+                        <div class="ep-form-group">
+                            <label class="ep-form-label">Level Req</label>
+                            <input class="ep-form-input" type="number" id="ppEditLvl" value="1" min="1">
+                        </div>
+                        <div class="ep-form-group">
+                            <label class="ep-form-label">Rank</label>
+                            <input class="ep-form-input" type="number" id="ppEditRank" value="1" min="1">
+                        </div>
+                    </div>
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Description / Benefit</label>
+                        <textarea class="ep-form-textarea" id="ppEditDesc" placeholder="What does this perk do?"></textarea>
+                    </div>
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Prerequisites</label>
+                        <input class="ep-form-input" type="text" id="ppEditPrereqs" placeholder="e.g. Endurance 5, Level 4">
+                    </div>
+                    <div class="ep-form-group">
+                        <label class="ep-form-label">Notes</label>
+                        <textarea class="ep-form-textarea" id="ppEditNotes" placeholder="Overseer notes&#x2026;"></textarea>
+                    </div>
+                    <div class="ep-form-actions">
+                        <button class="cmd-btn danger" onclick="ppCancelEdit()">CANCEL</button>
+                        <button class="cmd-btn success" onclick="ppSavePerk()">&#x1F4BE; SAVE PERK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div><!-- /perks page-content -->
+</div><!-- /hub-tab-perks -->
 
 <!-- ══════════════════════════════════════════════════════════════════
      COMBAT TAB
@@ -1930,6 +1983,11 @@
         renderCustomEnemyList();
         populateXpTargetDropdown();
         renderConditionTargets();
+        // Load persistent resource pools for this campaign from the server
+        var sessionCode = _campaignId.toUpperCase();
+        if (typeof window._loadEnemyPool === 'function') window._loadEnemyPool(sessionCode);
+        if (typeof window._loadItemPool  === 'function') window._loadItemPool(sessionCode);
+        if (typeof window._loadPerkPool  === 'function') window._loadPerkPool(sessionCode);
     }
 
     function mergePlayerHp(){
@@ -4517,57 +4575,211 @@
 <script>
 (function() {
     var _epEnemies = [];
+    var _epCurrentId = null; // id of the currently selected enemy
 
-    window.epSelectEnemy = function(el) {
-        document.querySelectorAll('.ep-enemy-list-item').forEach(function(i){ i.classList.remove('active'); });
-        el.classList.add('active');
-        var name = el.querySelector('.ep-enemy-list-name').textContent;
-        document.getElementById('epDetailEnemyName').textContent = name.toUpperCase();
-        document.getElementById('epEditName').value = name;
-    };
+    function epGetSessionCode() {
+        return (localStorage.getItem('PIPBOY_SESSION_CODE') || 'VAULT01').toUpperCase().trim();
+    }
 
-    window.epFilterEnemies = function() {
-        var q = document.getElementById('epEnemySearch').value.toLowerCase();
-        var t = document.getElementById('epTypeFilter').value;
-        var d = document.getElementById('epDiffFilter').value;
-        document.querySelectorAll('.ep-enemy-list-item').forEach(function(item) {
-            var nm = item.querySelector('.ep-enemy-list-name').textContent.toLowerCase();
-            var tp = item.getAttribute('data-type') || '';
-            var df = item.getAttribute('data-diff') || '';
-            var show = nm.includes(q) && (t === '' || tp === t) && (d === '' || df === d);
-            item.style.display = show ? '' : 'none';
+    function epEscHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Autosave enemies pool to server ──────────────────────────────────────
+    function epAutoSave() {
+        var code = epGetSessionCode();
+        fetch('/api/campaigns/' + code + '/pools/enemies', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: _epEnemies })
+        }).catch(function(e) { console.warn('[epAutoSave] failed:', e.message); });
+    }
+
+    // ── Dynamic list rendering ────────────────────────────────────────────────
+    function epRenderList() {
+        var listEl  = document.getElementById('epEnemyList');
+        var countEl = document.getElementById('epEnemyCount');
+        if (!listEl) return;
+
+        var q = (document.getElementById('epEnemySearch') || {value:''}).value.toLowerCase();
+        var t = (document.getElementById('epTypeFilter')  || {value:''}).value;
+        var d = (document.getElementById('epDiffFilter')  || {value:''}).value;
+
+        var filtered = _epEnemies.filter(function(e) {
+            return (!q || e.name.toLowerCase().indexOf(q) !== -1)
+                && (!t || e.type === t)
+                && (!d || e.difficulty === d);
         });
+
+        if (countEl) countEl.textContent = _epEnemies.length + ' entr' + (_epEnemies.length !== 1 ? 'ies' : 'y');
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<div style="padding:12px;font-size:11px;color:rgba(232,232,232,.4);text-align:center;">[ NO ENEMIES &#x2014; click + NEW ENEMY to add one ]</div>';
+            return;
+        }
+
+        var diffClass = { common:'ep-diff-common', uncommon:'ep-diff-uncommon', rare:'ep-diff-rare', legendary:'ep-diff-legendary' };
+        var html = '';
+        filtered.forEach(function(e) {
+            var isActive = e.id === _epCurrentId;
+            var dc = diffClass[e.difficulty] || 'ep-diff-common';
+            html += '<div class="ep-enemy-list-item' + (isActive ? ' active' : '') + '"'
+                + ' onclick="epSelectEnemy(\'' + epEscHtml(e.id) + '\')"'
+                + ' data-type="' + epEscHtml(e.type) + '"'
+                + ' data-diff="' + epEscHtml(e.difficulty) + '">'
+                + '<div>'
+                + '<div class="ep-enemy-list-name">' + epEscHtml(e.name) + '</div>'
+                + '<div class="ep-enemy-list-sub">' + epEscHtml((e.type||'').toUpperCase())
+                    + ' &#xB7; HP ' + (e.hp||0) + ' &#xB7; AC ' + (e.ac||0) + '</div>'
+                + '</div>'
+                + '<span class="ep-diff-badge ' + dc + '">' + epEscHtml((e.difficulty||'COMMON').toUpperCase()) + '</span>'
+                + '</div>';
+        });
+        listEl.innerHTML = html;
+    }
+
+    // ── Select an enemy by id ─────────────────────────────────────────────────
+    window.epSelectEnemy = function(id) {
+        _epCurrentId = id;
+        var e = null;
+        for (var i = 0; i < _epEnemies.length; i++) { if (_epEnemies[i].id === id) { e = _epEnemies[i]; break; } }
+        if (!e) return;
+
+        epRenderList();
+
+        // Populate detail panel
+        var nameEl = document.getElementById('epDetailEnemyName'); if (nameEl) nameEl.textContent = e.name.toUpperCase();
+        var hpEl   = document.getElementById('epDHP');    if (hpEl)   hpEl.textContent   = e.hp   || 0;
+        var mhpEl  = document.getElementById('epDMaxHP'); if (mhpEl)  mhpEl.textContent  = e.hp   || 0;
+        var acEl   = document.getElementById('epDAC');    if (acEl)   acEl.textContent   = e.ac   || 0;
+        var initEl = document.getElementById('epDInit');  if (initEl) initEl.textContent = e.initiative || 0;
+        var typeEl = document.getElementById('epDType');  if (typeEl) typeEl.textContent = (e.type||'').toUpperCase();
+        var diffEl = document.getElementById('epDDiff');  if (diffEl) diffEl.textContent = (e.difficulty||'').toUpperCase();
+        var descEl = document.getElementById('epDDesc');  if (descEl) descEl.textContent = e.description || '\u2014';
+        var notEl  = document.getElementById('epDNotes'); if (notEl)  notEl.textContent  = e.notes || '\u2014';
+
+        var abEl = document.getElementById('epDAbilities');
+        if (abEl) {
+            abEl.innerHTML = '';
+            (e.abilities || []).forEach(function(a) {
+                var span = document.createElement('span');
+                span.className = 'ep-tag perk';
+                span.textContent = a;
+                abEl.appendChild(span);
+            });
+        }
+        var lootEl = document.getElementById('epDLoot');
+        if (lootEl) {
+            lootEl.innerHTML = '';
+            (e.loot || []).forEach(function(l) {
+                var span = document.createElement('span');
+                span.className = 'ep-tag loot';
+                span.textContent = l;
+                lootEl.appendChild(span);
+            });
+        }
     };
+
+    window.epFilterEnemies = function() { epRenderList(); };
 
     window.epShowNewEnemyForm = function() {
+        _epCurrentId = null;
         document.getElementById('epEditorTitle').textContent = '+ NEW ENEMY';
         ['epEditName','epEditAbilities','epEditLoot','epEditDesc','epEditNotes','epEditDmg'].forEach(function(id){
-            var el = document.getElementById(id);
-            if (el) el.value = '';
+            var el = document.getElementById(id); if (el) el.value = '';
         });
-        var hp = document.getElementById('epEditHP'); if (hp) hp.value = 20;
-        var ac = document.getElementById('epEditAC'); if (ac) ac.value = 10;
+        var hp = document.getElementById('epEditHP');   if (hp)   hp.value   = 20;
+        var ac = document.getElementById('epEditAC');   if (ac)   ac.value   = 10;
         var init = document.getElementById('epEditInit'); if (init) init.value = 5;
+        var tp = document.getElementById('epEditType'); if (tp)   tp.value   = 'human';
+        var df = document.getElementById('epEditDiff'); if (df)   df.value   = 'common';
     };
 
     window.epEditEnemy = function() {
-        var name = document.getElementById('epDetailEnemyName').textContent;
-        document.getElementById('epEditorTitle').textContent = '&#x270F; EDIT &#x2014; ' + name;
+        if (!_epCurrentId) { epShowToast('Select an enemy first.', true); return; }
+        var e = null;
+        for (var i = 0; i < _epEnemies.length; i++) { if (_epEnemies[i].id === _epCurrentId) { e = _epEnemies[i]; break; } }
+        if (!e) return;
+
+        var titleEl = document.getElementById('epEditorTitle'); if (titleEl) titleEl.textContent = '\u270F EDIT \u2014 ' + e.name;
+        var n  = document.getElementById('epEditName');       if (n)  n.value  = e.name        || '';
+        var tp = document.getElementById('epEditType');       if (tp) tp.value = e.type         || 'human';
+        var df = document.getElementById('epEditDiff');       if (df) df.value = e.difficulty   || 'common';
+        var hp = document.getElementById('epEditHP');         if (hp) hp.value = e.hp           || 20;
+        var ac = document.getElementById('epEditAC');         if (ac) ac.value = e.ac           || 10;
+        var init = document.getElementById('epEditInit');     if (init) init.value = e.initiative || 5;
+        var dmg = document.getElementById('epEditDmg');       if (dmg) dmg.value = e.damage     || '';
+        var ab  = document.getElementById('epEditAbilities'); if (ab)  ab.value  = (e.abilities||[]).join(', ');
+        var lo  = document.getElementById('epEditLoot');      if (lo)  lo.value  = (e.loot||[]).join(', ');
+        var ds  = document.getElementById('epEditDesc');      if (ds)  ds.value  = e.description || '';
+        var nt  = document.getElementById('epEditNotes');     if (nt)  nt.value  = e.notes       || '';
     };
 
     window.epCancelEdit = function() { /* both panels remain visible */ };
 
     window.epSaveEnemy = function() {
-        var name = document.getElementById('epEditName').value.trim();
+        var nameEl = document.getElementById('epEditName');
+        var name   = nameEl ? nameEl.value.trim() : '';
         if (!name) { epShowToast('Enemy name is required.', true); return; }
-        epShowToast('Enemy "' + name + '" saved. (Placeholder &#x2014; logic to wire later)');
+
+        var hp   = parseInt((document.getElementById('epEditHP')   || {value:'20'}).value,  10) || 20;
+        var ac   = parseInt((document.getElementById('epEditAC')   || {value:'10'}).value,  10) || 10;
+        var init = parseInt((document.getElementById('epEditInit') || {value:'5'}).value,   10) || 5;
+        var type = (document.getElementById('epEditType') || {value:'human'}).value     || 'human';
+        var diff = (document.getElementById('epEditDiff') || {value:'common'}).value    || 'common';
+        var dmg  = ((document.getElementById('epEditDmg')         || {value:''}).value   || '').trim();
+        var abRaw   = (document.getElementById('epEditAbilities')  || {value:''}).value  || '';
+        var lootRaw = (document.getElementById('epEditLoot')       || {value:''}).value  || '';
+        var desc = ((document.getElementById('epEditDesc')         || {value:''}).value  || '').trim();
+        var notes = ((document.getElementById('epEditNotes')       || {value:''}).value  || '').trim();
+
+        var abilities = abRaw   ? abRaw.split(',').map(function(s){return s.trim();}).filter(Boolean)   : [];
+        var loot      = lootRaw ? lootRaw.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+
+        if (_epCurrentId) {
+            // Update existing enemy
+            for (var i = 0; i < _epEnemies.length; i++) {
+                if (_epEnemies[i].id === _epCurrentId) {
+                    _epEnemies[i] = {
+                        id: _epCurrentId, name: name, type: type, difficulty: diff,
+                        hp: hp, ac: ac, initiative: init, damage: dmg,
+                        abilities: abilities, loot: loot, description: desc, notes: notes,
+                        source: _epEnemies[i].source || 'custom'
+                    };
+                    break;
+                }
+            }
+        } else {
+            // Create new enemy
+            var newId = 'enemy_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+            _epEnemies.push({
+                id: newId, name: name, type: type, difficulty: diff,
+                hp: hp, ac: ac, initiative: init, damage: dmg,
+                abilities: abilities, loot: loot, description: desc, notes: notes,
+                source: 'custom'
+            });
+            _epCurrentId = newId;
+        }
+
+        epAutoSave();
+        epRenderList();
+        window.epSelectEnemy(_epCurrentId);
+        epShowToast('Enemy "' + name + '" saved.');
     };
 
     window.epDeleteEnemy = function() {
-        var name = document.getElementById('epDetailEnemyName').textContent;
-        if (confirm('Delete "' + name + '"? (Placeholder &#x2014; not wired yet)')) {
-            epShowToast('"' + name + '" deleted. (Placeholder)');
-        }
+        if (!_epCurrentId) { epShowToast('Select an enemy first.', true); return; }
+        var eName = '';
+        for (var i = 0; i < _epEnemies.length; i++) { if (_epEnemies[i].id === _epCurrentId) { eName = _epEnemies[i].name; break; } }
+        if (!confirm('Delete "' + eName + '"? This cannot be undone.')) return;
+
+        _epEnemies = _epEnemies.filter(function(x) { return x.id !== _epCurrentId; });
+        _epCurrentId = null;
+        epAutoSave();
+        epRenderList();
+        epShowToast('"' + eName + '" deleted.');
     };
 
     window.epExportPool = function() {
@@ -4580,6 +4792,20 @@
             URL.revokeObjectURL(url);
             epShowToast('Enemy pool exported successfully.');
         } catch(e) { epShowToast('Export failed: ' + e.message, true); }
+    };
+
+    // ── Load pool from server ─────────────────────────────────────────────────
+    window._loadEnemyPool = function(code) {
+        fetch('/api/campaigns/' + code + '/pools')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data && data.pools && Array.isArray(data.pools.enemies)) {
+                    _epEnemies = data.pools.enemies;
+                    _epCurrentId = null;
+                    epRenderList();
+                }
+            })
+            .catch(function(e) { console.warn('[epLoadPool] failed:', e.message); });
     };
 
     function epShowToast(msg, isError) {
@@ -4599,56 +4825,201 @@
 <script>
 (function() {
     var _ipItems = [];
+    var _ipCurrentId = null; // id of currently selected item
 
-    window.ipSelectItem = function(el) {
-        document.querySelectorAll('.ip-item-list-row').forEach(function(i){ i.classList.remove('active'); });
-        el.classList.add('active');
-        var name = el.querySelector('.ip-item-list-name').textContent;
-        document.getElementById('ipDetailItemName').textContent = name.toUpperCase();
-        document.getElementById('ipEditName').value = name;
-    };
+    function ipGetSessionCode() {
+        return (localStorage.getItem('PIPBOY_SESSION_CODE') || 'VAULT01').toUpperCase().trim();
+    }
 
-    window.ipFilterItems = function() {
-        var q = document.getElementById('ipItemSearch').value.toLowerCase();
-        var t = document.getElementById('ipTypeFilter').value;
-        var r = document.getElementById('ipRarityFilter').value;
-        document.querySelectorAll('.ip-item-list-row').forEach(function(item) {
-            var nm = item.querySelector('.ip-item-list-name').textContent.toLowerCase();
-            var tp = item.getAttribute('data-type') || '';
-            var ry = item.getAttribute('data-rarity') || '';
-            var show = nm.includes(q) && (t === '' || tp === t) && (r === '' || ry === r);
-            item.style.display = show ? '' : 'none';
+    function ipEscHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Autosave items pool to server ─────────────────────────────────────────
+    function ipAutoSave() {
+        var code = ipGetSessionCode();
+        fetch('/api/campaigns/' + code + '/pools/items', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: _ipItems })
+        }).catch(function(e) { console.warn('[ipAutoSave] failed:', e.message); });
+    }
+
+    // ── Dynamic list rendering ────────────────────────────────────────────────
+    function ipRenderList() {
+        var listEl  = document.getElementById('ipItemList');
+        var countEl = document.getElementById('ipItemCount');
+        if (!listEl) return;
+
+        var q = (document.getElementById('ipItemSearch')   || {value:''}).value.toLowerCase();
+        var t = (document.getElementById('ipTypeFilter')   || {value:''}).value;
+        var r = (document.getElementById('ipRarityFilter') || {value:''}).value;
+
+        var filtered = _ipItems.filter(function(item) {
+            return (!q || item.name.toLowerCase().indexOf(q) !== -1)
+                && (!t || item.type === t)
+                && (!r || item.rarity === r);
         });
+
+        if (countEl) countEl.textContent = _ipItems.length + ' entr' + (_ipItems.length !== 1 ? 'ies' : 'y');
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<div style="padding:12px;font-size:11px;color:rgba(232,232,232,.4);text-align:center;">[ NO ITEMS &#x2014; click + NEW ITEM to add one ]</div>';
+            return;
+        }
+
+        var rarityClass = { common:'ip-rarity-common', uncommon:'ip-rarity-uncommon', rare:'ip-rarity-rare', legendary:'ip-rarity-legendary' };
+        var html = '';
+        filtered.forEach(function(item) {
+            var isActive = item.id === _ipCurrentId;
+            var rc = rarityClass[item.rarity] || 'ip-rarity-common';
+            html += '<div class="ip-item-list-row' + (isActive ? ' active' : '') + '"'
+                + ' onclick="ipSelectItem(\'' + ipEscHtml(item.id) + '\')"'
+                + ' data-type="' + ipEscHtml(item.type) + '"'
+                + ' data-rarity="' + ipEscHtml(item.rarity) + '">'
+                + '<div>'
+                + '<div class="ip-item-list-name">' + ipEscHtml(item.name) + '</div>'
+                + '<div class="ip-item-list-sub">' + ipEscHtml((item.type||'').toUpperCase())
+                    + ' &#xB7; Wt ' + (item.weight||0) + ' &#xB7; Val ' + (item.value||0) + '</div>'
+                + '</div>'
+                + '<span class="ip-rarity-badge ' + rc + '">' + ipEscHtml((item.rarity||'COMMON').toUpperCase()) + '</span>'
+                + '</div>';
+        });
+        listEl.innerHTML = html;
+    }
+
+    // ── Select an item by id ──────────────────────────────────────────────────
+    window.ipSelectItem = function(id) {
+        _ipCurrentId = id;
+        var item = null;
+        for (var i = 0; i < _ipItems.length; i++) { if (_ipItems[i].id === id) { item = _ipItems[i]; break; } }
+        if (!item) return;
+
+        ipRenderList();
+
+        // Populate detail panel
+        var nameEl = document.getElementById('ipDetailItemName'); if (nameEl) nameEl.textContent = item.name.toUpperCase();
+        var wEl    = document.getElementById('ipDWeight');  if (wEl)    wEl.textContent    = item.weight   || 0;
+        var vEl    = document.getElementById('ipDValue');   if (vEl)    vEl.textContent    = item.value    || 0;
+        var dmgEl  = document.getElementById('ipDDmg');     if (dmgEl)  dmgEl.textContent  = item.damage   || '\u2014';
+        var tEl    = document.getElementById('ipDType');    if (tEl)    tEl.textContent    = (item.type||'').toUpperCase();
+        var rEl    = document.getElementById('ipDRarity');  if (rEl)    rEl.textContent    = (item.rarity||'').toUpperCase();
+        var idEl   = document.getElementById('ipDID');      if (idEl)   idEl.textContent   = item.itemId   || item.id || '\u2014';
+        var descEl = document.getElementById('ipDDesc');    if (descEl) descEl.textContent = item.description || '\u2014';
+        var effEl  = document.getElementById('ipDEffects'); if (effEl)  effEl.textContent  = item.effects  || 'None.';
+        var notEl  = document.getElementById('ipDNotes');   if (notEl)  notEl.textContent  = item.notes    || '\u2014';
+
+        var propsEl = document.getElementById('ipDProperties');
+        if (propsEl) {
+            propsEl.innerHTML = '';
+            (item.properties || []).forEach(function(p) {
+                var span = document.createElement('span');
+                span.className = 'ip-tag';
+                span.textContent = p;
+                propsEl.appendChild(span);
+            });
+        }
     };
+
+    window.ipFilterItems = function() { ipRenderList(); };
 
     window.ipShowNewItemForm = function() {
+        _ipCurrentId = null;
         document.getElementById('ipEditorTitle').textContent = '+ NEW ITEM';
         ['ipEditName','ipEditID','ipEditDmg','ipEditProps','ipEditEffects','ipEditDesc','ipEditNotes'].forEach(function(id){
-            var el = document.getElementById(id);
-            if (el) el.value = '';
+            var el = document.getElementById(id); if (el) el.value = '';
         });
         var w = document.getElementById('ipEditWeight'); if (w) w.value = '0';
         var v = document.getElementById('ipEditValue');  if (v) v.value = '0';
+        var t = document.getElementById('ipEditType');   if (t) t.value = 'misc';
+        var r = document.getElementById('ipEditRarity'); if (r) r.value = 'common';
     };
 
     window.ipEditItem = function() {
-        var name = document.getElementById('ipDetailItemName').textContent;
-        document.getElementById('ipEditorTitle').textContent = '&#x270F; EDIT &#x2014; ' + name;
+        if (!_ipCurrentId) { ipShowToast('Select an item first.', true); return; }
+        var item = null;
+        for (var i = 0; i < _ipItems.length; i++) { if (_ipItems[i].id === _ipCurrentId) { item = _ipItems[i]; break; } }
+        if (!item) return;
+
+        var titleEl = document.getElementById('ipEditorTitle'); if (titleEl) titleEl.textContent = '\u270F EDIT \u2014 ' + item.name;
+        var n  = document.getElementById('ipEditName');    if (n)  n.value  = item.name         || '';
+        var iid = document.getElementById('ipEditID');     if (iid) iid.value = item.itemId     || '';
+        var t  = document.getElementById('ipEditType');    if (t)  t.value  = item.type          || 'misc';
+        var r  = document.getElementById('ipEditRarity');  if (r)  r.value  = item.rarity        || 'common';
+        var w  = document.getElementById('ipEditWeight');  if (w)  w.value  = item.weight        || 0;
+        var v  = document.getElementById('ipEditValue');   if (v)  v.value  = item.value         || 0;
+        var dmg = document.getElementById('ipEditDmg');    if (dmg) dmg.value = item.damage      || '';
+        var pr  = document.getElementById('ipEditProps');  if (pr)  pr.value  = (item.properties||[]).join(', ');
+        var ef  = document.getElementById('ipEditEffects'); if (ef)  ef.value = item.effects     || '';
+        var ds  = document.getElementById('ipEditDesc');   if (ds)  ds.value  = item.description || '';
+        var nt  = document.getElementById('ipEditNotes');  if (nt)  nt.value  = item.notes       || '';
     };
 
     window.ipCancelEdit = function() { /* both panels visible */ };
 
     window.ipSaveItem = function() {
-        var name = document.getElementById('ipEditName').value.trim();
+        var nameEl = document.getElementById('ipEditName');
+        var name   = nameEl ? nameEl.value.trim() : '';
         if (!name) { ipShowToast('Item name is required.', true); return; }
-        ipShowToast('Item "' + name + '" saved. (Placeholder &#x2014; logic to wire later)');
+
+        var itemId   = ((document.getElementById('ipEditID')       || {value:''}).value || '').trim();
+        var type     = (document.getElementById('ipEditType')      || {value:'misc'}).value    || 'misc';
+        var rarity   = (document.getElementById('ipEditRarity')    || {value:'common'}).value  || 'common';
+        var weight   = parseFloat((document.getElementById('ipEditWeight')  || {value:'0'}).value)   || 0;
+        var value    = parseFloat((document.getElementById('ipEditValue')   || {value:'0'}).value)    || 0;
+        var damage   = ((document.getElementById('ipEditDmg')       || {value:''}).value  || '').trim();
+        var propsRaw = ((document.getElementById('ipEditProps')     || {value:''}).value  || '');
+        var effects  = ((document.getElementById('ipEditEffects')   || {value:''}).value  || '').trim();
+        var desc     = ((document.getElementById('ipEditDesc')      || {value:''}).value  || '').trim();
+        var notes    = ((document.getElementById('ipEditNotes')     || {value:''}).value  || '').trim();
+
+        var properties = propsRaw ? propsRaw.split(',').map(function(s){return s.trim();}).filter(Boolean) : [];
+
+        if (_ipCurrentId) {
+            // Update existing item
+            for (var i = 0; i < _ipItems.length; i++) {
+                if (_ipItems[i].id === _ipCurrentId) {
+                    _ipItems[i] = {
+                        id: _ipCurrentId, itemId: itemId || _ipCurrentId, name: name,
+                        type: type, rarity: rarity, weight: weight, value: value,
+                        damage: damage, properties: properties, effects: effects,
+                        description: desc, notes: notes,
+                        source: _ipItems[i].source || 'custom'
+                    };
+                    break;
+                }
+            }
+        } else {
+            // Create new item
+            var newId = 'item_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+            _ipItems.push({
+                id: newId, itemId: itemId || newId, name: name,
+                type: type, rarity: rarity, weight: weight, value: value,
+                damage: damage, properties: properties, effects: effects,
+                description: desc, notes: notes, source: 'custom'
+            });
+            _ipCurrentId = newId;
+        }
+
+        ipAutoSave();
+        ipRenderList();
+        window.ipSelectItem(_ipCurrentId);
+        ipShowToast('Item "' + name + '" saved.');
     };
 
     window.ipDeleteItem = function() {
-        var name = document.getElementById('ipDetailItemName').textContent;
-        if (confirm('Delete "' + name + '"? (Placeholder &#x2014; not wired yet)')) {
-            ipShowToast('"' + name + '" deleted. (Placeholder)');
-        }
+        if (!_ipCurrentId) { ipShowToast('Select an item first.', true); return; }
+        var iName = '';
+        for (var i = 0; i < _ipItems.length; i++) { if (_ipItems[i].id === _ipCurrentId) { iName = _ipItems[i].name; break; } }
+        if (!confirm('Delete "' + iName + '"? This cannot be undone.')) return;
+
+        _ipItems = _ipItems.filter(function(x) { return x.id !== _ipCurrentId; });
+        _ipCurrentId = null;
+        ipAutoSave();
+        ipRenderList();
+        ipShowToast('"' + iName + '" deleted.');
     };
 
     window.ipExportPool = function() {
@@ -4663,6 +5034,20 @@
         } catch(e) { ipShowToast('Export failed: ' + e.message, true); }
     };
 
+    // ── Load pool from server ─────────────────────────────────────────────────
+    window._loadItemPool = function(code) {
+        fetch('/api/campaigns/' + code + '/pools')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data && data.pools && Array.isArray(data.pools.items)) {
+                    _ipItems = data.pools.items;
+                    _ipCurrentId = null;
+                    ipRenderList();
+                }
+            })
+            .catch(function(e) { console.warn('[ipLoadPool] failed:', e.message); });
+    };
+
     function ipShowToast(msg, isError) {
         var t = document.getElementById('statusToast');
         if (!t) return;
@@ -4670,6 +5055,200 @@
         t.className = isError ? 'error visible' : 'visible';
         clearTimeout(t._ipTimer);
         t._ipTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
+    }
+}());
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     PERKS TAB JAVASCRIPT
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    var _ppPerks = [];
+    var _ppCurrentId = null; // id of currently selected perk
+
+    function ppGetSessionCode() {
+        return (localStorage.getItem('PIPBOY_SESSION_CODE') || 'VAULT01').toUpperCase().trim();
+    }
+
+    function ppEscHtml(s) {
+        return String(s == null ? '' : s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Autosave perks pool to server ─────────────────────────────────────────
+    function ppAutoSave() {
+        var code = ppGetSessionCode();
+        fetch('/api/campaigns/' + code + '/pools/perks', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items: _ppPerks })
+        }).catch(function(e) { console.warn('[ppAutoSave] failed:', e.message); });
+    }
+
+    // ── Dynamic list rendering ────────────────────────────────────────────────
+    function ppRenderList() {
+        var listEl  = document.getElementById('ppPerkList');
+        var countEl = document.getElementById('ppPerkCount');
+        if (!listEl) return;
+
+        var q = (document.getElementById('ppPerkSearch') || {value:''}).value.toLowerCase();
+
+        var filtered = _ppPerks.filter(function(p) {
+            return !q || p.name.toLowerCase().indexOf(q) !== -1;
+        });
+
+        if (countEl) countEl.textContent = _ppPerks.length + ' entr' + (_ppPerks.length !== 1 ? 'ies' : 'y');
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<div style="padding:12px;font-size:11px;color:rgba(232,232,232,.4);text-align:center;">[ NO PERKS &#x2014; click + NEW PERK to add one ]</div>';
+            return;
+        }
+
+        var html = '';
+        filtered.forEach(function(p) {
+            var isActive = p.id === _ppCurrentId;
+            html += '<div class="ep-enemy-list-item' + (isActive ? ' active' : '') + '"'
+                + ' onclick="ppSelectPerk(\'' + ppEscHtml(p.id) + '\')">'
+                + '<div>'
+                + '<div class="ep-enemy-list-name">' + ppEscHtml(p.name) + '</div>'
+                + '<div class="ep-enemy-list-sub">LVL REQ ' + (p.levelReq||1) + ' &#xB7; RANK ' + (p.rank||1) + '</div>'
+                + '</div>'
+                + '</div>';
+        });
+        listEl.innerHTML = html;
+    }
+
+    // ── Select a perk by id ───────────────────────────────────────────────────
+    window.ppSelectPerk = function(id) {
+        _ppCurrentId = id;
+        var p = null;
+        for (var i = 0; i < _ppPerks.length; i++) { if (_ppPerks[i].id === id) { p = _ppPerks[i]; break; } }
+        if (!p) return;
+
+        ppRenderList();
+
+        var nameEl   = document.getElementById('ppDetailPerkName'); if (nameEl)   nameEl.textContent   = p.name.toUpperCase();
+        var lvlEl    = document.getElementById('ppDLvl');           if (lvlEl)    lvlEl.textContent     = p.levelReq || 1;
+        var rankEl   = document.getElementById('ppDRank');          if (rankEl)   rankEl.textContent    = p.rank     || 1;
+        var descEl   = document.getElementById('ppDDesc');          if (descEl)   descEl.textContent    = p.description || '\u2014';
+        var prereqEl = document.getElementById('ppDPrereqs');       if (prereqEl) prereqEl.textContent  = p.prereqs  || 'None.';
+        var notEl    = document.getElementById('ppDNotes');         if (notEl)    notEl.textContent     = p.notes    || '\u2014';
+    };
+
+    window.ppFilterPerks = function() { ppRenderList(); };
+
+    window.ppShowNewPerkForm = function() {
+        _ppCurrentId = null;
+        var titleEl = document.getElementById('ppEditorTitle'); if (titleEl) titleEl.textContent = '+ NEW PERK';
+        ['ppEditName','ppEditDesc','ppEditPrereqs','ppEditNotes'].forEach(function(id){
+            var el = document.getElementById(id); if (el) el.value = '';
+        });
+        var lvl  = document.getElementById('ppEditLvl');  if (lvl)  lvl.value  = 1;
+        var rank = document.getElementById('ppEditRank'); if (rank) rank.value = 1;
+    };
+
+    window.ppEditPerk = function() {
+        if (!_ppCurrentId) { ppShowToast('Select a perk first.', true); return; }
+        var p = null;
+        for (var i = 0; i < _ppPerks.length; i++) { if (_ppPerks[i].id === _ppCurrentId) { p = _ppPerks[i]; break; } }
+        if (!p) return;
+
+        var titleEl = document.getElementById('ppEditorTitle'); if (titleEl) titleEl.textContent = '\u270F EDIT \u2014 ' + p.name;
+        var n  = document.getElementById('ppEditName');    if (n)  n.value  = p.name        || '';
+        var lv = document.getElementById('ppEditLvl');     if (lv) lv.value = p.levelReq    || 1;
+        var rk = document.getElementById('ppEditRank');    if (rk) rk.value = p.rank        || 1;
+        var ds = document.getElementById('ppEditDesc');    if (ds) ds.value = p.description || '';
+        var pr = document.getElementById('ppEditPrereqs'); if (pr) pr.value = p.prereqs     || '';
+        var nt = document.getElementById('ppEditNotes');   if (nt) nt.value = p.notes       || '';
+    };
+
+    window.ppCancelEdit = function() { /* both panels visible */ };
+
+    window.ppSavePerk = function() {
+        var nameEl = document.getElementById('ppEditName');
+        var name   = nameEl ? nameEl.value.trim() : '';
+        if (!name) { ppShowToast('Perk name is required.', true); return; }
+
+        var levelReq = parseInt((document.getElementById('ppEditLvl')     || {value:'1'}).value,  10) || 1;
+        var rank     = parseInt((document.getElementById('ppEditRank')    || {value:'1'}).value,  10) || 1;
+        var desc     = ((document.getElementById('ppEditDesc')    || {value:''}).value || '').trim();
+        var prereqs  = ((document.getElementById('ppEditPrereqs') || {value:''}).value || '').trim();
+        var notes    = ((document.getElementById('ppEditNotes')   || {value:''}).value || '').trim();
+
+        if (_ppCurrentId) {
+            for (var i = 0; i < _ppPerks.length; i++) {
+                if (_ppPerks[i].id === _ppCurrentId) {
+                    _ppPerks[i] = {
+                        id: _ppCurrentId, name: name, levelReq: levelReq, rank: rank,
+                        description: desc, prereqs: prereqs, notes: notes,
+                        source: _ppPerks[i].source || 'custom'
+                    };
+                    break;
+                }
+            }
+        } else {
+            var newId = 'perk_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+            _ppPerks.push({
+                id: newId, name: name, levelReq: levelReq, rank: rank,
+                description: desc, prereqs: prereqs, notes: notes, source: 'custom'
+            });
+            _ppCurrentId = newId;
+        }
+
+        ppAutoSave();
+        ppRenderList();
+        window.ppSelectPerk(_ppCurrentId);
+        ppShowToast('Perk "' + name + '" saved.');
+    };
+
+    window.ppDeletePerk = function() {
+        if (!_ppCurrentId) { ppShowToast('Select a perk first.', true); return; }
+        var pName = '';
+        for (var i = 0; i < _ppPerks.length; i++) { if (_ppPerks[i].id === _ppCurrentId) { pName = _ppPerks[i].name; break; } }
+        if (!confirm('Delete "' + pName + '"? This cannot be undone.')) return;
+
+        _ppPerks = _ppPerks.filter(function(x) { return x.id !== _ppCurrentId; });
+        _ppCurrentId = null;
+        ppAutoSave();
+        ppRenderList();
+        ppShowToast('"' + pName + '" deleted.');
+    };
+
+    window.ppExportPool = function() {
+        try {
+            var data = JSON.stringify(_ppPerks, null, 2);
+            var blob = new Blob([data], {type:'application/json'});
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url; a.download = 'perks-pool.json'; a.click();
+            URL.revokeObjectURL(url);
+            ppShowToast('Perks pool exported successfully.');
+        } catch(e) { ppShowToast('Export failed: ' + e.message, true); }
+    };
+
+    // ── Load pool from server ─────────────────────────────────────────────────
+    window._loadPerkPool = function(code) {
+        fetch('/api/campaigns/' + code + '/pools')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data && data.pools && Array.isArray(data.pools.perks)) {
+                    _ppPerks = data.pools.perks;
+                    _ppCurrentId = null;
+                    ppRenderList();
+                }
+            })
+            .catch(function(e) { console.warn('[ppLoadPool] failed:', e.message); });
+    };
+
+    function ppShowToast(msg, isError) {
+        var t = document.getElementById('statusToast');
+        if (!t) return;
+        t.textContent = msg;
+        t.className = isError ? 'error visible' : 'visible';
+        clearTimeout(t._ppTimer);
+        t._ppTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
     }
 }());
 </script>
