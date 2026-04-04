@@ -640,6 +640,7 @@
         <span id="campaignSessionBadge">● NO SESSION</span>
         <button class="cmd-btn campaign-start" id="btnStartCampaign" onclick="startCampaignSession()">[▶ START SESSION]</button>
         <button class="cmd-btn campaign-end"   id="btnEndCampaign"   onclick="endCampaignSession()"   style="display:none;">[■ END SESSION]</button>
+        <button class="cmd-btn success" onclick="saveCampaignToServer()" title="Save all campaign data to the server disk immediately">[💾 SAVE TO SERVER]</button>
         <button class="cmd-btn success" onclick="exportCampaign()">[SAVE CAMPAIGN]</button>
         <button class="cmd-btn success" onclick="handleStorageExport()">[EXPORT CAMPAIGN]</button>
         <input type="file" id="importFile" accept=".json" style="display:none;" onchange="handleImport(this)">
@@ -2545,6 +2546,24 @@
         if(!cid){addLog('No campaign loaded to export','red');return;}
         StorageManager.exportCampaign(cid);
         addLog('Campaign exported as JSON','green');
+    };
+
+    // Save all campaign data to the server disk immediately.
+    // Calls POST /api/campaigns/save which triggers saveAllSessionsToDisk() on the server.
+    window.saveCampaignToServer=function(){
+        var url=(localStorage.getItem('PIPBOY_SERVER_URL')||'')+'/api/campaigns/save';
+        fetch(url,{method:'POST',headers:{'Content-Type':'application/json'}})
+            .then(function(r){return r.json();})
+            .then(function(data){
+                if(data.ok){
+                    addLog('Campaign saved to server disk at '+data.savedAt,'green');
+                }else{
+                    addLog('Server save returned unexpected response','red');
+                }
+            })
+            .catch(function(err){
+                addLog('Server save failed: '+(err&&err.message?err.message:err),'red');
+            });
     };
 
     // Import campaign from JSON file

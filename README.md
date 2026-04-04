@@ -180,10 +180,60 @@ Settings are saved and synced across devices using your username.
 
 ## Data Persistence
 
-- **Auto-Save:** Game automatically saves every 30 seconds
-- **Export:** Download campaign as JSON backup
-- **Import:** Upload JSON to restore campaign
-- **Recovery:** System recovers from crashes automatically
+### Server-side autosave (new)
+
+All campaign and player data is now automatically saved to the **`campaigns/`** directory on the server as JSON files — one file per session code (e.g. `campaigns/SAFEHAVEN.json`).
+
+| When data is saved | How |
+|--------------------|-----|
+| **Server startup** | All `campaigns/*.json` files are loaded back into memory automatically |
+| **Every 5 minutes** | Periodic autosave runs in the background |
+| **Server shutdown** | All sessions are flushed to disk before the process exits (`SIGINT` / `SIGTERM`) |
+| **Manual save** | Click **[💾 SAVE TO SERVER]** in the Overseer console to save immediately |
+
+### First-run / demo campaigns
+
+On the very first run (no `campaigns/*.json` files exist yet), the server seeds two starter campaigns:
+
+| Session code | Campaign | Players |
+|---|---|---|
+| `VAULT01` | **Demo** | `test` (dev character) |
+| `SAFEHAVEN` | **Safe Haven** | David, Moe, Zach, Katie, Jade, Nikki |
+
+Players for the Safe Haven campaign start with default Fallout S.P.E.C.I.A.L. stats.  
+Once campaigns exist on disk, the seed step is skipped automatically.
+
+### Backing up campaign data
+
+Campaign files are **not committed to Git** by default (they are in `.gitignore`).  
+To back up your live campaigns, copy the `campaigns/` folder somewhere safe:
+
+```bash
+# Windows
+xcopy campaigns\ backup\campaigns\ /E /I
+
+# macOS / Linux
+cp -r campaigns/ ~/Desktop/vault215-backup/
+```
+
+You can also use the **[EXPORT CAMPAIGN]** button in the Overseer UI to download a portable JSON snapshot.
+
+### Restoring a campaign
+
+1. Place the `*.json` files back in the `campaigns/` directory.
+2. Restart the server — it will load them automatically.
+
+Alternatively, use **[IMPORT CAMPAIGN]** in the Overseer UI to restore a JSON backup into browser localStorage without restarting the server.
+
+### Client-side auto-save (existing)
+
+Each player's device also saves to **browser localStorage** via `StorageManager`:
+
+- Auto-saves every **30 seconds** in the Overseer UI
+- Saves on every major combat action
+- Saves on page unload (`beforeunload`)
+
+This means player data is doubly protected: once in the server-side `campaigns/` files and once in each browser's local storage.
 
 ## System Requirements
 

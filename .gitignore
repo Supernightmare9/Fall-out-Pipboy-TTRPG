@@ -9,3 +9,7 @@ dist/
 .DS_Store
 Thumbs.db
 *.log
+
+# Campaign data (auto-saved by server — use git to backup if desired)
+# Keep the directory itself tracked via campaigns/.gitkeep
+campaigns/*.json
