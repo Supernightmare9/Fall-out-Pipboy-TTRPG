@@ -254,7 +254,9 @@ app.put('/api/campaigns/:code/pools/:type', (req, res) => {
 //     }
 //   }
 // }
-const sessions = {};
+// Using Object.create(null) prevents prototype-pollution: a crafted '__proto__'
+// session code cannot modify Object.prototype.
+const sessions = Object.create(null);
 
 function getOrCreateSession(code) {
   if (!sessions[code]) {
