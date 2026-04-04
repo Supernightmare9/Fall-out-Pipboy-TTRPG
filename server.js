@@ -23,6 +23,7 @@ require('dotenv').config();
 const express   = require('express');
 const http      = require('http');
 const path      = require('path');
+const fs        = require('fs');
 const { Server } = require('socket.io');
 
 const PORT       = process.env.PORT       || 3000;
@@ -56,6 +57,124 @@ app.use(express.json());
 // Health-check endpoint (used by Render / Heroku uptime monitors)
 app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: Date.now() }));
 
+// ── Campaign persistence: disk-backed JSON storage ────────────────────────────
+//
+// All active sessions are written to campaigns/<SESSION_CODE>.json so that
+// campaign and player data survives server restarts.  Files are:
+//   • Loaded at startup (see loadSessionsFromDisk below)
+//   • Saved periodically (AUTOSAVE_INTERVAL_MS) while the server runs
+//   • Saved on graceful shutdown (SIGINT / SIGTERM)
+//   • Saved on demand via POST /api/campaigns/save (Overseer manual-save button)
+const CAMPAIGNS_DIR        = path.join(__dirname, 'campaigns');
+const AUTOSAVE_INTERVAL_MS = 5 * 60 * 1000; // every 5 minutes
+
+// Ensure the directory exists
+if (!fs.existsSync(CAMPAIGNS_DIR)) {
+  fs.mkdirSync(CAMPAIGNS_DIR, { recursive: true });
+}
+
+/**
+ * Persist a single session to campaigns/<CODE>.json.
+ * Socket IDs are runtime-only; only static player data is written.
+ * @param {string} sessionCode
+ * @param {object} session
+ */
+function saveSessionToDisk(sessionCode, session) {
+  const players = {};
+  for (const [handle, p] of Object.entries(session.players || {})) {
+    players[handle] = p.data;
+  }
+  const payload = {
+    sessionCode,
+    campaignId: session.campaignId || null,
+    players,
+    savedAt: new Date().toISOString()
+  };
+  const file = path.join(CAMPAIGNS_DIR, sessionCode + '.json');
+  try {
+    fs.writeFileSync(file, JSON.stringify(payload, null, 2));
+  } catch (err) {
+    console.error(`[persist] Failed to save session ${sessionCode}:`, err.message);
+  }
+}
+
+/**
+ * Save every active session to disk.
+ */
+function saveAllSessionsToDisk() {
+  for (const [code, session] of Object.entries(sessions)) {
+    saveSessionToDisk(code, session);
+  }
+  console.log('[persist] All sessions saved to disk.');
+}
+
+/**
+ * Load sessions from any *.json files found in campaigns/.
+ * Called once at startup before any sockets connect.
+ */
+function loadSessionsFromDisk() {
+  let files;
+  try {
+    files = fs.readdirSync(CAMPAIGNS_DIR).filter(f => f.endsWith('.json'));
+  } catch (_) {
+    return;
+  }
+
+  for (const file of files) {
+    try {
+      const raw     = fs.readFileSync(path.join(CAMPAIGNS_DIR, file), 'utf8');
+      const data    = JSON.parse(raw);
+      const code    = (data.sessionCode || file.replace('.json', '')).toUpperCase().trim();
+      const session = getOrCreateSession(code);
+      if (data.campaignId) session.campaignId = data.campaignId;
+      for (const [handle, playerData] of Object.entries(data.players || {})) {
+        if (!session.players[handle]) {
+          session.players[handle] = {
+            socketId: null,
+            data: Object.assign(defaultPlayerData(), playerData)
+          };
+        }
+      }
+      console.log(`[persist] Loaded session '${code}' (${Object.keys(data.players || {}).length} player(s)) from ${file}`);
+    } catch (err) {
+      console.error(`[persist] Failed to load ${file}:`, err.message);
+    }
+  }
+}
+
+/**
+ * On first run (no *.json files present), seed a demo campaign and the
+ * "Safe Haven" campaign so the Overseer has something to work with immediately.
+ * Existing files are never overwritten.
+ */
+function seedDefaultCampaignsIfNeeded() {
+  const existing = fs.readdirSync(CAMPAIGNS_DIR).filter(f => f.endsWith('.json'));
+  if (existing.length > 0) return; // campaigns already exist – skip seeding
+
+  // ── Demo campaign (VAULT01) uses the dev test player already in memory ──────
+  if (sessions[SEED_SESSION_CODE]) {
+    saveSessionToDisk(SEED_SESSION_CODE, sessions[SEED_SESSION_CODE]);
+    console.log(`[persist] Seeded demo campaign '${SEED_SESSION_CODE}'.`);
+  }
+
+  // ── Safe Haven campaign ─────────────────────────────────────────────────────
+  const SAFE_HAVEN_CODE    = 'SAFEHAVEN';
+  const SAFE_HAVEN_PLAYERS = ['David', 'Moe', 'Zach', 'Katie', 'Jade', 'Nikki'];
+  const safeHaven = getOrCreateSession(SAFE_HAVEN_CODE);
+  safeHaven.campaignId = 'safe-haven';
+  for (const name of SAFE_HAVEN_PLAYERS) {
+    const handle = name.toLowerCase();
+    if (!safeHaven.players[handle]) {
+      safeHaven.players[handle] = {
+        socketId: null,
+        data: Object.assign(defaultPlayerData(), { name })
+      };
+    }
+  }
+  saveSessionToDisk(SAFE_HAVEN_CODE, safeHaven);
+  console.log(`[persist] Seeded 'Safe Haven' campaign (${SAFE_HAVEN_PLAYERS.length} players).`);
+}
+
 // ── Campaign discovery endpoint ────────────────────────────────────────────────
 // Returns all sessions that currently have an active campaign so that the login
 // page can show players which campaigns they can join right now.
@@ -68,6 +187,12 @@ app.get('/api/campaigns', (_req, res) => {
       playerCount: Object.keys(s.players || {}).length
     }));
   res.json({ campaigns: active });
+});
+
+// ── Manual campaign save endpoint (called by the Overseer "Save to Server" button)
+app.post('/api/campaigns/save', (_req, res) => {
+  saveAllSessionsToDisk();
+  res.json({ ok: true, savedAt: new Date().toISOString() });
 });
 
 // ── In-memory session store ────────────────────────────────────────────────────
@@ -884,6 +1009,33 @@ io.on('connection', (socket) => {
 });
 
 // ── Start ──────────────────────────────────────────────────────────────────────
+// 1. Load any previously-saved campaigns from disk so they survive restarts.
+// 2. Seed default campaigns on first run (no *.json files present yet).
+// 3. Start the periodic autosave interval.
+// 4. Register graceful-shutdown handlers so data is flushed on exit.
+
+loadSessionsFromDisk();
+seedDefaultCampaignsIfNeeded();
+
+// Periodic autosave — use .unref() so the timer does not prevent Node from
+// exiting naturally if all other work is done (e.g. in test environments).
+const _autosaveTimer = setInterval(saveAllSessionsToDisk, AUTOSAVE_INTERVAL_MS).unref();
+
+/** Maximum time to wait for open connections to drain before forcing exit. */
+const SHUTDOWN_TIMEOUT_MS = 5000;
+
+// Graceful shutdown: save all sessions then exit cleanly
+function _gracefulShutdown(signal) {
+  console.log(`[server] ${signal} received — saving campaigns and shutting down…`);
+  clearInterval(_autosaveTimer);
+  saveAllSessionsToDisk();
+  server.close(() => process.exit(0));
+  // Force exit after SHUTDOWN_TIMEOUT_MS if server.close() hangs
+  setTimeout(() => process.exit(0), SHUTDOWN_TIMEOUT_MS).unref();
+}
+process.on('SIGINT',  () => _gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => _gracefulShutdown('SIGTERM'));
+
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Vault 215 sync server running on http://localhost:${PORT}`);
   console.log(`Admin code loaded: ${ADMIN_CODE ? '✓ (set)' : '✗ (using default)'}`);

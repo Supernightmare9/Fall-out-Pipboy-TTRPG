@@ -12,7 +12,7 @@ This guide explains how to host the real-time sync server so your whole party ca
   (playerSync.js)                      (server.js)                                  (overseerSync.js)
 ```
 
-The server is a lightweight Node.js process. All player state is held in memory per session — no database needed. On reconnect, players re-send their local `playerData` and the server re-syncs everyone.
+The server is a lightweight Node.js process. All player state is held in memory per session — no database needed. On reconnect, players re-send their local `playerData` and the server re-syncs everyone. **Campaign and player data is now also persisted to disk** in the `campaigns/` directory so it survives server restarts.
 
 ---
 
@@ -142,6 +142,60 @@ pm2 save && pm2 startup
 
 ---
 
+## Campaign Persistence (Disk Storage)
+
+Campaign and player data is saved to the **`campaigns/`** directory as JSON files (one per session code).
+
+### When saves happen automatically
+
+| Trigger | Behaviour |
+|---------|-----------|
+| **Server startup** | Loads all `campaigns/*.json` back into memory |
+| **Every 5 minutes** | Periodic autosave runs while the server is running |
+| **Server shutdown** (`Ctrl+C` / `SIGTERM`) | All sessions flushed to disk before exit |
+| **Manual save** | Click **[💾 SAVE TO SERVER]** in the Overseer UI |
+
+### First-run seed campaigns
+
+On first run (no `*.json` files in `campaigns/`), two starter campaigns are automatically created:
+
+| Session code | Campaign | Players |
+|---|---|---|
+| `VAULT01` | Demo | `test` (dev character — only in non-production mode) |
+| `SAFEHAVEN` | Safe Haven | David, Moe, Zach, Katie, Jade, Nikki |
+
+Players join the Safe Haven campaign using `PIPBOY_SESSION_CODE=SAFEHAVEN` in their browser `localStorage`.
+
+### Backing up campaign data
+
+```bash
+# macOS / Linux
+cp -r campaigns/ ~/vault215-backup-$(date +%Y%m%d)/
+
+# Windows
+xcopy campaigns\ vault215-backup\ /E /I
+```
+
+Campaign JSON files are excluded from Git by `.gitignore`.  
+Add specific files or the whole folder to a backup medium or a private Git repo if you want version-controlled history.
+
+### Restoring a campaign
+
+1. Copy the `*.json` files back into the `campaigns/` directory.
+2. Restart the server — it loads them at startup.
+
+Or use **[IMPORT CAMPAIGN]** in the Overseer UI to restore a JSON backup without restarting.
+
+### Cloud deployment note
+
+Platforms with **ephemeral filesystems** (e.g. Render free tier, Heroku dynos) will lose the `campaigns/` files on every redeploy or sleep/wake cycle.  
+For production persistence on these platforms, either:
+- Use a persistent disk / mount (Render paid tier, or a VPS)
+- Run `pm2` on a VPS (see below) — the filesystem is permanent
+- Regularly export campaign backups via the Overseer UI and store them off-server
+
+---
+
 ## Socket.IO Event Reference
 
 | Emitted by | Event | Payload | Description |
@@ -235,5 +289,5 @@ Use this checklist to verify the real-time sync works across devices before a se
 | Status bar stays "OFFLINE" | Check `PIPBOY_SERVER_URL` is set correctly in `localStorage`. Make sure the server is running. |
 | "AUTH FAILED" in Overseer status bar | The `PIPBOY_ADMIN_CODE` in localStorage doesn't match `ADMIN_CODE` in the server `.env`. |
 | CORS errors in browser console | Set `CORS_ORIGIN` in `.env` to your exact front-end URL (no trailing slash). |
-| Data doesn't survive server restart | The server stores state in memory only. Players should reload their pages after a restart to re-push their `localStorage` data. |
+| Data doesn't survive server restart | Campaigns are auto-saved to `campaigns/*.json`. If files are missing, the server may be running on a platform with an ephemeral filesystem (see *Cloud deployment note* above). Use **[💾 SAVE TO SERVER]** before restarting, or deploy on a VPS with a persistent disk. |
 | Two players use the same handle | Handles must be unique per session. The second join replaces the first player's socket. |
