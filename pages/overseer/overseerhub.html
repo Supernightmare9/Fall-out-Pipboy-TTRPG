@@ -1984,10 +1984,10 @@
         populateXpTargetDropdown();
         renderConditionTargets();
         // Load persistent resource pools for this campaign from the server
-        var poolCode = _campaignId.toUpperCase();
-        if (typeof window._loadEnemyPool === 'function') window._loadEnemyPool(poolCode);
-        if (typeof window._loadItemPool  === 'function') window._loadItemPool(poolCode);
-        if (typeof window._loadPerkPool  === 'function') window._loadPerkPool(poolCode);
+        var sessionCode = _campaignId.toUpperCase();
+        if (typeof window._loadEnemyPool === 'function') window._loadEnemyPool(sessionCode);
+        if (typeof window._loadItemPool  === 'function') window._loadItemPool(sessionCode);
+        if (typeof window._loadPerkPool  === 'function') window._loadPerkPool(sessionCode);
     }
 
     function mergePlayerHp(){
@@ -4657,8 +4657,8 @@
         var initEl = document.getElementById('epDInit');  if (initEl) initEl.textContent = e.initiative || 0;
         var typeEl = document.getElementById('epDType');  if (typeEl) typeEl.textContent = (e.type||'').toUpperCase();
         var diffEl = document.getElementById('epDDiff');  if (diffEl) diffEl.textContent = (e.difficulty||'').toUpperCase();
-        var descEl = document.getElementById('epDDesc');  if (descEl) descEl.textContent = e.description || '&#x2014;';
-        var notEl  = document.getElementById('epDNotes'); if (notEl)  notEl.textContent  = e.notes || '&#x2014;';
+        var descEl = document.getElementById('epDDesc');  if (descEl) descEl.textContent = e.description || '\u2014';
+        var notEl  = document.getElementById('epDNotes'); if (notEl)  notEl.textContent  = e.notes || '\u2014';
 
         var abEl = document.getElementById('epDAbilities');
         if (abEl) {
@@ -4903,13 +4903,13 @@
         var nameEl = document.getElementById('ipDetailItemName'); if (nameEl) nameEl.textContent = item.name.toUpperCase();
         var wEl    = document.getElementById('ipDWeight');  if (wEl)    wEl.textContent    = item.weight   || 0;
         var vEl    = document.getElementById('ipDValue');   if (vEl)    vEl.textContent    = item.value    || 0;
-        var dmgEl  = document.getElementById('ipDDmg');     if (dmgEl)  dmgEl.textContent  = item.damage   || '&#x2014;';
+        var dmgEl  = document.getElementById('ipDDmg');     if (dmgEl)  dmgEl.textContent  = item.damage   || '\u2014';
         var tEl    = document.getElementById('ipDType');    if (tEl)    tEl.textContent    = (item.type||'').toUpperCase();
         var rEl    = document.getElementById('ipDRarity');  if (rEl)    rEl.textContent    = (item.rarity||'').toUpperCase();
-        var idEl   = document.getElementById('ipDID');      if (idEl)   idEl.textContent   = item.itemId   || item.id || '&#x2014;';
-        var descEl = document.getElementById('ipDDesc');    if (descEl) descEl.textContent = item.description || '&#x2014;';
+        var idEl   = document.getElementById('ipDID');      if (idEl)   idEl.textContent   = item.itemId   || item.id || '\u2014';
+        var descEl = document.getElementById('ipDDesc');    if (descEl) descEl.textContent = item.description || '\u2014';
         var effEl  = document.getElementById('ipDEffects'); if (effEl)  effEl.textContent  = item.effects  || 'None.';
-        var notEl  = document.getElementById('ipDNotes');   if (notEl)  notEl.textContent  = item.notes    || '&#x2014;';
+        var notEl  = document.getElementById('ipDNotes');   if (notEl)  notEl.textContent  = item.notes    || '\u2014';
 
         var propsEl = document.getElementById('ipDProperties');
         if (propsEl) {

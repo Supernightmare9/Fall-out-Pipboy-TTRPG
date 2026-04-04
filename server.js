@@ -228,11 +228,11 @@ app.put('/api/campaigns/:code/pools/:type', (req, res) => {
     return res.status(400).json({ ok: false, error: 'Invalid pool type. Must be one of: ' + [...VALID_POOL_TYPES].join(', ') });
   }
 
-  const session = getOrCreateSession(code);
-  const items   = req.body && Array.isArray(req.body.items) ? req.body.items : [];
-  session.pools[type] = items;
+  const session  = getOrCreateSession(code);
+  const poolData = req.body && Array.isArray(req.body.items) ? req.body.items : [];
+  session.pools[type] = poolData;
   saveSessionToDisk(code, session);
-  res.json({ ok: true, type, count: items.length });
+  res.json({ ok: true, type, count: poolData.length });
 });
 
 // ── In-memory session store ────────────────────────────────────────────────────
@@ -269,8 +269,9 @@ function getOrCreateSession(code) {
     };
   } else {
     // Back-fill for sessions created before these fields existed
-    if (!sessions[code].craftRequests) sessions[code].craftRequests = {};
-    if (!sessions[code].pools) sessions[code].pools = { enemies: [], items: [], recipes: [], perks: [] };
+    const s = sessions[code];
+    if (!s.craftRequests) s.craftRequests = {};
+    if (!s.pools) s.pools = { enemies: [], items: [], recipes: [], perks: [] };
   }
   return sessions[code];
 }

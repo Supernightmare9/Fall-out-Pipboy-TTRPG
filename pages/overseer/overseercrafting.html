@@ -496,9 +496,11 @@
     }
 
     function _loadRecipesFromLocalStorage() {
+        var wasEmpty = false;
         try { masterRecipes = JSON.parse(localStorage.getItem(LS_MASTER) || '[]'); } catch(e) { masterRecipes = []; }
-        // Seed built-in recipes on first load
+        // Seed built-in recipes on first load only
         if (masterRecipes.length === 0) {
+            wasEmpty = true;
             masterRecipes = [
                 { recipeId:'builtin_molotov', name:'Molotov Cocktail', type:'weapon', weight:0.5, value:50,
                   description:'Improvised incendiary. Nuka-Cola bottle + cloth.', ingredients:[], notes:'', source:'builtin' },
@@ -506,7 +508,8 @@
                   description:'Jury-rigged medkit from Stimpaks and RadAway.', ingredients:[], notes:'', source:'builtin' }
             ];
         }
-        saveMasterRecipes();
+        // Only mirror to server when seeding fresh data for the first time
+        if (wasEmpty) { saveMasterRecipes(); } else { try { localStorage.setItem(LS_MASTER, JSON.stringify(masterRecipes)); } catch(e) {} }
         renderRecipeList();
     }
 
