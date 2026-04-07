@@ -1589,7 +1589,7 @@
             cursor: pointer;
         }
 
-        /* ===== HP RAD ZONE (anti-health overlay) ===== */
+        /* ===== HP RAD ZONE & TEMP HP ZONE (overlays on main health bar) ===== */
         .hp-bar-bg { position: relative; overflow: hidden; }
         .hp-bar-rad-zone {
             position: absolute;
@@ -1606,6 +1606,20 @@
             pointer-events: none;
             width: 0;
         }
+        .hp-bar-temp-zone {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: rgba(96,165,250,0.75);
+            box-shadow: 0 0 5px rgba(96,165,250,0.5);
+            border-left: 1px solid rgba(96,165,250,0.9);
+            transition: left 0.4s, width 0.4s;
+            pointer-events: none;
+            width: 0;
+        }
+        /* Make the unified health bar a bit taller for better readability */
+        #hpBarUnified { height: 14px; }
 
         /* ===== FLOATING DICE ROLLER ===== */
         .dice-roller-fab {
@@ -1771,17 +1785,12 @@
                 </div>
                 <div id="radReductionNote" style="font-size:9px;color:#ff6b6b;letter-spacing:1px;margin-bottom:4px;display:none;">☢ RADIATION REDUCING MAX HP</div>
 
-                <!-- Health bar -->
+                <!-- Unified health bar: HP (green) + Temp HP (blue overlay) + Rad zone (red from right) -->
                 <div class="hp-bar-wrap">
-                    <div class="hp-bar-bg">
+                    <div class="hp-bar-bg" id="hpBarUnified">
                         <div class="hp-bar-fill hp-high" id="hpBarFill" style="width:100%"></div>
+                        <div class="hp-bar-temp-zone" id="hpBarTempZone" role="presentation" aria-hidden="true"></div>
                         <div class="hp-bar-rad-zone" id="hpBarRadZone" role="presentation" aria-hidden="true"></div>
-                    </div>
-                </div>
-                <!-- Temp HP bar (blue, sits adjacent to HP bar) -->
-                <div id="tempHpBarWrap" class="hp-bar-wrap" style="margin-top:2px;display:none;">
-                    <div class="hp-bar-bg" style="height:4px;">
-                        <div id="tempHpBarFill" class="hp-bar-fill" style="width:0%;background:#60a5fa;box-shadow:0 0 6px rgba(96,165,250,0.6);"></div>
                     </div>
                 </div>
 
@@ -2075,6 +2084,7 @@
     var activeCampaign = null;
     var hpLastUpdated  = null;
     var refreshInterval = null;
+    var _lastHpPct = 0; // last computed HP percentage; used by _refreshTempZone for reliable positioning
 
     // ── FALLOUT CONSTANTS (single source of truth, matches stats.html & server) ──
     // These must remain in sync with the server's defaultPlayerData() in server.js
@@ -2405,6 +2415,7 @@
     // ── HP BAR ────────────────────────────────────────────────────
     function updateHpBar(current, max) {
         var pct  = max > 0 ? Math.min(100, Math.max(0, Math.round((current / max) * 100))) : 0;
+        _lastHpPct = pct; // store for _refreshTempZone
         var fill = document.getElementById('hpBarFill');
         if (fill) {
             fill.style.width = pct + '%';
@@ -2417,6 +2428,8 @@
             var radPct = Math.min(100, Math.round((rad / 1000) * 100));
             radZone.style.width = radPct + '%';
         }
+        // Reposition temp HP zone now that HP fill width has changed
+        _refreshTempZone();
     }
 
     // ── HP ADJUSTMENT ────────────────────────────────────────────
@@ -2772,6 +2785,16 @@
         return []; // Inventory pools not yet connected — show empty until linked
     }
 
+    // Returns a compact 3-letter abbreviation for an inventory item type.
+    var _TYPE_ABBR = {
+        'weapon': 'WPN', 'armor': 'ARM', 'consumable': 'CSM',
+        'gear': 'GER', 'ammo': 'AMO', 'misc': 'MSC'
+    };
+    function getItemTypeAbbr(type) {
+        var key = (type || 'misc').toLowerCase();
+        return _TYPE_ABBR[key] || 'MSC';
+    }
+
     // Returns equipment from vault_equipment localStorage (inventory.html slot names)
     // or falls back to campaign player entry equipment.
     function getDisplayEquipment(myEntry) {
@@ -2837,8 +2860,8 @@
 
             return '<div class="inventory-item" data-type="' + escHtml(item.type || 'misc') + '" onclick="selectInventoryItem(this)">' +
                 '<span class="item-rarity-dot" style="background:' + rarityColor + ';box-shadow:0 0 4px ' + rarityColor + ';"></span>' +
-                '<span class="item-type-badge ' + typeCls + '">' + escHtml(item.type || 'misc') + '</span>' +
-                (isEquipped ? '<span class="item-type-badge" style="border-color:var(--vault-info);color:var(--vault-info);margin-left:3px;">EQUIPPED</span>' : '') +
+                '<span class="item-type-badge ' + typeCls + '" title="' + escHtml(item.type || 'misc') + '">' + getItemTypeAbbr(item.type) + '</span>' +
+                (isEquipped ? '<span class="item-type-badge" style="border-color:var(--vault-info);color:var(--vault-info);margin-left:3px;">EQP</span>' : '') +
                 '<div class="item-name">' + escHtml(item.name) + '</div>' +
                 '<div class="item-desc">' + escHtml(item.description || '') + '</div>' +
                 '<div class="item-stats">' +
@@ -3636,14 +3659,27 @@
         // Dedicated current value display
         var curEl = document.getElementById('tempHpCurrentDisplay');
         if (curEl) curEl.textContent = val;
-        // Blue temp HP bar adjacent to HP bar (relative to max HP)
+        // Blue temp HP zone on unified health bar (overlay after HP fill)
+        _refreshTempZone();
+    }
+
+    // Recomputes and sets the blue temp HP zone position on the main HP bar.
+    // Called from both refreshTempHpCombatDisplay() and updateHpBar() so the
+    // zone always tracks both HP fill width and temp HP value correctly.
+    // Note: the zone is capped at the remaining bar space (100 - hpPct) so it
+    // never visually overlaps the radiation zone from the right side.
+    function _refreshTempZone() {
+        var val     = getCombatTempHp();
         var myMaxHp = getCombatMaxHp();
-        var barFill = document.getElementById('tempHpBarFill');
-        var barWrap = document.getElementById('tempHpBarWrap');
-        if (barFill && barWrap) {
-            var pct = myMaxHp > 0 ? Math.min(100, Math.round((val / myMaxHp) * 100)) : 0;
-            barFill.style.width = pct + '%';
-            barWrap.style.display = val > 0 ? '' : 'none';
+        var tempZone = document.getElementById('hpBarTempZone');
+        if (!tempZone) return;
+        if (val > 0 && myMaxHp > 0) {
+            var hpPct   = _lastHpPct; // set by updateHpBar; avoids fragile style-string parsing
+            var tempPct = Math.min(100 - hpPct, Math.round((val / myMaxHp) * 100));
+            tempZone.style.left  = hpPct + '%';
+            tempZone.style.width = Math.max(0, tempPct) + '%';
+        } else {
+            tempZone.style.width = '0';
         }
     }
 
