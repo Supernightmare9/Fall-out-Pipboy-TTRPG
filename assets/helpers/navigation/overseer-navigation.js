@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <li><a href="overseercrafting.html" class="nav-link" data-page="overseercrafting">🛠️ CRAFTING</a></li>
                 <li><a href="overseermessages.html" class="nav-link" data-page="overseermessages">📻 MESSAGES</a></li>
                 <li><a href="overseersetting.html" class="nav-link" data-page="overseersetting">⚙️ SETTINGS</a></li>
+                <li><a href="player-sheet.html" class="nav-link" data-page="player-sheet">📝 PLAYER SHEET</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -407,6 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (path.includes('overseermessages')) return 'overseermessages';
         if (path.includes('overseersetting')) return 'overseersetting';
         if (path.includes('overseerhub')) return 'overseerhub';
+        if (path.includes('player-sheet')) return 'player-sheet';
         return null;
     }
 
