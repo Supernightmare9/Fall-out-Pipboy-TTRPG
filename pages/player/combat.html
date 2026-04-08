@@ -1768,12 +1768,12 @@
 
             <!-- LEFT: ALL CHARACTER & COMBAT INFO -->
             <div class="panel" id="combatInfoPanel">
-                <div class="panel-title panel-collapse-toggle" onclick="togglePanelCollapse('leftPanelBody', this)"
-                     role="button" aria-expanded="true" aria-controls="leftPanelBody">
+                <div class="panel-title panel-collapse-toggle" onclick="togglePanelCollapse('combatInfoPanelBody', this)"
+                     role="button" aria-expanded="true" aria-controls="combatInfoPanelBody">
                     <span>⚙ Character Status</span>
                     <span class="panel-chevron">▲</span>
                 </div>
-                <div id="leftPanelBody">
+                <div id="combatInfoPanelBody">
                 <div class="char-name-display" id="charNameDisplay">—</div>
                 <div class="char-color-row">
                     <div class="char-color-dot" id="charColorDot" style="background:#4ade80;"></div>
@@ -1885,7 +1885,7 @@
                 <div class="hp-success-msg" id="tempHpMsg">✓ TEMP HP UPDATED!</div>
 
                 <!-- DICE ROLLER moved to floating button (bottom right) -->
-                </div><!-- end leftPanelBody -->
+                </div><!-- end combatInfoPanelBody -->
 
             <!-- Armor Class Section -->
                 <div class="panel-title" style="margin-top:14px;">🛡 Armor Class</div>
@@ -1975,7 +1975,7 @@
             </div><!-- end combatInfoPanel -->
 
             <!-- RIGHT: INVENTORY & ABILITIES TABS -->
-            <div class="panel panel-tabs" id="panel-tabs">
+            <div class="panel" id="panel-tabs">
                 <div class="tabs-container">
                     <div class="tab-buttons">
                         <button class="tab-btn active" onclick="switchTab('inventory', this)">📦 Inventory</button>
