@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fallout TTRPG Player Sheet</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 1rem auto; }
+    .sheet { border: 2px solid #333; padding: 2rem; border-radius: 1rem; background: #f9f9f9; }
+    .row { display: flex; gap: 2rem; }
+    .section { flex: 1; margin-bottom: 1.5rem; }
+    label { font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    th, td { padding: 0.4rem; border: 1px solid #bbb; text-align: center; }
+    .buttons { margin-bottom: 1.5rem; }
+    @media print {
+      .buttons, nav { display: none !important; }
+      body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <nav style="margin-bottom: 2rem;">
+    <a href="index.html">Home</a> | 
+    <a href="player-sheet.html"><b>Player Sheet</b></a>
+    <!-- Add overseer nav here as needed -->
+  </nav>
+
+  <div class="sheet">
+    <h2>Fallout TTRPG Player Sheet</h2>
+    <div class="buttons">
+      <button onclick="window.print()">Print Sheet</button>
+      <button onclick="clearSheet()">Download Blank</button>
+    </div>
+    <div class="section">
+      <label>Name:</label> <input id="playerName" value="Vault Dweller" type="text" style="width: 200px">
+    </div>
+    <div class="row">
+      <div class="section">
+        <label>SPECIAL Attributes</label>
+        <table>
+          <tr>
+            <th>S</th><th>P</th><th>E</th><th>C</th><th>I</th><th>A</th><th>L</th>
+          </tr>
+          <tr>
+            <td><input type="number" id="S" value="5" min="1" max="10"></td>
+            <td><input type="number" id="P" value="5" min="1" max="10"></td>
+            <td><input type="number" id="E" value="5" min="1" max="10"></td>
+            <td><input type="number" id="C" value="5" min="1" max="10"></td>
+            <td><input type="number" id="I" value="5" min="1" max="10"></td>
+            <td><input type="number" id="A" value="5" min="1" max="10"></td>
+            <td><input type="number" id="L" value="5" min="1" max="10"></td>
+          </tr>
+        </table>
+      </div>
+      <div class="section">
+        <label>AC:</label> <input id="ac" type="number" value="12" min="0" style="width: 60px">
+      </div>
+    </div>
+    <div class="section">
+      <label>Inventory</label>
+      <textarea id="inventory" rows="3" style="width: 100%;">Pistol, Stimpack, Duct Tape</textarea>
+    </div>
+    <div class="section">
+      <label>Effects</label>
+      <textarea id="effects" rows="2" style="width: 100%;">+2 to Sneak (Cloak Boy), Rad-X taken</textarea>
+    </div>
+    <div class="row">
+      <div class="section">
+        <label>Radiation Tracker</label><br>
+        <input id="radiation" type="number" value="0" min="0" max="100" style="width: 60px"> / 100
+        <div style="margin-top: 0.5rem;">
+          <progress id="radiationBar" value="0" max="100" style="width: 100%"></progress>
+        </div>
+      </div>
+      <div class="section">
+        <label>Skills</label>
+        <textarea id="skills" rows="4" style="width: 100%;">Lockpick: 50, Speech: 35, Repair: 45</textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Sync the progress bar with the input
+    document.getElementById('radiation').addEventListener('input', function () {
+      document.getElementById('radiationBar').value = this.value;
+    });
+
+    // Download Blank (clears all fields but doesn't actually download a file for simplicity)
+    function clearSheet() {
+        document.getElementById('playerName').value = '';
+        ['S','P','E','C','I','A','L'].forEach(function(attr){document.getElementById(attr).value = '';});
+        document.getElementById('ac').value = '';
+        document.getElementById('inventory').value = '';
+        document.getElementById('effects').value = '';
+        document.getElementById('radiation').value = 0;
+        document.getElementById('radiationBar').value = 0;
+        document.getElementById('skills').value = '';
+        window.print(); // Optionally immediately open print!
+    }
+  </script>
+</body>
+</html>
