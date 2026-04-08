@@ -191,20 +191,25 @@
             margin-bottom: 14px;
         }
 
-        /* ===== TWO-COLUMN GRID ===== */
-        .character-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        /* ===== BOTTOM TWO-COLUMN GRID ===== */
+        .bottom-grid {
+            display: flex;
             gap: 16px;
             margin-bottom: 20px;
+            align-items: flex-start;
+        }
+
+        .bottom-grid > .panel {
+            flex: 1;
+            min-width: 0;
         }
 
         @media (max-width: 900px) {
-            .character-grid { grid-template-columns: 1fr; }
+            .bottom-grid { flex-direction: column; }
         }
 
         @media (max-width: 768px) {
-            .character-grid { grid-template-columns: 1fr; }
+            .bottom-grid { flex-direction: column; }
             .top-bar { flex-direction: column; align-items: flex-start; }
         }
 
@@ -701,7 +706,7 @@
         }
 
         /* ===== TABS ===== */
-        .tabs-container { margin-top: 20px; }
+        .tabs-container { margin-top: 0; }
 
         .tab-buttons {
             display: flex;
@@ -1758,17 +1763,17 @@
             </div>
         </div>
 
-        <!-- ── THREE-COLUMN GRID ──────────────────────────── -->
-        <div class="character-grid">
+        <!-- ── TWO-COLUMN GRID ──────────────────────────── -->
+        <div class="bottom-grid">
 
-            <!-- LEFT: CHARACTER INFO & STATUS -->
-            <div class="panel" id="leftPanel">
-                <div class="panel-title panel-collapse-toggle" onclick="togglePanelCollapse('leftPanelBody', this)"
-                     role="button" aria-expanded="true" aria-controls="leftPanelBody">
+            <!-- LEFT: ALL CHARACTER & COMBAT INFO -->
+            <div class="panel" id="combatInfoPanel">
+                <div class="panel-title panel-collapse-toggle" onclick="togglePanelCollapse('combatInfoPanelBody', this)"
+                     role="button" aria-expanded="true" aria-controls="combatInfoPanelBody">
                     <span>⚙ Character Status</span>
                     <span class="panel-chevron">▲</span>
                 </div>
-                <div id="leftPanelBody">
+                <div id="combatInfoPanelBody">
                 <div class="char-name-display" id="charNameDisplay">—</div>
                 <div class="char-color-row">
                     <div class="char-color-dot" id="charColorDot" style="background:#4ade80;"></div>
@@ -1880,11 +1885,9 @@
                 <div class="hp-success-msg" id="tempHpMsg">✓ TEMP HP UPDATED!</div>
 
                 <!-- DICE ROLLER moved to floating button (bottom right) -->
-                </div><!-- end leftPanelBody -->
-            </div>
+                </div><!-- end combatInfoPanelBody -->
 
-            <!-- MIDDLE: COMBAT STATUS & CONDITIONS -->
-             <!-- Armor Class Section -->
+            <!-- Armor Class Section -->
                 <div class="panel-title" style="margin-top:14px;">🛡 Armor Class</div>
                 <div style="font-size:32px;font-weight:bold;color:var(--vault-green);text-shadow:0 0 8px var(--vault-green);text-align:center;padding:6px 0;" id="charAc">—</div>
                 <div class="hp-input-row" style="justify-content:center;flex-wrap:wrap;">
@@ -1956,7 +1959,6 @@
                         </div>
                     </div>
                 </div>
-            <div class="panel" id="middlePanel">
                 <!-- Combat Status -->
                 <div class="panel-title">⚔ Combat Status</div>
                 <div id="combatStatusSection">
@@ -1970,47 +1972,49 @@
                 <div class="conditions-list" id="conditionsDisplay">
                     <div class="empty-state">No active conditions.</div>
                 </div>
-            </div>
+            </div><!-- end combatInfoPanel -->
 
-        </div><!-- end .character-grid -->
+            <!-- RIGHT: INVENTORY & ABILITIES TABS -->
+            <div class="panel" id="panel-tabs">
+                <div class="tabs-container">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" onclick="switchTab('inventory', this)">📦 Inventory</button>
+                        <button class="tab-btn"        onclick="switchTab('abilities', this)">✦ Abilities &amp; Skills</button>
+                    </div>
 
-        <!-- ── TABS ──────────────────────────────────────── -->
-        <div class="tabs-container">
-            <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('inventory', this)">📦 Inventory</button>
-                <button class="tab-btn"        onclick="switchTab('abilities', this)">✦ Abilities &amp; Skills</button>
-            </div>
+                    <!-- TAB 1: INVENTORY -->
+                    <div class="tab-content active" id="tab-inventory">
+                        <!-- Equipment Slots Panel (compact, 4 slots only) -->
+                        <div class="equip-panel">
+                            <div class="equip-panel-title">🛡 Equipped Items</div>
+                            <div class="equip-slots-compact" id="equipmentPanel">
+                                <!-- populated by JS -->
+                            </div>
+                        </div>
+                        <div class="filter-bar" id="inventoryFilters" style="display:none;">
+                            <button class="filter-btn active" onclick="filterInventory('all', this)">All</button>
+                            <button class="filter-btn" onclick="filterInventory('weapon', this)">Weapons</button>
+                            <button class="filter-btn" onclick="filterInventory('armor', this)">Armor</button>
+                            <button class="filter-btn" onclick="filterInventory('consumable', this)">Consumables</button>
+                            <button class="filter-btn" onclick="filterInventory('gear', this)">Gear</button>
+                            <button class="filter-btn" onclick="filterInventory('misc', this)">Misc</button>
+                        </div>
+                        <div class="inventory-grid" id="inventoryGrid">
+                            <div class="empty-state">No items in inventory.</div>
+                        </div>
+                        <div class="inventory-footer" id="inventoryFooter"></div>
+                    </div>
 
-            <!-- TAB 1: INVENTORY -->
-            <div class="tab-content active" id="tab-inventory">
-                <!-- Equipment Slots Panel (compact, 4 slots only) -->
-                <div class="equip-panel">
-                    <div class="equip-panel-title">🛡 Equipped Items</div>
-                    <div class="equip-slots-compact" id="equipmentPanel">
-                        <!-- populated by JS -->
+                    <!-- TAB 2: ABILITIES/SKILLS (Fallout perks and skills from live playerData) -->
+                    <div class="tab-content" id="tab-abilities">
+                        <div id="abilitiesContent">
+                            <div class="empty-state">Load a campaign to view abilities.</div>
+                        </div>
                     </div>
                 </div>
-                <div class="filter-bar" id="inventoryFilters" style="display:none;">
-                    <button class="filter-btn active" onclick="filterInventory('all', this)">All</button>
-                    <button class="filter-btn" onclick="filterInventory('weapon', this)">Weapons</button>
-                    <button class="filter-btn" onclick="filterInventory('armor', this)">Armor</button>
-                    <button class="filter-btn" onclick="filterInventory('consumable', this)">Consumables</button>
-                    <button class="filter-btn" onclick="filterInventory('gear', this)">Gear</button>
-                    <button class="filter-btn" onclick="filterInventory('misc', this)">Misc</button>
-                </div>
-                <div class="inventory-grid" id="inventoryGrid">
-                    <div class="empty-state">No items in inventory.</div>
-                </div>
-                <div class="inventory-footer" id="inventoryFooter"></div>
-            </div>
+            </div><!-- end panel-tabs -->
 
-            <!-- TAB 2: ABILITIES/SKILLS (Fallout perks and skills from live playerData) -->
-            <div class="tab-content" id="tab-abilities">
-                <div id="abilitiesContent">
-                    <div class="empty-state">Load a campaign to view abilities.</div>
-                </div>
-            </div>
-        </div>
+        </div><!-- end .bottom-grid -->
 
     </div><!-- end .container -->
 
