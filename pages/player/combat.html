@@ -1618,8 +1618,8 @@
             height: 100%;
             background: rgba(96,165,250,0.75);
             box-shadow: 0 0 5px rgba(96,165,250,0.5);
-            border-left: 1px solid rgba(96,165,250,0.9);
-            transition: left 0.4s, width 0.4s;
+            border-right: 1px solid rgba(96,165,250,0.9);
+            transition: width 0.4s;
             pointer-events: none;
             width: 0;
         }
@@ -1827,12 +1827,6 @@
                 <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;">
                     <span style="color:#ff6b6b;font-weight:bold;letter-spacing:1px;">RAD</span>
                     <span style="color:var(--vault-green);"><span id="radCurrent">0</span> / 1000 RAD</span>
-                </div>
-                <!-- Rad bar fills right-to-left (anti-health: more rad = less effective max HP) -->
-                <div class="hp-bar-wrap" style="margin:4px 0 8px;">
-                    <div class="hp-bar-bg" style="direction:rtl;">
-                <div id="radBarFill" class="hp-bar-fill hp-high" style="width:0%;background:#ef4444;box-shadow:0 0 8px rgba(239,68,68,0.6);"></div>
-                    </div>
                 </div>
                 <div class="hp-input-row" style="justify-content:center;flex-wrap:wrap;">
                     <button class="hp-update-btn" onclick="decreaseRadCombat()" style="border-color:rgba(239,68,68,0.5);color:#ef4444;">−</button>
@@ -2087,7 +2081,6 @@
     var activeCampaign = null;
     var hpLastUpdated  = null;
     var refreshInterval = null;
-    var _lastHpPct = 0; // last computed HP percentage; used by _refreshTempZone for reliable positioning
 
     // ── FALLOUT CONSTANTS (single source of truth, matches stats.html & server) ──
     // These must remain in sync with the server's defaultPlayerData() in server.js
@@ -2417,21 +2410,23 @@
 
     // ── HP BAR ────────────────────────────────────────────────────
     function updateHpBar(current, max) {
-        var pct  = max > 0 ? Math.min(100, Math.max(0, Math.round((current / max) * 100))) : 0;
-        _lastHpPct = pct; // store for _refreshTempZone
+        var rad = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
+        // Green fill is capped at effectiveMax so it never visually overlaps the red rad zone
+        var effectiveMax = Math.max(0, max - rad);
+        var cappedCurrent = Math.min(current, effectiveMax);
+        var pct  = max > 0 ? Math.min(100, Math.max(0, Math.round((cappedCurrent / max) * 100))) : 0;
         var fill = document.getElementById('hpBarFill');
         if (fill) {
             fill.style.width = pct + '%';
             fill.className   = 'hp-bar-fill ' + (pct >= 75 ? 'hp-high' : pct >= 25 ? 'hp-mid' : 'hp-low');
         }
-        // Update radiation zone overlay in HP bar
-        var rad = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
+        // Radiation zone overlay: sized relative to maxHP (not absolute max-rad value)
         var radZone = document.getElementById('hpBarRadZone');
         if (radZone) {
-            var radPct = Math.min(100, Math.round((rad / 1000) * 100));
+            var radPct = max > 0 ? Math.min(100, Math.round((rad / max) * 100)) : 0;
             radZone.style.width = radPct + '%';
         }
-        // Reposition temp HP zone now that HP fill width has changed
+        // Reposition temp HP zone (blue overlay from left, over green)
         _refreshTempZone();
     }
 
@@ -3579,28 +3574,23 @@
     function refreshRadCombatDisplay(val) {
         var cur  = Math.max(0, Math.min(COMBAT_MAX_RAD, val));
         var el   = document.getElementById('radCurrent');
-        var fill = document.getElementById('radBarFill');
         var note = document.getElementById('radReductionNote');
         if (el)   el.textContent  = cur;
-        if (fill) {
-            // Rad bar fills right-to-left: use pct directly (bar has direction:rtl)
-            var pct = Math.min(100, Math.round((cur / COMBAT_MAX_RAD) * 100));
-            fill.style.width = pct + '%';
-            // Always bright red — radiation clearly signals it is reducing max HP
-            fill.style.background = '#ef4444';
-            fill.style.boxShadow  = '0 0 8px rgba(239,68,68,0.6)';
-        }
         if (note) note.style.display = cur > 0 ? 'block' : 'none';
 
-        // Update the HP bar rad zone overlay (anti-health visual)
-        var radZone = document.getElementById('hpBarRadZone');
-        if (radZone) {
-            var radPct = Math.min(100, Math.round((cur / COMBAT_MAX_RAD) * 100));
-            radZone.style.width = radPct + '%';
+        // Re-render unified HP bar so both rad zone and green fill reflect updated radiation.
+        // Read current HP values from the DOM (set by the campaign loader).
+        var hpCurEl = document.getElementById('hpCurrent');
+        var hpMaxEl = document.getElementById('hpMax');
+        var hpCur = hpCurEl ? (parseInt(hpCurEl.textContent, 10) || 0) : 0;
+        var hpMax = hpMaxEl ? (parseInt(hpMaxEl.textContent, 10) || 0) : 0;
+        if (hpMax > 0) {
+            updateHpBar(hpCur, hpMax);
+        } else {
+            // HP not loaded yet — just clear the rad zone
+            var radZone = document.getElementById('hpBarRadZone');
+            if (radZone) radZone.style.width = '0';
         }
-
-        // Also update temp HP display in case max HP changed
-        refreshTempHpCombatDisplay();
     }
 
     function loadRadCombat() {
@@ -3666,20 +3656,20 @@
         _refreshTempZone();
     }
 
-    // Recomputes and sets the blue temp HP zone position on the main HP bar.
-    // Called from both refreshTempHpCombatDisplay() and updateHpBar() so the
-    // zone always tracks both HP fill width and temp HP value correctly.
-    // Note: the zone is capped at the remaining bar space (100 - hpPct) so it
-    // never visually overlaps the radiation zone from the right side.
+    // Recomputes and sets the blue temp HP zone on the main HP bar.
+    // Temp HP overlays from the left (over the green fill) — consumed first.
+    // Capped at effectiveMax so it never overlaps the red radiation zone from the right.
     function _refreshTempZone() {
         var val     = getCombatTempHp();
         var myMaxHp = getCombatMaxHp();
         var tempZone = document.getElementById('hpBarTempZone');
         if (!tempZone) return;
         if (val > 0 && myMaxHp > 0) {
-            var hpPct   = _lastHpPct; // set by updateHpBar; avoids fragile style-string parsing
-            var tempPct = Math.min(100 - hpPct, Math.round((val / myMaxHp) * 100));
-            tempZone.style.left  = hpPct + '%';
+            var rad = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
+            var effectiveMax = Math.max(0, myMaxHp - rad);
+            var cappedTemp = Math.min(val, effectiveMax);
+            var tempPct = Math.round((cappedTemp / myMaxHp) * 100);
+            tempZone.style.left  = '0%';
             tempZone.style.width = Math.max(0, tempPct) + '%';
         } else {
             tempZone.style.width = '0';
