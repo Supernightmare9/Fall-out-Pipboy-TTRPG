@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <li><a href="messages.html" class="nav-link" data-page="messages">📻 MESSAGES <span id="nav-messages-badge" class="nav-msg-badge" style="display:none">0</span></a></li>
                 <li><a href="settings.html" class="nav-link" data-page="settings">⚙ SETTINGS</a></li>
                 <li><a href="../terminal.html" class="nav-link" data-page="terminal">🖥️ TERMINAL</a></li>
+                <li><a href="player-sheet.html" class="nav-link" data-page="player-sheet">📝 PLAYER SHEET</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -385,6 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (path.includes('messages')) return 'messages';
         if (path.includes('settings')) return 'settings';
         if (path.includes('terminal')) return 'terminal';
+        if (path.includes('player-sheet')) return 'player-sheet';
         return null;
     }
 
