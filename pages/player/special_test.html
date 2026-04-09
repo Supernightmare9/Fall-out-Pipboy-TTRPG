@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G.O.A.T. — Vault 215</title>
+    <link rel="stylesheet" href="../../css/branding.css">
+    <link rel="stylesheet" href="../../css/player/playerstyle.css">
+    <style>
+        :root {
+            --vault-primary: #4ade80;
+            --vault-secondary: #fbbf24;
+            --vault-dark: #0a0a0a;
+            --vault-darker: #1a1a1a;
+            --vault-accent: #c084fc;
+            --vault-error: #ff6b6b;
+            --vault-green: #4ade80;
+            --vault-gold: #fbbf24;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--vault-dark);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(58,102,20,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58,102,20,0.1) 0%, transparent 50%);
+        }
+
+        body::before {
+            content: '';
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
+            pointer-events: none; z-index: 10;
+        }
+
+        .page-wrapper {
+            display: flex; flex-direction: column; min-height: 100vh;
+            position: relative; z-index: 1;
+        }
+
+        /* HEADER */
+        .vault-header {
+            text-align: center; padding: 20px 30px;
+            background-color: var(--vault-darker);
+            border-bottom: 3px solid var(--vault-green);
+            box-shadow: 0 0 30px rgba(74,222,128,0.3);
+            flex-shrink: 0;
+        }
+        .vault-badge {
+            font-size: 10px; letter-spacing: 4px; color: var(--vault-gold);
+            margin-bottom: 6px; text-transform: uppercase;
+        }
+        .vault-title {
+            font-size: 28px; font-weight: bold; letter-spacing: 6px;
+            text-transform: uppercase; text-shadow: 0 0 15px rgba(74,222,128,0.8);
+            margin-bottom: 4px; animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0%,100% { text-shadow: 0 0 10px var(--vault-green); }
+            50%      { text-shadow: 0 0 20px var(--vault-green), 0 0 30px rgba(74,222,128,0.5); }
+        }
+        .vault-subtitle { font-size: 11px; letter-spacing: 3px; opacity: 0.7; text-transform: uppercase; }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1; display: flex; align-items: flex-start;
+            justify-content: center; padding: 30px 16px 40px;
+        }
+
+        .goat-card {
+            width: 100%; max-width: 680px;
+            background: var(--vault-darker);
+            border: 2px solid var(--vault-green);
+            box-shadow: 0 0 30px rgba(74,222,128,0.2);
+            padding: 28px 28px 24px;
+        }
+
+        /* ── INTRO SCREEN ──────────────────────────────────────── */
+        #screen-intro { display: block; }
+
+        .goat-intro-badge {
+            font-size: 10px; letter-spacing: 3px; color: var(--vault-gold);
+            text-transform: uppercase; margin-bottom: 10px;
+        }
+        .goat-intro-title {
+            font-size: 22px; font-weight: bold; letter-spacing: 3px;
+            color: var(--vault-green); text-shadow: 0 0 8px var(--vault-green);
+            margin-bottom: 14px; text-transform: uppercase;
+        }
+        .goat-intro-body {
+            font-size: 13px; line-height: 1.7; color: rgba(74,222,128,0.85);
+            margin-bottom: 20px; border-left: 3px solid rgba(251,191,36,0.4);
+            padding-left: 14px;
+        }
+        .goat-intro-note {
+            font-size: 11px; color: rgba(74,222,128,0.55); letter-spacing: 1px;
+            border-top: 1px solid rgba(74,222,128,0.15); padding-top: 14px;
+            margin-top: 6px;
+        }
+
+        /* ── QUESTION SCREEN ───────────────────────────────────── */
+        #screen-quiz  { display: none; }
+
+        .goat-progress {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 18px;
+        }
+        .goat-progress-label {
+            font-size: 10px; letter-spacing: 2px; color: var(--vault-gold);
+            text-transform: uppercase; white-space: nowrap;
+        }
+        .goat-progress-bar-wrap {
+            flex: 1; height: 6px;
+            background: rgba(74,222,128,0.12);
+            border: 1px solid rgba(74,222,128,0.25);
+        }
+        .goat-progress-bar {
+            height: 100%; background: var(--vault-gold);
+            box-shadow: 0 0 6px rgba(251,191,36,0.6);
+            transition: width 0.35s ease;
+        }
+
+        .goat-q-num {
+            font-size: 10px; letter-spacing: 2px; color: var(--vault-gold);
+            text-transform: uppercase; margin-bottom: 6px;
+        }
+        .goat-q-text {
+            font-size: 15px; font-weight: bold; color: var(--vault-green);
+            line-height: 1.5; margin-bottom: 20px;
+            text-shadow: 0 0 6px rgba(74,222,128,0.3);
+        }
+
+        /* Answer options */
+        .goat-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+
+        .goat-option {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 13px 14px;
+            background: var(--vault-dark);
+            border: 2px solid rgba(74,222,128,0.25);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+        .goat-option:hover {
+            border-color: rgba(74,222,128,0.6);
+            background: rgba(74,222,128,0.04);
+            box-shadow: 0 0 10px rgba(74,222,128,0.15);
+        }
+        .goat-option.selected {
+            border-color: var(--vault-gold);
+            background: rgba(251,191,36,0.08);
+            box-shadow: 0 0 14px rgba(251,191,36,0.3);
+        }
+
+        .goat-option-key {
+            flex-shrink: 0; width: 22px; height: 22px;
+            border: 2px solid rgba(74,222,128,0.4);
+            background: transparent;
+            font-size: 11px; font-weight: bold; letter-spacing: 0;
+            color: var(--vault-gold); font-family: 'Courier New', monospace;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.2s;
+        }
+        .goat-option.selected .goat-option-key {
+            border-color: var(--vault-gold);
+            background: rgba(251,191,36,0.15);
+        }
+
+        .goat-option-text {
+            font-size: 13px; color: rgba(74,222,128,0.9); line-height: 1.45;
+        }
+        .goat-option.selected .goat-option-text { color: var(--vault-gold); }
+
+        /* ── RESULTS SCREEN ────────────────────────────────────── */
+        #screen-results { display: none; }
+
+        .goat-result-header {
+            font-size: 10px; letter-spacing: 3px; color: var(--vault-gold);
+            text-transform: uppercase; margin-bottom: 8px;
+        }
+        .goat-result-title {
+            font-size: 20px; font-weight: bold; letter-spacing: 3px;
+            color: var(--vault-green); text-shadow: 0 0 10px var(--vault-green);
+            text-transform: uppercase; margin-bottom: 18px;
+        }
+
+        .goat-vaultec-box {
+            border: 2px solid var(--vault-gold);
+            background: rgba(251,191,36,0.05);
+            box-shadow: 0 0 20px rgba(251,191,36,0.2);
+            padding: 20px 22px 18px;
+            margin-bottom: 20px;
+        }
+        .goat-vaultec-label {
+            font-size: 10px; letter-spacing: 3px; color: var(--vault-gold);
+            text-transform: uppercase; margin-bottom: 10px;
+        }
+        .goat-vaultec-message {
+            font-size: 13px; color: rgba(74,222,128,0.85); line-height: 1.7;
+            margin-bottom: 14px;
+        }
+        .goat-skill-tags {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+        }
+        .goat-skill-tag {
+            padding: 7px 14px;
+            border: 2px solid var(--vault-gold);
+            background: rgba(251,191,36,0.1);
+            color: var(--vault-gold);
+            font-size: 13px; font-weight: bold;
+            letter-spacing: 1px; text-transform: uppercase;
+            text-shadow: 0 0 6px rgba(251,191,36,0.5);
+            box-shadow: 0 0 10px rgba(251,191,36,0.2);
+        }
+        .goat-result-note {
+            font-size: 11px; color: rgba(74,222,128,0.5); line-height: 1.6;
+            border-top: 1px solid rgba(74,222,128,0.15); padding-top: 12px;
+        }
+
+        /* ── BUTTONS ───────────────────────────────────────────── */
+        .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+        .vault-btn {
+            padding: 12px 22px;
+            background: var(--vault-dark);
+            border: 2px solid var(--vault-green);
+            color: var(--vault-green);
+            font-family: 'Courier New', monospace;
+            font-size: 13px; font-weight: bold;
+            letter-spacing: 1px; text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0 8px rgba(74,222,128,0.15);
+        }
+        .vault-btn:hover {
+            background: rgba(74,222,128,0.08);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+            box-shadow: 0 0 16px rgba(251,191,36,0.3);
+        }
+        .vault-btn:active { transform: scale(0.97); }
+        .vault-btn:disabled {
+            opacity: 0.35; cursor: not-allowed; transform: none;
+        }
+        .vault-btn:disabled:hover {
+            background: var(--vault-dark);
+            border-color: var(--vault-green); color: var(--vault-green);
+            box-shadow: 0 0 8px rgba(74,222,128,0.15);
+        }
+
+        .vault-btn-gold {
+            border-color: var(--vault-gold); color: var(--vault-gold);
+            box-shadow: 0 0 10px rgba(251,191,36,0.2);
+        }
+        .vault-btn-gold:hover {
+            background: rgba(251,191,36,0.08);
+            box-shadow: 0 0 18px rgba(251,191,36,0.4);
+        }
+
+        .restart-btn {
+            border-color: var(--vault-error); color: var(--vault-error);
+            box-shadow: 0 0 8px rgba(255,107,107,0.15);
+        }
+        .restart-btn:hover {
+            background: rgba(255,107,107,0.08);
+            border-color: var(--vault-error); color: var(--vault-error);
+            box-shadow: 0 0 16px rgba(255,107,107,0.3);
+        }
+
+        /* ── RESPONSIVE ────────────────────────────────────────── */
+        @media (max-width: 600px) {
+            .goat-card { padding: 18px 14px; }
+            .goat-q-text { font-size: 13px; }
+            .vault-title { font-size: 20px; letter-spacing: 3px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SESSION GUARD -->
+<script>
+(function(){
+    var role = sessionStorage.getItem('role');
+    if (role !== 'player' && role !== 'admin') {
+        window.location.replace('../login.html');
+    }
+})();
+</script>
+
+<!-- HAMBURGER NAV -->
+<script src="../../assets/helpers/navigation/playernavigation.js"></script>
+
+<div class="page-wrapper">
+
+    <!-- HEADER -->
+    <header class="vault-header">
+        <div class="vault-badge">⬡ VAULT-TEC PRESENTS ⬡</div>
+        <div class="vault-title">G.O.A.T.</div>
+        <div class="vault-subtitle">Generalized Occupational Aptitude Test</div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+        <div class="goat-card">
+
+            <!-- ══════════════════════════════════════════════════
+                 INTRO SCREEN
+                 ══════════════════════════════════════════════════ -->
+            <div id="screen-intro">
+                <div class="goat-intro-badge">⬡ ONBOARDING MODULE — NEW VAULT RESIDENTS ⬡</div>
+                <div class="goat-intro-title">Welcome, Vault Resident.</div>
+                <div class="goat-intro-body">
+                    By order of Vault-Tec Corporation, all incoming residents must complete the
+                    <strong style="color:var(--vault-gold)">Generalized Occupational Aptitude Test</strong>
+                    (G.O.A.T.) before being assigned to their post.<br><br>
+                    This test consists of <strong style="color:var(--vault-gold)">{{ QUESTION_COUNT }}</strong>
+                    carefully designed scenarios. Answer honestly — your responses will help
+                    Vault-Tec recommend which <strong style="color:var(--vault-gold)">3 Tag Skills</strong>
+                    best suit your particular talents.<br><br>
+                    <em style="color:rgba(74,222,128,0.6)">Remember: Tag Skills receive a permanent
+                    bonus when you build your character. Choose wisely!</em>
+                </div>
+                <div class="goat-intro-note">
+                    ⚠ This test is advisory only. Your results will not alter any character data.
+                    You may retake the test at any time using the Restart button.
+                </div>
+                <div class="btn-row" style="margin-top:20px;">
+                    <button class="vault-btn vault-btn-gold" onclick="GOAT.start()">▶ BEGIN TEST</button>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════
+                 QUIZ SCREEN
+                 ══════════════════════════════════════════════════ -->
+            <div id="screen-quiz">
+                <div class="goat-progress">
+                    <span class="goat-progress-label" id="progressLabel">Question 1 / 9</span>
+                    <div class="goat-progress-bar-wrap">
+                        <div class="goat-progress-bar" id="progressBar" style="width:0%"></div>
+                    </div>
+                </div>
+
+                <div class="goat-q-num" id="qNum">QUESTION 1</div>
+                <div class="goat-q-text" id="qText"></div>
+                <div class="goat-options" id="qOptions"></div>
+
+                <div class="btn-row">
+                    <button class="vault-btn" id="btnNext" onclick="GOAT.next()" disabled>NEXT ▶</button>
+                    <button class="vault-btn restart-btn" onclick="GOAT.restart()">↻ RESTART TEST</button>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════
+                 RESULTS SCREEN
+                 ══════════════════════════════════════════════════ -->
+            <div id="screen-results">
+                <div class="goat-result-header">⬡ G.O.A.T. ANALYSIS COMPLETE ⬡</div>
+                <div class="goat-result-title">Your Results Are In</div>
+
+                <div class="goat-vaultec-box">
+                    <div class="goat-vaultec-label">📋 VAULT-TEC RECOMMENDATION</div>
+                    <div class="goat-vaultec-message" id="resultMessage"></div>
+                    <div class="goat-skill-tags" id="resultTags"></div>
+                </div>
+
+                <div class="goat-result-note">
+                    These are <em>suggestions</em> based on your answers — you are free to tag any
+                    3 skills you like when building your character. Good luck out there, Vault Resident!<br><br>
+                    To retake the test, press <strong>Restart Test</strong> below.
+                </div>
+
+                <div class="btn-row" style="margin-top:20px;">
+                    <button class="vault-btn restart-btn" onclick="GOAT.restart()">↻ RESTART TEST</button>
+                    <button class="vault-btn" onclick="window.location.href='stats.html'">📊 GO TO STATS</button>
+                </div>
+            </div>
+
+        </div><!-- /.goat-card -->
+    </main>
+
+</div><!-- /.page-wrapper -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// G.O.A.T. — GENERALIZED OCCUPATIONAL APTITUDE TEST
+// Skill-tag recommendation quiz for new Vault 215 residents.
+//
+// HOW TO CUSTOMIZE:
+//   Edit the GOAT_QUESTIONS array below. Each question object has:
+//     text    — The scenario text shown to the player.
+//     choices — Array of answer objects, each with:
+//                 label  — The answer text.
+//                 skills — Array of skill name strings (from VALID_SKILLS).
+//                          Each skill receives +1 vote when chosen.
+//
+// The quiz tallies all votes after the last question and recommends
+// the top-3 most-voted skills as Tag Skill suggestions.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** Full list of valid Fallout skill names (matches stats.html). */
+var VALID_SKILLS = [
+    'Barter', 'Small Guns', 'Big Guns', 'Melee Weapons', 'Energy Weapons',
+    'Explosives', 'Lockpick', 'Medicine', 'Science', 'Repair',
+    'Sneak', 'Speech', 'Unarmed', 'Survival'
+];
+
+/**
+ * Quiz questions. Answers map to one or more skills from VALID_SKILLS.
+ * Edit freely — each answer's skills array can contain 1–3 skill names.
+ */
+var GOAT_QUESTIONS = [
+    {
+        text: "You stumble upon a sealed vault door in an abandoned facility. What is your first instinct?",
+        choices: [
+            { label: "Grab your bobby pins and work the lock.", skills: ['Lockpick'] },
+            { label: "Find a nearby terminal and hack your way in.", skills: ['Science'] },
+            { label: "Sweet-talk the local settlers for the access code.", skills: ['Speech'] },
+            { label: "Consult your survival notes — there's always another way in.", skills: ['Survival'] }
+        ]
+    },
+    {
+        text: "A band of raiders blocks the road ahead. They outnumber you three to one. How do you handle it?",
+        choices: [
+            { label: "Spin a convincing story and negotiate safe passage.", skills: ['Speech', 'Barter'] },
+            { label: "Take position at distance and pick them off with your rifle.", skills: ['Small Guns'] },
+            { label: "Melt into the shadows and slip around them unnoticed.", skills: ['Sneak'] },
+            { label: "Charge in, bare-knuckled. Pain is just weakness leaving the body.", skills: ['Unarmed', 'Melee Weapons'] }
+        ]
+    },
+    {
+        text: "A settler's water purifier is broken and their crops are dying. You offer to help. What's your approach?",
+        choices: [
+            { label: "Examine the filtration chemistry and synthesize a fix.", skills: ['Science', 'Medicine'] },
+            { label: "Strip it down, identify the faulty parts, and rebuild it.", skills: ['Repair'] },
+            { label: "Haggle with a passing merchant for the right replacement parts.", skills: ['Barter'] },
+            { label: "Improvise with Wasteland scrap — you've survived on less.", skills: ['Survival', 'Repair'] }
+        ]
+    },
+    {
+        text: "An old pre-war strongbox sits in the corner of a ruined office. Inside could be valuable loot. What do you do?",
+        choices: [
+            { label: "Work a bobby pin until the tumblers click.", skills: ['Lockpick'] },
+            { label: "Blast the hinges off with an explosive charge.", skills: ['Explosives'] },
+            { label: "Search the room's terminal for a combination.", skills: ['Science'] },
+            { label: "Cave it open with a good heavy swing.", skills: ['Melee Weapons'] }
+        ]
+    },
+    {
+        text: "You're deep in hostile territory. Danger lurks around every corner. What keeps you alive?",
+        choices: [
+            { label: "Move slow, stay low — if they can't see me, they can't shoot me.", skills: ['Sneak'] },
+            { label: "A trusty rifle I've maintained since day one.", skills: ['Small Guns', 'Repair'] },
+            { label: "Heavy firepower. If it's coming at me, I want it vaporized.", skills: ['Big Guns', 'Energy Weapons'] },
+            { label: "Raw instinct and my fists — fastest weapon in the Wasteland.", skills: ['Unarmed'] }
+        ]
+    },
+    {
+        text: "A wounded caravan trader stumbles into camp after a ghoul ambush. You're their only hope. What do you do?",
+        choices: [
+            { label: "Patch them up with a stim and field bandages — stat.", skills: ['Medicine'] },
+            { label: "Improvise a splint from scrap while scouting for threats.", skills: ['Repair', 'Survival'] },
+            { label: "Rally the camp with calm words and delegate care roles.", skills: ['Speech'] },
+            { label: "Offer to trade your medical supplies for something useful.", skills: ['Barter', 'Medicine'] }
+        ]
+    },
+    {
+        text: "You discover an intact pre-war research laboratory. Terminals still hum with life. What draws your attention first?",
+        choices: [
+            { label: "Scientific data — formulas, experiments, schematics galore.", skills: ['Science'] },
+            { label: "The medical bay; drugs, stim packs, and pharmaceutical notes.", skills: ['Medicine'] },
+            { label: "The maintenance logs — machinery in here could be salvaged.", skills: ['Repair'] },
+            { label: "Anything with caps value. Sell it all.", skills: ['Barter'] }
+        ]
+    },
+    {
+        text: "The Overseer announces a territory dispute with a rival faction. They demand a champion duel. You step forward. What weapon do you bring?",
+        choices: [
+            { label: "My reliable sidearm. Accurate and clean.", skills: ['Small Guns'] },
+            { label: "A plasma rifle — show them the future.", skills: ['Energy Weapons'] },
+            { label: "A sledgehammer. Make it memorable.", skills: ['Melee Weapons'] },
+            { label: "A stick of dynamite. Negotiations are overrated.", skills: ['Explosives'] }
+        ]
+    },
+    {
+        text: "You need to cross a stretch of open Wasteland known for deathclaw sightings. How do you prepare?",
+        choices: [
+            { label: "Brew a coyote-berry tea, read the wind, and track safe corridors.", skills: ['Survival'] },
+            { label: "Craft improvised caltrops and set tripwire alerts along the path.", skills: ['Repair', 'Explosives'] },
+            { label: "Move at dusk, hug the shadows, and freeze when anything moves.", skills: ['Sneak'] },
+            { label: "Find a local guide willing to share the safe route — for a price.", skills: ['Barter', 'Speech'] }
+        ]
+    }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENGINE — no need to edit below this line
+// ═══════════════════════════════════════════════════════════════════════════
+
+var GOAT = (function () {
+    var _current = 0;       // index of current question
+    var _answers  = [];     // selected choice index per question
+    var _total    = GOAT_QUESTIONS.length;
+
+    // Patch intro template with question count
+    (function patchIntro() {
+        var el = document.querySelector('.goat-intro-body');
+        if (el) el.innerHTML = el.innerHTML.replace('{{ QUESTION_COUNT }}', _total);
+    })();
+
+    // ── show / hide screens ───────────────────────────────────────────────
+    function _show(id) {
+        ['screen-intro', 'screen-quiz', 'screen-results'].forEach(function (s) {
+            document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
+        });
+    }
+
+    // ── render a single question ──────────────────────────────────────────
+    function _renderQuestion(idx) {
+        var q       = GOAT_QUESTIONS[idx];
+        var pct     = Math.round((idx / _total) * 100);
+        var chosen  = _answers[idx];
+        var KEYS    = ['A', 'B', 'C', 'D', 'E'];
+
+        document.getElementById('progressLabel').textContent =
+            'Question ' + (idx + 1) + ' / ' + _total;
+        document.getElementById('progressBar').style.width = pct + '%';
+        document.getElementById('qNum').textContent = 'QUESTION ' + (idx + 1);
+        document.getElementById('qText').textContent = q.text;
+
+        var html = '';
+        q.choices.forEach(function (c, i) {
+            var sel = (chosen === i) ? ' selected' : '';
+            html += '<div class="goat-option' + sel + '" onclick="GOAT.selectAnswer(' + i + ')" role="button" tabindex="0" aria-pressed="' + (chosen === i) + '">' +
+                '<div class="goat-option-key">' + (KEYS[i] || (i + 1)) + '</div>' +
+                '<div class="goat-option-text">' + _escape(c.label) + '</div>' +
+                '</div>';
+        });
+        document.getElementById('qOptions').innerHTML = html;
+
+        document.getElementById('btnNext').disabled = (chosen === undefined);
+    }
+
+    // ── tally scores ──────────────────────────────────────────────────────
+    function _tally() {
+        var scores = {};
+        VALID_SKILLS.forEach(function (s) { scores[s] = 0; });
+
+        _answers.forEach(function (choiceIdx, qIdx) {
+            if (choiceIdx === undefined || choiceIdx === null) return;
+            var skills = GOAT_QUESTIONS[qIdx].choices[choiceIdx].skills;
+            skills.forEach(function (skill) {
+                if (scores.hasOwnProperty(skill)) scores[skill]++;
+            });
+        });
+
+        // Sort by score desc, then alphabetically for ties
+        return VALID_SKILLS.slice().sort(function (a, b) {
+            return scores[b] - scores[a] || a.localeCompare(b);
+        });
+    }
+
+    // ── show results ──────────────────────────────────────────────────────
+    function _showResults() {
+        var ranked = _tally();
+        var top3   = ranked.slice(0, 3);
+
+        document.getElementById('resultMessage').textContent =
+            'Based on your answers, Vault-Tec recommends you tag the following skills:';
+
+        var tagsHtml = top3.map(function (s) {
+            return '<span class="goat-skill-tag">' + _escape(s) + '</span>';
+        }).join('');
+        document.getElementById('resultTags').innerHTML = tagsHtml;
+
+        _show('screen-results');
+    }
+
+    // ── helpers ───────────────────────────────────────────────────────────
+    function _escape(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // ── public API ────────────────────────────────────────────────────────
+    return {
+        start: function () {
+            _current = 0;
+            _answers = [];
+            _show('screen-quiz');
+            _renderQuestion(0);
+        },
+
+        selectAnswer: function (choiceIdx) {
+            _answers[_current] = choiceIdx;
+            _renderQuestion(_current);
+        },
+
+        next: function () {
+            if (_answers[_current] === undefined) return;
+
+            _current++;
+            if (_current >= _total) {
+                _showResults();
+            } else {
+                _renderQuestion(_current);
+            }
+        },
+
+        restart: function () {
+            _current = 0;
+            _answers = [];
+            _show('screen-intro');
+        }
+    };
+})();
+
+// Keyboard support: Enter/Space on focused option
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    var focused = document.activeElement;
+    if (focused && focused.classList.contains('goat-option')) {
+        e.preventDefault();
+        focused.click();
+    }
+});
+</script>
+</body>
+</html>
