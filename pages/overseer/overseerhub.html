@@ -3609,6 +3609,7 @@
                 lbl.textContent = label;
                 var val = document.createElement('div');
                 val.className = 'spc-stat-value';
+                val.id = 'spc-' + label.toLowerCase() + '-val-' + handle.replace(/\s+/g, '_');
                 val.textContent = current + ' / ' + max;
                 var bg = document.createElement('div');
                 bg.className = 'spc-bar-bg';
@@ -4276,9 +4277,11 @@
 
     function _updateVitalBars(hp, maxHp, ap, maxAp, rad, maxRad, tempHp) {
         var tempHP  = typeof tempHp === 'number' ? tempHp : 0;
-        var hpPct  = maxHp  > 0 ? Math.min(100, Math.round((hp  / maxHp)  * 100)) : 0;
-        var apPct  = maxAp  > 0 ? Math.min(100, Math.round((ap  / maxAp)  * 100)) : 0;
-        var radPct = maxHp  > 0 ? Math.min(100, Math.round((rad / maxHp)  * 100)) : 0;
+        var mr     = (typeof maxRad === 'number' && maxRad > 0) ? maxRad : 1000;
+        var hpPct  = maxHp > 0 ? Math.min(100, Math.round((hp  / maxHp) * 100)) : 0;
+        var apPct  = maxAp > 0 ? Math.min(100, Math.round((ap  / maxAp) * 100)) : 0;
+        // Separate rad indicator bar: shows rad as % of maxRad (1000), not maxHp
+        var radPct = mr    > 0 ? Math.min(100, Math.round((rad / mr)    * 100)) : 0;
         var hpLbl  = document.getElementById('poHPBarLabel');
         var apLbl  = document.getElementById('poAPBarLabel');
         var radLbl = document.getElementById('poRadBarLabel');
