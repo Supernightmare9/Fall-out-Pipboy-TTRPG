@@ -26,6 +26,26 @@ const path      = require('path');
 const fs        = require('fs');
 const { Server } = require('socket.io');
 
+// ── XP / Level helpers (shared with client via xpprogression.js) ──────────────
+const { getLevelFromXP } = require('./assets/logic/xp/xpprogression');
+
+// ── INT bonus helper (shared with client via fallout_stat_bonuses.js) ─────────
+// Inline the INT multiplier table so the server can apply it without loading the
+// full browser-only fallout_stat_bonuses.js script.
+const _intStatBonus = { 1:1.03,2:1.06,3:1.09,4:1.12,5:1.15,6:1.18,7:1.21,8:1.24,9:1.27,10:1.30 };
+function _getIntXPMultiplier(intStat) {
+  const clamped = Math.max(1, Math.min(10, Number(intStat) || 5));
+  return _intStatBonus[clamped] || 1.15;
+}
+
+/**
+ * Derive the canonical level from a total XP value using the shared XP table.
+ * Always returns at least 1.
+ */
+function _deriveLevel(xp) {
+  return getLevelFromXP(Number(xp) || 0);
+}
+
 const PORT       = process.env.PORT       || 3000;
 const ADMIN_CODE = process.env.ADMIN_CODE || 'OVERSEER215';
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
@@ -691,9 +711,10 @@ io.on('connection', (socket) => {
   // ── OVERSEER: award combat XP to individual players ───────────────────────
   // Payload: { awards: [{ playerHandle, xp, message }] }
   // Immediately delivers per-player XP grants mid-combat.  Each eligible player
-  // receives a private 'player:private-message' socket event with their XP amount
-  // so they can apply it to ProgressionManager and see a level-up if they cross
-  // the threshold.  Ultra / boss enemies are excluded upstream before calling this.
+  // receives a 'player:xp-updated' event with their new canonical XP total so
+  // all UI bars (combat, stats) stay in sync.  A 'player:private-message' is
+  // also sent for the feed notification text.
+  // Ultra / boss enemies are excluded upstream before calling this.
   socket.on('overseer:award-combat-xp', ({ awards } = {}) => {
     const { role, sessionCode } = socket.data || {};
     if (role !== 'overseer' || !sessionCode) return;
@@ -709,12 +730,29 @@ io.on('connection', (socket) => {
       const player = session.players[handle];
       if (!player) return;
 
-      // Keep server-side XP tally in sync for the Overseer overview panel
+      // Update canonical server-side XP and derive level
       if (typeof xp === 'number' && xp > 0) {
-        player.data.xp = (player.data.xp || 0) + xp;
+        const oldXp    = player.data.xp || 0;
+        const newXp    = oldXp + xp;
+        const oldLevel = _deriveLevel(oldXp);
+        const newLevel = _deriveLevel(newXp);
+        player.data.xp    = newXp;
+        player.data.level = newLevel;
+
+        // Push canonical XP update so all player UIs (combat + stats) stay in sync
+        if (player.socketId) {
+          io.to(player.socketId).emit('player:xp-updated', {
+            xp:           newXp,
+            level:        newLevel,
+            gained:       xp,
+            levelsGained: newLevel > oldLevel
+              ? Array.from({ length: newLevel - oldLevel }, (_, i) => oldLevel + i + 1)
+              : []
+          });
+        }
       }
 
-      // Send private XP notification directly to the player's socket
+      // Send feed notification text to the player's socket
       if (player.socketId) {
         io.to(player.socketId).emit('player:private-message', {
           type:    'xp_award',
@@ -726,11 +764,83 @@ io.on('connection', (socket) => {
 
     // Notify Overseer with fresh snapshot so the player overview stays current
     socket.emit('overseer:ack', { action: 'combat-xp-awarded', count: awards.length });
-    if (session.overseerSocketId) {
-      socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
-    }
+    socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
 
     console.log(`[overseer:award-combat-xp] session ${sessionCode} | ${awards.length} award(s)`);
+  });
+
+  // ── OVERSEER: gift XP to players (quest / story rewards) ─────────────────
+  // Payload: { awards: [{ playerHandle, rawXp, source }] }
+  // The server reads each player's INT from their stored S.P.E.C.I.A.L. data,
+  // applies the INT bonus via _getIntXPMultiplier(), updates player.data.xp,
+  // and broadcasts 'player:xp-updated' so every client (combat, stats) refreshes.
+  socket.on('overseer:gift-xp', ({ awards } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    if (!Array.isArray(awards) || awards.length === 0) return;
+
+    const results = [];
+
+    awards.forEach(({ playerHandle, rawXp, source }) => {
+      const handle = String(playerHandle || '').trim();
+      if (!handle) return;
+      const player = session.players[handle];
+      if (!player) {
+        results.push({ handle, status: 'offline' });
+        return;
+      }
+
+      if (typeof rawXp !== 'number' || rawXp <= 0) return;
+
+      // Apply INT bonus server-side so no client can bypass it
+      const intStat  = (player.data.special && typeof player.data.special.intelligence === 'number')
+                       ? player.data.special.intelligence : 5;
+      const intBonus = _getIntXPMultiplier(intStat);
+      const finalXp  = Math.round(rawXp * intBonus);
+
+      const oldXp    = player.data.xp || 0;
+      const newXp    = oldXp + finalXp;
+      const oldLevel = _deriveLevel(oldXp);
+      const newLevel = _deriveLevel(newXp);
+      player.data.xp    = newXp;
+      player.data.level = newLevel;
+
+      const gained = newLevel > oldLevel
+        ? Array.from({ length: newLevel - oldLevel }, (_, i) => oldLevel + i + 1)
+        : [];
+
+      // Push canonical XP update to the player's socket
+      if (player.socketId) {
+        io.to(player.socketId).emit('player:xp-updated', {
+          xp:           newXp,
+          level:        newLevel,
+          gained:       finalXp,
+          levelsGained: gained,
+          source:       source || 'Quest'
+        });
+
+        // Also send a feed notification
+        let msg = `+${finalXp} XP (${source || 'Quest'})`;
+        if (intBonus > 1) msg += ` [INT \u00D7${intBonus.toFixed(2)}]`;
+        io.to(player.socketId).emit('player:private-message', {
+          type:    'xp_award',
+          message: msg,
+          xp:      finalXp
+        });
+      }
+
+      results.push({ handle, status: 'ok', finalXp, newXp, newLevel, intBonus, levelsGained: gained });
+    });
+
+    // Push fresh snapshot to Overseer
+    socket.emit('overseer:ack', { action: 'gift-xp-awarded', results });
+    socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
+
+    console.log(`[overseer:gift-xp] session ${sessionCode} | ${results.length} award(s)`);
   });
 
   // ── OVERSEER: broadcast mutation event to all players ─────────────────────

@@ -67,7 +67,7 @@ function getLootBonusChance(luck) {
 // XP multiplier table: each INT point above 0 adds +3 % bonus XP.
 // Pass the result of getIntXPMultiplier(player.special.intelligence)
 // as the `intBonus` parameter to any XP-award function
-// (addQuestXP, addCombatXP, etc.) in Xpdistrubtion.js.
+// (addQuestXP, addCombatXP, etc.) in xpdistribution.js.
 var intStatBonus = {
   1: 1.03,    // +3 %
   2: 1.06,    // +6 %

@@ -3208,14 +3208,24 @@
     }
 
     // ── PROGRESSION DISPLAY ──────────────────────────────────────
+    // Reads the canonical XP from the server live cache when connected;
+    // falls back to ProgressionManager (localStorage) when offline.
     function updateProgressionDisplay() {
-        if (!activeCampaign) return;
-        var cid  = activeCampaign.id;
-        var user = sessionUsername;
-        if (typeof ProgressionManager === 'undefined') return;
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        var totalXp;
+        if (liveData && typeof liveData.xp === 'number') {
+            totalXp = liveData.xp;
+        } else if (activeCampaign && typeof ProgressionManager !== 'undefined') {
+            var prog = ProgressionManager.getPlayerProgression(activeCampaign.id, sessionUsername);
+            totalXp = Number(prog.totalXp) || 0;
+        } else {
+            totalXp = 0;
+        }
 
-        var prog = ProgressionManager.getPlayerProgression(cid, user);
-        var info = ProgressionManager.getLevelInfo(prog.totalXp);
+        var info = (typeof ProgressionManager !== 'undefined')
+            ? ProgressionManager.getLevelInfo(totalXp)
+            : { level: 1, totalXp: totalXp, xpForNext: 0, progressPct: 0, abilityBonus: 0, unlockedAbilities: [] };
 
         // Level badge
         var levelBadge = document.getElementById('progLevelBadge');
@@ -3227,13 +3237,13 @@
 
         // XP text
         var xpCurrent = document.getElementById('progXpCurrent');
-        if (xpCurrent) xpCurrent.textContent = ProgressionManager.formatXpNumber(info.totalXp) + ' XP';
+        if (xpCurrent) xpCurrent.textContent = (typeof ProgressionManager !== 'undefined' ? ProgressionManager.formatXpNumber(info.totalXp) : info.totalXp) + ' XP';
 
         var xpNext = document.getElementById('progXpNext');
         if (xpNext) {
             xpNext.textContent = info.level >= 100
                 ? 'Max level'
-                : ProgressionManager.formatXpNumber(info.xpForNext) + ' to next';
+                : ((typeof ProgressionManager !== 'undefined' ? ProgressionManager.formatXpNumber(info.xpForNext) : info.xpForNext) + ' to next');
         }
 
         // Ability score bonus
@@ -3246,10 +3256,10 @@
         var unlockedCount = document.getElementById('progUnlockedCount');
         if (unlockedCount) unlockedCount.textContent = info.unlockedAbilities.length;
 
-        // Level-up history
+        // Level-up history (keep from ProgressionManager when available)
         var historyList = document.getElementById('progHistoryList');
-        if (historyList) {
-            var history = ProgressionManager.getLevelHistory(cid, user);
+        if (historyList && activeCampaign && typeof ProgressionManager !== 'undefined') {
+            var history = ProgressionManager.getLevelHistory(activeCampaign.id, sessionUsername);
             if (history.length === 0) {
                 historyList.innerHTML = '<div class="empty-state" style="padding:8px 0;font-size:9px;">No level-ups yet</div>';
             } else {
@@ -3262,38 +3272,60 @@
         }
     }
 
-    function awardXpToCharacter(xpAmount, source) {
-        if (!activeCampaign || typeof ProgressionManager === 'undefined') return;
-        var amount = Number(xpAmount);
-        if (!(amount > 0)) return;
+    // Called when server broadcasts player:xp-updated with canonical XP total.
+    // Updates the live player cache, refreshes the progression display, and
+    // triggers the level-up notification if one or more levels were gained.
+    function applyServerXpUpdate(payload) {
+        if (!payload || typeof payload.xp !== 'number') return;
 
-        var cid  = activeCampaign.id;
-        var user = sessionUsername;
-
-        var result = ProgressionManager.awardXp(cid, user, amount, source || 'Combat');
-        if (!result) return;
+        // Update live cache so updateProgressionDisplay() reads server value
+        var handle = window._liveMyHandle;
+        if (handle) {
+            if (!window._livePlayerCache) window._livePlayerCache = {};
+            if (!window._livePlayerCache[handle]) window._livePlayerCache[handle] = {};
+            window._livePlayerCache[handle].xp    = payload.xp;
+            window._livePlayerCache[handle].level = payload.level || (typeof getLevelFromXP === 'function' ? getLevelFromXP(payload.xp) : 1);
+        }
 
         updateProgressionDisplay();
-        addRollResult('+ ' + ProgressionManager.formatXpNumber(amount) + ' XP earned! (' + ProgressionManager.formatXpNumber(result.newXp) + ' total)', 'roll-hit');
 
-        // Show level-up notification if character leveled up
-        if (result.levelsGained && result.levelsGained.length > 0) {
-            showLevelUpNotification(result.levelsGained[result.levelsGained.length - 1], result.newXp);
+        // Show level-up notification and nav badge if one or more levels were gained
+        if (payload.levelsGained && payload.levelsGained.length > 0) {
+            var newLevel = payload.levelsGained[payload.levelsGained.length - 1];
+            showLevelUpNotification(newLevel, payload.xp);
+            if (typeof window.markNavLevelUpPending === 'function') {
+                window.markNavLevelUpPending(true);
+            }
         }
     }
 
+    // Legacy helper kept for backward compatibility (called from onPrivateMessage xp_award).
+    // No longer stores XP locally — the canonical update arrives via player:xp-updated.
+    function awardXpToCharacter(xpAmount, source) {
+        var amount = Number(xpAmount);
+        if (!(amount > 0)) return;
+        // Display update is handled by applyServerXpUpdate (player:xp-updated event).
+        // This function only adds a feed entry so the player sees the "+XP" message.
+        var fmtFn = (typeof ProgressionManager !== 'undefined') ? ProgressionManager.formatXpNumber : function(n) { return String(n); };
+        addRollResult('+ ' + fmtFn(amount) + ' XP earned!', 'roll-hit');
+    }
+
     function showLevelUpNotification(newLevel, totalXp) {
-        if (typeof ProgressionManager === 'undefined') return;
         var overlay = document.getElementById('levelUpNotification');
         if (!overlay) return;
 
-        var info = ProgressionManager.getLevelInfo(totalXp || 0);
-        var abilities = ProgressionManager.getUnlockedAbilitiesUpToLevel(newLevel);
+        var info = (typeof ProgressionManager !== 'undefined')
+            ? ProgressionManager.getLevelInfo(totalXp || 0)
+            : { abilityBonus: 0, unlockedAbilities: [] };
+        var abilities = (typeof ProgressionManager !== 'undefined')
+            ? ProgressionManager.getUnlockedAbilitiesUpToLevel(newLevel)
+            : [];
         var newAbility = abilities.find(function (a) { return a.level === newLevel; });
 
         document.getElementById('levelUpNumber').textContent = newLevel;
 
-        var details = 'Total XP: ' + ProgressionManager.formatXpNumber(totalXp || 0);
+        var fmtFn = (typeof ProgressionManager !== 'undefined') ? ProgressionManager.formatXpNumber : function(n) { return String(n); };
+        var details = 'Total XP: ' + fmtFn(totalXp || 0);
         if (info.abilityBonus > 0) {
             details += '\nAbility Score Bonus: +' + info.abilityBonus + ' to all stats';
         }
@@ -3380,33 +3412,9 @@
         } catch (ex) { /* ignore malformed */ }
     });
 
-    // ── XP PROGRESSION SYNC (overseer awards XP) ──────────────────
-    window.addEventListener('storage', function(e) {
-        if (!e.key || e.key.indexOf('vault215_progression_') !== 0 || !e.newValue) return;
-        if (!activeCampaign) return;
-        var progressionCampaignId = e.key.replace('vault215_progression_', '');
-        if (progressionCampaignId !== activeCampaign.id) return;
-        try {
-            var progressionData = JSON.parse(e.newValue);
-            var myProg = progressionData[sessionUsername];
-            if (!myProg) return;
-            // Derive old XP from previous value
-            var oldData = e.oldValue ? JSON.parse(e.oldValue) : {};
-            var oldMyProg = oldData[sessionUsername] || { totalXp: 0 };
-            var oldXp = Number(oldMyProg.totalXp) || 0;
-            var newXp = Number(myProg.totalXp) || 0;
-            var oldLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(oldXp) : 1;
-            var newLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(newXp) : 1;
-            updateProgressionDisplay();
-            if (newLevel > oldLevel) {
-                showLevelUpNotification(newLevel, newXp);
-            }
-            if (newXp > oldXp) {
-                var gained = newXp - oldXp;
-                addRollResult('⭐ +' + ProgressionManager.formatXpNumber(gained) + ' XP awarded by Overseer!', 'roll-hit');
-            }
-        } catch (ex) { /* ignore malformed */ }
-    });
+    // ── XP PROGRESSION SYNC: now handled via server 'player:xp-updated' event ──
+    // The localStorage vault215_progression_ cross-tab listener has been removed.
+    // All XP updates flow through the server socket to keep a single source of truth.
 
     // ── SAME-TAB COMBAT SYNC (overseer on same page context) ─────
     window.addEventListener('campaignCombatUpdated', function(e) {
@@ -4527,12 +4535,12 @@
             },
 
             onPrivateMessage: function (payload) {
-                // Handle private messages from Overseer — specifically XP awards
-                // triggered automatically on enemy defeat (mid-combat).
+                // Handle private messages from Overseer — feed notification for XP awards.
+                // The canonical XP update arrives via player:xp-updated (onXpUpdated below);
+                // this handler only shows the notification text in the roll-result feed.
                 if (!payload) return;
 
                 if (payload.type === 'xp_award' && typeof payload.xp === 'number' && payload.xp > 0) {
-                    // Award XP through ProgressionManager so level-up logic fires
                     awardXpToCharacter(payload.xp, 'Combat');
                 }
 
@@ -4540,6 +4548,11 @@
                 if (payload.message) {
                     addRollResult('⚔ ' + payload.message, 'roll-hit');
                 }
+            },
+
+            onXpUpdated: function (payload) {
+                // Canonical XP update from server — refresh all XP/level bars.
+                applyServerXpUpdate(payload);
             },
 
             onDisconnect: function () {
