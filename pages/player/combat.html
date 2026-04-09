@@ -3284,6 +3284,8 @@
             if (!window._livePlayerCache) window._livePlayerCache = {};
             if (!window._livePlayerCache[handle]) window._livePlayerCache[handle] = {};
             window._livePlayerCache[handle].xp    = payload.xp;
+            // payload.level is always set by the server; getLevelFromXP is a fallback
+            // for older server versions that may not include the level field.
             window._livePlayerCache[handle].level = payload.level || (typeof getLevelFromXP === 'function' ? getLevelFromXP(payload.xp) : 1);
         }
 

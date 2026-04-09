@@ -9,14 +9,9 @@
 // xpprogression.js defines XP_TABLE and level-calculation functions
 require('./xpprogression');
 
-// fallout_stat_bonuses.js defines getIntXPMultiplier
-// It uses var declarations so the globals leak into the module scope as expected.
-const fs   = require('fs');
-const path = require('path');
-const bonusCode = fs.readFileSync(path.join(__dirname, '../fallout_stat_bonuses.js'), 'utf8');
-new Function(bonusCode)(); // execute so getIntXPMultiplier becomes a global
-
-// xpdistribution.js exports calcXpWithIntBonus and helpers
+// xpdistribution.js exports calcXpWithIntBonus and helpers.
+// It includes an inline INT bonus table so it is self-contained for Node.js use
+// without needing to load the browser-only fallout_stat_bonuses.js.
 const xpDist = require('./xpdistribution');
 const {
   calcXpWithIntBonus,

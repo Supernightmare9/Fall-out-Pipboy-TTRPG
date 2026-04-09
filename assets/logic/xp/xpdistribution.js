@@ -14,8 +14,12 @@
 
 // ── Inline INT bonus table (mirrors fallout_stat_bonuses.js intStatBonus) ─────
 // This keeps xpdistribution.js self-contained for server-side and test use.
-// In a browser context with fallout_stat_bonuses.js loaded, getIntXPMultiplier()
-// will be available as a global and is called preferentially.
+// Duplication with fallout_stat_bonuses.js is intentional: that file is browser-
+// only and cannot be require()'d in Node.js (server/test) contexts.
+// If the bonus values change, update ALL THREE locations:
+//   1. fallout_stat_bonuses.js (intStatBonus) — browser source of truth
+//   2. xpdistribution.js (_XD_INT_BONUS) — Node.js / server fallback
+//   3. server.js (_intStatBonus) — server-only helper
 var _XD_INT_BONUS = { 1:1.03,2:1.06,3:1.09,4:1.12,5:1.15,6:1.18,7:1.21,8:1.24,9:1.27,10:1.30 };
 
 // ── Core INT-bonus calculation ────────────────────────────────────────────────

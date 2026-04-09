@@ -60,6 +60,14 @@ const {
   ? require('./server/playerDataSeed')
   : { SEED_SESSION_CODE: null, SEED_PLAYER_HANDLE: null, TEST_PLAYER_DATA: null };
 
+// ── INT bonus helper ──────────────────────────────────────────────────────────
+// Inline table mirrors fallout_stat_bonuses.js (intStatBonus) and
+// xpdistribution.js (_XD_INT_BONUS). Cannot require the browser-only
+// fallout_stat_bonuses.js directly. If bonus values change, update all three:
+//   1. fallout_stat_bonuses.js (intStatBonus)     — browser source of truth
+//   2. assets/logic/xp/xpdistribution.js (_XD_INT_BONUS) — Node fallback
+//   3. server.js (_intStatBonus)                  — server-only helper
+
 const app    = express();
 const server = http.createServer(app);
 

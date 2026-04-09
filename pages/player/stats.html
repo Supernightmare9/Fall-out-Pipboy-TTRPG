@@ -1642,7 +1642,13 @@
             onXpUpdated: function (payload) {
                 if (!payload || typeof payload.xp !== 'number') return;
                 var newXp   = payload.xp;
-                var oldXp   = parseInt(localStorage.getItem(lsKey('pipboyXP')) || '0');
+                // Use playerData.xp as the previous value — it reflects the last
+                // server-synced canonical XP (set by onConnected / onUpdate).
+                // Falls back to localStorage only as a last resort for the first
+                // award before onConnected has populated playerData.xp.
+                var oldXp   = typeof playerData.xp === 'number'
+                              ? playerData.xp
+                              : parseInt(localStorage.getItem(lsKey('pipboyXP')) || '0');
                 var oldLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(oldXp) : 1;
                 var newLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(newXp) : 1;
 
