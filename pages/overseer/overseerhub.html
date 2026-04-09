@@ -1836,7 +1836,11 @@
 
     window.awardXpFromOverseer=function(){
         if(!_campaign){addLog('Load a campaign first','red');return;}
-        if(typeof ProgressionManager==='undefined'){addLog('ProgressionManager not loaded','red');return;}
+        if(typeof OverseerSync==='undefined'||!OverseerSync.isConnected()){
+            addLog('Server not connected. XP award requires a live server connection.','red');
+            addXpAwardLog('⚠ Server offline — XP not awarded',false);
+            return;
+        }
         var amountEl=document.getElementById('xpAwardAmount');
         var targetEl=document.getElementById('xpAwardTarget');
         var sourceEl=document.getElementById('xpAwardSource');
@@ -1844,7 +1848,7 @@
         var amount=parseInt(amountEl.value,10);
         if(isNaN(amount)||amount<=0){addLog('Enter a valid XP amount','red');return;}
         var target=targetEl.value;
-        var source=sourceEl.value||'Combat';
+        var source=sourceEl.value||'Quest';
         var recipients=[];
         if(target==='all'){
             recipients=(_campaign.players||[]).map(function(p){return p.username;});
@@ -1852,21 +1856,19 @@
             recipients=[target];
         }
         if(recipients.length===0){addLog('No players found in campaign','red');return;}
-        var results=ProgressionManager.awardXpToAll(_campaignId,recipients,amount,source);
-        var levelUps=[];
-        recipients.forEach(function(username){
-            var r=results[username];
-            if(r&&r.levelsGained&&r.levelsGained.length>0){
-                levelUps.push(username+' \u2192 Lvl '+r.levelsGained[r.levelsGained.length-1]);
-            }
+
+        // Build awards array for the server — server applies INT bonus per player
+        var awards=recipients.map(function(username){
+            return {playerHandle:username,rawXp:amount,source:source};
         });
+
+        // Route through server so INT bonus is applied and all clients update live
+        OverseerSync.giftXP(awards);
+
         var targetLabel=target==='all'?'all players':target;
-        var logMsg='\u2B50 Awarded '+amount+' XP ('+source+') to '+targetLabel;
-        addLog(logMsg+(levelUps.length>0?' | LEVEL UP: '+levelUps.join(', '):''),'green');
+        var logMsg='\u2B50 Gifted '+amount+' XP ('+source+') to '+targetLabel+' [INT bonus applied server-side]';
+        addLog(logMsg,'green');
         addXpAwardLog(logMsg,true);
-        if(levelUps.length>0){
-            addXpAwardLog('\uD83C\uDF1F Level Up! '+levelUps.join(', '),true);
-        }
         amountEl.value='';
         save();
     };
@@ -3875,6 +3877,26 @@
             players.forEach(function (p) { _syncPlayers[p.handle] = p.data || {}; });
             addLog('SYNC: Snapshot — ' + players.length + ' player(s) active', 'yellow');
             renderSyncPlayers();
+        },
+
+        onAck: function (payload) {
+            // Handle gift-xp acknowledgement: show level-up results in the XP award log
+            if (payload && payload.action === 'gift-xp-awarded' && Array.isArray(payload.results)) {
+                payload.results.forEach(function (r) {
+                    if (r.status === 'ok') {
+                        var msg = '✓ ' + r.handle + ': +'  + r.finalXp + ' XP (INT ×' + (r.intBonus || 1).toFixed(2) + ') → ' + r.newXp + ' total';
+                        if (r.levelsGained && r.levelsGained.length > 0) {
+                            msg += ' 🌟 LEVEL UP → Lvl ' + r.newLevel;
+                            addLog('🌟 LEVEL UP: ' + r.handle + ' reached level ' + r.newLevel + '!', 'green');
+                        }
+                        addXpAwardLog(msg, true);
+                    } else if (r.status === 'offline') {
+                        addXpAwardLog('⚠ ' + r.handle + ' is offline — XP queued for next login', false);
+                    }
+                });
+                // Refresh live snapshot after awards
+                OverseerSync.requestSnapshot();
+            }
         }
     });
 }());

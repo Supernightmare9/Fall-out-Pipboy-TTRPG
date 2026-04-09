@@ -154,8 +154,9 @@
         if (typeof _opts.onSnapshot === 'function') _opts.onSnapshot(payload);
       });
 
-      _socket.on('overseer:ack', function () {
+      _socket.on('overseer:ack', function (payload) {
         _flashSync();
+        if (typeof _opts.onAck === 'function') _opts.onAck(payload || {});
       });
 
       // Campaign start confirmed by server
@@ -209,6 +210,19 @@
     awardCombatXP: function (awards) {
       if (!_socket || !_connected) return;
       _socket.emit('overseer:award-combat-xp', { awards: awards || [] });
+      _flashSync();
+    },
+
+    /**
+     * Gift XP to one or more players as a quest/story reward.
+     * The server applies each player's INT bonus before crediting XP.
+     * Fails gracefully for offline players (server skips them and reports status).
+     * Each entry in awards should be { playerHandle, rawXp, source }.
+     * @param {Array<{playerHandle: string, rawXp: number, source: string}>} awards
+     */
+    giftXP: function (awards) {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:gift-xp', { awards: awards || [] });
       _flashSync();
     },
 

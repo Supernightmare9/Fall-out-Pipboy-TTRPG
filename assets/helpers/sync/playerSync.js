@@ -216,6 +216,15 @@
         }
       });
 
+      // Canonical XP update from server — fires after any XP award (combat or gift).
+      // Payload: { xp, level, gained, levelsGained, source? }
+      _socket.on('player:xp-updated', function (payload) {
+        _flashSync();
+        if (typeof _opts.onXpUpdated === 'function') {
+          _opts.onXpUpdated(payload || {});
+        }
+      });
+
       // Overseer pushed a change to this player
       _socket.on('player:updated-by-overseer', function (payload) {
         _setStatus('syncing', '⬤ SYNC: UPDATE FROM OVERSEER');

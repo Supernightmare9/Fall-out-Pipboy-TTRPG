@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <ul class="nav-list">
                 <li><a href="combat.html" class="nav-link" data-page="combat">⚔ COMBAT</a></li>
-                <li><a href="stats.html" class="nav-link" data-page="stats">📊 STATS</a></li>
+                <li><a href="stats.html" class="nav-link" data-page="stats">📊 STATS<span id="navLevelUpBadge" style="display:none;margin-left:6px;font-size:10px;color:#fbbf24;animation:navLevelUpPulse 1s ease-in-out infinite;" title="Level up available!">⭐</span></a></li>
                 <li><a href="inventory.html" class="nav-link" data-page="inventory">🎒 INVENTORY</a></li>
                 <li><a href="data.html" class="nav-link" data-page="data">📋 DATA</a></li>
                 <li><a href="../terminal.html" class="nav-link" data-page="terminal">🖥️ TERMINAL</a></li>
@@ -349,8 +349,44 @@ document.addEventListener('DOMContentLoaded', function() {
             box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
         }
 
+        @keyframes navLevelUpPulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.4; transform: scale(1.3); }
+        }
+
     `;
     document.head.appendChild(styleSheet);
+
+    // ── Level-Up Badge API ─────────────────────────────────────────────────────
+    // Call window.setNavLevelUpBadge(true) when a level-up becomes available,
+    // and window.setNavLevelUpBadge(false) once the player completes their level-up.
+    window.setNavLevelUpBadge = function (visible) {
+        var badge = document.getElementById('navLevelUpBadge');
+        if (badge) badge.style.display = visible ? 'inline' : 'none';
+    };
+
+    // Persist level-up badge state across page loads via localStorage
+    var _lvlUpKey = 'pipboy_levelup_pending_' + (localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player');
+    if (localStorage.getItem(_lvlUpKey) === '1') {
+        // Restore badge immediately so it shows on every page while pending
+        document.addEventListener('DOMContentLoaded', function () {
+            window.setNavLevelUpBadge(true);
+        });
+        window.setNavLevelUpBadge(true);
+    }
+
+    /**
+     * Mark a level-up as pending (persists across pages) or clear it.
+     * @param {boolean} pending
+     */
+    window.markNavLevelUpPending = function (pending) {
+        if (pending) {
+            localStorage.setItem(_lvlUpKey, '1');
+        } else {
+            localStorage.removeItem(_lvlUpKey);
+        }
+        window.setNavLevelUpBadge(pending);
+    };
 
     // ═══════════════════════════════════════════════════════════
     // HAMBURGER MENU FUNCTIONALITY

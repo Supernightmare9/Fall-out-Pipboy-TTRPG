@@ -232,3 +232,21 @@ function clearXPHistory() {
 function formatXP(xp) {
     return Number(xp).toLocaleString();
 }
+
+// ── Node.js / CommonJS export (for server.js and tests) ──────────────────────
+// In browser contexts `module` is undefined and this block is skipped.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        XP_TABLE,
+        XP_SOURCES,
+        getLevelFromXP,
+        getXPForNextLevel,
+        getLevelProgress,
+        checkLevelUp,
+        loadXPHistory,
+        saveXPHistory,
+        addXPToHistory,
+        clearXPHistory,
+        formatXP
+    };
+}

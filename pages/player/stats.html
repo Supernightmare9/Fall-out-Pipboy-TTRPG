@@ -1607,6 +1607,13 @@
                     updatePerksDisplay();
                     updateEffectsDisplay();
                     updateSpecialDisplay();
+                    // Load canonical XP from server immediately on connect
+                    if (typeof payload.data.xp === 'number') {
+                        checkAndHandleLevelUp(payload.data.xp);
+                        updateXPDisplay(payload.data.xp);
+                        refreshLevelUpTabVisibility();
+                        updateLevelUpTab();
+                    }
                 }
             },
 
@@ -1623,8 +1630,76 @@
                 updatePerksDisplay();
                 updateEffectsDisplay();
                 updateSpecialDisplay();
-                if (snapshot && snapshot.xp !== undefined) {
+                if (snapshot && typeof snapshot.xp === 'number') {
+                    checkAndHandleLevelUp(snapshot.xp);
                     updateXPDisplay(snapshot.xp);
+                    refreshLevelUpTabVisibility();
+                    updateLevelUpTab();
+                }
+            },
+
+            // Canonical XP update pushed by server after any XP award
+            onXpUpdated: function (payload) {
+                if (!payload || typeof payload.xp !== 'number') return;
+                var newXp   = payload.xp;
+                // Use playerData.xp as the previous value — it reflects the last
+                // server-synced canonical XP (set by onConnected / onUpdate).
+                // Falls back to localStorage only as a last resort for the first
+                // award before onConnected has populated playerData.xp.
+                var oldXp   = typeof playerData.xp === 'number'
+                              ? playerData.xp
+                              : parseInt(localStorage.getItem(lsKey('pipboyXP')) || '0');
+                var oldLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(oldXp) : 1;
+                var newLevel = typeof getLevelFromXP === 'function' ? getLevelFromXP(newXp) : 1;
+
+                // Apply level-up side effects if level increased
+                if (newLevel > oldLevel) {
+                    var gained = newLevel - oldLevel;
+                    playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + gained * SKILL_POINTS_PER_LEVEL;
+                    playerData.perkPointsAvailable  = (playerData.perkPointsAvailable  || 0) + gained;
+                    playerData.skillsLocked         = false;
+                    playerData.skillsAllocationActive = true;
+                    playerData.perkSelectionActive  = true;
+                    playerData.skillsLockBaseline   = deepCopy(playerData.skills);
+                    _levelUpUndoStack = [];
+                    if (!_levelUpBaseline) _levelUpBaseline = deepCopy(playerData);
+                    savePlayerData();
+                    // Show level-up message banner
+                    var msgEl = document.getElementById('levelUpMessage');
+                    if (msgEl) {
+                        msgEl.textContent = '\u2B06 LEVEL UP! You are now level ' + newLevel + '!';
+                        msgEl.style.display = 'block';
+                    }
+                    // Activate nav badge
+                    if (typeof window.markNavLevelUpPending === 'function') {
+                        window.markNavLevelUpPending(true);
+                    }
+                }
+
+                updateXPDisplay(newXp);
+                refreshLevelUpTabVisibility();
+                updateLevelUpTab();
+
+                // Add to XP history so the history panel stays current
+                var gained = newXp - oldXp;
+                if (gained > 0) {
+                    addXPToHistory(gained, payload.source || 'Quest', '', newXp);
+                }
+            },
+
+            onPrivateMessage: function (payload) {
+                // Feed notification only — canonical XP update arrives via onXpUpdated
+                if (!payload) return;
+                if (payload.message) {
+                    var msgEl = document.getElementById('levelUpMessage');
+                    if (msgEl && payload.type === 'xp_award') {
+                        // Briefly show the XP gain in the XP banner
+                        msgEl.textContent = payload.message;
+                        msgEl.style.display = 'block';
+                        setTimeout(function() {
+                            if (msgEl.textContent === payload.message) msgEl.style.display = 'none';
+                        }, 4000);
+                    }
                 }
             }
         });
