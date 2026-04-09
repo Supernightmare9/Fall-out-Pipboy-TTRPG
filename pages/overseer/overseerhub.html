@@ -151,17 +151,6 @@
         .log-yellow{color:#fbbf24;}
         .log-white{color:var(--overseer-white);}
 
-        .message-broadcast-panel{margin-top:16px;}
-        .message-compose-body{padding:14px;}
-        .message-type-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-        .message-type-row label{font-size:10px;color:var(--overseer-gold);letter-spacing:1px;text-transform:uppercase;white-space:nowrap;}
-        .msg-type-select{background:var(--overseer-blue);border:1px solid var(--overseer-gold);color:var(--overseer-gold);font-family:'Courier New',monospace;font-size:11px;padding:5px 8px;cursor:pointer;}
-        .msg-type-select:focus{outline:none;border-color:var(--overseer-gold-bright);}
-        .msg-textarea{width:100%;background:var(--overseer-dark);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:'Courier New',monospace;font-size:11px;padding:10px;resize:vertical;min-height:70px;line-height:1.5;transition:border-color .2s;}
-        .msg-textarea:focus{outline:none;border-color:var(--overseer-gold);}
-        .msg-textarea::placeholder{color:rgba(232,232,232,.3);}
-        .message-compose-footer{display:flex;justify-content:flex-end;margin-top:10px;}
-
         .modal-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(4,8,15,.85);z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;}
         .modal-box{background:var(--overseer-blue-mid);border:2px solid var(--overseer-gold);box-shadow:0 0 40px var(--overseer-glow-gold);padding:24px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto;}
         .modal-title{font-size:14px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;}
@@ -1592,27 +1581,6 @@
         <div id="rollToolResults" style="padding:0 10px 10px;max-height:120px;overflow-y:auto;font-size:10px;font-family:'Share Tech Mono',monospace;"></div>
     </div>
 
-    <!-- MESSAGE BROADCAST TO PLAYERS -->
-    <div class="panel message-broadcast-panel">
-        <div class="panel-header">
-            <span class="panel-title">&#x1F4E1; Send Message to Players</span>
-        </div>
-        <div class="message-compose-body">
-            <div class="message-type-row">
-                <label>Type:</label>
-                <select id="msgTypeSelector" class="msg-type-select">
-                    <option value="normal">Normal</option>
-                    <option value="important">Important</option>
-                    <option value="alert">Alert</option>
-                </select>
-            </div>
-            <textarea id="msgTextarea" class="msg-textarea" placeholder="Type a message to broadcast to all players..." rows="3"></textarea>
-            <div class="message-compose-footer">
-                <button class="cmd-btn success" onclick="sendOverseerMessage()">[BROADCAST TO PLAYERS]</button>
-            </div>
-        </div>
-    </div>
-
     <!-- XP AWARD PANEL -->
     <div class="panel" style="margin-top:12px;" id="xpAwardPanel">
         <div class="panel-header">
@@ -1817,7 +1785,7 @@
 
 <script>
 (function(){
-    var _campaign=null,_campaignId=null,_selEnemyId=null,_combatLog=[],_messages=[];
+    var _campaign=null,_campaignId=null,_selEnemyId=null,_combatLog=[];
     var _editingEnemyId=null,_encounterPreview=[],_pendingLoot=[];
     var LS='vault215_overseer_';
 
@@ -1844,27 +1812,6 @@
         el.scrollTop=el.scrollHeight;
     }
     window.clearCombatLog=function(){_combatLog=[];renderLog();if(_campaign)save();};
-
-    window.sendOverseerMessage=function(){
-        if(!_campaign){addLog('Load a campaign before sending messages','red');return;}
-        var textarea=document.getElementById('msgTextarea');
-        var typesel=document.getElementById('msgTypeSelector');
-        if(!textarea||!typesel)return;
-        var text=textarea.value.trim();
-        if(!text){addLog('Message cannot be empty','red');return;}
-        var type=typesel.value||'normal';
-        var msg={
-            id:'msg_'+Date.now()+'_'+Math.random().toString(36).substring(2,9),
-            text:text,
-            type:type,
-            from:'overseer',
-            timestamp:new Date().toISOString()
-        };
-        _messages.push(msg);
-        textarea.value='';
-        addLog('Message broadcast ['+type+']: "'+text.substring(0,50)+(text.length>50?'...':'')+'"','green');
-        save();
-    };
 
     function populateXpTargetDropdown(){
         var sel=document.getElementById('xpAwardTarget');if(!sel)return;
@@ -1920,15 +1867,6 @@
         if(levelUps.length>0){
             addXpAwardLog('\uD83C\uDF1F Level Up! '+levelUps.join(', '),true);
         }
-        // Broadcast a message to players about the XP award
-        var broadcastText='\u2B50 XP Awarded: +'+amount+' XP ('+(source||'Combat')+') to '+targetLabel+'.'+(levelUps.length>0?' LEVEL UP: '+levelUps.join(', '):'');
-        _messages.push({
-            id:'msg_xp_'+Date.now(),
-            text:broadcastText,
-            type:'important',
-            from:'overseer',
-            timestamp:new Date().toISOString()
-        });
         amountEl.value='';
         save();
     };
@@ -1971,7 +1909,6 @@
         var saved;try{saved=JSON.parse(localStorage.getItem('vault215_campaign_'+id));}catch(e){saved=null;}
         if(saved&&saved.activeEncounter)_campaign.activeEncounter=saved.activeEncounter;
         if(saved&&saved._combatLog)_combatLog=saved._combatLog;
-        if(saved&&Array.isArray(saved.messages))_messages=saved.messages;
         mergePlayerHp();
         populateCampaignDropdown();
         renderPlayerStatus();
@@ -2038,7 +1975,7 @@
         if(!_campaign)return;
         var sharedKey='vault215_campaign_'+_campaignId;
         var existing;try{existing=JSON.parse(localStorage.getItem(sharedKey));}catch(e){existing={};}
-        var merged=Object.assign({},existing||{},{activeEncounter:_campaign.activeEncounter,_combatLog:_combatLog,messages:_messages,lastUpdated:new Date().toISOString()});
+        var merged=Object.assign({},existing||{},{activeEncounter:_campaign.activeEncounter,_combatLog:_combatLog,lastUpdated:new Date().toISOString()});
         try{localStorage.setItem(sharedKey,JSON.stringify(merged));}catch(e){}
         try{window.dispatchEvent(new CustomEvent('campaignCombatUpdated',{detail:{campaignId:_campaignId,encounter:_campaign.activeEncounter}}));}catch(e){}
     }

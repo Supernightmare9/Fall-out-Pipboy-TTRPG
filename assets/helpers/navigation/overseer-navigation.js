@@ -24,8 +24,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <ul class="nav-list">
                 <li><a href="overseerhub.html" class="nav-link" data-page="overseerhub">🖥️ OVERSEER HUB</a></li>
                 <li><a href="overseercrafting.html" class="nav-link" data-page="overseercrafting">🛠️ CRAFTING</a></li>
-                <li><a href="overseermessages.html" class="nav-link" data-page="overseermessages">📻 MESSAGES</a></li>
-                <li><a href="overseersetting.html" class="nav-link" data-page="overseersetting">⚙️ SETTINGS</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -404,8 +402,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function getCurrentPage() {
         const path = window.location.pathname;
         if (path.includes('overseercrafting')) return 'overseercrafting';
-        if (path.includes('overseermessages')) return 'overseermessages';
-        if (path.includes('overseersetting')) return 'overseersetting';
         if (path.includes('overseerhub')) return 'overseerhub';
         return null;
     }

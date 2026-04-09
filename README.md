@@ -7,9 +7,10 @@ A complete tabletop RPG management system built with vanilla JavaScript, designe
 - 🎮 **Complete Combat System** - Initiative tracking, turn management, enemy encounters
 - 👤 **Character Management** - Player characters with stats, inventory, quests
 - 🎯 **Overseer Controls** - Game master tools for campaign management
-- ⚙️ **Customization** - Player color customization, display names, themes
 - 💾 **Data Persistence** - Auto-save system with export/import
 - 📱 **Responsive Design** - Works on desktop, tablet, and mobile
+
+> **Note (2026-04-09):** Messaging and Settings features have been removed from both the Player and Overseer sides per owner request. These can be re-implemented in a future update if desired.
 
 ## LAN / Local Multiplayer — Quickstart
 
@@ -115,7 +116,6 @@ A status bar at the bottom of each page shows **● LIVE** once connected.
 - See party members and their status
 - Update HP with quick buttons
 - View inventory and quests
-- Customize display settings
 
 ### Overseer View
 - Manage campaigns and encounters
@@ -135,10 +135,8 @@ assets/
 │   ├── items.js       # Item database
 │   └── npcs.js        # NPC data
 ├── logic/             # Game logic & mechanics
-│   ├── xp.js          # XP system
-│   └── settings.js    # Settings logic
+│   └── xp.js          # XP system
 └── helpers/           # Helper functions
-    ├── settingsManager.js   # Settings management
     ├── storageManager.js    # Data persistence
     └── utils.js             # Utility functions
 css/
@@ -146,8 +144,7 @@ css/
 pages/
 ├── index.html         # Login page
 ├── character.html     # Player character sheet
-├── overseer.html      # Overseer control panel
-└── settings.html      # Player settings
+└── overseer.html      # Overseer control panel
 ```
 
 ## How to Play
@@ -158,7 +155,6 @@ pages/
 3. Manage your HP with quick buttons
 4. See party members' status
 5. View quests and inventory
-6. Customize your display in Settings
 
 ### For Overseer
 1. Login with PIN (082998)
@@ -167,16 +163,6 @@ pages/
 4. Manage initiative and rounds
 5. Track combat with the combat log
 6. Export campaign for backup
-
-## Settings & Customization
-
-- **Display Color:** Customize your character's color theme
-- **Display Name:** Set a custom name for your character
-- **Theme:** Choose dark or light mode
-- **Font:** Select your preferred font
-- **Sound/Notifications:** Toggle sound effects
-
-Settings are saved and synced across devices using your username.
 
 ## Data Persistence
 
@@ -285,7 +271,6 @@ Each campaign maintains its own **resource pools** that survive server restarts 
 - ✅ Campaign data
 - ✅ Auto-save
 - ✅ Export/Import
-- ✅ Settings persistence
 - ✅ Responsive design
 
 ## Future Enhancements
