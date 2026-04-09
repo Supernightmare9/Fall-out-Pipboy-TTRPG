@@ -536,7 +536,9 @@
              All values are updated in real time via player:health-updated.
              Controls live on the Combat page; this is a status-only view. -->
         <div style="background:var(--vault-darker);border:1px solid rgba(74,222,128,0.25);border-bottom:none;padding:10px 16px;">
-            <!-- Radiation sickness banner — shown only when rads >= 80% maxHP -->
+            <!-- Radiation sickness banner — shown only when rads >= 80% maxHP.
+                 Debuff stat penalties (STR −2, AGI −2, MOVE −1) mirror the
+                 rad_sickness debuff applied server-side in healthManager.js. -->
             <div id="statsRadSicknessBanner" style="display:none;font-size:9px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);border-radius:3px;padding:4px 8px;margin-bottom:6px;color:#ff6b6b;letter-spacing:0.5px;" role="alert">☢ RADIATION SICKNESS — STR −2, AGI −2, MOVE −1</div>
             <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
                 <div style="display:flex;align-items:baseline;gap:6px;">
@@ -1207,7 +1209,10 @@
 
     // Reflects radiation sickness debuff status on the stats page banner.
     // Debuffs are applied server-side and carried in the player:health-updated payload.
+    // Server contract: radiation sickness debuff has id 'rad_sickness' (healthManager.js).
     function _updateStatsRadSicknessBanner(debuffs) {
+        // 'rad_sickness' is the canonical debuff ID set by HealthManager on the server
+        // when rads >= 80% of maxHP. See assets/logic/health/healthManager.js.
         var debuffArr = Array.isArray(debuffs) ? debuffs : [];
         var sick = debuffArr.some(function(d) {
             return (typeof d === 'object' ? d.id : d) === 'rad_sickness';
