@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <li><a href="../terminal.html" class="nav-link" data-page="terminal">🖥️ TERMINAL</a></li>
                 <li><a href="player-sheet.html" class="nav-link" data-page="player-sheet">📝 PLAYER SHEET</a></li>
                 <li><a href="special_test.html" class="nav-link" data-page="special_test">📋 G.O.A.T. TEST</a></li>
+                <li><a href="character_sheet.html" class="nav-link" data-page="character_sheet">🗒️ CHAR SHEET</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -389,6 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (path.includes('terminal')) return 'terminal';
         if (path.includes('player-sheet')) return 'player-sheet';
         if (path.includes('special_test')) return 'special_test';
+        if (path.includes('character_sheet')) return 'character_sheet';
         return null;
     }
 

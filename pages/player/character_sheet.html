@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Character Sheet — Vault 215 TTRPG</title>
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       VAULT 215 — PRINTABLE CHARACTER SHEET
+       All CSS in-page. No external stylesheets.
+       B&W print safe · browser-fillable · mobile/desktop ready
+       ═══════════════════════════════════════════════════════════ */
+
+    /* ── RESET ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ── SCREEN BASE ── */
+    body {
+      font-family: 'Courier New', Consolas, monospace;
+      font-size: 11px;
+      background: #0d1a0d;
+      color: #d0f0c0;
+      padding: 8px;
+    }
+
+    /* ── PAGE WRAPPER ── */
+    .page {
+      background: #141a14;
+      color: #d0f0c0;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 18px 22px;
+      border: 2px solid #4ade80;
+      box-shadow: 0 0 20px rgba(74,222,128,0.15);
+    }
+
+    /* ── PRINT INSTRUCTIONS BANNER ── */
+    .print-instructions {
+      text-align: center;
+      font-size: 10px;
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      border: 1.5px dashed #4ade80;
+      color: #4ade80;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── BUTTON BAR ── */
+    .btn-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .btn-bar button {
+      background: #1a2e1a;
+      color: #4ade80;
+      border: 1.5px solid #4ade80;
+      font-family: 'Courier New', Consolas, monospace;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      padding: 5px 14px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .btn-bar button:hover {
+      background: #2a3e2a;
+      color: #fbbf24;
+      border-color: #fbbf24;
+    }
+
+    /* ── SECTION DIVIDERS ── */
+    .section-label {
+      font-weight: bold;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 2px solid #4ade80;
+      padding-bottom: 3px;
+      margin-bottom: 6px;
+      margin-top: 12px;
+      color: #4ade80;
+    }
+
+    /* ── HEADER ── */
+    .sheet-header {
+      border: 2px solid #4ade80;
+      padding: 8px 12px 10px 12px;
+      margin-bottom: 10px;
+    }
+    .sheet-title {
+      font-size: 17px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-align: center;
+      margin-bottom: 8px;
+      color: #4ade80;
+    }
+    .header-fields {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 90px;
+    }
+    .field-label {
+      font-size: 8px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+      color: #4ade80;
+    }
+
+    /* ── INPUTS & TEXTAREAS ── */
+    input[type="text"],
+    input[type="number"] {
+      font-family: 'Courier New', Consolas, monospace;
+      font-size: 11px;
+      border: none;
+      border-bottom: 1.5px solid #4ade80;
+      background: transparent;
+      color: #d0f0c0;
+      width: 100%;
+      padding: 2px 2px;
+      outline: none;
+    }
+    input[type="number"] {
+      width: 48px;
+      text-align: center;
+    }
+    input::placeholder { color: #4a7a4a; font-style: italic; }
+    textarea {
+      font-family: 'Courier New', Consolas, monospace;
+      font-size: 11px;
+      border: 1.5px solid #4ade80;
+      background: transparent;
+      color: #d0f0c0;
+      resize: none;
+      padding: 4px;
+      width: 100%;
+      outline: none;
+    }
+    textarea::placeholder { color: #4a7a4a; font-style: italic; }
+
+    /* ── S.P.E.C.I.A.L. STAT BOXES ── */
+    .special-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .special-box {
+      flex: 1;
+      border: 2px solid #4ade80;
+      text-align: center;
+      padding: 5px 2px 5px 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .special-letter {
+      font-size: 22px;
+      font-weight: bold;
+      line-height: 1;
+      display: block;
+      color: #4ade80;
+    }
+    .special-name {
+      font-size: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: block;
+      margin-bottom: 5px;
+      color: #a0c090;
+    }
+    .special-val-wrap {
+      border: 1.5px solid #4ade80;
+      width: 36px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .special-val-wrap input[type="number"] {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      padding: 0;
+    }
+    .tagged-row {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      margin-top: 4px;
+      font-size: 7px;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #fbbf24;
+    }
+    .tag-cb { width: 13px; height: 13px; accent-color: #fbbf24; cursor: pointer; }
+
+    /* ── VITALS BAR ── */
+    .vitals-row {
+      display: flex;
+      gap: 0;
+      border: 2px solid #4ade80;
+      margin-bottom: 10px;
+    }
+    .vital-cell {
+      flex: 1;
+      padding: 6px 8px;
+      text-align: center;
+      border-right: 1.5px solid #4ade80;
+    }
+    .vital-cell:last-child { border-right: none; }
+    .vital-cell.wide { flex: 1.8; }
+    .vital-name {
+      display: block;
+      font-size: 9px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      color: #4ade80;
+    }
+    .vital-inputs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-size: 11px;
+    }
+    .vital-inputs input[type="number"] { width: 36px; }
+    .vital-slash { font-size: 13px; color: #4ade80; }
+
+    /* ── SKILLS TABLE ── */
+    .skills-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      margin-bottom: 4px;
+    }
+    .skills-table th {
+      font-size: 9px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 1.5px solid #4ade80;
+      padding: 3px 5px;
+      text-align: center;
+      background: #1a2e1a;
+      color: #4ade80;
+    }
+    .skills-table td {
+      border: 1.5px solid #4ade80;
+      padding: 2px 4px;
+      height: 21px;
+      color: #d0f0c0;
+    }
+    .skills-table .col-tag  { width: 30px; text-align: center; }
+    .skills-table .col-name { width: 120px; font-weight: bold; }
+    .skills-table .col-sp   { width: 45px; text-align: center; font-size: 9px; }
+    .skills-table .col-val  { width: 50px; text-align: center; }
+    .skills-table .col-notes { /* remaining */ }
+    .skills-table tr.tagged-row-hl td { font-weight: bold; }
+    .skills-table td input[type="number"] {
+      width: 42px;
+      border: none;
+      border-bottom: 1.5px solid #4ade80;
+    }
+    .skills-table td input[type="text"] { border: none; border-bottom: 1.5px solid #4ade80; }
+    .skill-tag-hint { font-size: 9px; color: #a0c090; margin-bottom: 8px; }
+
+    /* ── PERKS TABLE ── */
+    .perks-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+    .perks-table th {
+      font-size: 9px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 1.5px solid #4ade80;
+      padding: 3px 5px;
+      background: #1a2e1a;
+      color: #4ade80;
+    }
+    .perks-table td {
+      border: 1.5px solid #4ade80;
+      padding: 2px 4px;
+      height: 21px;
+      color: #d0f0c0;
+    }
+    .perks-table .col-perk  { width: 140px; }
+    .perks-table .col-rank  { width: 45px; text-align: center; }
+    .perks-table td input[type="text"] { border: none; border-bottom: 1.5px solid #4ade80; }
+
+    /* ── INVENTORY TABLE ── */
+    .inv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+    .inv-table th {
+      font-size: 9px;
+      font-weight: bold;
+      text-transform: uppercase;
+      border: 1.5px solid #4ade80;
+      padding: 3px 5px;
+      background: #1a2e1a;
+      color: #4ade80;
+    }
+    .inv-table td {
+      border: 1.5px solid #4ade80;
+      padding: 2px 4px;
+      height: 22px;
+      color: #d0f0c0;
+    }
+    .inv-table .col-slot { width: 36px; text-align: center; font-weight: bold; }
+    .inv-table .col-qty  { width: 58px; }
+    .inv-table .col-dmg  { width: 72px; }
+    .inv-table .col-note { width: 90px; }
+    .inv-table td input[type="text"] { border: none; border-bottom: 1.5px solid #4ade80; }
+    .inv-caps-row { font-size: 9px; color: #a0c090; margin-top: 4px; }
+    .inv-caps-row input[type="number"] { width: 55px; font-size: 9px; border-bottom-color: #4ade80; }
+
+    /* ── TWO-COLUMN LAYOUT ── */
+    .two-col { display: flex; gap: 12px; }
+    .col-left { flex: 1.5; }
+    .col-right { flex: 1; }
+
+    /* ── WRITE LINES ── */
+    .write-lines { display: flex; flex-direction: column; gap: 5px; margin-top: 4px; }
+    .write-line {
+      border-bottom: 1.5px solid #4ade80;
+      height: 21px;
+      display: flex;
+      align-items: center;
+    }
+    .write-line input[type="text"] { border: none; }
+
+    /* ── QUEST SLOTS ── */
+    .quest-slot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
+    }
+    .quest-num { font-weight: bold; font-size: 10px; min-width: 18px; color: #4ade80; }
+    .quest-name { flex: 1; border-bottom: 1.5px solid #4ade80; height: 19px; display:flex; align-items:center; }
+    .quest-name input[type="text"] { border: none; }
+    .quest-status { width: 62px; border-bottom: 1.5px solid #4ade80; height: 19px; display:flex; align-items:center; }
+    .quest-status input[type="text"] { border: none; font-size: 9px; }
+
+    /* ── FOOTER ── */
+    .sheet-footer {
+      border-top: 2px solid #4ade80;
+      margin-top: 10px;
+      padding-top: 10px;
+      display: flex;
+      gap: 14px;
+    }
+    .footer-sig { flex: 1; }
+    .footer-gm  { flex: 1.6; }
+    .sig-area { display: flex; gap: 12px; margin-top: 4px; }
+    .sig-line { flex: 1; display: flex; flex-direction: column; }
+    .sig-underline { border-bottom: 1.5px solid #4ade80; height: 28px; margin-top: 3px; }
+    .sig-line.narrow { max-width: 110px; }
+
+    /* ── PAGE BREAK GUARDS ── */
+    .no-break { page-break-inside: avoid; }
+
+    /* ═══════════════════════════════════════════════════════════
+       PRINT OVERRIDES
+       ═══════════════════════════════════════════════════════════ */
+    @media print {
+      /* hide navigation and on-screen chrome */
+      #hamburgerBtn, #sideNav, #navOverlay, #terminalAccess,
+      .btn-bar, .print-instructions { display: none !important; }
+
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+        font-size: 10px;
+      }
+      .page {
+        background: #fff !important;
+        color: #000 !important;
+        max-width: 100%;
+        margin: 0;
+        padding: 8px 10px;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .section-label {
+        color: #000 !important;
+        border-bottom-color: #000 !important;
+      }
+      .sheet-header  { border-color: #000 !important; }
+      .sheet-title   { color: #000 !important; }
+      .field-label   { color: #000 !important; }
+      .vital-name    { color: #000 !important; }
+      .quest-num     { color: #000 !important; }
+      .tagged-row    { color: #000 !important; }
+
+      input[type="text"], input[type="number"] {
+        color: #000 !important;
+        border-bottom-color: #000 !important;
+        background: transparent !important;
+      }
+      textarea {
+        color: #000 !important;
+        border-color: #000 !important;
+        background: transparent !important;
+      }
+      .special-box        { border-color: #000 !important; background: #fff !important; }
+      .special-letter     { color: #000 !important; }
+      .special-name       { color: #444 !important; }
+      .special-val-wrap   { border-color: #000 !important; }
+      .vitals-row         { border-color: #000 !important; background: #fff !important; }
+      .vital-cell         { border-right-color: #000 !important; }
+      .vital-slash        { color: #000 !important; }
+      .skills-table th    { background: #e8e8e8 !important; color: #000 !important; border-color: #000 !important; }
+      .skills-table td    { border-color: #000 !important; color: #000 !important; }
+      .perks-table th     { background: #e8e8e8 !important; color: #000 !important; border-color: #000 !important; }
+      .perks-table td     { border-color: #000 !important; color: #000 !important; }
+      .inv-table th       { background: #e8e8e8 !important; color: #000 !important; border-color: #000 !important; }
+      .inv-table td       { border-color: #000 !important; color: #000 !important; }
+      .write-line         { border-bottom-color: #000 !important; }
+      .quest-name         { border-bottom-color: #000 !important; }
+      .quest-status       { border-bottom-color: #000 !important; }
+      .sig-underline      { border-bottom-color: #000 !important; }
+      .sheet-footer       { border-top-color: #000 !important; }
+      .special-box input  { color: #000 !important; }
+      .skill-tag-hint     { color: #444 !important; }
+      .inv-caps-row       { color: #444 !important; }
+      .inv-caps-row input { border-bottom-color: #000 !important; }
+
+      @page { margin: 1.1cm 0.9cm; size: letter; }
+    }
+  </style>
+</head>
+<body>
+  <!-- ── NAVIGATION (hidden on print via CSS above) ── -->
+  <script src="../../assets/helpers/navigation/playernavigation.js"></script>
+
+  <div class="page">
+
+    <!-- ── INSTRUCTIONS BANNER ── -->
+    <div class="print-instructions">
+      ☢&nbsp;&nbsp;Print and fill by hand, or fill out in browser before printing.&nbsp;&nbsp;☢
+    </div>
+
+    <!-- ── BUTTON BAR ── -->
+    <div class="btn-bar">
+      <button onclick="clearSheet()">↺ Clear Sheet</button>
+      <button onclick="window.print()">⎙ Print Sheet</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         1. HEADER
+         ═══════════════════════════════════════════════════ -->
+    <div class="sheet-header no-break">
+      <div class="sheet-title">☢ Fallout TTRPG — Character Sheet ☢</div>
+      <div class="header-fields">
+        <div class="field-group" style="flex:2.2; min-width:130px">
+          <span class="field-label">Character Name</span>
+          <input type="text" id="h_name" placeholder="Vault Dweller">
+        </div>
+        <div class="field-group" style="flex:1.6; min-width:110px">
+          <span class="field-label">Race / Background</span>
+          <input type="text" id="h_race" placeholder="Human / Survivor">
+        </div>
+        <div class="field-group" style="flex:1.2; min-width:90px">
+          <span class="field-label">Player Name</span>
+          <input type="text" id="h_player" placeholder="">
+        </div>
+        <div class="field-group" style="flex:0.5; min-width:50px">
+          <span class="field-label">Level</span>
+          <input type="number" id="h_level" min="1" max="99" placeholder="1" style="width:44px">
+        </div>
+        <div class="field-group" style="flex:0.8; min-width:80px">
+          <span class="field-label">XP (current / next)</span>
+          <input type="text" id="h_xp" placeholder="0 / 1000" style="width:90px">
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         2. S.P.E.C.I.A.L. STATS
+         ═══════════════════════════════════════════════════ -->
+    <div class="no-break">
+      <div class="section-label">S.P.E.C.I.A.L. Attributes</div>
+      <div class="special-row">
+
+        <div class="special-box">
+          <span class="special-letter">S</span>
+          <span class="special-name">Strength</span>
+          <div class="special-val-wrap">
+            <input type="number" id="sp_s" min="1" max="10" placeholder="5">
+          </div>
+          <div class="tagged-row">
+            <span>TAG</span><input type="checkbox" class="tag-cb sp-tag-cb" data-stat="strength">
+          </div>
+        </div>
+
+        <div class="special-box">
+          <span class="special-letter">P</span>
+          <span class="special-name">Perception</span>
+          <div class="special-val-wrap">
+            <input type="number" id="sp_p" min="1" max="10" placeholder="5">
+          </div>
+          <div class="tagged-row">
+            <span>TAG</span><input type="checkbox" class="tag-cb sp-tag-cb" data-stat="perception">
+          </div>
+        </div>
+
+        <div class="special-box">
+          <span class="special-letter">E</span>
+          <span class="special-name">Endurance</span>
+          <div class="special-val-wrap">
+            <input type="number" id="sp_e" min="1" max="10" placeholder="5">
+          </div>
+          <div class="tagged-row">
+            <span>TAG</span><input type="checkbox" class="tag-cb sp-tag-cb" data-stat="endurance">
+          </div>
+        </div>
+
+        <div class="special-box">
+          <span class="special-letter">C</span>
+          <span class="special-name">Charisma</span>
+          <div class="special-val-wrap">
+            <input type="number" id="sp_c" min="1" max="10" placeholder="5">
+          </div>
+          <div class="tagged-row">
+            <span>TAG</span><input type="checkbox" class="tag-cb sp-tag-cb" data-stat="charisma">
+          </div>
+        </div>
+
+        <div class="special-box">
+          <span class="special-letter">I</span>
+          <span class="special-name">Intelligence</span>
+          <div class="special-val-wrap">
+            <input type="number" id="sp_i" min="1" max="10" placeholder="5">
+          </div>
+          <div class="tagged-row">
+            <span>TAG</span><input type="checkbox" class="tag-cb sp-tag-cb" data-stat="intelligence">
+          </div>
+        </div>
+
+        <div class="special-box">
+          <span class="special-letter">A</span>
+          <span class="special-name">Agility</span>
+          <div class="special-val-wrap">
+            <input type="number" id="sp_a" min="1" max="10" placeholder="5">
+          </div>
+          <div class="tagged-row">
+            <span>TAG</span><input type="checkbox" class="tag-cb sp-tag-cb" data-stat="agility">
+          </div>
+        </div>
+
+        <div class="special-box">
+          <span class="special-letter">L</span>
+          <span class="special-name">Luck</span>
+          <div class="special-val-wrap">
+            <input type="number" id="sp_l" min="1" max="10" placeholder="5">
+          </div>
+          <div class="tagged-row">
+            <span>TAG</span><input type="checkbox" class="tag-cb sp-tag-cb" data-stat="luck">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         3. VITALS — HP / AP / RAD / DEF+AC
+         ═══════════════════════════════════════════════════ -->
+    <div class="no-break">
+      <div class="section-label">Vitals</div>
+      <div class="vitals-row">
+
+        <div class="vital-cell">
+          <span class="vital-name">❤ Hit Points</span>
+          <div class="vital-inputs">
+            <input type="number" id="v_hp_cur" min="0" placeholder="—">
+            <span class="vital-slash">/</span>
+            <input type="number" id="v_hp_max" min="0" placeholder="—">
+          </div>
+        </div>
+
+        <div class="vital-cell">
+          <span class="vital-name">⚡ Action Points</span>
+          <div class="vital-inputs">
+            <input type="number" id="v_ap_cur" min="0" placeholder="—">
+            <span class="vital-slash">/</span>
+            <input type="number" id="v_ap_max" min="0" placeholder="—">
+          </div>
+        </div>
+
+        <div class="vital-cell">
+          <span class="vital-name">☢ Radiation</span>
+          <div class="vital-inputs">
+            <input type="number" id="v_rad" min="0" max="1000" placeholder="0">
+            <span class="vital-slash">/1000</span>
+          </div>
+        </div>
+
+        <div class="vital-cell">
+          <span class="vital-name">🛡 Defense / AC</span>
+          <div class="vital-inputs">
+            <input type="number" id="v_def" min="0" placeholder="0">
+            <span class="vital-slash">/</span>
+            <input type="number" id="v_ac" min="0" placeholder="0">
+          </div>
+        </div>
+
+        <div class="vital-cell wide">
+          <span class="vital-name">Status Notes</span>
+          <div class="vital-inputs" style="justify-content:flex-start">
+            <input type="text" id="v_notes" placeholder="active effects, conditions..." style="width:100%; border:none; border-bottom:1.5px solid #4ade80;">
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         4. SKILLS TABLE
+         ═══════════════════════════════════════════════════ -->
+    <div class="no-break">
+      <div class="section-label">Skills</div>
+      <table class="skills-table">
+        <thead>
+          <tr>
+            <th class="col-tag">TAG</th>
+            <th class="col-name" style="text-align:left">Skill</th>
+            <th class="col-sp">S.P.E.C.I.A.L.</th>
+            <th class="col-val">Value</th>
+            <th class="col-notes">Notes / Bonuses</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- STRENGTH -->
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Melee Weapons"></td>
+            <td class="col-name">Melee Weapons</td>
+            <td class="col-sp">STR</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Big Guns"></td>
+            <td class="col-name">Big Guns</td>
+            <td class="col-sp">STR</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Unarmed"></td>
+            <td class="col-name">Unarmed</td>
+            <td class="col-sp">STR</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <!-- PERCEPTION -->
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Small Guns"></td>
+            <td class="col-name">Small Guns</td>
+            <td class="col-sp">PER</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Energy Weapons"></td>
+            <td class="col-name">Energy Weapons</td>
+            <td class="col-sp">PER</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <!-- ENDURANCE -->
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Survival"></td>
+            <td class="col-name">Survival</td>
+            <td class="col-sp">END</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Explosives"></td>
+            <td class="col-name">Explosives</td>
+            <td class="col-sp">END</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <!-- CHARISMA -->
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Barter"></td>
+            <td class="col-name">Barter</td>
+            <td class="col-sp">CHA</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Speech"></td>
+            <td class="col-name">Speech</td>
+            <td class="col-sp">CHA</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <!-- INTELLIGENCE -->
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Science"></td>
+            <td class="col-name">Science</td>
+            <td class="col-sp">INT</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Repair"></td>
+            <td class="col-name">Repair</td>
+            <td class="col-sp">INT</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Medicine"></td>
+            <td class="col-name">Medicine</td>
+            <td class="col-sp">INT</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <!-- AGILITY -->
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Sneak"></td>
+            <td class="col-name">Sneak</td>
+            <td class="col-sp">AGI</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+          <tr>
+            <td class="col-tag"><input type="checkbox" class="tag-cb skill-tag-cb" data-skill="Lockpick"></td>
+            <td class="col-name">Lockpick</td>
+            <td class="col-sp">AGI</td>
+            <td class="col-val"><input type="number" min="0" max="100" placeholder="—"></td>
+            <td class="col-notes"><input type="text" style="width:100%" placeholder=""></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="skill-tag-hint">★ TAG skills receive +15 bonus. Maximum 3 TAG skills allowed.</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         5. PERKS & TRAITS
+         ═══════════════════════════════════════════════════ -->
+    <div class="no-break">
+      <div class="section-label">Perks &amp; Traits</div>
+      <table class="perks-table">
+        <thead>
+          <tr>
+            <th class="col-perk" style="text-align:left">Perk / Trait Name</th>
+            <th class="col-rank">Rank</th>
+            <th style="text-align:left">Effect / Description</th>
+          </tr>
+        </thead>
+        <tbody id="perks-tbody">
+          <tr><td class="col-perk"><input type="text" style="width:100%"></td><td class="col-rank" style="text-align:center"><input type="text" style="width:36px;text-align:center"></td><td><input type="text" style="width:100%"></td></tr>
+          <tr><td class="col-perk"><input type="text" style="width:100%"></td><td class="col-rank" style="text-align:center"><input type="text" style="width:36px;text-align:center"></td><td><input type="text" style="width:100%"></td></tr>
+          <tr><td class="col-perk"><input type="text" style="width:100%"></td><td class="col-rank" style="text-align:center"><input type="text" style="width:36px;text-align:center"></td><td><input type="text" style="width:100%"></td></tr>
+          <tr><td class="col-perk"><input type="text" style="width:100%"></td><td class="col-rank" style="text-align:center"><input type="text" style="width:36px;text-align:center"></td><td><input type="text" style="width:100%"></td></tr>
+          <tr><td class="col-perk"><input type="text" style="width:100%"></td><td class="col-rank" style="text-align:center"><input type="text" style="width:36px;text-align:center"></td><td><input type="text" style="width:100%"></td></tr>
+          <tr><td class="col-perk"><input type="text" style="width:100%"></td><td class="col-rank" style="text-align:center"><input type="text" style="width:36px;text-align:center"></td><td><input type="text" style="width:100%"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         6. QUICK INVENTORY
+         ═══════════════════════════════════════════════════ -->
+    <div class="no-break">
+      <div class="section-label">Quick Inventory</div>
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th class="col-slot">Slot</th>
+            <th style="text-align:left">Item / Weapon / Armor</th>
+            <th class="col-qty">Qty / Ammo</th>
+            <th class="col-dmg">Damage / DR</th>
+            <th class="col-note">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-slot">W1</td>
+            <td><input type="text" placeholder="Main Weapon" style="width:100%"></td>
+            <td class="col-qty"><input type="text" style="width:100%"></td>
+            <td class="col-dmg"><input type="text" style="width:100%"></td>
+            <td class="col-note"><input type="text" style="width:100%"></td>
+          </tr>
+          <tr>
+            <td class="col-slot">W2</td>
+            <td><input type="text" placeholder="Secondary Weapon" style="width:100%"></td>
+            <td class="col-qty"><input type="text" style="width:100%"></td>
+            <td class="col-dmg"><input type="text" style="width:100%"></td>
+            <td class="col-note"><input type="text" style="width:100%"></td>
+          </tr>
+          <tr>
+            <td class="col-slot">ARM</td>
+            <td><input type="text" placeholder="Armor / Outfit" style="width:100%"></td>
+            <td class="col-qty"><input type="text" style="width:100%"></td>
+            <td class="col-dmg"><input type="text" placeholder="DR:" style="width:100%"></td>
+            <td class="col-note"><input type="text" style="width:100%"></td>
+          </tr>
+          <tr>
+            <td class="col-slot" style="font-weight:normal">1</td>
+            <td><input type="text" style="width:100%"></td>
+            <td class="col-qty"><input type="text" style="width:100%"></td>
+            <td class="col-dmg"><input type="text" style="width:100%"></td>
+            <td class="col-note"><input type="text" style="width:100%"></td>
+          </tr>
+          <tr>
+            <td class="col-slot" style="font-weight:normal">2</td>
+            <td><input type="text" style="width:100%"></td>
+            <td class="col-qty"><input type="text" style="width:100%"></td>
+            <td class="col-dmg"><input type="text" style="width:100%"></td>
+            <td class="col-note"><input type="text" style="width:100%"></td>
+          </tr>
+          <tr>
+            <td class="col-slot" style="font-weight:normal">3</td>
+            <td><input type="text" style="width:100%"></td>
+            <td class="col-qty"><input type="text" style="width:100%"></td>
+            <td class="col-dmg"><input type="text" style="width:100%"></td>
+            <td class="col-note"><input type="text" style="width:100%"></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="inv-caps-row">
+        W1/W2 = weapons &nbsp;|&nbsp; ARM = armor &nbsp;|&nbsp; 1–3 = misc items / consumables
+        &nbsp;&nbsp;&nbsp; Caps: <input type="number" id="inv_caps" min="0" placeholder="0">
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         7. CONDITIONS / STATUS · NOTES · QUESTS
+         ═══════════════════════════════════════════════════ -->
+    <div class="two-col">
+
+      <!-- LEFT: CONDITIONS + NOTES -->
+      <div class="col-left">
+        <div class="no-break">
+          <div class="section-label">Conditions &amp; Status</div>
+          <div style="font-size:9px; color:#a0c090; margin-bottom:4px; font-style:italic;">Active effects · injuries · addictions · buffs / debuffs:</div>
+          <div class="write-lines">
+            <div class="write-line"><input type="text" style="width:100%"></div>
+            <div class="write-line"><input type="text" style="width:100%"></div>
+            <div class="write-line"><input type="text" style="width:100%"></div>
+            <div class="write-line"><input type="text" style="width:100%"></div>
+            <div class="write-line"><input type="text" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="no-break">
+          <div class="section-label">Notes</div>
+          <textarea id="notes_area" rows="5" placeholder="Campaign notes, contacts, faction standing, discoveries..."></textarea>
+        </div>
+      </div>
+
+      <!-- RIGHT: QUESTS + COMPANIONS -->
+      <div class="col-right">
+        <div class="no-break">
+          <div class="section-label">Active Quests</div>
+          <div style="font-size:9px; color:#a0c090; margin-bottom:5px; font-style:italic;">Quest name &nbsp;/&nbsp; Status (active · done · failed):</div>
+          <div class="quest-slot">
+            <span class="quest-num">Q1</span>
+            <div class="quest-name"><input type="text" style="width:100%"></div>
+            <div class="quest-status"><input type="text" placeholder="[active]" style="width:100%"></div>
+          </div>
+          <div class="quest-slot">
+            <span class="quest-num">Q2</span>
+            <div class="quest-name"><input type="text" style="width:100%"></div>
+            <div class="quest-status"><input type="text" placeholder="[active]" style="width:100%"></div>
+          </div>
+          <div class="quest-slot">
+            <span class="quest-num">Q3</span>
+            <div class="quest-name"><input type="text" style="width:100%"></div>
+            <div class="quest-status"><input type="text" placeholder="[active]" style="width:100%"></div>
+          </div>
+          <div class="quest-slot">
+            <span class="quest-num">Q4</span>
+            <div class="quest-name"><input type="text" style="width:100%"></div>
+            <div class="quest-status"><input type="text" placeholder="[done]" style="width:100%"></div>
+          </div>
+          <div class="quest-slot">
+            <span class="quest-num">Q5</span>
+            <div class="quest-name"><input type="text" style="width:100%"></div>
+            <div class="quest-status"><input type="text" placeholder="[done]" style="width:100%"></div>
+          </div>
+        </div>
+        <div class="no-break">
+          <div class="section-label">Companions / Allies</div>
+          <div class="write-lines">
+            <div class="write-line"><input type="text" style="width:100%"></div>
+            <div class="write-line"><input type="text" style="width:100%"></div>
+            <div class="write-line"><input type="text" style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         8. FOOTER — SIGNATURE & GM NOTES
+         ═══════════════════════════════════════════════════ -->
+    <div class="sheet-footer no-break">
+
+      <div class="footer-sig">
+        <div class="section-label" style="margin-top:0">Player Signature</div>
+        <div class="sig-area">
+          <div class="sig-line">
+            <span class="field-label">Signature</span>
+            <div class="sig-underline"></div>
+          </div>
+          <div class="sig-line narrow">
+            <span class="field-label">Date</span>
+            <div class="sig-underline"></div>
+          </div>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:16px; align-items:center;">
+          <span>
+            <span class="field-label">Session #&nbsp;</span>
+            <input type="text" id="footer_session" style="width:55px">
+          </span>
+          <span>
+            <span class="field-label">Total Caps&nbsp;</span>
+            <input type="number" id="footer_caps" min="0" placeholder="0" style="width:60px">
+          </span>
+        </div>
+      </div>
+
+      <div class="footer-gm">
+        <div class="section-label" style="margin-top:0">GM Notes</div>
+        <textarea id="gm_notes" rows="6" placeholder="For Game Master use only..."></textarea>
+      </div>
+
+    </div>
+
+  </div><!-- /.page -->
+
+  <script>
+    // ─────────────────────────────────────────────────────────
+    // TAG SKILL ENFORCEMENT  (max 3)
+    // ─────────────────────────────────────────────────────────
+    var skillTagCBs = document.querySelectorAll('.skill-tag-cb');
+
+    skillTagCBs.forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        var checked = document.querySelectorAll('.skill-tag-cb:checked');
+        if (checked.length > 3) {
+          this.checked = false;
+          alert('You may only TAG 3 skills.');
+          return;
+        }
+        highlightTaggedRows();
+      });
+    });
+
+    function highlightTaggedRows() {
+      skillTagCBs.forEach(function(cb) {
+        var row = cb.closest('tr');
+        if (!row) return;
+        if (cb.checked) {
+          row.style.fontWeight = 'bold';
+        } else {
+          row.style.fontWeight = '';
+        }
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // CLEAR SHEET
+    // ─────────────────────────────────────────────────────────
+    function clearSheet() {
+      if (!confirm('Clear all fields and reset the character sheet?')) return;
+      document.querySelectorAll('input[type="text"], input[type="number"]').forEach(function(el) {
+        el.value = '';
+      });
+      document.querySelectorAll('input[type="checkbox"]').forEach(function(el) {
+        el.checked = false;
+      });
+      document.querySelectorAll('textarea').forEach(function(el) {
+        el.value = '';
+      });
+      highlightTaggedRows();
+    }
+  </script>
+</body>
+</html>
