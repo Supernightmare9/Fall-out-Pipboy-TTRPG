@@ -112,6 +112,16 @@
         .bar-crit-gold  { background: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
         .bar-crit-red   { background: #ff6b6b; box-shadow: 0 0 6px #ff6b6b; }
 
+        /* UNIFIED HEALTH BAR (stats page — read-only, server-driven) */
+        #statsHpBarBg { height: 12px; }
+        #statsHpBarFill { position: relative; z-index: 1; }
+        .stats-hp-temp-zone, .stats-hp-rad-zone {
+            position: absolute; top: 0; height: 100%;
+            transition: width 0.4s; pointer-events: none; z-index: 2;
+        }
+        .stats-hp-temp-zone { left: 0;  background: rgba(96,165,250,0.55); }
+        .stats-hp-rad-zone  { right: 0; background: rgba(239,68,68,0.65); }
+
         /* HP CONTROLS */
         .hp-controls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
         .hp-btn {
@@ -520,6 +530,37 @@
             <button class="tab-btn"        onclick="switchTab('perks', this)">&#11088; PERKS</button>
             <button class="tab-btn"        onclick="switchTab('effects', this)">&#10022; EFFECTS</button>
             <button class="tab-btn level-up-tab-btn" id="levelUpTabBtn" onclick="switchTab('levelup', this)" style="display:none;border-color:rgba(251,191,36,0.6);color:#fbbf24;animation:blinkText 1s ease-in-out infinite;">&#11014; LEVEL UP</button>
+        </div>
+
+        <!-- Unified Health Bar (server-driven, read-only).
+             All values are updated in real time via player:health-updated.
+             Controls live on the Combat page; this is a status-only view. -->
+        <div style="background:var(--vault-darker);border:1px solid rgba(74,222,128,0.25);border-bottom:none;padding:10px 16px;">
+            <!-- Radiation sickness banner — shown only when rads >= 80% maxHP.
+                 Debuff stat penalties (STR −2, AGI −2, MOVE −1) mirror the
+                 rad_sickness debuff applied server-side in healthManager.js. -->
+            <div id="statsRadSicknessBanner" style="display:none;font-size:9px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);border-radius:3px;padding:4px 8px;margin-bottom:6px;color:#ff6b6b;letter-spacing:0.5px;" role="alert">☢ RADIATION SICKNESS — STR −2, AGI −2, MOVE −1</div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+                <div style="display:flex;align-items:baseline;gap:6px;">
+                    <span style="font-size:26px;font-weight:bold;color:var(--vault-green);text-shadow:0 0 10px var(--vault-green);line-height:1;" id="statsHpCurrent">—</span>
+                    <span style="font-size:15px;color:rgba(74,222,128,0.5);">/</span>
+                    <span style="font-size:15px;color:rgba(74,222,128,0.7);" id="statsHpMax">—</span>
+                    <span style="font-size:9px;color:var(--vault-gold);letter-spacing:1px;text-transform:uppercase;margin-left:4px;align-self:center;">HP</span>
+                    <span style="font-size:10px;color:var(--vault-info);margin-left:4px;" id="statsTempHpDisplay"></span>
+                </div>
+                <div style="font-size:9px;color:rgba(74,222,128,0.5);display:flex;gap:10px;flex-wrap:wrap;">
+                    <span>☢ RAD: <span id="statsRadCurrent" style="color:#ff6b6b;">0</span></span>
+                    <span style="color:rgba(74,222,128,0.3);">|</span>
+                    <span>TEMP: <span id="statsTempHpValue" style="color:#60a5fa;">+0</span></span>
+                </div>
+            </div>
+            <!-- Segmented bar: 🟢 HP | 🔵 Temp HP (overlay, left) | 🔴 Radiation (overlay, right) -->
+            <div class="bar-bg" id="statsHpBarBg">
+                <div class="bar-fill bar-high" id="statsHpBarFill" style="width:100%;position:relative;z-index:1;"></div>
+                <div class="stats-hp-temp-zone" id="statsHpTempZone" style="width:0;" role="presentation" aria-hidden="true"></div>
+                <div class="stats-hp-rad-zone"  id="statsHpRadZone"  style="width:0;" role="presentation" aria-hidden="true"></div>
+            </div>
+            <div style="font-size:8px;color:rgba(74,222,128,0.35);margin-top:3px;letter-spacing:0.5px;">HEALTH — LIVE SERVER STATE · 🟢 HP &nbsp;🔵 TEMP &nbsp;🔴 RADS · Manage on Combat page</div>
         </div>
 
         <!-- Compact Level & XP summary (element IDs kept for JS compatibility) -->
@@ -1128,6 +1169,58 @@
         localStorage.setItem(lsKey('pipboyLevel'), level);
     }
 
+    // ---- UNIFIED HEALTH BAR (server-driven, read-only) ----
+    // Updates the compact health bar on this page from canonical server state.
+    // All health mutations happen on the Combat page via PlayerSync → server.
+    function updateStatsHealthDisplay(hp, maxHp, radiation, tempHealth) {
+        var rad  = typeof radiation  === 'number' ? Math.max(0, radiation)  : 0;
+        var temp = typeof tempHealth === 'number' ? Math.max(0, tempHealth) : 0;
+        var cur  = typeof hp         === 'number' ? Math.max(0, hp)         : 0;
+        var max  = typeof maxHp      === 'number' ? Math.max(0, maxHp)      : 0;
+
+        var effectiveCap = Math.max(0, max - rad);
+        var cappedHp     = Math.min(cur, effectiveCap);
+        var hpPct        = max > 0 ? Math.min(100, Math.round((cappedHp / max) * 100)) : 0;
+        var radPct       = max > 0 ? Math.min(100, Math.round((rad      / max) * 100)) : 0;
+        var cappedTemp   = Math.min(temp, effectiveCap);
+        var tempPct      = max > 0 ? Math.min(100, Math.round((cappedTemp / max) * 100)) : 0;
+
+        var curEl  = document.getElementById('statsHpCurrent');
+        var maxEl  = document.getElementById('statsHpMax');
+        var fill   = document.getElementById('statsHpBarFill');
+        var radEl  = document.getElementById('statsRadCurrent');
+        var tempEl = document.getElementById('statsTempHpValue');
+        var tempD  = document.getElementById('statsTempHpDisplay');
+        var radZ   = document.getElementById('statsHpRadZone');
+        var tempZ  = document.getElementById('statsHpTempZone');
+
+        if (curEl)  curEl.textContent  = cur;
+        if (maxEl)  maxEl.textContent  = max;
+        if (radEl)  radEl.textContent  = rad;
+        if (tempEl) tempEl.textContent = '+' + temp;
+        if (tempD)  tempD.textContent  = temp > 0 ? '(+' + temp + ' temp)' : '';
+        if (fill) {
+            fill.style.width = hpPct + '%';
+            fill.className   = 'bar-fill ' + (hpPct >= 75 ? 'bar-high' : hpPct >= 25 ? 'bar-mid' : 'bar-low');
+        }
+        if (radZ)  radZ.style.width  = radPct  + '%';
+        if (tempZ) tempZ.style.width = tempPct + '%';
+    }
+
+    // Reflects radiation sickness debuff status on the stats page banner.
+    // Debuffs are applied server-side and carried in the player:health-updated payload.
+    // Server contract: radiation sickness debuff has id 'rad_sickness' (healthManager.js).
+    function _updateStatsRadSicknessBanner(debuffs) {
+        // 'rad_sickness' is the canonical debuff ID set by HealthManager on the server
+        // when rads >= 80% of maxHP. See assets/logic/health/healthManager.js.
+        var debuffArr = Array.isArray(debuffs) ? debuffs : [];
+        var sick = debuffArr.some(function(d) {
+            return (typeof d === 'object' ? d.id : d) === 'rad_sickness';
+        });
+        var banner = document.getElementById('statsRadSicknessBanner');
+        if (banner) banner.style.display = sick ? 'block' : 'none';
+    }
+
     function addXP() {
         var inp    = document.getElementById('xpInput');
         if (!inp) return;
@@ -1614,6 +1707,16 @@
                         refreshLevelUpTabVisibility();
                         updateLevelUpTab();
                     }
+                    // Load canonical health state from server immediately on connect
+                    if (typeof payload.data.hp === 'number') {
+                        updateStatsHealthDisplay(
+                            payload.data.hp,
+                            payload.data.maxHp   || 0,
+                            payload.data.radiation  || 0,
+                            payload.data.tempHealth || 0
+                        );
+                        _updateStatsRadSicknessBanner(payload.data.debuffs || []);
+                    }
                 }
             },
 
@@ -1635,6 +1738,17 @@
                     updateXPDisplay(snapshot.xp);
                     refreshLevelUpTabVisibility();
                     updateLevelUpTab();
+                }
+                // Refresh health bar when health-related fields are pushed
+                if (field === 'hp' || field === 'radiation' || field === 'tempHealth' || field === 'debuffs' || field === 'all') {
+                    var src = (field === 'all' && snapshot) ? snapshot : playerData;
+                    updateStatsHealthDisplay(
+                        typeof src.hp         === 'number' ? src.hp         : 0,
+                        typeof src.maxHp      === 'number' ? src.maxHp      : 0,
+                        typeof src.radiation  === 'number' ? src.radiation  : 0,
+                        typeof src.tempHealth === 'number' ? src.tempHealth : 0
+                    );
+                    _updateStatsRadSicknessBanner(src.debuffs || []);
                 }
             },
 
@@ -1701,6 +1815,21 @@
                         }, 4000);
                     }
                 }
+            },
+
+            // Canonical health update from server — fires after any health mutation.
+            // Payload: { hp, radiation, tempHealth, debuffs, events, snapshot }
+            onHealthUpdated: function (payload) {
+                if (!payload) return;
+                var snap  = payload.snapshot || {};
+                var maxHp = typeof snap.maxHp === 'number' ? snap.maxHp : 0;
+                updateStatsHealthDisplay(
+                    typeof payload.hp         === 'number' ? payload.hp         : 0,
+                    maxHp,
+                    typeof payload.radiation  === 'number' ? payload.radiation  : 0,
+                    typeof payload.tempHealth === 'number' ? payload.tempHealth : 0
+                );
+                _updateStatsRadSicknessBanner(payload.debuffs || []);
             }
         });
     }());
