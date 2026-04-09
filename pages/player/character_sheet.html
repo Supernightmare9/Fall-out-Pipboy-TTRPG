@@ -959,11 +959,11 @@
     // ─────────────────────────────────────────────────────────
     // TAG SKILL ENFORCEMENT  (max 3)
     // ─────────────────────────────────────────────────────────
-    var skillTagCBs = document.querySelectorAll('.skill-tag-cb');
+    const skillTagCBs = document.querySelectorAll('.skill-tag-cb');
 
     skillTagCBs.forEach(function(cb) {
       cb.addEventListener('change', function() {
-        var checked = document.querySelectorAll('.skill-tag-cb:checked');
+        const checked = document.querySelectorAll('.skill-tag-cb:checked');
         if (checked.length > 3) {
           this.checked = false;
           alert('You may only TAG 3 skills.');
