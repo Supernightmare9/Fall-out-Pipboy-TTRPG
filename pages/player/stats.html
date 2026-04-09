@@ -350,6 +350,135 @@
             margin-left: 10px;
             vertical-align: middle;
         }
+
+        /* ── S.P.E.C.I.A.L. STATS SECTION ──────────────────────────────── */
+        .sp-section {
+            background: var(--vault-darker);
+            border: 1px solid rgba(74,222,128,0.3);
+            border-top: 2px solid var(--vault-green);
+            padding: 12px 16px 14px;
+        }
+        .sp-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .sp-section-title {
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: var(--vault-gold);
+            text-shadow: 0 0 6px rgba(251,191,36,0.5);
+            text-transform: uppercase;
+        }
+        .sp-status {
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: rgba(74,222,128,0.45);
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border: 1px solid rgba(74,222,128,0.2);
+        }
+        .sp-status.sp-alloc-active {
+            color: var(--vault-gold);
+            border-color: rgba(251,191,36,0.5);
+            animation: blinkBorder 1.5s ease-in-out infinite;
+        }
+        .sp-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .sp-attr {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.2);
+            padding: 6px 5px 8px;
+            flex: 1;
+            min-width: 46px;
+            max-width: 70px;
+            transition: border-color 0.2s;
+        }
+        .sp-attr.sp-attr-active {
+            border-color: rgba(74,222,128,0.4);
+        }
+        .sp-attr-letter {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--vault-gold);
+            letter-spacing: 1px;
+            line-height: 1;
+            margin-bottom: 1px;
+        }
+        .sp-attr-name {
+            font-size: 6px;
+            color: rgba(74,222,128,0.5);
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            text-align: center;
+            margin-bottom: 4px;
+            white-space: nowrap;
+        }
+        .sp-attr-val {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--vault-green);
+            text-shadow: 0 0 5px rgba(74,222,128,0.4);
+            line-height: 1;
+            min-width: 24px;
+            text-align: center;
+            margin: 3px 0 4px;
+        }
+        .sp-btn {
+            width: 24px;
+            height: 22px;
+            background: rgba(74,222,128,0.05);
+            border: 1px solid rgba(74,222,128,0.15);
+            color: rgba(74,222,128,0.25);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 1;
+            cursor: not-allowed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2px 0;
+            transition: all 0.15s;
+            padding: 0;
+        }
+        .sp-btn:not([disabled]) {
+            color: var(--vault-green);
+            border-color: rgba(74,222,128,0.45);
+            cursor: pointer;
+            background: rgba(74,222,128,0.08);
+        }
+        .sp-btn:not([disabled]):hover {
+            background: rgba(74,222,128,0.2);
+            border-color: var(--vault-gold);
+            color: var(--vault-gold);
+        }
+        .sp-btn.sp-minus:not([disabled]) {
+            color: var(--vault-error);
+            border-color: rgba(255,107,107,0.35);
+            background: rgba(255,107,107,0.04);
+        }
+        .sp-btn.sp-minus:not([disabled]):hover {
+            background: rgba(255,107,107,0.12);
+            border-color: var(--vault-error);
+        }
+        @media (max-width: 520px) {
+            .sp-attr { min-width: 38px; max-width: 56px; padding: 5px 3px 7px; }
+            .sp-attr-val { font-size: 18px; }
+            .sp-btn { width: 20px; height: 19px; font-size: 12px; }
+            .sp-section-title { letter-spacing: 2px; }
+        }
     </style>
 </head>
 <body>
@@ -374,6 +503,15 @@
             </svg>
             <div class="vt-decorative-line"></div>
             <div style="font-size:9px;letter-spacing:1px;color:rgba(251,191,36,0.6);">VAULT-TEC CORPORATION &bull; APPROVED <span class="vt-approved-badge">APPROVED</span></div>
+        </div>
+
+        <!-- S.P.E.C.I.A.L. ATTRIBUTES — below header, above main tabs -->
+        <div id="spSection" class="sp-section">
+            <div class="sp-section-header">
+                <span class="sp-section-title">S.P.E.C.I.A.L.</span>
+                <span id="spStatus" class="sp-status">AWAITING RACE SELECTION</span>
+            </div>
+            <div class="sp-row" id="spRow" role="group" aria-label="S.P.E.C.I.A.L. attribute adjustments"></div>
         </div>
 
         <!-- TABS NAV -->
@@ -586,7 +724,7 @@
                   'Explosives','Lockpick','Medicine','Science','Repair',
                   'Sneak','Speech','Unarmed','Survival'];
 
-    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, perkPointsAvailable:0, selectedPerks:[], perkSelectionActive:false, skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false };
+    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, perkPointsAvailable:0, selectedPerks:[], perkSelectionActive:false, skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false, special:{ strength:0, perception:0, endurance:0, charisma:0, intelligence:0, agility:0, luck:0 }, specialAllocationActive:false, raceSelected:false };
     var debuffs    = [];
     var boosts     = [];
 
@@ -603,7 +741,109 @@
         });
     }
 
-    // ---- TAB SWITCHING ----
+    // ---- S.P.E.C.I.A.L. ----
+    var SPECIAL_ATTRS = [
+        { key: 'strength',     letter: 'S', name: 'Strength' },
+        { key: 'perception',   letter: 'P', name: 'Perception' },
+        { key: 'endurance',    letter: 'E', name: 'Endurance' },
+        { key: 'charisma',     letter: 'C', name: 'Charisma' },
+        { key: 'intelligence', letter: 'I', name: 'Intelligence' },
+        { key: 'agility',      letter: 'A', name: 'Agility' },
+        { key: 'luck',         letter: 'L', name: 'Luck' }
+    ];
+
+    // Ensure playerData.special is a valid object with all seven attributes.
+    function ensureValidSpecial() {
+        if (!playerData.special || typeof playerData.special !== 'object' || Array.isArray(playerData.special)) {
+            playerData.special = {};
+        }
+        SPECIAL_ATTRS.forEach(function(a) {
+            if (typeof playerData.special[a.key] !== 'number') playerData.special[a.key] = 0;
+        });
+    }
+
+    // Returns true when the player has a perk or gene pool item that permits
+    // adjusting the given S.P.E.C.I.A.L. attribute.
+    // "Intense Training" (id: IntenseTraining) allows raising any single attribute.
+    // Perks / gene pool items may also set a `specialGrant` field: an array of
+    // attribute keys (e.g. ['strength','luck']) or the string 'all'.
+    function hasSPECIALAdjustPerk(key) {
+        var perks = playerData.selectedPerks || [];
+        // Intense Training — lets you put a point into any SPECIAL attribute
+        if (perks.some(function(p) { return p.id === 'IntenseTraining'; })) return true;
+        // Generic mechanism: perks / gene pool items may carry a specialGrant field
+        return perks.some(function(p) {
+            if (!p.specialGrant) return false;
+            return p.specialGrant === 'all' ||
+                   (Array.isArray(p.specialGrant) && p.specialGrant.indexOf(key) !== -1);
+        });
+    }
+
+    // Render / refresh the S.P.E.C.I.A.L. row and status badge.
+    function updateSpecialDisplay() {
+        ensureValidSpecial();
+        var raceSelected = !!playerData.raceSelected;
+        var allocActive  = raceSelected && !!playerData.specialAllocationActive;
+        var row = document.getElementById('spRow');
+        if (!row) return;
+
+        row.innerHTML = SPECIAL_ATTRS.map(function(attr) {
+            var val       = playerData.special[attr.key];
+            var perkUnlock = raceSelected && hasSPECIALAdjustPerk(attr.key);
+            var canAdjust  = allocActive || perkUnlock;
+            var canInc = canAdjust && val < 10;
+            var canDec = canAdjust && val > 1;
+            return '<div class="sp-attr' + (raceSelected ? ' sp-attr-active' : '') + '">' +
+                '<button class="sp-btn sp-plus"' + (!canInc ? ' disabled' : '') +
+                    ' onclick="adjustSpecial(\'' + attr.key + '\',1)"' +
+                    ' aria-label="Increase ' + attr.name + '"' +
+                    ' title="' + (canInc ? 'Increase ' + attr.name : 'Adjustment locked') + '">+</button>' +
+                '<span class="sp-attr-val" id="sp-val-' + attr.key + '">' + val + '</span>' +
+                '<span class="sp-attr-letter">' + attr.letter + '</span>' +
+                '<span class="sp-attr-name">' + attr.name + '</span>' +
+                '<button class="sp-btn sp-minus"' + (!canDec ? ' disabled' : '') +
+                    ' onclick="adjustSpecial(\'' + attr.key + '\',-1)"' +
+                    ' aria-label="Decrease ' + attr.name + '"' +
+                    ' title="' + (canDec ? 'Decrease ' + attr.name : 'Adjustment locked') + '">-</button>' +
+            '</div>';
+        }).join('');
+
+        // Update status badge
+        var statusEl = document.getElementById('spStatus');
+        if (statusEl) {
+            if (!raceSelected) {
+                statusEl.textContent = 'AWAITING RACE SELECTION';
+                statusEl.className   = 'sp-status';
+            } else if (allocActive) {
+                statusEl.textContent = 'ALLOCATION MODE ACTIVE';
+                statusEl.className   = 'sp-status sp-alloc-active';
+            } else {
+                statusEl.textContent = 'ATTRIBUTES LOCKED';
+                statusEl.className   = 'sp-status';
+            }
+        }
+
+        // Keep pipboySpecial in sync so that getSpecialValue() works for perk prereqs
+        if (raceSelected) {
+            localStorage.setItem(lsKey('pipboySpecial'), JSON.stringify(playerData.special));
+        }
+    }
+
+    // Adjust a single S.P.E.C.I.A.L. attribute by +1 or -1.
+    function adjustSpecial(key, delta) {
+        ensureValidSpecial();
+        var raceSelected = !!playerData.raceSelected;
+        var allocActive  = raceSelected && !!playerData.specialAllocationActive;
+        var perkUnlock   = raceSelected && hasSPECIALAdjustPerk(key);
+        if (!allocActive && !perkUnlock) return;
+        var cur = playerData.special[key] || 0;
+        var nv  = Math.max(1, Math.min(10, cur + delta));
+        if (nv === cur) return;
+        playerData.special[key] = nv;
+        savePlayerData();
+        updateSpecialDisplay();
+    }
+
     function switchTab(tabName, btn) {
         document.querySelectorAll('.tab-content').forEach(function(c){ c.classList.remove('active'); });
         document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
@@ -634,6 +874,11 @@
         }
         // Guard: ensure skills is always a plain object with a numeric value for every skill
         ensureValidSkills();
+        // Guard: ensure special is always a valid object with all seven attributes
+        ensureValidSpecial();
+        // Migration: initialize specialAllocationActive and raceSelected for existing saves
+        if (playerData.specialAllocationActive === undefined) playerData.specialAllocationActive = false;
+        if (playerData.raceSelected === undefined) playerData.raceSelected = false;
         // Migration: initialize skillsAllocationActive for existing saves
         if (playerData.skillsAllocationActive === undefined) {
             playerData.skillsAllocationActive = ((playerData.skillPointsAvailable || 0) > 0 && !playerData.skillsLocked);
@@ -1193,6 +1438,7 @@
         renderLevelUpPerks();
         updatePerksDisplay();
         refreshLevelUpTabVisibility();
+        updateSpecialDisplay();
         var ptEl = document.getElementById('luPerkPointsCount');
         if (ptEl) {
             ptEl.textContent = playerData.perkPointsAvailable || 0;
@@ -1290,6 +1536,7 @@
         updateDisplay();
         updatePerksDisplay();
         updateEffectsDisplay();
+        updateSpecialDisplay();
         var storedXP = parseInt(localStorage.getItem(lsKey('pipboyXP'))||'0');
         checkAndHandleLevelUp(storedXP);
         updateXPDisplay(storedXP);
@@ -1349,9 +1596,11 @@
                 if (payload.data && typeof payload.data === 'object') {
                     Object.assign(playerData, payload.data);
                     ensureValidSkills();
+                    ensureValidSpecial();
                     updateDisplay();
                     updatePerksDisplay();
                     updateEffectsDisplay();
+                    updateSpecialDisplay();
                 }
             },
 
@@ -1363,9 +1612,11 @@
                     playerData[field] = value;
                 }
                 ensureValidSkills();
+                ensureValidSpecial();
                 updateDisplay();
                 updatePerksDisplay();
                 updateEffectsDisplay();
+                updateSpecialDisplay();
                 if (snapshot && snapshot.xp !== undefined) {
                     updateXPDisplay(snapshot.xp);
                 }
