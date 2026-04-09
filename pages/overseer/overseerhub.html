@@ -773,10 +773,24 @@
     <!-- 3. VITALS -->
     <div class="po-accordion-section">
         <div class="po-accordion-header open" onclick="poToggleAccordion(this)">
-            <span class="po-accordion-title">&#x2764;&#xFE0F; VITALS &#x2014; HP / AP / RADIATION</span>
+            <span class="po-accordion-title">&#x2764;&#xFE0F; VITALS &#x2014; HP / AP / RADIATION / TEMP HP</span>
             <span class="po-accordion-toggle">&#x25BC;</span>
         </div>
         <div class="po-accordion-body open">
+            <!-- Unified segmented health bar: green HP | blue Temp HP | red Rad (right) -->
+            <div class="po-bar-wrapper" style="margin-bottom:10px;">
+                <div id="poUnifiedHPBarLabel" style="font-size:9px;color:var(--overseer-green);margin-bottom:3px;">HP &#x2014; 100/100 &nbsp;|&nbsp; RAD 0 &nbsp;|&nbsp; TEMP +0</div>
+                <div class="po-bar-track" style="position:relative;overflow:hidden;">
+                    <div class="po-bar-fill po-bar-hp" id="poUnifiedHPFill"   style="width:100%;"></div>
+                    <div id="poUnifiedTempZone" role="presentation" aria-hidden="true"
+                         style="position:absolute;top:0;left:0;height:100%;width:0;background:#60a5fa;opacity:0.75;box-shadow:0 0 4px #60a5fa;pointer-events:none;"></div>
+                    <div id="poUnifiedRadZone"  role="presentation" aria-hidden="true"
+                         style="position:absolute;top:0;right:0;height:100%;width:0;background:#ef4444;opacity:0.85;box-shadow:0 0 4px #ef4444;pointer-events:none;"></div>
+                </div>
+            </div>
+            <!-- Rad sickness indicator -->
+            <div id="poRadSicknessBanner" style="display:none;font-size:9px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);border-radius:4px;padding:4px 8px;margin-bottom:8px;color:#ff6b6b;letter-spacing:0.5px;">&#x2622; RADIATION SICKNESS — STR &#x2212;2, AGI &#x2212;2, MOVE &#x2212;1</div>
+
             <div class="po-form-grid-3">
                 <div>
                     <div class="po-form-group">
@@ -812,11 +826,11 @@
                         <input class="po-form-input" type="number" id="poCharRad" value="0" min="0">
                     </div>
                     <div class="po-form-group" style="margin-top:8px;">
-                        <label class="po-form-label">Max Rads (lethal)</label>
-                        <input class="po-form-input" type="number" id="poCharMaxRad" value="1000" min="1">
+                        <label class="po-form-label">Temp HP</label>
+                        <input class="po-form-input" type="number" id="poCharTempHP" value="0" min="0">
                     </div>
                     <div class="po-bar-wrapper" style="margin-top:8px;">
-                        <div id="poRadBarLabel" style="font-size:9px;color:var(--overseer-red-bright);margin-bottom:3px;">RADIATION &#x2014; 0/1000</div>
+                        <div id="poRadBarLabel" style="font-size:9px;color:var(--overseer-red-bright);margin-bottom:3px;">RADIATION &#x2014; 0</div>
                         <div class="po-bar-track"><div class="po-bar-fill po-bar-rad" id="poRadBarFill" style="width:0%;"></div></div>
                     </div>
                 </div>
@@ -3499,6 +3513,11 @@
             var maxHp = typeof data.maxHp === 'number' ? data.maxHp : 100;
             var ap    = typeof data.actionPoints    === 'number' ? data.actionPoints    : 0;
             var maxAp = typeof data.maxActionPoints === 'number' ? data.maxActionPoints : 10;
+            var rad   = typeof data.radiation  === 'number' ? data.radiation  : 0;
+            var temp  = typeof data.tempHealth === 'number' ? data.tempHealth : 0;
+            var sick  = (data.debuffs || []).some(function (d) {
+                return (typeof d === 'object' ? d.id : d) === 'rad_sickness';
+            });
 
             var card = document.createElement('div');
             card.className = 'spc-card' + (isCurrent ? ' current-turn' : '') + (data._waiting ? ' spc-waiting' : '');
@@ -3515,6 +3534,13 @@
             nameEl.textContent = handle;
             hdr.appendChild(turnIcon);
             hdr.appendChild(nameEl);
+            if (sick) {
+                var sickBadge = document.createElement('span');
+                sickBadge.style.cssText = 'font-size:9px;color:#ff6b6b;margin-left:auto;';
+                sickBadge.title = 'Radiation Sickness — STR-2, AGI-2, MOVE-1';
+                sickBadge.textContent = '☢ RAD SICK';
+                hdr.appendChild(sickBadge);
+            }
             if (data._waiting) {
                 var wb = document.createElement('span');
                 wb.className = 'spc-turn-badge spc-waiting-badge';
@@ -3533,6 +3559,48 @@
             var statsRow = document.createElement('div');
             statsRow.className = 'spc-stats-row';
 
+            // Unified segmented HP bar (replace plain HP stat block)
+            var hpBlock = document.createElement('div');
+            hpBlock.className = 'spc-stat-block';
+            var hpLblEl = document.createElement('div');
+            hpLblEl.className = 'spc-stat-label';
+            hpLblEl.textContent = 'HP';
+            var hpValEl = document.createElement('div');
+            hpValEl.className = 'spc-stat-value';
+            hpValEl.textContent = hp + '/' + maxHp + (temp > 0 ? ' +' + temp + 'T' : '') + (rad > 0 ? ' ☢' + rad : '');
+            var barBg = document.createElement('div');
+            barBg.className = 'spc-bar-bg';
+            barBg.style.position = 'relative';
+            barBg.style.overflow = 'hidden';
+            var effectiveCap = Math.max(0, maxHp - rad);
+            var cappedHp   = Math.min(hp, effectiveCap);
+            var hpPct   = maxHp > 0 ? Math.min(100, Math.round((cappedHp / maxHp) * 100)) : 0;
+            var hpCls   = hpPct > 50 ? 'spc-bar-hp-high' : hpPct > 25 ? 'spc-bar-hp-mid' : 'spc-bar-hp-low';
+            var hpFill  = document.createElement('div');
+            hpFill.className = 'spc-bar-fill ' + hpCls;
+            hpFill.style.width = hpPct + '%';
+            barBg.appendChild(hpFill);
+            // Blue temp zone
+            if (temp > 0 && maxHp > 0) {
+                var cappedTemp = Math.min(temp, effectiveCap);
+                var tempPct = Math.min(100, Math.round((cappedTemp / maxHp) * 100));
+                var tempZoneEl = document.createElement('div');
+                tempZoneEl.style.cssText = 'position:absolute;top:0;left:0;height:100%;width:' + tempPct + '%;background:#60a5fa;opacity:0.6;pointer-events:none;';
+                barBg.appendChild(tempZoneEl);
+            }
+            // Red rad zone (right to left)
+            if (rad > 0 && maxHp > 0) {
+                var radPct2 = Math.min(100, Math.round((rad / maxHp) * 100));
+                var radZoneEl = document.createElement('div');
+                radZoneEl.style.cssText = 'position:absolute;top:0;right:0;height:100%;width:' + radPct2 + '%;background:#ef4444;opacity:0.8;pointer-events:none;';
+                barBg.appendChild(radZoneEl);
+            }
+            hpBlock.appendChild(hpLblEl);
+            hpBlock.appendChild(hpValEl);
+            hpBlock.appendChild(barBg);
+            statsRow.appendChild(hpBlock);
+
+            // Helper for AP block
             function makeStatBlock(label, current, max, barClass) {
                 var block = document.createElement('div');
                 block.className = 'spc-stat-block';
@@ -3541,7 +3609,6 @@
                 lbl.textContent = label;
                 var val = document.createElement('div');
                 val.className = 'spc-stat-value';
-                val.id = 'spc-' + label.toLowerCase() + '-val-' + handle.replace(/\s+/g, '_');
                 val.textContent = current + ' / ' + max;
                 var bg = document.createElement('div');
                 bg.className = 'spc-bar-bg';
@@ -3556,9 +3623,6 @@
                 return block;
             }
 
-            var hpPct = maxHp > 0 ? Math.round((hp / maxHp) * 100) : 0;
-            var hpCls = hpPct > 50 ? 'spc-bar-hp-high' : hpPct > 25 ? 'spc-bar-hp-mid' : 'spc-bar-hp-low';
-            statsRow.appendChild(makeStatBlock('HP', hp, maxHp, hpCls));
             statsRow.appendChild(makeStatBlock('AP', ap, maxAp, 'spc-bar-ap'));
             card.appendChild(statsRow);
 
@@ -3669,27 +3733,15 @@
         var mode   = _sAdjMode[handle];
         if (isNaN(amount) || amount < 0) { closeSyncAdjust(handle); return; }
 
-        var data  = _syncPlayers[handle] || {};
         if (mode === 'ap') {
-            var newAp = amount;
-            OverseerSync.updatePlayer(handle, 'actionPoints', newAp);
+            OverseerSync.updatePlayer(handle, 'actionPoints', amount);
             if (!_syncPlayers[handle]) _syncPlayers[handle] = {};
-            _syncPlayers[handle].actionPoints = newAp;
-            addLog('SYNC: ' + handle + ' AP → ' + newAp, 'blue');
-        } else {
-            var hp    = typeof data.hp    === 'number' ? data.hp    : 0;
-            var maxHp = typeof data.maxHp === 'number' ? data.maxHp : 100;
-            var newHp;
-            if (mode === 'damage') {
-                newHp = Math.max(0, hp - amount);
-                addLog('SYNC: ' + handle + ' took ' + amount + ' damage (HP: ' + hp + ' → ' + newHp + ')', 'red');
-            } else {
-                newHp = Math.min(maxHp, hp + amount);
-                addLog('SYNC: ' + handle + ' healed ' + amount + ' (HP: ' + hp + ' → ' + newHp + ')', 'green');
-            }
-            OverseerSync.updatePlayer(handle, 'hp', newHp);
-            if (!_syncPlayers[handle]) _syncPlayers[handle] = {};
-            _syncPlayers[handle].hp = newHp;
+            _syncPlayers[handle].actionPoints = amount;
+            addLog('SYNC: ' + handle + ' AP → ' + amount, 'blue');
+        } else if (mode === 'damage' || mode === 'heal') {
+            // Route through server health manager — server enforces all rules
+            OverseerSync.applyHealthMutation(handle, mode, amount);
+            addLog('SYNC: ' + handle + ' ' + mode + ' ' + amount + ' (server-processed)', mode === 'damage' ? 'red' : 'green');
         }
 
         closeSyncAdjust(handle);
@@ -3897,6 +3949,50 @@
                 // Refresh live snapshot after awards
                 OverseerSync.requestSnapshot();
             }
+        },
+
+        onPlayerHealthUpdated: function (payload) {
+            // Server broadcast after a health mutation applied by Overseer or Player.
+            // Payload: { handle, hp, radiation, tempHealth, debuffs, events, snapshot }
+            if (!payload || !payload.handle) return;
+            var handle = payload.handle;
+            if (!_syncPlayers[handle]) _syncPlayers[handle] = {};
+            if (typeof payload.hp         === 'number') _syncPlayers[handle].hp         = payload.hp;
+            if (typeof payload.radiation  === 'number') _syncPlayers[handle].radiation  = payload.radiation;
+            if (typeof payload.tempHealth === 'number') _syncPlayers[handle].tempHealth = payload.tempHealth;
+            if (Array.isArray(payload.debuffs))          _syncPlayers[handle].debuffs    = payload.debuffs;
+
+            _persistPlayerUpdate(handle, _syncPlayers[handle]);
+            addLog('HEALTH: ' + handle + ' HP=' + payload.hp + ' RAD=' + payload.radiation + ' TEMP=' + payload.tempHealth, 'blue');
+
+            // Log any notable health events
+            (payload.events || []).forEach(function (ev) {
+                if (ev && ev.message) {
+                    var color = ev.type === 'rad_sickness_onset'   ? 'red'   :
+                                ev.type === 'rad_sickness_cleared' ? 'green' :
+                                ev.type === 'player_down'          ? 'red'   : 'blue';
+                    addLog(handle + ': ' + ev.message, color);
+                }
+            });
+
+            renderSyncPlayers();
+            // If this player is open in the detail panel, refresh the vitals display
+            if (typeof _currentHandle !== 'undefined' && _currentHandle === handle) {
+                var data = _syncPlayers[handle];
+                if (data) {
+                    var hp    = typeof data.hp    === 'number' ? data.hp    : 0;
+                    var maxHp = typeof data.maxHp === 'number' ? data.maxHp : 100;
+                    var rad   = typeof data.radiation  === 'number' ? data.radiation  : 0;
+                    var temp  = typeof data.tempHealth === 'number' ? data.tempHealth : 0;
+                    var ap    = typeof data.actionPoints    === 'number' ? data.actionPoints    : 0;
+                    var maxAp = typeof data.maxActionPoints === 'number' ? data.maxActionPoints : 10;
+                    document.getElementById('poCharHP').value       = hp;
+                    document.getElementById('poCharRad').value      = rad;
+                    document.getElementById('poCharTempHP').value   = temp;
+                    _updateVitalBars(hp, maxHp, ap, maxAp, rad, 1000, temp);
+                    _refreshPoRadSickness(data.debuffs || []);
+                }
+            }
         }
     });
 }());
@@ -4061,14 +4157,16 @@
         var maxHp = typeof data.maxHp === 'number' ? data.maxHp : 100;
         var ap    = typeof data.actionPoints    === 'number' ? data.actionPoints    : 10;
         var maxAp = typeof data.maxActionPoints === 'number' ? data.maxActionPoints : 10;
-        var rad   = typeof data.radiation === 'number' ? data.radiation : 0;
+        var rad   = typeof data.radiation  === 'number' ? data.radiation  : 0;
+        var temp  = typeof data.tempHealth === 'number' ? data.tempHealth : 0;
         _set('poCharHP',     hp);
         _set('poCharMaxHP',  maxHp);
         _set('poCharAP',     ap);
         _set('poCharMaxAP',  maxAp);
         _set('poCharRad',    rad);
-        _set('poCharMaxRad', 1000);
-        _updateVitalBars(hp, maxHp, ap, maxAp, rad, 1000);
+        _set('poCharTempHP', temp);
+        _updateVitalBars(hp, maxHp, ap, maxAp, rad, 1000, temp);
+        _refreshPoRadSickness(data.debuffs || []);
 
         // ── S.P.E.C.I.A.L. ───────────────────────────────────────────────────
         var sp = data.special || {};
@@ -4143,8 +4241,9 @@
         // Vitals
         _set('poCharHP', 100); _set('poCharMaxHP', 100);
         _set('poCharAP', 10);  _set('poCharMaxAP', 10);
-        _set('poCharRad', 0);  _set('poCharMaxRad', 1000);
-        _updateVitalBars(100, 100, 10, 10, 0, 1000);
+        _set('poCharRad', 0);  _set('poCharTempHP', 0);
+        _updateVitalBars(100, 100, 10, 10, 0, 1000, 0);
+        _refreshPoRadSickness([]);
         // SPECIAL
         ['poSStr','poSPer','poSEnd','poSCha','poSInt','poSAgi','poSLck'].forEach(function(id){ _set(id, 5); });
         // Skills
@@ -4175,10 +4274,11 @@
         if (fill) fill.style.width = pct + '%';
     }
 
-    function _updateVitalBars(hp, maxHp, ap, maxAp, rad, maxRad) {
+    function _updateVitalBars(hp, maxHp, ap, maxAp, rad, maxRad, tempHp) {
+        var tempHP  = typeof tempHp === 'number' ? tempHp : 0;
         var hpPct  = maxHp  > 0 ? Math.min(100, Math.round((hp  / maxHp)  * 100)) : 0;
         var apPct  = maxAp  > 0 ? Math.min(100, Math.round((ap  / maxAp)  * 100)) : 0;
-        var radPct = maxRad > 0 ? Math.min(100, Math.round((rad / maxRad) * 100)) : 0;
+        var radPct = maxHp  > 0 ? Math.min(100, Math.round((rad / maxHp)  * 100)) : 0;
         var hpLbl  = document.getElementById('poHPBarLabel');
         var apLbl  = document.getElementById('poAPBarLabel');
         var radLbl = document.getElementById('poRadBarLabel');
@@ -4187,15 +4287,44 @@
         var radFill = document.getElementById('poRadBarFill');
         if (hpLbl)  hpLbl.textContent  = 'HP \u2014 ' + hp  + '/' + maxHp;
         if (apLbl)  apLbl.textContent  = 'AP \u2014 ' + ap  + '/' + maxAp;
-        if (radLbl) radLbl.textContent = 'RADIATION \u2014 ' + rad + '/' + maxRad;
+        if (radLbl) radLbl.textContent = 'RADIATION \u2014 ' + rad;
         if (hpFill)  hpFill.style.width  = hpPct  + '%';
         if (apFill)  apFill.style.width  = apPct  + '%';
         if (radFill) radFill.style.width = radPct + '%';
+
+        // Unified segmented bar
+        var unifiedLabel = document.getElementById('poUnifiedHPBarLabel');
+        var unifiedFill  = document.getElementById('poUnifiedHPFill');
+        var unifiedTemp  = document.getElementById('poUnifiedTempZone');
+        var unifiedRad   = document.getElementById('poUnifiedRadZone');
+        if (unifiedLabel) {
+            unifiedLabel.textContent = 'HP \u2014 ' + hp + '/' + maxHp + ' \u00a0|\u00a0 RAD ' + rad + ' \u00a0|\u00a0 TEMP +' + tempHP;
+        }
+        if (maxHp > 0) {
+            var effectiveCap = Math.max(0, maxHp - rad);
+            var cappedHp     = Math.min(hp, effectiveCap);
+            var cappedTemp   = Math.min(tempHP, effectiveCap);
+            var hpW   = Math.round((cappedHp  / maxHp) * 100);
+            var tempW = Math.round((cappedTemp / maxHp) * 100);
+            var radW  = Math.round((rad        / maxHp) * 100);
+            if (unifiedFill) unifiedFill.style.width = hpW + '%';
+            if (unifiedTemp) unifiedTemp.style.width = tempW + '%';
+            if (unifiedRad)  unifiedRad.style.width  = radW  + '%';
+        }
     }
 
     function _updateFooter(msg) {
         var el = document.getElementById('poLastSavedInfo');
         if (el) el.textContent = msg;
+    }
+
+    // Show or hide the radiation sickness banner based on debuffs array
+    function _refreshPoRadSickness(debuffs) {
+        var sick = (debuffs || []).some(function (d) {
+            return (typeof d === 'object' ? d.id : d) === 'rad_sickness';
+        });
+        var banner = document.getElementById('poRadSicknessBanner');
+        if (banner) banner.style.display = sick ? 'block' : 'none';
     }
 
     function _renderInventory(items) {
@@ -4289,6 +4418,7 @@
             OverseerSync.updatePlayer(handle, 'actionPoints',   parseInt(document.getElementById('poCharAP').value,     10) || 0);
             OverseerSync.updatePlayer(handle, 'maxActionPoints',parseInt(document.getElementById('poCharMaxAP').value,  10) || 10);
             OverseerSync.updatePlayer(handle, 'radiation',      parseInt(document.getElementById('poCharRad').value,    10) || 0);
+            OverseerSync.updatePlayer(handle, 'tempHealth',     parseInt(document.getElementById('poCharTempHP').value, 10) || 0);
         } else if (section === 'special') {
             OverseerSync.updatePlayer(handle, 'special', {
                 strength:    parseInt(document.getElementById('poSStr').value, 10) || 5,
@@ -4427,25 +4557,30 @@
         var handle = _requireHandle();
         if (!handle) return;
         var maxHp = parseInt(document.getElementById('poCharMaxHP').value, 10) || 100;
-        document.getElementById('poCharHP').value = maxHp;
+        var rad   = parseInt(document.getElementById('poCharRad').value,   10) || 0;
+        var effectiveCap = Math.max(0, maxHp - rad);
+        document.getElementById('poCharHP').value = effectiveCap;
         var ap    = parseInt(document.getElementById('poCharAP').value,    10) || 0;
         var maxAp = parseInt(document.getElementById('poCharMaxAP').value, 10) || 10;
-        var rad   = parseInt(document.getElementById('poCharRad').value,   10) || 0;
-        _updateVitalBars(maxHp, maxHp, ap, maxAp, rad, 1000);
-        OverseerSync.updatePlayer(handle, 'hp', maxHp);
-        poShowToast(handle + ' fully healed to ' + maxHp + ' HP.');
+        var temp  = parseInt(document.getElementById('poCharTempHP').value,10) || 0;
+        _updateVitalBars(effectiveCap, maxHp, ap, maxAp, rad, 1000, temp);
+        OverseerSync.applyHealthMutation(handle, 'heal', effectiveCap);
+        poShowToast(handle + ' fully healed to ' + effectiveCap + ' HP (cap after ' + rad + ' rads).');
     };
 
     window.poClearRads = function() {
         var handle = _requireHandle();
         if (!handle) return;
+        var rad   = parseInt(document.getElementById('poCharRad').value,   10) || 0;
         document.getElementById('poCharRad').value = 0;
-        var hp = parseInt(document.getElementById('poCharHP').value, 10) || 0;
+        var hp    = parseInt(document.getElementById('poCharHP').value,    10) || 0;
         var maxHp = parseInt(document.getElementById('poCharMaxHP').value, 10) || 100;
-        var ap = parseInt(document.getElementById('poCharAP').value, 10) || 0;
+        var ap    = parseInt(document.getElementById('poCharAP').value,    10) || 0;
         var maxAp = parseInt(document.getElementById('poCharMaxAP').value, 10) || 10;
-        _updateVitalBars(hp, maxHp, ap, maxAp, 0, 1000);
-        OverseerSync.updatePlayer(handle, 'radiation', 0);
+        var temp  = parseInt(document.getElementById('poCharTempHP').value,10) || 0;
+        _updateVitalBars(hp, maxHp, ap, maxAp, 0, 1000, temp);
+        _refreshPoRadSickness([]);
+        OverseerSync.applyHealthMutation(handle, 'removeRads', rad);
         poShowToast('Radiation cleared for ' + handle + '.');
     };
 

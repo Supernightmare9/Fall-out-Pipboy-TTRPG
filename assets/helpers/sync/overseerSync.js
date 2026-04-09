@@ -185,6 +185,14 @@
         }
       });
 
+      // Health mutation result for a specific player (applied by Overseer or Player)
+      _socket.on('overseer:player-health-updated', function (payload) {
+        _flashSync();
+        if (typeof _opts.onPlayerHealthUpdated === 'function') {
+          _opts.onPlayerHealthUpdated(payload || {});
+        }
+      });
+
       _socket.on('disconnect', function () {
         _connected = false;
         _setStatus('disconnected', '⬤ OVERSEER SYNC: DISCONNECTED — reconnecting…');
@@ -257,6 +265,26 @@
         playerHandle: playerHandle,
         field:        field,
         value:        value
+      });
+      _flashSync();
+    },
+
+    /**
+     * Apply a server-validated health mutation to a specific player.
+     * All health rules (Rad caps, Temp HP absorption, Rad Sickness) are enforced
+     * by the server HealthManager.  The result is broadcast back to both the player
+     * and this Overseer socket.
+     *
+     * @param {string} playerHandle  Target player name
+     * @param {string} type          'damage'|'heal'|'addRads'|'removeRads'|'setTempHp'
+     * @param {number} amount        Non-negative integer
+     */
+    applyHealthMutation: function (playerHandle, type, amount) {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:health-mutation', {
+        playerHandle: playerHandle,
+        type:         type,
+        amount:       amount
       });
       _flashSync();
     },

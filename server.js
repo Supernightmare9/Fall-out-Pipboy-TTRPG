@@ -29,6 +29,9 @@ const { Server } = require('socket.io');
 // ── XP / Level helpers (shared with client via xpprogression.js) ──────────────
 const { getLevelFromXP } = require('./assets/logic/xp/xpprogression');
 
+// ── Health manager (shared with client via healthManager.js) ──────────────────
+const HealthManager = require('./assets/logic/health/healthManager');
+
 // ── INT bonus helper (shared with client via fallout_stat_bonuses.js) ─────────
 // Inline the INT multiplier table so the server can apply it without loading the
 // full browser-only fallout_stat_bonuses.js script.
@@ -324,6 +327,7 @@ function defaultPlayerData() {
     actionPoints: 10,
     maxActionPoints: 20,
     radiation: 0,
+    tempHealth: 0,
     ac: 10,
     critChance: 5,
     special: { strength:5, perception:5, endurance:5, charisma:5, intelligence:5, agility:5, luck:5 },
@@ -716,7 +720,112 @@ io.on('connection', (socket) => {
     socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
   });
 
-  // ── OVERSEER: award combat XP to individual players ───────────────────────
+  // ── PLAYER: health mutation ───────────────────────────────────────────────
+  // Payload: { type: 'damage'|'heal'|'addRads'|'removeRads'|'setTempHp', amount: number }
+  // All health changes go through the central HealthManager so rules are enforced
+  // server-side, then broadcast back to both the player and the Overseer.
+  socket.on('player:health-mutation', ({ type, amount } = {}) => {
+    const { role, sessionCode, handle } = socket.data || {};
+    if (role !== 'player' || !sessionCode || !handle) return;
+
+    const session = sessions[sessionCode];
+    if (!session || !session.players[handle]) return;
+
+    const player = session.players[handle];
+    const healthState = {
+      hp:         typeof player.data.hp         === 'number' ? player.data.hp         : 0,
+      maxHp:      typeof player.data.maxHp      === 'number' ? player.data.maxHp      : 0,
+      radiation:  typeof player.data.radiation  === 'number' ? player.data.radiation  : 0,
+      tempHealth: typeof player.data.tempHealth === 'number' ? player.data.tempHealth : 0,
+      debuffs:    player.data.debuffs || []
+    };
+
+    const { state: newHealth, events } = HealthManager.applyHealthMutation(healthState, type, amount);
+
+    // Persist updated health fields back into player data
+    player.data.hp         = newHealth.hp;
+    player.data.radiation  = newHealth.radiation;
+    player.data.tempHealth = newHealth.tempHealth;
+    player.data.debuffs    = newHealth.debuffs;
+
+    // Broadcast health update back to the player
+    socket.emit('player:health-updated', {
+      hp:         newHealth.hp,
+      radiation:  newHealth.radiation,
+      tempHealth: newHealth.tempHealth,
+      debuffs:    newHealth.debuffs,
+      events,
+      snapshot:   player.data
+    });
+
+    // Forward full health update to Overseer
+    if (session.overseerSocketId) {
+      io.to(session.overseerSocketId).emit('overseer:player-health-updated', {
+        handle,
+        hp:         newHealth.hp,
+        radiation:  newHealth.radiation,
+        tempHealth: newHealth.tempHealth,
+        debuffs:    newHealth.debuffs,
+        events,
+        snapshot:   player.data
+      });
+    }
+  });
+
+  // ── OVERSEER: apply health mutation to a specific player ──────────────────
+  // Payload: { playerHandle: string, type: string, amount: number }
+  socket.on('overseer:health-mutation', ({ playerHandle, type, amount } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const handle = String(playerHandle || '').trim();
+    const player = session.players[handle];
+    if (!player) {
+      socket.emit('error:update', { message: `Player "${handle}" not found in session.` });
+      return;
+    }
+
+    const healthState = {
+      hp:         typeof player.data.hp         === 'number' ? player.data.hp         : 0,
+      maxHp:      typeof player.data.maxHp      === 'number' ? player.data.maxHp      : 0,
+      radiation:  typeof player.data.radiation  === 'number' ? player.data.radiation  : 0,
+      tempHealth: typeof player.data.tempHealth === 'number' ? player.data.tempHealth : 0,
+      debuffs:    player.data.debuffs || []
+    };
+
+    const { state: newHealth, events } = HealthManager.applyHealthMutation(healthState, type, amount);
+
+    player.data.hp         = newHealth.hp;
+    player.data.radiation  = newHealth.radiation;
+    player.data.tempHealth = newHealth.tempHealth;
+    player.data.debuffs    = newHealth.debuffs;
+
+    // Push canonical health update to the player's socket
+    io.to(player.socketId).emit('player:health-updated', {
+      hp:         newHealth.hp,
+      radiation:  newHealth.radiation,
+      tempHealth: newHealth.tempHealth,
+      debuffs:    newHealth.debuffs,
+      events,
+      snapshot:   player.data
+    });
+
+    // Confirm to Overseer with updated values
+    socket.emit('overseer:player-health-updated', {
+      handle,
+      hp:         newHealth.hp,
+      radiation:  newHealth.radiation,
+      tempHealth: newHealth.tempHealth,
+      debuffs:    newHealth.debuffs,
+      events,
+      snapshot:   player.data
+    });
+  });
+
+
   // Payload: { awards: [{ playerHandle, xp, message }] }
   // Immediately delivers per-player XP grants mid-combat.  Each eligible player
   // receives a 'player:xp-updated' event with their new canonical XP total so

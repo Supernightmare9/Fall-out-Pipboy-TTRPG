@@ -225,6 +225,15 @@
         }
       });
 
+      // Canonical health update from server — fires after any health mutation.
+      // Payload: { hp, radiation, tempHealth, debuffs, events, snapshot }
+      _socket.on('player:health-updated', function (payload) {
+        _flashSync();
+        if (typeof _opts.onHealthUpdated === 'function') {
+          _opts.onHealthUpdated(payload || {});
+        }
+      });
+
       // Overseer pushed a change to this player
       _socket.on('player:updated-by-overseer', function (payload) {
         _setStatus('syncing', '⬤ SYNC: UPDATE FROM OVERSEER');
@@ -269,6 +278,17 @@
       _socket.on('error:auth', function (err) {
         _setStatus('disconnected', '⬤ SYNC: AUTH ERROR — ' + (err.message || 'check admin code'));
       });
+    },
+
+    /**
+     * Send a health mutation to the server for centralised processing.
+     * @param {string} type   'damage'|'heal'|'addRads'|'removeRads'|'setTempHp'
+     * @param {number} amount Non-negative integer
+     */
+    pushHealthMutation: function (type, amount) {
+      if (!_socket || !_connected) return;
+      _socket.emit('player:health-mutation', { type: type, amount: amount });
+      _flashSync();
     },
 
     /**
