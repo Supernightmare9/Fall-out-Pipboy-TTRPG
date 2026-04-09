@@ -1823,19 +1823,47 @@
                 <div class="hp-timestamp" id="hpTimestamp">Last updated: —</div>
                 <div class="hp-success-msg" id="hpSuccessMsg">✓ HP UPDATED!</div>
 
-                <!-- Radiation Section -->
-                <div class="panel-title" style="margin-top:14px;">☢ Radiation (Anti-Health)</div>
-                <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;">
-                    <span style="color:#ff6b6b;font-weight:bold;letter-spacing:1px;">RAD</span>
-                    <span style="color:var(--vault-green);"><span id="radCurrent">0</span> / 1000 RAD</span>
+                <!-- Radiation + Temp HP: condensed controls integrated into the unified health bar section.
+                     All mutations route through PlayerSync.pushHealthMutation → server HealthManager.
+                     The bar above always reflects the canonical server state. -->
+                <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                    <!-- Radiation controls -->
+                    <div style="flex:1;min-width:130px;border:1px solid rgba(239,68,68,0.25);padding:6px 8px;background:rgba(239,68,68,0.04);">
+                        <div style="display:flex;justify-content:space-between;font-size:9px;margin-bottom:5px;">
+                            <span style="color:#ff6b6b;font-weight:bold;letter-spacing:1px;">☢ RADIATION</span>
+                            <span style="color:var(--vault-green);"><span id="radCurrent">0</span> / 1000</span>
+                        </div>
+                        <div class="hp-input-row" style="gap:4px;">
+                            <button class="hp-update-btn" onclick="decreaseRadCombat()" style="border-color:rgba(239,68,68,0.5);color:#ef4444;" title="Decrease radiation (use input for amount)">−</button>
+                            <input type="number" id="radInput" class="hp-manual-input" placeholder="Set RAD" min="0" max="1000">
+                            <button class="hp-update-btn" onclick="increaseRadCombat()" style="border-color:rgba(239,68,68,0.5);color:#ef4444;" title="Increase radiation (use input for amount)">+</button>
+                            <button class="hp-update-btn" onclick="setRadCombat()" title="Set radiation to input value">Set</button>
+                        </div>
+                        <div class="hp-success-msg" id="radMsg">✓ RAD UPDATED!</div>
+                    </div>
+                    <!-- Temp HP controls -->
+                    <div style="flex:1;min-width:130px;border:1px solid rgba(96,165,250,0.25);padding:6px 8px;background:rgba(96,165,250,0.04);">
+                        <div style="display:flex;justify-content:space-between;font-size:9px;margin-bottom:5px;">
+                            <span style="color:#60a5fa;font-weight:bold;letter-spacing:1px;">💊 TEMP HP</span>
+                            <span style="color:var(--vault-green);"><span id="tempHpCurrentDisplay">0</span></span>
+                        </div>
+                        <div class="hp-controls" style="gap:4px;margin-bottom:5px;">
+                            <button class="hp-btn" onclick="adjustTempHpCombat(-5)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">−5</button>
+                            <button class="hp-btn" onclick="adjustTempHpCombat(-1)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">−1</button>
+                            <button class="hp-btn" onclick="adjustTempHpCombat(+1)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">+1</button>
+                            <button class="hp-btn" onclick="adjustTempHpCombat(+5)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">+5</button>
+                        </div>
+                        <div class="hp-input-row" style="gap:4px;">
+                            <input type="number" id="tempHpAdjustInput" class="hp-manual-input" placeholder="±Amount" style="border-color:rgba(96,165,250,0.3);" title="Enter positive to add, negative to remove">
+                            <button class="hp-update-btn" onclick="applyTempHpAdjustment()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;">Apply ±</button>
+                        </div>
+                        <div class="hp-input-row" style="gap:4px;margin-top:4px;">
+                            <input type="number" id="tempHpManualInput" class="hp-manual-input" placeholder="Override Temp HP" min="0" style="border-color:rgba(96,165,250,0.3);">
+                            <button class="hp-update-btn" onclick="setTempHpManual()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;">Override</button>
+                        </div>
+                        <div class="hp-success-msg" id="tempHpMsg">✓ TEMP HP UPDATED!</div>
+                    </div>
                 </div>
-                <div class="hp-input-row" style="justify-content:center;flex-wrap:wrap;">
-                    <button class="hp-update-btn" onclick="decreaseRadCombat()" style="border-color:rgba(239,68,68,0.5);color:#ef4444;">−</button>
-                    <input type="number" id="radInput" class="hp-manual-input" placeholder="Set RAD" min="0" max="1000">
-                    <button class="hp-update-btn" onclick="setRadCombat()">Set</button>
-                    <button class="hp-update-btn" onclick="increaseRadCombat()" style="border-color:rgba(239,68,68,0.5);color:#ef4444;">+</button>
-                </div>
-                <div class="hp-success-msg" id="radMsg">✓ RAD UPDATED!</div>
 
                 <!-- Action Points Section -->
                 <div class="panel-title" style="margin-top:14px;">⚡ Action Points</div>
@@ -1856,28 +1884,6 @@
                     <button class="hp-update-btn" onclick="removeTempApCombat()" style="border-color:rgba(255,107,107,0.5);color:#ff6b6b;">−Temp AP</button>
                 </div>
                 <div class="hp-success-msg" id="apCombatMsg">✓ AP UPDATED!</div>
-
-                <!-- Temp HP Controls -->
-                <div class="panel-title" style="margin-top:14px;">💊 Temporary HP</div>
-                <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px;">
-                    <span style="color:#60a5fa;font-weight:bold;letter-spacing:1px;">TEMP HP</span>
-                    <span style="color:var(--vault-green);">Current: <span id="tempHpCurrentDisplay">0</span></span>
-                </div>
-                <div class="hp-controls">
-                    <button class="hp-btn minus" onclick="adjustTempHpCombat(-5)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">− 5</button>
-                    <button class="hp-btn minus" onclick="adjustTempHpCombat(-1)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">− 1</button>
-                    <button class="hp-btn" onclick="adjustTempHpCombat(+1)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">+ 1</button>
-                    <button class="hp-btn" onclick="adjustTempHpCombat(+5)" style="border-color:rgba(96,165,250,0.3);color:#60a5fa;">+ 5</button>
-                </div>
-                <div class="hp-input-row">
-                    <input type="number" id="tempHpAdjustInput" class="hp-manual-input" placeholder="±Amount" style="border-color:rgba(96,165,250,0.3);" title="Enter positive to add, negative to remove">
-                    <button class="hp-update-btn" onclick="applyTempHpAdjustment()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;">Apply ±</button>
-                </div>
-                <div class="hp-input-row">
-                    <input type="number" id="tempHpManualInput" class="hp-manual-input" placeholder="Override Temp HP" min="0" style="border-color:rgba(96,165,250,0.3);">
-                    <button class="hp-update-btn" onclick="setTempHpManual()" style="border-color:rgba(96,165,250,0.5);color:#60a5fa;">Override</button>
-                </div>
-                <div class="hp-success-msg" id="tempHpMsg">✓ TEMP HP UPDATED!</div>
 
                 <!-- DICE ROLLER moved to floating button (bottom right) -->
                 </div><!-- end combatInfoPanelBody -->
