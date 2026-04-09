@@ -1789,6 +1789,7 @@
                     <span style="font-size:11px;color:var(--vault-info);margin-left:6px;" id="tempHpDisplay"></span>
                 </div>
                 <div id="radReductionNote" style="font-size:9px;color:#ff6b6b;letter-spacing:1px;margin-bottom:4px;display:none;">☢ RADIATION REDUCING MAX HP</div>
+                <div id="radSicknessBanner" style="display:none;font-size:10px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);border-radius:4px;padding:5px 8px;margin-bottom:6px;color:#ff6b6b;letter-spacing:0.5px;">☢ RADIATION SICKNESS — STR −2, AGI −2, MOVE −1</div>
 
                 <!-- Unified health bar: HP (green) + Temp HP (blue overlay) + Rad zone (red from right) -->
                 <div class="hp-bar-wrap">
@@ -2055,6 +2056,8 @@
     <script src="../../assets/logic/xp/xpprogression.js"></script>
     <script src="../../assets/helpers/Managers/progressionManager.js"></script>
     <script src="../../assets/helpers/mechanics/combatSystem.js"></script>
+    <!-- Health Manager — shared logic for HP / Rad / Temp HP mutations -->
+    <script src="../../assets/logic/health/healthManager.js"></script>
     <!-- Navigation (hamburger injected by playernavigation.js) -->
     <script src="../../assets/helpers/navigation/playernavigation.js"></script>
     <script>
@@ -2410,7 +2413,11 @@
 
     // ── HP BAR ────────────────────────────────────────────────────
     function updateHpBar(current, max) {
-        var rad = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        var rad = (liveData && typeof liveData.radiation === 'number')
+                  ? liveData.radiation
+                  : parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
         // Green fill is capped at effectiveMax so it never visually overlaps the red rad zone
         var effectiveMax = Math.max(0, max - rad);
         var cappedCurrent = Math.min(current, effectiveMax);
@@ -2431,53 +2438,45 @@
     }
 
     // ── HP ADJUSTMENT ────────────────────────────────────────────
-    // Internal helper: apply damage/healing with automatic temp HP absorption.
-    // When delta < 0 (damage), temp HP is consumed first before real HP is reduced.
+    // Internal helper: apply damage/healing — routed through the server health manager.
+    // Temp HP absorption and radiation caps are enforced server-side.
     function adjustHp(delta) {
         if (!activeCampaign) return;
-        var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
-        if (!myEntry) return;
+        if (delta === 0) return;
 
-        if (delta < 0) {
-            // Damage: consume temp HP first
-            var tempHp = getCombatTempHp();
-            if (tempHp > 0) {
-                var damage   = Math.abs(delta);
-                var absorbed = Math.min(tempHp, damage);
-                var remaining = damage - absorbed;
-
-                // Reduce tempHP
-                var liveData = (window._livePlayerCache && window._liveMyHandle)
-                               ? window._livePlayerCache[window._liveMyHandle] : null;
-                if (liveData) {
-                    liveData.tempHealth = tempHp - absorbed;
-                    if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
-                        PlayerSync.push('tempHealth', liveData.tempHealth);
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            var type   = delta < 0 ? 'damage' : 'heal';
+            var amount = Math.abs(delta);
+            PlayerSync.pushHealthMutation(type, amount);
+            // The UI will update when the server echoes back 'player:health-updated'
+        } else {
+            // Offline fallback — apply locally without server validation
+            var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+            if (!myEntry) return;
+            if (delta < 0) {
+                var tempHp = getCombatTempHp();
+                if (tempHp > 0) {
+                    var damage   = Math.abs(delta);
+                    var absorbed = Math.min(tempHp, damage);
+                    var remaining = damage - absorbed;
+                    var liveData = (window._livePlayerCache && window._liveMyHandle)
+                                   ? window._livePlayerCache[window._liveMyHandle] : null;
+                    if (liveData) {
+                        liveData.tempHealth = tempHp - absorbed;
+                        refreshTempHpCombatDisplay();
                     }
-                    refreshTempHpCombatDisplay();
+                    if (remaining <= 0) return;
+                    delta = -remaining;
                 }
-
-                if (remaining <= 0) {
-                    // All damage absorbed by temp HP — show feedback and stop
-                    var msg = document.getElementById('hpSuccessMsg');
-                    if (msg) {
-                        var origText = msg.textContent;
-                        msg.setAttribute('role', 'status');
-                        msg.setAttribute('aria-live', 'polite');
-                        msg.textContent = '🛡 ' + absorbed + ' DMG absorbed by TEMP HP!';
-                        msg.style.display = 'block'; msg.style.animation = 'none';
-                        void msg.offsetWidth;
-                        msg.style.animation = 'fadeMsg 3s ease forwards';
-                        setTimeout(function() { msg.style.display = 'none'; msg.textContent = origText; }, 3200);
-                    }
-                    return;
-                }
-                delta = -remaining; // Remaining damage after temp HP
             }
+            var liveData2 = (window._livePlayerCache && window._liveMyHandle)
+                            ? window._livePlayerCache[window._liveMyHandle] : null;
+            if (!liveData2) return;
+            var rad = typeof liveData2.radiation === 'number' ? liveData2.radiation : 0;
+            var cap = Math.max(0, myEntry.maxHp - rad);
+            myEntry.currentHp = Math.min(cap, Math.max(0, myEntry.currentHp + delta));
+            commitHpUpdate(myEntry);
         }
-
-        myEntry.currentHp = Math.min(myEntry.maxHp, Math.max(0, myEntry.currentHp + delta));
-        commitHpUpdate(myEntry);
     }
 
     // Apply +/- HP adjustment from the adjustment input field
@@ -2498,9 +2497,25 @@
 
         var raw = parseInt(document.getElementById('hpManualInput').value, 10);
         if (isNaN(raw)) return;
-        myEntry.currentHp = Math.min(myEntry.maxHp, Math.max(0, raw));
         document.getElementById('hpManualInput').value = '';
-        commitHpUpdate(myEntry);
+
+        // Compute delta and route through health mutation (healing/damage)
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        var currentHp = liveData && typeof liveData.hp === 'number' ? liveData.hp : myEntry.currentHp;
+        var target    = Math.max(0, raw);
+        if (target === currentHp) return;
+
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            var delta = target - currentHp;
+            var type  = delta > 0 ? 'heal' : 'damage';
+            PlayerSync.pushHealthMutation(type, Math.abs(delta));
+        } else {
+            var rad2  = liveData && typeof liveData.radiation === 'number' ? liveData.radiation : 0;
+            var cap   = Math.max(0, myEntry.maxHp - rad2);
+            myEntry.currentHp = Math.min(cap, Math.max(0, raw));
+            commitHpUpdate(myEntry);
+        }
     }
 
     function commitHpUpdate(myEntry) {
@@ -3581,6 +3596,15 @@
     }
 
     // ── RADIATION ─────────────────────────────────────────────────────────────
+    // Helper: get current radiation from the live player cache (server canonical state).
+    function _getServerRad() {
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        if (liveData && typeof liveData.radiation === 'number') return liveData.radiation;
+        // Fallback to localStorage for players not yet synced
+        return parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
+    }
+
     function refreshRadCombatDisplay(val) {
         var cur  = Math.max(0, Math.min(COMBAT_MAX_RAD, val));
         var el   = document.getElementById('radCurrent');
@@ -3603,9 +3627,22 @@
         }
     }
 
+    // Update radiation sickness banner from current live data debuffs
+    function _refreshRadSicknessBanner() {
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        var debuffs  = liveData ? (liveData.debuffs || []) : [];
+        var sick     = debuffs.some(function(d) {
+            return (typeof d === 'object' ? d.id : d) === 'rad_sickness';
+        });
+        var banner = document.getElementById('radSicknessBanner');
+        if (banner) banner.style.display = sick ? 'block' : 'none';
+    }
+
     function loadRadCombat() {
-        var val = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0');
+        var val = _getServerRad();
         refreshRadCombatDisplay(val);
+        _refreshRadSicknessBanner();
     }
 
     window.setRadCombat = function() {
@@ -3613,33 +3650,52 @@
         if (!inp) return;
         var nv = parseInt(inp.value);
         if (inp.value === '' || isNaN(nv)) return;
-        nv = Math.max(0, Math.min(COMBAT_MAX_RAD, nv));
-        localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
         inp.value = '';
-        refreshRadCombatDisplay(nv);
-        flashVitalsMsg('radMsg');
+        nv = Math.max(0, Math.min(COMBAT_MAX_RAD, nv));
+
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            var cur = _getServerRad();
+            var delta = nv - cur;
+            if (delta === 0) return;
+            var type  = delta > 0 ? 'addRads' : 'removeRads';
+            PlayerSync.pushHealthMutation(type, Math.abs(delta));
+        } else {
+            localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
+            refreshRadCombatDisplay(nv);
+            flashVitalsMsg('radMsg');
+        }
     };
 
     window.increaseRadCombat = function() {
-        var cur = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0');
-        var inp = document.getElementById('radInput');
+        var inp  = document.getElementById('radInput');
         var step = (inp && inp.value !== '') ? (parseInt(inp.value) || 1) : 1;
-        var nv = Math.min(COMBAT_MAX_RAD, (isNaN(cur) ? 0 : cur) + step);
         if (inp) inp.value = '';
-        localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
-        refreshRadCombatDisplay(nv);
-        flashVitalsMsg('radMsg');
+
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            PlayerSync.pushHealthMutation('addRads', step);
+        } else {
+            var cur = _getServerRad();
+            var nv  = Math.min(COMBAT_MAX_RAD, cur + step);
+            localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
+            refreshRadCombatDisplay(nv);
+            flashVitalsMsg('radMsg');
+        }
     };
 
     window.decreaseRadCombat = function() {
-        var cur = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0');
-        var inp = document.getElementById('radInput');
+        var inp  = document.getElementById('radInput');
         var step = (inp && inp.value !== '') ? (parseInt(inp.value) || 1) : 1;
-        var nv = Math.max(0, (isNaN(cur) ? 0 : cur) - step);
         if (inp) inp.value = '';
-        localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
-        refreshRadCombatDisplay(nv);
-        flashVitalsMsg('radMsg');
+
+        if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+            PlayerSync.pushHealthMutation('removeRads', step);
+        } else {
+            var cur = _getServerRad();
+            var nv  = Math.max(0, cur - step);
+            localStorage.setItem(lsVitalsKey('pipboyRadiation'), nv);
+            refreshRadCombatDisplay(nv);
+            flashVitalsMsg('radMsg');
+        }
     };
 
     // ── TEMP HP ───────────────────────────────────────────────────────────────
@@ -3675,7 +3731,7 @@
         var tempZone = document.getElementById('hpBarTempZone');
         if (!tempZone) return;
         if (val > 0 && myMaxHp > 0) {
-            var rad = parseInt(localStorage.getItem(lsVitalsKey('pipboyRadiation')) || '0', 10);
+            var rad = _getServerRad();
             var effectiveMax = Math.max(0, myMaxHp - rad);
             var cappedTemp = Math.min(val, effectiveMax);
             var tempPct = Math.round((cappedTemp / myMaxHp) * 100);
@@ -3686,15 +3742,28 @@
         }
     }
 
+    // Route temp HP changes through the server health manager.
+    // 'setTempHp' uses highest-value-wins logic server-side.
+    // For explicit removal (negative delta) we use a direct push since setTempHp
+    // only replaces when higher; compute the new absolute value client-side.
     function _applyTempHpChange(newVal) {
-        var liveData = (window._livePlayerCache && window._liveMyHandle)
-                       ? window._livePlayerCache[window._liveMyHandle] : null;
-        if (!liveData) return;
-        liveData.tempHealth = Math.max(0, newVal);
+        var clampedVal = Math.max(0, newVal);
         if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
-            PlayerSync.push('tempHealth', liveData.tempHealth);
+            PlayerSync.pushHealthMutation('setTempHp', clampedVal);
+            // For decreases (e.g. manually removing temp HP), push as direct field update
+            // since setTempHp only applies when the new value is higher.
+            // This mirrors how the damage path works on the server (server absorbs damage,
+            // reducing tempHealth automatically). For explicit UI removal we push directly.
+            if (clampedVal < getCombatTempHp()) {
+                PlayerSync.push('tempHealth', clampedVal);
+            }
+        } else {
+            var liveData = (window._livePlayerCache && window._liveMyHandle)
+                           ? window._livePlayerCache[window._liveMyHandle] : null;
+            if (!liveData) return;
+            liveData.tempHealth = clampedVal;
+            refreshTempHpCombatDisplay();
         }
-        refreshTempHpCombatDisplay();
         flashVitalsMsg('tempHpMsg');
     }
 
@@ -4503,6 +4572,9 @@
                 // Refresh S.P.E.C.I.A.L. panel and abilities tab with live data
                 if (typeof renderStats === 'function')     renderStats();
                 if (typeof renderAbilities === 'function') renderAbilities();
+                // Refresh radiation display and rad-sickness banner from server data
+                loadRadCombat();
+                refreshTempHpCombatDisplay();
             },
 
             onUpdate: function (field, value, snapshot) {
@@ -4514,6 +4586,19 @@
                     _playerCache[_myHandle][field] = value;
                 }
                 renderCombat();
+                // Refresh radiation + rad sickness + temp HP when those fields change
+                if (field === 'radiation' || field === 'all') {
+                    var rad = typeof value === 'number' ? value :
+                              (snapshot && typeof snapshot.radiation === 'number' ? snapshot.radiation : _getServerRad());
+                    refreshRadCombatDisplay(rad);
+                    _refreshRadSicknessBanner();
+                }
+                if (field === 'tempHealth' || field === 'all') {
+                    refreshTempHpCombatDisplay();
+                }
+                if (field === 'debuffs' || field === 'all') {
+                    _refreshRadSicknessBanner();
+                }
                 // Refresh left-panel stat display whenever the Overseer pushes a change
                 if (typeof renderStats === 'function')     renderStats();
                 if (typeof renderAbilities === 'function') renderAbilities();
@@ -4555,6 +4640,42 @@
             onXpUpdated: function (payload) {
                 // Canonical XP update from server — refresh all XP/level bars.
                 applyServerXpUpdate(payload);
+            },
+
+            onHealthUpdated: function (payload) {
+                // Canonical health update from server — applies after any health mutation.
+                // Payload: { hp, radiation, tempHealth, debuffs, events, snapshot }
+                if (!payload) return;
+                if (!_playerCache[_myHandle]) _playerCache[_myHandle] = {};
+                // Apply health fields to live player cache
+                if (typeof payload.hp         === 'number') _playerCache[_myHandle].hp         = payload.hp;
+                if (typeof payload.radiation  === 'number') _playerCache[_myHandle].radiation  = payload.radiation;
+                if (typeof payload.tempHealth === 'number') _playerCache[_myHandle].tempHealth = payload.tempHealth;
+                if (Array.isArray(payload.debuffs))          _playerCache[_myHandle].debuffs    = payload.debuffs;
+
+                // Update all health UI in one pass
+                var hpMaxEl = document.getElementById('hpMax');
+                var maxHp   = hpMaxEl ? (parseInt(hpMaxEl.textContent, 10) || 0) : 0;
+                document.getElementById('hpCurrent').textContent = payload.hp;
+                if (maxHp > 0) updateHpBar(payload.hp, maxHp);
+                refreshRadCombatDisplay(payload.radiation || 0);
+                _refreshRadSicknessBanner();
+                refreshTempHpCombatDisplay();
+
+                // Show event messages in the roll-result feed
+                (payload.events || []).forEach(function (ev) {
+                    if (ev && ev.message) {
+                        var cls = ev.type === 'rad_sickness_onset'   ? 'roll-crit' :
+                                  ev.type === 'rad_sickness_cleared' ? 'roll-hit'  :
+                                  ev.type === 'temp_absorbed'        ? 'roll-hit'  :
+                                  ev.type === 'player_down'          ? 'roll-miss' : '';
+                        addRollResult(ev.message, cls);
+                    }
+                });
+
+                flashVitalsMsg('hpSuccessMsg');
+                hpLastUpdated = new Date();
+                updateHpTimestamp();
             },
 
             onDisconnect: function () {

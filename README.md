@@ -259,19 +259,101 @@ Each campaign maintains its own **resource pools** that survive server restarts 
 - JavaScript enabled
 - Node.js 18+ (for the real-time sync server)
 
-## Known Features
+## Unified Health Bar System
 
-- ✅ Multi-user support
-- ✅ Real-time multiplayer (Socket.IO / WebSockets)
-- ✅ LAN / local network play
-- ✅ Combat tracking
-- ✅ HP management
-- ✅ Initiative system
-- ✅ Enemy management
-- ✅ Campaign data
-- ✅ Auto-save
-- ✅ Export/Import
-- ✅ Responsive design
+### Overview
+
+All health state — **current HP**, **max HP**, **Radiation (Rads)**, and **Temp HP** — is stored server-side and managed by a central `HealthManager` module. Both the Player (combat.html) and the Overseer (overseerhub.html) display only the server's canonical values, which are pushed in real time via Socket.IO whenever any health mutation occurs.
+
+### Visual Bar Composition
+
+The health bar is a single segmented strip that represents the player's full `maxHP` width:
+
+| Segment | Colour | Position | Represents |
+|---------|--------|----------|------------|
+| Green fill | 🟢 Green | Left → right | Current HP (capped at `maxHP − Rads`) |
+| Blue overlay | 🔵 Blue | Left → right (over green) | Temp HP buffer (consumed first on damage) |
+| Red overlay | 🔴 Red | Right → left | Radiation (shrinks available HP) |
+
+### Health Rules
+
+#### Hit Points (HP)
+- Current HP is always between `0` and `effectiveCap = maxHP − Rads`.
+- Healing can never raise HP above `effectiveCap`.
+- When Rads increase and current HP would exceed the new cap, HP is immediately clamped down.
+
+#### Radiation (Rads)
+- Rads reduce the available HP cap: `effectiveCap = maxHP − Rads`.
+- Taking Rads clamps `currentHP` (and `tempHealth`) to the new cap immediately.
+- **Removing Rads raises the cap but does NOT restore HP** — the player must heal separately up to the new cap.
+- Rads are capped at `1000`.
+- Rad changes are displayed as a red overlay entering from the right side of the bar.
+
+#### Radiation Sickness
+- Triggered automatically when `Rads ≥ 80% of maxHP`.
+- Penalty debuffs applied: **STR −2**, **AGI −2**, **Move Speed −1**.
+- A "☢ RADIATION SICKNESS" banner is shown to the player.
+- The Overseer's player card shows a **☢ RAD SICK** badge.
+- Automatically revoked (debuffs removed, message shown) when Rads drop below the 80% threshold.
+
+#### Temp HP
+- Temp HP acts as a buffer — **all incoming damage hits Temp HP first**.
+- Temp HP cap = `effectiveCap` (`maxHP − Rads`). It can never exceed the radiation-adjusted max.
+- When setting Temp HP, only the **highest value wins** (same rule as D&D 5e). An effect granting 8 Temp HP does nothing if you already have 10; one granting 15 replaces 10.
+- If Rads increase and the current Temp HP exceeds the new cap, Temp HP is immediately reduced to the cap.
+
+### Damage Processing Order
+
+```
+Incoming Damage
+  └─ Temp HP > 0?
+       ├─ Yes: absorb up to Temp HP remaining
+       │         └─ remainder (if any) hits real HP
+       └─ No: hits real HP directly
+                 └─ HP floors at 0
+```
+
+### Server Event Flow
+
+| Event | Direction | Purpose |
+|-------|-----------|---------|
+| `player:health-mutation` | Client → Server | Player requests a health change |
+| `overseer:health-mutation` | Overseer → Server | Overseer applies a change to a specific player |
+| `player:health-updated` | Server → Player | Canonical new health state + event messages |
+| `overseer:player-health-updated` | Server → Overseer | Same update reflected on the Overseer dashboard |
+
+All validation (caps, clamping, Rad Sickness checks) happens in `assets/logic/health/healthManager.js` on the server — never client-side.
+
+### Mutation Types
+
+| Type | Effect |
+|------|--------|
+| `damage` | Absorb with Temp HP first, then reduce HP. HP floors at 0. |
+| `heal` | Increase HP up to `effectiveCap`. |
+| `addRads` | Increase Rads; clamp HP and Temp HP to new cap; check Rad Sickness. |
+| `removeRads` | Decrease Rads; HP unchanged; check Rad Sickness revocation. |
+| `setTempHp` | Set Temp HP to max of (current, requested), capped at `effectiveCap`. |
+
+### Test Coverage
+
+`assets/logic/health/healthManager.test.js` covers all edge cases:
+- Damage with / without Temp HP; Temp HP partial absorption
+- HP floor at 0; player-down event
+- Healing capped at `effectiveCap`
+- Rads increasing HP cap below current HP
+- Rads increasing Temp HP cap below current Temp HP
+- Rad Sickness onset / clearance
+- No duplicate Rad Sickness events
+- Full cycle: damage → heal → addRads → removeRads → clearRads
+
+Run with:
+```bash
+npm test
+```
+
+---
+
+
 
 ## Future Enhancements
 
