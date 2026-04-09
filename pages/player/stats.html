@@ -751,8 +751,12 @@
         { key: 'agility',      letter: 'A', name: 'Agility' },
         { key: 'luck',         letter: 'L', name: 'Luck' }
     ];
+    // 0 = "not yet set / awaiting race selection"; valid play range is 1–10.
+    var SPECIAL_MIN = 1;
+    var SPECIAL_MAX = 10;
 
     // Ensure playerData.special is a valid object with all seven attributes.
+    // Values are 0 (unset) until a race/genepool is chosen.
     function ensureValidSpecial() {
         if (!playerData.special || typeof playerData.special !== 'object' || Array.isArray(playerData.special)) {
             playerData.special = {};
@@ -788,22 +792,27 @@
         if (!row) return;
 
         row.innerHTML = SPECIAL_ATTRS.map(function(attr) {
-            var val       = playerData.special[attr.key];
+            var val        = playerData.special[attr.key];
             var perkUnlock = raceSelected && hasSPECIALAdjustPerk(attr.key);
             var canAdjust  = allocActive || perkUnlock;
-            var canInc = canAdjust && val < 10;
-            var canDec = canAdjust && val > 1;
-            return '<div class="sp-attr' + (raceSelected ? ' sp-attr-active' : '') + '">' +
+            var canInc = canAdjust && val < SPECIAL_MAX;
+            var canDec = canAdjust && val > SPECIAL_MIN;
+            var nameId = 'sp-name-' + attr.key;
+            var valId  = 'sp-val-'  + attr.key;
+            return '<div class="sp-attr' + (raceSelected ? ' sp-attr-active' : '') + '"' +
+                    ' role="group" aria-labelledby="' + nameId + '">' +
                 '<button class="sp-btn sp-plus"' + (!canInc ? ' disabled' : '') +
                     ' onclick="adjustSpecial(\'' + attr.key + '\',1)"' +
                     ' aria-label="Increase ' + attr.name + '"' +
+                    ' aria-describedby="' + valId + '"' +
                     ' title="' + (canInc ? 'Increase ' + attr.name : 'Adjustment locked') + '">+</button>' +
-                '<span class="sp-attr-val" id="sp-val-' + attr.key + '">' + val + '</span>' +
-                '<span class="sp-attr-letter">' + attr.letter + '</span>' +
-                '<span class="sp-attr-name">' + attr.name + '</span>' +
+                '<span class="sp-attr-val" id="' + valId + '">' + val + '</span>' +
+                '<span class="sp-attr-letter" aria-hidden="true">' + attr.letter + '</span>' +
+                '<span class="sp-attr-name" id="' + nameId + '">' + attr.name + '</span>' +
                 '<button class="sp-btn sp-minus"' + (!canDec ? ' disabled' : '') +
                     ' onclick="adjustSpecial(\'' + attr.key + '\',-1)"' +
                     ' aria-label="Decrease ' + attr.name + '"' +
+                    ' aria-describedby="' + valId + '"' +
                     ' title="' + (canDec ? 'Decrease ' + attr.name : 'Adjustment locked') + '">-</button>' +
             '</div>';
         }).join('');
@@ -822,11 +831,6 @@
                 statusEl.className   = 'sp-status';
             }
         }
-
-        // Keep pipboySpecial in sync so that getSpecialValue() works for perk prereqs
-        if (raceSelected) {
-            localStorage.setItem(lsKey('pipboySpecial'), JSON.stringify(playerData.special));
-        }
     }
 
     // Adjust a single S.P.E.C.I.A.L. attribute by +1 or -1.
@@ -837,9 +841,11 @@
         var perkUnlock   = raceSelected && hasSPECIALAdjustPerk(key);
         if (!allocActive && !perkUnlock) return;
         var cur = playerData.special[key] || 0;
-        var nv  = Math.max(1, Math.min(10, cur + delta));
+        var nv  = Math.max(SPECIAL_MIN, Math.min(SPECIAL_MAX, cur + delta));
         if (nv === cur) return;
         playerData.special[key] = nv;
+        // Keep pipboySpecial in sync so getSpecialValue() works for perk prereqs
+        localStorage.setItem(lsKey('pipboySpecial'), JSON.stringify(playerData.special));
         savePlayerData();
         updateSpecialDisplay();
     }
