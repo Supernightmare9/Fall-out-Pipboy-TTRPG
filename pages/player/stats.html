@@ -132,6 +132,12 @@
         .hp-btn:hover { background: rgba(74,222,128,0.2); border-color: var(--vault-green); box-shadow: 0 0 8px rgba(74,222,128,0.4); }
         .hp-btn.minus { border-color: rgba(255,107,107,0.4); color: var(--vault-error); }
         .hp-btn.minus:hover { background: rgba(255,107,107,0.12); border-color: var(--vault-error); box-shadow: 0 0 8px rgba(255,107,107,0.3); }
+        /* Unified controls row — identical look to combat.html */
+        .unified-hp-ctrl-row { display:flex; flex-wrap:wrap; gap:5px; align-items:center; margin-top:6px; }
+        .unified-hp-ctrl-sep { color:rgba(74,222,128,0.25); font-size:16px; margin:0 3px; user-select:none; }
+        .unified-hp-ctrl-label { font-size:9px; letter-spacing:1px; text-transform:uppercase; font-family:'Courier New',monospace; }
+        /* Flash message for health mutations */
+        .hp-success-msg { font-size:10px; letter-spacing:1px; animation:fadeMsg 3s ease forwards; display:none; }
 
         /* INPUTS */
         .input-row { display: flex; gap: 6px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
@@ -532,13 +538,10 @@
             <button class="tab-btn level-up-tab-btn" id="levelUpTabBtn" onclick="switchTab('levelup', this)" style="display:none;border-color:rgba(251,191,36,0.6);color:#fbbf24;animation:blinkText 1s ease-in-out infinite;">&#11014; LEVEL UP</button>
         </div>
 
-        <!-- Unified Health Bar (server-driven, read-only).
-             All values are updated in real time via player:health-updated.
-             Controls live on the Combat page; this is a status-only view. -->
+        <!-- Unified Health Bar — server-driven. All mutations route through PlayerSync → server HealthManager.
+             Updates in real time via player:health-updated. -->
         <div style="background:var(--vault-darker);border:1px solid rgba(74,222,128,0.25);border-bottom:none;padding:10px 16px;">
-            <!-- Radiation sickness banner — shown only when rads >= 80% maxHP.
-                 Debuff stat penalties (STR −2, AGI −2, MOVE −1) mirror the
-                 rad_sickness debuff applied server-side in healthManager.js. -->
+            <!-- Radiation sickness banner — shown when rads ≥ 80% maxHP -->
             <div id="statsRadSicknessBanner" style="display:none;font-size:9px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.5);border-radius:3px;padding:4px 8px;margin-bottom:6px;color:#ff6b6b;letter-spacing:0.5px;" role="alert">☢ RADIATION SICKNESS — STR −2, AGI −2, MOVE −1</div>
             <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
                 <div style="display:flex;align-items:baseline;gap:6px;">
@@ -560,7 +563,43 @@
                 <div class="stats-hp-temp-zone" id="statsHpTempZone" style="width:0;" role="presentation" aria-hidden="true"></div>
                 <div class="stats-hp-rad-zone"  id="statsHpRadZone"  style="width:0;" role="presentation" aria-hidden="true"></div>
             </div>
-            <div style="font-size:8px;color:rgba(74,222,128,0.35);margin-top:3px;letter-spacing:0.5px;">HEALTH — LIVE SERVER STATE · 🟢 HP &nbsp;🔵 TEMP &nbsp;🔴 RADS · Manage on Combat page</div>
+            <div style="font-size:8px;color:rgba(74,222,128,0.35);margin-top:2px;margin-bottom:6px;letter-spacing:0.5px;">🟢 HP &nbsp;🔵 TEMP &nbsp;🔴 RADS · LIVE SERVER STATE</div>
+            <!-- Consolidated controls: HP | ☢ RAD | 💊 TMP — identical layout to combat.html -->
+            <div class="unified-hp-ctrl-row">
+                <span class="unified-hp-ctrl-label" style="color:var(--vault-gold);">HP:</span>
+                <button class="hp-btn minus" onclick="adjustHpStats(-5)">−5</button>
+                <button class="hp-btn minus" onclick="adjustHpStats(-1)">−1</button>
+                <button class="hp-btn"       onclick="adjustHpStats(+1)">+1</button>
+                <button class="hp-btn"       onclick="adjustHpStats(+5)">+5</button>
+                <span class="unified-hp-ctrl-sep">│</span>
+                <span class="unified-hp-ctrl-label" style="color:#ef4444;">☢ RAD:</span>
+                <button class="hp-btn" onclick="adjustRadStats(-5)" style="border-color:rgba(239,68,68,0.4);color:#ef4444;">−5</button>
+                <button class="hp-btn" onclick="adjustRadStats(-1)" style="border-color:rgba(239,68,68,0.4);color:#ef4444;">−1</button>
+                <button class="hp-btn" onclick="adjustRadStats(+1)" style="border-color:rgba(239,68,68,0.4);color:#ef4444;">+1</button>
+                <button class="hp-btn" onclick="adjustRadStats(+5)" style="border-color:rgba(239,68,68,0.4);color:#ef4444;">+5</button>
+                <span class="unified-hp-ctrl-sep">│</span>
+                <span class="unified-hp-ctrl-label" style="color:#60a5fa;">💊 TMP:</span>
+                <button class="hp-btn" onclick="adjustTempHpStats(-5)" style="border-color:rgba(96,165,250,0.4);color:#60a5fa;">−5</button>
+                <button class="hp-btn" onclick="adjustTempHpStats(-1)" style="border-color:rgba(96,165,250,0.4);color:#60a5fa;">−1</button>
+                <button class="hp-btn" onclick="adjustTempHpStats(+1)" style="border-color:rgba(96,165,250,0.4);color:#60a5fa;">+1</button>
+                <button class="hp-btn" onclick="adjustTempHpStats(+5)" style="border-color:rgba(96,165,250,0.4);color:#60a5fa;">+5</button>
+            </div>
+            <!-- Custom amount inputs for precise adjustments -->
+            <div class="unified-hp-ctrl-row" style="margin-top:6px;">
+                <input type="number" id="statsHpAdjInput" class="compact-input" placeholder="±HP" style="width:58px;" title="HP to heal (+) or damage (−)" aria-label="HP adjustment amount">
+                <button class="update-btn" onclick="applyHpAdjStats()" style="font-size:9px;padding:4px 8px;">HP ±</button>
+                <input type="number" id="statsRadAdjInput" class="compact-input" placeholder="RAD" min="0" style="width:56px;border-color:rgba(239,68,68,0.3);" title="Radiation amount" aria-label="Radiation adjustment amount">
+                <button class="update-btn" onclick="applyRadAdjStats(-1)" style="font-size:9px;padding:4px 8px;border-color:rgba(239,68,68,0.5);color:#ef4444;">RAD−</button>
+                <button class="update-btn" onclick="applyRadAdjStats(+1)" style="font-size:9px;padding:4px 8px;border-color:rgba(239,68,68,0.5);color:#ef4444;">RAD+</button>
+                <input type="number" id="statsTempHpAdjInput" class="compact-input" placeholder="±TMP" style="width:58px;border-color:rgba(96,165,250,0.3);" title="Temp HP to add (+) or remove (−)" aria-label="Temp HP adjustment amount">
+                <button class="update-btn" onclick="applyTempHpAdjStats()" style="font-size:9px;padding:4px 8px;border-color:rgba(96,165,250,0.5);color:#60a5fa;">TMP ±</button>
+            </div>
+            <!-- Flash messages -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;min-height:16px;">
+                <div class="hp-success-msg" id="statsHpMsg" style="color:var(--vault-success);">✓ HP UPDATED!</div>
+                <div class="hp-success-msg" id="statsRadMsg" style="color:#ef4444;">✓ RAD UPDATED!</div>
+                <div class="hp-success-msg" id="statsTempHpMsg" style="color:#60a5fa;">✓ TEMP HP UPDATED!</div>
+            </div>
         </div>
 
         <!-- Compact Level & XP summary (element IDs kept for JS compatibility) -->
@@ -1169,9 +1208,9 @@
         localStorage.setItem(lsKey('pipboyLevel'), level);
     }
 
-    // ---- UNIFIED HEALTH BAR (server-driven, read-only) ----
-    // Updates the compact health bar on this page from canonical server state.
-    // All health mutations happen on the Combat page via PlayerSync → server.
+    // ---- UNIFIED HEALTH BAR — controls + display ----
+    // Updates the health bar on this page from canonical server state.
+    // Mutations use PlayerSync.pushHealthMutation → server HealthManager → player:health-updated.
     function updateStatsHealthDisplay(hp, maxHp, radiation, tempHealth) {
         var rad  = typeof radiation  === 'number' ? Math.max(0, radiation)  : 0;
         var temp = typeof tempHealth === 'number' ? Math.max(0, tempHealth) : 0;
@@ -1206,6 +1245,80 @@
         if (radZ)  radZ.style.width  = radPct  + '%';
         if (tempZ) tempZ.style.width = tempPct + '%';
     }
+
+    // ---- HEALTH MUTATION HELPERS (stats.html controls) ----
+    // Route all mutations through PlayerSync → server HealthManager → player:health-updated.
+    // The health bar above then refreshes via the onHealthUpdated callback.
+
+    function _flashStatsHealthMsg(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.style.display = 'none';
+        // Force reflow so the CSS animation restarts cleanly
+        void el.offsetWidth; // eslint-disable-line no-void
+        el.style.display = 'block';
+        setTimeout(function() { el.style.display = 'none'; }, 3000);
+    }
+
+    // Returns current temp HP from playerData (populated on connect / health-updated)
+    function _getStatsTempHp() {
+        return (typeof playerData.tempHealth === 'number') ? Math.max(0, playerData.tempHealth) : 0;
+    }
+
+    window.adjustHpStats = function(delta) {
+        if (typeof PlayerSync === 'undefined' || !PlayerSync.isConnected()) return;
+        PlayerSync.pushHealthMutation(delta > 0 ? 'heal' : 'damage', Math.abs(delta));
+        _flashStatsHealthMsg('statsHpMsg');
+    };
+
+    window.applyHpAdjStats = function() {
+        var inp = document.getElementById('statsHpAdjInput');
+        if (!inp) return;
+        var v = parseInt(inp.value);
+        if (inp.value === '' || isNaN(v) || v === 0) return;
+        inp.value = '';
+        window.adjustHpStats(v);
+    };
+
+    window.adjustRadStats = function(delta) {
+        if (typeof PlayerSync === 'undefined' || !PlayerSync.isConnected()) return;
+        PlayerSync.pushHealthMutation(delta > 0 ? 'addRads' : 'removeRads', Math.abs(delta));
+        _flashStatsHealthMsg('statsRadMsg');
+    };
+
+    // applyRadAdjStats(sign): sign=+1 to add rads, sign=-1 to remove rads (reads #statsRadAdjInput)
+    window.applyRadAdjStats = function(sign) {
+        var inp = document.getElementById('statsRadAdjInput');
+        if (!inp) return;
+        var v = parseInt(inp.value);
+        if (inp.value === '' || isNaN(v) || v <= 0) return;
+        inp.value = '';
+        window.adjustRadStats(sign > 0 ? v : -v);
+    };
+
+    window.adjustTempHpStats = function(delta) {
+        if (typeof PlayerSync === 'undefined' || !PlayerSync.isConnected()) return;
+        var cur = _getStatsTempHp();
+        var newVal = Math.max(0, cur + delta);
+        if (newVal >= cur) {
+            // Increase: use setTempHp mutation (server validates cap & highest-wins)
+            PlayerSync.pushHealthMutation('setTempHp', newVal);
+        } else {
+            // Decrease: direct field push + update local playerData immediately
+            PlayerSync.push('tempHealth', newVal);
+            playerData.tempHealth = newVal;
+        }
+        _flashStatsHealthMsg('statsTempHpMsg');
+    };
+
+    window.applyTempHpAdjStats = function() {
+        var inp = document.getElementById('statsTempHpAdjInput');
+        if (!inp) return;
+        var v = parseInt(inp.value);
+        if (inp.value === '' || isNaN(v) || v === 0) return;
+        inp.value = '';
+        window.adjustTempHpStats(v);
+    };
 
     // Reflects radiation sickness debuff status on the stats page banner.
     // Debuffs are applied server-side and carried in the player:health-updated payload.
