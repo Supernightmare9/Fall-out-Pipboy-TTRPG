@@ -1888,6 +1888,10 @@
                     </div>
                     <div class="progression-xp-percent" id="progXpPercent">0%</div>
                 </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px;">
+                    <span class="progression-level-label">PROF BONUS</span>
+                    <span style="font-size:18px;font-weight:bold;color:var(--vault-green);text-shadow:0 0 5px rgba(74,222,128,0.5);" id="progProfBonus" title="Proficiency Bonus (auto-calculated by level, read-only)">+2</span>
+                </div>
             </div>
         </div>
 
@@ -2657,6 +2661,7 @@
         '</div>';
 
         // Stat bonuses
+        html += '<div class="stat-row"><span class="stat-label">Proficiency Bonus</span><span class="stat-value" title="Auto-calculated by level (read-only)">+' + info.proficiencyBonus + '</span></div>';
         html += '<div class="stat-row"><span class="stat-label">Ability Score Bonus</span><span class="stat-value">' + (info.abilityBonus > 0 ? '+' + info.abilityBonus : '+0') + '</span></div>';
         html += '<div class="stat-row" style="margin-bottom:12px;"><span class="stat-label">Unlocked Abilities</span><span class="stat-value">' + info.unlockedAbilities.length + '</span></div>';
 
@@ -3200,6 +3205,14 @@
         var skills    = (liveData.skills && typeof liveData.skills === 'object') ? liveData.skills : {};
         var tagSkills = Array.isArray(liveData.tagSkills) ? liveData.tagSkills : [];
 
+        // Proficiency bonus from current player level
+        var currentLevel = typeof liveData.level === 'number' ? liveData.level
+                         : (typeof liveData.xp === 'number' && typeof getLevelFromXP === 'function')
+                           ? getLevelFromXP(liveData.xp) : 1;
+        var profBonus = (typeof ProgressionManager !== 'undefined')
+            ? ProgressionManager.getProficiencyBonus(currentLevel)
+            : 2;
+
         // ── Perks section ──────────────────────────────────────────
         var html = '<div class="panel-title">Perks</div>';
         if (perks.length > 0) {
@@ -3217,7 +3230,7 @@
 
         // ── Fallout Skills section (14 skills, 0–100 range) ────────
         html += '<div class="skills-section"><div class="panel-title" style="margin-top:16px;">Skills</div>';
-        html += '<div style="font-size:9px;color:rgba(74,222,128,0.5);margin-bottom:8px;">TAG skills receive a permanent +15 bonus.</div>';
+        html += '<div style="font-size:9px;color:rgba(74,222,128,0.5);margin-bottom:8px;">TAG skills receive a permanent +15 bonus and your proficiency bonus (+' + profBonus + ').</div>';
         html += FALLOUT_SKILLS.map(function(sk) {
             var baseVal   = typeof skills[sk] === 'number' ? skills[sk] : 0;
             var isTag     = tagSkills.indexOf(sk) !== -1;
@@ -3228,7 +3241,7 @@
             return '<div class="skill-row">' +
                 '<span class="skill-name">' + escHtml(sk) + '</span>' +
                 (spLabel ? '<span style="font-size:9px;color:var(--vault-accent);margin-left:4px;">' + escHtml(spLabel) + '</span>' : '') +
-                '<span class="skill-badge ' + badgeCls + '" style="margin-left:auto;">' + (isTag ? 'TAG ✦' : 'Standard') + '</span>' +
+                '<span class="skill-badge ' + badgeCls + '" style="margin-left:auto;">' + (isTag ? 'TAG ✦ PROF +' + profBonus : 'Standard') + '</span>' +
                 '<span style="font-size:11px;color:var(--vault-green);min-width:28px;text-align:right;">' + effective + '</span>' +
                 '</div>';
         }).join('');
@@ -3284,6 +3297,12 @@
         // XP percentage label (matches stats.html xpPercent element)
         var xpPercent = document.getElementById('progXpPercent');
         if (xpPercent) xpPercent.textContent = Math.min(100, info.progressPct) + '%';
+
+        // Proficiency bonus (auto-calculated, read-only)
+        var profBonus = document.getElementById('progProfBonus');
+        if (profBonus) {
+            profBonus.textContent = '+' + info.proficiencyBonus;
+        }
 
         // Ability score bonus
         var abilityBonus = document.getElementById('progAbilityBonus');
@@ -3501,10 +3520,10 @@
     };
 
     // ── DICE ROLLER: FALLOUT SKILL CHECK ────────────────────────
-    // Skill check = d20 + (skill_value / 10) + SPECIAL modifier.
+    // Skill check = d20 + (skill_value / 10) + SPECIAL modifier + proficiency bonus (TAG skills).
     // Formula: each 10 points in a skill = +1 bonus. Governing SPECIAL (1-10 scale)
     // gives (value - 5) bonus (so a 5 is neutral, 10 is +5, 1 is -4).
-    // Tag skills receive an extra +1 to reflect their +15 point bonus.
+    // TAG skills are treated as proficient and add the level-scaled proficiency bonus.
     window.rollSkillCheck = function() {
         if (typeof DiceRoller === 'undefined') { addRollResult('Dice roller not available.'); return; }
         var skillSel = document.getElementById('skillSelector');
@@ -3528,15 +3547,24 @@
         var spVal     = govSp && special[govSp] !== undefined ? special[govSp] : DEFAULT_SPECIAL_VALUE;
         var spMod     = spVal - DEFAULT_SPECIAL_VALUE; // neutral at 5, bonus above, penalty below
 
+        // Proficiency bonus: auto-calculated from player level; applied to TAG (proficient) skills
+        var currentLevel  = (liveData && typeof liveData.level === 'number') ? liveData.level
+                          : (liveData && typeof liveData.xp === 'number' && typeof getLevelFromXP === 'function')
+                            ? getLevelFromXP(liveData.xp) : 1;
+        var profBonus = (typeof ProgressionManager !== 'undefined')
+            ? ProgressionManager.getProficiencyBonus(currentLevel)
+            : 2;
+
         // Total modifier = (skill_value / 10) + SPECIAL modifier
         // Each 10 points in a Fallout skill (0–100 scale) contributes +1 to the d20 roll modifier
         var skillMod  = Math.floor(effective / 10) + spMod;
 
-        var rollResult = DiceRoller.skillCheck(skillName, skillMod, 0, false);
-        var tagNote    = isTag ? ' [TAG +15]' : '';
+        var rollResult = DiceRoller.skillCheck(skillName, skillMod, profBonus, isTag);
+        var tagNote    = isTag ? ' [TAG +15, PROF +' + profBonus + ']' : '';
         var desc       = skillName + ' Check' + tagNote +
                          ': [d20: ' + rollResult.d20 + '] + [skill: ' + Math.floor(effective / 10) +
                          (govSp ? ', ' + abbreviateSpecial(govSp) + ' mod: ' + (spMod >= 0 ? '+' : '') + spMod : '') +
+                         (isTag ? ', prof: +' + profBonus : '') +
                          '] = ' + rollResult.total;
         addRollResult(desc);
         broadcastRoll(sessionUsername + ' rolled ' + desc, 'important');
