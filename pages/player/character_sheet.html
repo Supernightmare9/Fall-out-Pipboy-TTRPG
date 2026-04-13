@@ -487,7 +487,11 @@
         </div>
         <div class="field-group" style="flex:0.5; min-width:50px">
           <span class="field-label">Level</span>
-          <input type="number" id="h_level" min="1" max="99" placeholder="1" style="width:44px">
+          <input type="number" id="h_level" min="1" max="100" placeholder="1" style="width:44px" oninput="updateProfBonusDisplay()">
+        </div>
+        <div class="field-group" style="flex:0.6; min-width:60px">
+          <span class="field-label">Prof Bonus</span>
+          <input type="text" id="h_prof_bonus" readonly value="+2" style="width:38px;cursor:default;background:rgba(0,0,0,0.2);color:var(--vault-green,#4ade80);font-weight:bold;" title="Auto-calculated from level (read-only)">
         </div>
         <div class="field-group" style="flex:0.8; min-width:80px">
           <span class="field-label">XP (current / next)</span>
@@ -956,6 +960,28 @@
   </div><!-- /.page -->
 
   <script>
+    // ─────────────────────────────────────────────────────────
+    // PROFICIENCY BONUS — auto-calculated from level (read-only)
+    // Tier breakpoints match progressionManager.js → getProficiencyBonus()
+    //   1–8 → +2 | 9–16 → +3 | 17–24 → +4 | 25–32 → +5 | 33–50 → +6
+    // ─────────────────────────────────────────────────────────
+    function calcProficiencyBonus(level) {
+      var lvl = Math.max(1, Math.min(50, parseInt(level, 10) || 1));
+      if (lvl <= 8)  return 2;
+      if (lvl <= 16) return 3;
+      if (lvl <= 24) return 4;
+      if (lvl <= 32) return 5;
+      return 6;
+    }
+
+    function updateProfBonusDisplay() {
+      var levelEl = document.getElementById('h_level');
+      var profEl  = document.getElementById('h_prof_bonus');
+      if (!levelEl || !profEl) return;
+      var bonus = calcProficiencyBonus(levelEl.value);
+      profEl.value = '+' + bonus;
+    }
+
     // ─────────────────────────────────────────────────────────
     // TAG SKILL ENFORCEMENT  (max 3)
     // ─────────────────────────────────────────────────────────

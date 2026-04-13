@@ -115,12 +115,25 @@ var ProgressionManager = (function () {
             xpInCurrentLevel:   xpInCurrentLevel,
             xpNeededForLevel:   xpNeededForLevel,
             abilityBonus:       getAbilityScoreBonus(level),
+            proficiencyBonus:   getProficiencyBonus(level),
             unlockedAbilities:  getUnlockedAbilitiesUpToLevel(level)
         };
     }
 
     function getAbilityScoreBonus(level) {
         return Math.floor((Number(level) || 1) / 4);
+    }
+
+    // ── Public: proficiency bonus (DnD-style, scaled to level 50) ────────────
+    // Tier breakpoints:
+    //   1–8  → +2 | 9–16  → +3 | 17–24 → +4 | 25–32 → +5 | 33–50 → +6
+    function getProficiencyBonus(level) {
+        var lvl = Math.max(1, Math.min(50, Number(level) || 1));
+        if (lvl <= 8)  return 2;
+        if (lvl <= 16) return 3;
+        if (lvl <= 24) return 4;
+        if (lvl <= 32) return 5;
+        return 6;
     }
 
     function getUnlockedAbilitiesUpToLevel(level) {
@@ -217,6 +230,7 @@ var ProgressionManager = (function () {
         setProgression:              setProgression,
         getLevelInfo:                getLevelInfo,
         getAbilityScoreBonus:        getAbilityScoreBonus,
+        getProficiencyBonus:         getProficiencyBonus,
         getUnlockedAbilitiesUpToLevel: getUnlockedAbilitiesUpToLevel,
         rollHpIncrease:              rollHpIncrease,
         awardXp:                     awardXp,

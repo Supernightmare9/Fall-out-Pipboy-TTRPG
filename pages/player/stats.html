@@ -618,6 +618,10 @@
                 </div>
                 <div style="font-size:8px;color:rgba(74,222,128,0.4);text-align:right;margin-top:2px;" id="xpPercent">0%</div>
             </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:2px;min-width:56px;">
+                <span style="font-size:9px;color:var(--vault-gold);letter-spacing:1px;">PROF BONUS</span>
+                <span style="font-size:18px;font-weight:bold;color:var(--vault-green);text-shadow:0 0 5px rgba(74,222,128,0.5);" id="statsProfBonus" title="Proficiency Bonus (auto-calculated by level, read-only)">+2</span>
+            </div>
             <div id="levelUpMessage" style="display:none;font-size:10px;letter-spacing:1px;padding:4px 8px;border:1px solid rgba(251,191,36,0.4);background:rgba(251,191,36,0.05);color:#fbbf24;animation:blinkBorder 1.5s ease-in-out infinite;" aria-live="polite"></div>
         </div>
 
@@ -1204,6 +1208,13 @@
         document.getElementById('xpToNext').textContent = level >= 100 ? 'MAX' : formatXP(xpNeeded);
         document.getElementById('xpPercent').textContent = progress + '%';
         document.getElementById('xpBar').style.width    = progress + '%';
+        var profEl = document.getElementById('statsProfBonus');
+        if (profEl) {
+            var profBonus = (typeof ProgressionManager !== 'undefined')
+                ? ProgressionManager.getProficiencyBonus(level)
+                : 2;
+            profEl.textContent = '+' + profBonus;
+        }
         localStorage.setItem(lsKey('pipboyXP'),    totalXP);
         localStorage.setItem(lsKey('pipboyLevel'), level);
     }
