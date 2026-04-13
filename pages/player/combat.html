@@ -1145,11 +1145,11 @@
         }
         .obj-toggle-btn:hover { opacity: 0.7; }
 
-        /* ===== PROGRESSION PANEL ===== */
+        /* ===== PROGRESSION PANEL — unified look matching stats.html XP bar ===== */
         .progression-panel {
-            background: rgba(0,0,0,0.35);
-            border: 1px solid rgba(74,222,128,0.25);
-            padding: 10px 12px;
+            background: var(--vault-darker);
+            border: 1px solid rgba(251,191,36,0.3);
+            padding: 10px 16px;
             margin-top: 14px;
         }
         .progression-panel-title {
@@ -1162,51 +1162,56 @@
         .progression-level-display {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 16px;
+            flex-wrap: wrap;
         }
+        /* Level badge — 22px to match stats.html compact layout */
         .progression-level-badge {
-            font-size: 28px;
+            font-size: 22px;
             font-weight: bold;
             color: var(--vault-gold);
-            text-shadow: 0 0 10px rgba(251,191,36,0.6);
+            text-shadow: 0 0 6px rgba(251,191,36,0.5);
             line-height: 1;
-            min-width: 40px;
-            text-align: center;
         }
         .progression-level-label {
             font-size: 9px;
-            color: rgba(251,191,36,0.6);
+            color: var(--vault-gold);
             letter-spacing: 1px;
             text-transform: uppercase;
         }
-        .progression-xp-label {
-            font-size: 9px;
-            color: rgba(74,222,128,0.5);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            margin-bottom: 3px;
+        /* XP bar inner section — flex:1 growth to fill remaining width */
+        .progression-xp-section {
+            flex: 1;
+            min-width: 160px;
         }
+        /* XP bar — matches stats.html bar-bg/bar-fill bar-high style */
         .progression-xp-bar-bg {
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(74,222,128,0.2);
-            height: 6px;
-            border-radius: 3px;
+            height: 10px;
+            border-radius: 2px;
             overflow: hidden;
-            margin-bottom: 4px;
+            position: relative;
         }
         .progression-xp-bar-fill {
             height: 100%;
-            background: var(--vault-gold);
-            box-shadow: 0 0 4px rgba(251,191,36,0.6);
-            border-radius: 3px;
-            transition: width 0.4s;
+            background: var(--vault-green);
+            box-shadow: 0 0 6px var(--vault-green);
+            border-radius: 2px;
+            transition: width 0.4s, background 0.4s;
         }
         .progression-xp-text {
-            font-size: 10px;
-            color: rgba(74,222,128,0.7);
+            font-size: 9px;
+            color: rgba(74,222,128,0.6);
             display: flex;
             justify-content: space-between;
+            margin-bottom: 3px;
+        }
+        .progression-xp-percent {
+            font-size: 8px;
+            color: rgba(74,222,128,0.4);
+            text-align: right;
+            margin-top: 2px;
         }
         .progression-stat-row {
             display: flex;
@@ -1595,20 +1600,17 @@
         }
 
         /* ===== HP RAD ZONE & TEMP HP ZONE (overlays on main health bar) ===== */
+        /* Identical visual style to stats.html: solid overlays, z-index layering */
         .hp-bar-bg { position: relative; overflow: hidden; }
         .hp-bar-rad-zone {
             position: absolute;
             right: 0;
             top: 0;
             height: 100%;
-            background: repeating-linear-gradient(
-                45deg,
-                rgba(255,107,107,0.35), rgba(255,107,107,0.35) 2px,
-                rgba(100,0,0,0.2) 2px, rgba(100,0,0,0.2) 5px
-            );
-            border-left: 1px solid rgba(255,107,107,0.6);
+            background: rgba(239,68,68,0.65);
             transition: width 0.4s;
             pointer-events: none;
+            z-index: 2;
             width: 0;
         }
         .hp-bar-temp-zone {
@@ -1616,15 +1618,14 @@
             left: 0;
             top: 0;
             height: 100%;
-            background: rgba(96,165,250,0.75);
-            box-shadow: 0 0 5px rgba(96,165,250,0.5);
-            border-right: 1px solid rgba(96,165,250,0.9);
+            background: rgba(96,165,250,0.55);
             transition: width 0.4s;
             pointer-events: none;
+            z-index: 2;
             width: 0;
         }
-        /* Make the unified health bar a bit taller for better readability */
-        #hpBarUnified { height: 14px; }
+        /* Match stats.html health bar height (12px) for visual consistency */
+        #hpBarUnified { height: 12px; }
 
         /* ===== FLOATING DICE ROLLER ===== */
         .dice-roller-fab {
@@ -1794,11 +1795,12 @@
                 <!-- Unified health bar: HP (green) + Temp HP (blue overlay) + Rad zone (red from right) -->
                 <div class="hp-bar-wrap">
                     <div class="hp-bar-bg" id="hpBarUnified">
-                        <div class="hp-bar-fill hp-high" id="hpBarFill" style="width:100%"></div>
+                        <div class="hp-bar-fill hp-high" id="hpBarFill" style="width:100%;position:relative;z-index:1;"></div>
                         <div class="hp-bar-temp-zone" id="hpBarTempZone" role="presentation" aria-hidden="true"></div>
                         <div class="hp-bar-rad-zone" id="hpBarRadZone" role="presentation" aria-hidden="true"></div>
                     </div>
                 </div>
+                <div style="font-size:8px;color:rgba(74,222,128,0.35);margin-top:3px;letter-spacing:0.5px;" aria-label="Health bar legend: green for HP, blue for Temp HP, red for Radiation"><span aria-hidden="true">🟢</span> HP &nbsp;<span aria-hidden="true">🔵</span> TEMP &nbsp;<span aria-hidden="true">🔴</span> RADS</div>
 
                 <!-- Quick HP Buttons -->
                 <div class="hp-controls">
@@ -1926,26 +1928,25 @@
                 </div>
                 <div class="hp-success-msg" id="combatCritMsg">✓ CRIT UPDATED!</div>
 
-                <!-- PROGRESSION PANEL -->
+                <!-- PROGRESSION PANEL — compact horizontal layout matching stats.html XP bar -->
                 <div class="progression-panel" id="progressionPanel">
-                    <div class="progression-panel-title">⭐ Progression</div>
                     <div class="progression-level-display">
-                        <div>
-                            <div class="progression-level-badge" id="progLevelBadge">1</div>
-                            <div class="progression-level-label">Level</div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="progression-level-label">LEVEL</span>
+                            <span class="progression-level-badge" id="progLevelBadge">1</span>
                         </div>
-                        <div style="flex:1;">
-                            <div class="progression-xp-label">Experience Points</div>
+                        <div class="progression-xp-section">
+                            <div class="progression-xp-text">
+                                <span>XP: <span id="progXpCurrent">0</span></span>
+                                <span id="progXpNext">— to next</span>
+                            </div>
                             <div class="progression-xp-bar-bg">
                                 <div class="progression-xp-bar-fill" id="progXpBarFill" style="width:0%"></div>
                             </div>
-                            <div class="progression-xp-text">
-                                <span id="progXpCurrent">0 XP</span>
-                                <span id="progXpNext">— to next</span>
-                            </div>
+                            <div class="progression-xp-percent" id="progXpPercent">0%</div>
                         </div>
                     </div>
-                    <div class="progression-stat-row">
+                    <div class="progression-stat-row" style="margin-top:6px;">
                         <span class="stat-label">Ability Score Bonus</span>
                         <span class="stat-value" id="progAbilityBonus">+0</span>
                     </div>
@@ -3248,24 +3249,33 @@
             ? ProgressionManager.getLevelInfo(totalXp)
             : { level: 1, totalXp: totalXp, xpForNext: 0, progressPct: 0, abilityBonus: 0, unlockedAbilities: [] };
 
+        var fmtXp = (typeof ProgressionManager !== 'undefined')
+            ? function(n) { return ProgressionManager.formatXpNumber(n); }
+            : function(n) { return String(n); };
+
         // Level badge
         var levelBadge = document.getElementById('progLevelBadge');
         if (levelBadge) levelBadge.textContent = info.level;
 
-        // XP bar
+        // XP bar fill width
         var xpFill = document.getElementById('progXpBarFill');
         if (xpFill) xpFill.style.width = Math.min(100, info.progressPct) + '%';
 
-        // XP text
+        // XP current — just the number (HTML wrapper supplies the "XP:" label)
         var xpCurrent = document.getElementById('progXpCurrent');
-        if (xpCurrent) xpCurrent.textContent = (typeof ProgressionManager !== 'undefined' ? ProgressionManager.formatXpNumber(info.totalXp) : info.totalXp) + ' XP';
+        if (xpCurrent) xpCurrent.textContent = fmtXp(info.totalXp);
 
+        // XP to next — number with "to next" suffix, or "MAX" at cap
         var xpNext = document.getElementById('progXpNext');
         if (xpNext) {
             xpNext.textContent = info.level >= 100
-                ? 'Max level'
-                : ((typeof ProgressionManager !== 'undefined' ? ProgressionManager.formatXpNumber(info.xpForNext) : info.xpForNext) + ' to next');
+                ? 'MAX'
+                : fmtXp(info.xpForNext) + ' to next';
         }
+
+        // XP percentage label (matches stats.html xpPercent element)
+        var xpPercent = document.getElementById('progXpPercent');
+        if (xpPercent) xpPercent.textContent = Math.min(100, info.progressPct) + '%';
 
         // Ability score bonus
         var abilityBonus = document.getElementById('progAbilityBonus');
