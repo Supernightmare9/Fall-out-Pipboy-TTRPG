@@ -3236,19 +3236,26 @@
 
         // ── Fallout Skills section (14 skills, 0–100 range) ────────
         html += '<div class="skills-section"><div class="panel-title" style="margin-top:16px;">Skills</div>';
-        html += '<div style="font-size:9px;color:rgba(74,222,128,0.5);margin-bottom:8px;">TAG skills receive a permanent +15 bonus and your proficiency bonus (+' + profBonus + ').</div>';
+        html += '<div style="font-size:9px;color:rgba(74,222,128,0.5);margin-bottom:8px;">Each skill modifier is derived from its governing S.P.E.C.I.A.L. stat (score 5 = 0; &#177;1 per point). TAG skills also add your proficiency bonus (+' + profBonus + ').</div>';
         html += FALLOUT_SKILLS.map(function(sk) {
             var baseVal   = typeof skills[sk] === 'number' ? skills[sk] : 0;
             var isTag     = tagSkills.indexOf(sk) !== -1;
-            var effective = Math.min(100, baseVal + (isTag ? 15 : 0));
             var badgeCls  = isTag ? 'skill-proficient' : 'skill-standard';
             var govSp     = getSpecialForSkill(sk);
             var spLabel   = govSp ? abbreviateSpecial(govSp) : '';
+            var spVal     = (govSp && liveData.special && liveData.special[govSp] !== undefined)
+                            ? liveData.special[govSp] : DEFAULT_SPECIAL_VALUE;
+            var spMod     = spVal - DEFAULT_SPECIAL_VALUE;
+            var totalBonus = isTag ? spMod + profBonus : spMod;
+            var bonusFmt   = (totalBonus >= 0 ? '+' : '') + totalBonus;
+            var breakdown  = isTag
+                ? (spMod >= 0 ? '+' : '') + spMod + ' [' + (spLabel || '?') + '] + ' + profBonus + ' [Prof] = ' + bonusFmt
+                : (spMod >= 0 ? '+' : '') + spMod + ' [' + (spLabel || '?') + ']';
             return '<div class="skill-row">' +
                 '<span class="skill-name">' + escHtml(sk) + '</span>' +
                 (spLabel ? '<span style="font-size:9px;color:var(--vault-accent);margin-left:4px;">' + escHtml(spLabel) + '</span>' : '') +
                 '<span class="skill-badge ' + badgeCls + '" style="margin-left:auto;">' + (isTag ? 'TAG ✦ PROF +' + profBonus : 'Standard') + '</span>' +
-                '<span style="font-size:11px;color:var(--vault-green);min-width:28px;text-align:right;">' + effective + '</span>' +
+                '<span style="font-size:11px;color:var(--vault-green);min-width:60px;text-align:right;" title="' + escHtml(breakdown) + '">' + breakdown + '</span>' +
                 '</div>';
         }).join('');
         html += '</div>';
@@ -3526,9 +3533,8 @@
     };
 
     // ── DICE ROLLER: FALLOUT SKILL CHECK ────────────────────────
-    // Skill check = d20 + (skill_value / 10) + SPECIAL modifier + proficiency bonus (TAG skills).
-    // Formula: each 10 points in a skill = +1 bonus. Governing SPECIAL (1-10 scale)
-    // gives (value - 5) bonus (so a 5 is neutral, 10 is +5, 1 is -4).
+    // Skill check = d20 + SPECIAL modifier (+ proficiency bonus if TAG skill).
+    // SPECIAL modifier = governing stat score − 5 (range: −4 at score 1 to +5 at score 10).
     // TAG skills are treated as proficient and add the level-scaled proficiency bonus.
     window.rollSkillCheck = function() {
         if (typeof DiceRoller === 'undefined') { addRollResult('Dice roller not available.'); return; }
@@ -3540,31 +3546,28 @@
         var liveData = (window._livePlayerCache && window._liveMyHandle)
                        ? window._livePlayerCache[window._liveMyHandle]
                        : null;
-        var skills    = (liveData && typeof liveData.skills === 'object') ? liveData.skills : {};
         var tagSkills = (liveData && Array.isArray(liveData.tagSkills))   ? liveData.tagSkills : [];
         var special   = (liveData && liveData.special)                    ? liveData.special : {};
 
-        var skillVal  = typeof skills[skillName] === 'number' ? skills[skillName] : 0;
         var isTag     = tagSkills.indexOf(skillName) !== -1;
-        var effective = Math.min(100, skillVal + (isTag ? 15 : 0));
 
-        // Governing S.P.E.C.I.A.L. attribute modifier: (stat - DEFAULT_SPECIAL_VALUE), range -4 to +5
+        // Skill modifier is derived from the governing S.P.E.C.I.A.L. stat.
+        // Formula: score − 5  (range: −4 at score 1 to +5 at score 10)
         var govSp     = getSpecialForSkill(skillName);
         var spVal     = govSp && special[govSp] !== undefined ? special[govSp] : DEFAULT_SPECIAL_VALUE;
-        var spMod     = spVal - DEFAULT_SPECIAL_VALUE; // neutral at 5, bonus above, penalty below
+        var spMod     = spVal - DEFAULT_SPECIAL_VALUE;
 
         // Proficiency bonus: auto-calculated from player level; applied to TAG (proficient) skills
         var profBonus = getLivePlayerProficiencyBonus(liveData);
 
-        // Total modifier = (skill_value / 10) + SPECIAL modifier
-        // Each 10 points in a Fallout skill (0–100 scale) contributes +1 to the d20 roll modifier
-        var skillMod  = Math.floor(effective / 10) + spMod;
+        // Total modifier = SPECIAL modifier (+ proficiency bonus if tagged)
+        var skillMod  = spMod;
 
         var rollResult = DiceRoller.skillCheck(skillName, skillMod, profBonus, isTag);
-        var tagNote    = isTag ? ' [TAG +15, PROF +' + profBonus + ']' : '';
+        var tagNote    = isTag ? ' [TAG, PROF +' + profBonus + ']' : '';
         var desc       = skillName + ' Check' + tagNote +
-                         ': [d20: ' + rollResult.d20 + '] + [skill: ' + Math.floor(effective / 10) +
-                         (govSp ? ', ' + abbreviateSpecial(govSp) + ' mod: ' + (spMod >= 0 ? '+' : '') + spMod : '') +
+                         ': [d20: ' + rollResult.d20 + '] + [' +
+                         (govSp ? abbreviateSpecial(govSp) + ' mod: ' + (spMod >= 0 ? '+' : '') + spMod : 'mod: ' + (spMod >= 0 ? '+' : '') + spMod) +
                          (isTag ? ', prof: +' + profBonus : '') +
                          '] = ' + rollResult.total;
         addRollResult(desc);
