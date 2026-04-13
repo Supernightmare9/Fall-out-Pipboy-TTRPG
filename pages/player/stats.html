@@ -588,10 +588,10 @@
             <div class="unified-hp-ctrl-row" style="margin-top:6px;">
                 <input type="number" id="statsHpAdjInput" class="compact-input" placeholder="±HP" style="width:58px;" title="HP to heal (+) or damage (−)" aria-label="HP adjustment amount">
                 <button class="update-btn" onclick="applyHpAdjStats()" style="font-size:9px;padding:4px 8px;">HP ±</button>
-                <input type="number" id="statsRadAdjInput" class="compact-input" placeholder="RAD" min="0" style="width:56px;border-color:rgba(239,68,68,0.3);" title="Radiation amount">
+                <input type="number" id="statsRadAdjInput" class="compact-input" placeholder="RAD" min="0" style="width:56px;border-color:rgba(239,68,68,0.3);" title="Radiation amount" aria-label="Radiation adjustment amount">
                 <button class="update-btn" onclick="applyRadAdjStats(-1)" style="font-size:9px;padding:4px 8px;border-color:rgba(239,68,68,0.5);color:#ef4444;">RAD−</button>
                 <button class="update-btn" onclick="applyRadAdjStats(+1)" style="font-size:9px;padding:4px 8px;border-color:rgba(239,68,68,0.5);color:#ef4444;">RAD+</button>
-                <input type="number" id="statsTempHpAdjInput" class="compact-input" placeholder="±TMP" style="width:58px;border-color:rgba(96,165,250,0.3);" title="Temp HP to add (+) or remove (−)">
+                <input type="number" id="statsTempHpAdjInput" class="compact-input" placeholder="±TMP" style="width:58px;border-color:rgba(96,165,250,0.3);" title="Temp HP to add (+) or remove (−)" aria-label="Temp HP adjustment amount">
                 <button class="update-btn" onclick="applyTempHpAdjStats()" style="font-size:9px;padding:4px 8px;border-color:rgba(96,165,250,0.5);color:#60a5fa;">TMP ±</button>
             </div>
             <!-- Flash messages -->

@@ -1857,10 +1857,10 @@
                 <button class="hp-update-btn" onclick="applyHpAdjustment()" style="font-size:9px;padding:4px 8px;">HP ±</button>
                 <input type="number" id="hpManualInput" class="hp-manual-input" placeholder="Set HP" min="0" style="width:66px;" title="Set HP to exact value" aria-label="HP override value">
                 <button class="hp-update-btn" onclick="setHpManual()" style="font-size:9px;padding:4px 8px;border-color:rgba(251,191,36,0.5);color:var(--vault-gold);" aria-label="Override HP to exact value">HP =</button>
-                <input type="number" id="radInput" class="hp-manual-input" placeholder="RAD" min="0" max="1000" style="width:56px;border-color:rgba(239,68,68,0.3);">
+                <input type="number" id="radInput" class="hp-manual-input" placeholder="RAD" min="0" max="1000" style="width:56px;border-color:rgba(239,68,68,0.3);" aria-label="Radiation amount">
                 <button class="hp-update-btn" onclick="decreaseRadCombat()" style="font-size:9px;padding:4px 8px;border-color:rgba(239,68,68,0.5);color:#ef4444;">RAD−</button>
                 <button class="hp-update-btn" onclick="increaseRadCombat()" style="font-size:9px;padding:4px 8px;border-color:rgba(239,68,68,0.5);color:#ef4444;">RAD+</button>
-                <input type="number" id="tempHpAdjustInput" class="hp-manual-input" placeholder="±TMP" style="width:58px;border-color:rgba(96,165,250,0.3);" title="Temp HP to add (+) or remove (−)">
+                <input type="number" id="tempHpAdjustInput" class="hp-manual-input" placeholder="±TMP" style="width:58px;border-color:rgba(96,165,250,0.3);" title="Temp HP to add (+) or remove (−)" aria-label="Temp HP adjustment amount">
                 <button class="hp-update-btn" onclick="applyTempHpAdjustment()" style="font-size:9px;padding:4px 8px;border-color:rgba(96,165,250,0.5);color:#60a5fa;">TMP ±</button>
             </div>
             <!-- Status messages + timestamp -->
