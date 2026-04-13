@@ -627,7 +627,7 @@
 
         <!-- TAB 1: SKILLS (default active — vitals moved to combat page) -->
         <div class="tab-content active" id="tab-skills">
-            <div class="stat-help-text" style="margin-bottom:12px;">Skills represent your character's proficiencies (0–100). Check up to 3 skills as Tag Skills for a permanent +15 bonus. Spend skill points (earned on level-up) using the + / − buttons. Lock in your allocation when done.</div>
+            <div class="stat-help-text" style="margin-bottom:12px;">Skills represent your character's training (0–100 allocation value). Each skill's <strong>modifier</strong> is derived from its governing S.P.E.C.I.A.L. stat (score 5 = 0; each point above/below adds/subtracts 1). Skill points (earned on level-up) track how much you have invested in a skill. Check up to 3 skills as Tag Skills <strong>at creation</strong> to add your proficiency bonus to that skill's modifier. Lock in your allocation when done.</div>
             <div class="tag-header">
                 TAG SKILLS: <span class="tag-count-badge" id="tagBadge">0/3</span>
             </div>
@@ -722,7 +722,7 @@
       <div class="vault-dialog" style="max-width:560px;">
         <div class="vault-dialog-title" id="onboardingTitle">&#127968; Welcome to Your Pip-Boy Stats Module</div>
         <div class="vault-dialog-body" style="font-size:11px;line-height:1.7;color:rgba(74,222,128,0.85);">
-          <p><strong style="color:#fbbf24;">SKILLS TAB:</strong> View your 14 Fallout skills. Tag up to 3 skills for a permanent +15 bonus. Spend skill points (earned on level-up) using the + / &minus; buttons.</p>
+          <p><strong style="color:#fbbf24;">SKILLS TAB:</strong> View your 14 Fallout skills. Each skill modifier is derived from its governing S.P.E.C.I.A.L. stat (score 5 = 0; ±1 per point). Tag up to 3 skills at creation to add your proficiency bonus to the modifier. Skill points (earned on level-up) track training investment and are spent using the + / &minus; buttons.</p>
           <p style="margin-top:6px;"><strong style="color:#fbbf24;">PERKS TAB:</strong> View all perks you have earned so far.</p>
           <p style="margin-top:6px;"><strong style="color:#fbbf24;">EFFECTS TAB:</strong> Track active debuffs and boosts, and manage their durations.</p>
           <p style="margin-top:6px;"><strong style="color:#fbbf24;">LEVEL UP TAB:</strong> Appears when you gain a level. Allocate skill points and choose a new perk from the available pool.</p>
@@ -781,8 +781,8 @@
     var BASE_HEALTH = 100;
     var BASE_AP     = 10;
     var MAX_RAD     = 1000;
-    var MAX_TAG_SKILLS    = 3;
-    var TAG_SKILL_BONUS   = 15;
+    var MAX_TAG_SKILLS         = 3;
+    var DEFAULT_SPECIAL_VALUE  = 5;  // Neutral SPECIAL score; mod = score - 5
     var SKILL_POINTS_PER_LEVEL = 13;
 
     // ── Per-player localStorage namespace ─────────────────────────────────────
@@ -973,6 +973,12 @@
         if (playerData.skillsAllocationActive === undefined) {
             playerData.skillsAllocationActive = ((playerData.skillPointsAvailable || 0) > 0 && !playerData.skillsLocked);
         }
+        // Migration: initialize tagSkillsLocked for existing saves
+        // If skills have already been locked (baseline is set), tag skills are also considered locked.
+        if (playerData.tagSkillsLocked === undefined) {
+            playerData.tagSkillsLocked = !!playerData.skillsLocked &&
+                Object.keys(playerData.skillsLockBaseline || {}).length > 0;
+        }
     }
 
     function saveEffects() {
@@ -1070,16 +1076,33 @@
     }
 
     // ---- SKILLS ----
-    function getSpecialForSkill(skill) {
+    /** Returns the SPECIAL key (e.g. 'agility') for a skill, or null if ungoverned. */
+    function getSpecialKeyForSkill(skill) {
         for (var sp in SKILLS_BY_SPECIAL) {
-            if (SKILLS_BY_SPECIAL[sp].indexOf(skill) !== -1)
-                return sp.charAt(0).toUpperCase() + sp.slice(1);
+            if (SKILLS_BY_SPECIAL[sp].indexOf(skill) !== -1) return sp;
         }
-        return 'Unknown';
+        return null;
     }
 
-    function calculateSkillBonus(val, tagged) {
-        return Math.floor(((val + (tagged ? TAG_SKILL_BONUS : 0)) - 50) / 10);
+    /** Returns the display name (e.g. 'Agility') for a skill's governing SPECIAL, or 'Unknown'. */
+    function getSpecialForSkill(skill) {
+        var sp = getSpecialKeyForSkill(skill);
+        return sp ? sp.charAt(0).toUpperCase() + sp.slice(1) : 'Unknown';
+    }
+
+    /** Ability modifier: score 5 = 0; each point above/below adds/subtracts 1. Range: −4 to +5. */
+    function getSpecialModifier(spVal) {
+        return (Number(spVal) || DEFAULT_SPECIAL_VALUE) - DEFAULT_SPECIAL_VALUE;
+    }
+
+    /**
+     * Calculate a skill's total modifier.
+     *   Untagged: SPECIAL modifier (ability score − 5)
+     *   Tagged:   SPECIAL modifier + proficiency bonus
+     */
+    function calculateSkillBonus(spVal, tagged, profBonus) {
+        var mod = getSpecialModifier(spVal);
+        return tagged ? mod + (profBonus || 0) : mod;
     }
 
     function formatBonus(b) { return b >= 0 ? '+' + b : String(b); }
@@ -1101,6 +1124,11 @@
     }
 
     function toggleTagSkill(skill, checkbox) {
+        // Tag skills are locked after initial creation (unless a perk grants override)
+        if (playerData.tagSkillsLocked) {
+            if (checkbox) checkbox.checked = playerData.tagSkills.indexOf(skill) !== -1;
+            return;
+        }
         var idx = playerData.tagSkills.indexOf(skill);
         if (idx > -1) {
             playerData.tagSkills.splice(idx,1);
@@ -1143,29 +1171,37 @@
             }
         }
 
-        var atMax = playerData.tagSkills.length >= MAX_TAG_SKILLS;
+        var atMax      = playerData.tagSkills.length >= MAX_TAG_SKILLS;
+        var tagLocked  = !!playerData.tagSkillsLocked;
+        var profBonus  = (typeof ProgressionManager !== 'undefined')
+                         ? ProgressionManager.getProficiencyBonus(playerData.level || 1) : 2;
         document.getElementById('skillsGrid').innerHTML = SKILLS.map(function(skill){
-            var sp     = getSpecialForSkill(skill);
-            var val    = playerData.skills[skill] || 0;
-            var tagged = playerData.tagSkills.indexOf(skill) !== -1;
-            var bonus  = calculateSkillBonus(val, tagged);
-            var canInc = pts > 0 && !locked;
+            var sp       = getSpecialForSkill(skill);
+            var spKey    = getSpecialKeyForSkill(skill);
+            var spVal    = spKey ? (playerData.special[spKey] || DEFAULT_SPECIAL_VALUE) : DEFAULT_SPECIAL_VALUE;
+            var spMod    = getSpecialModifier(spVal);
+            var val      = playerData.skills[skill] || 0;
+            var tagged   = playerData.tagSkills.indexOf(skill) !== -1;
+            var bonus    = calculateSkillBonus(spVal, tagged, profBonus);
+            var canInc   = pts > 0 && !locked;
             var baseline = (playerData.skillsLockBaseline || {})[skill] || 0;
-            var canDec = !locked && (val > baseline);
-            var displayVal = tagged ? val + TAG_SKILL_BONUS : val;
-            var cbDisabled = (atMax && !tagged) ? ' disabled' : '';
+            var canDec   = !locked && (val > baseline);
+            var cbDisabled = (tagLocked || (atMax && !tagged)) ? ' disabled' : '';
+            var bonusBreakdown = tagged
+                ? formatBonus(spMod) + ' [' + sp + '] + ' + profBonus + ' [Prof] = ' + formatBonus(bonus)
+                : formatBonus(spMod) + ' [' + sp + ']';
             return '<div class="skill-item">' +
                 '<div class="skill-left">' +
-                    '<input type="checkbox" class="skill-checkbox" ' + (tagged?'checked':'') + cbDisabled + ' onchange="toggleTagSkill(\''+skill+'\', this)">'  +
+                    '<input type="checkbox" class="skill-checkbox" ' + (tagged?'checked':'') + cbDisabled + ' onchange="toggleTagSkill(\''+skill+'\', this)" title="' + (tagLocked ? 'Tag skills are locked (set at creation)' : 'Toggle TAG skill') + '">'  +
                     '<div class="skill-info">' +
                         '<div class="skill-name">'+skill+'</div>' +
                         '<div class="skill-special">'+sp+'</div>' +
-                        '<div class="skill-bonus">Bonus: '+formatBonus(bonus)+'</div>' +
+                        '<div class="skill-bonus">Bonus: '+bonusBreakdown+'</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="skill-controls">' +
                     '<button class="skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',-1)" ' + (!canDec ? 'disabled title="Cannot decrease below locked baseline"' : 'title="Decrease skill (refunds 1 point)"') + '>-</button>' +
-                    '<span class="skill-value">'+displayVal+'</span>' +
+                    '<span class="skill-value">'+val+'</span>' +
                     '<button class="skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" onclick="updateSkill(\''+skill+'\',1)" ' + (!canInc ? 'disabled title="'+(locked?'Skills are locked in':'No skill points available')+'"' : 'title="Increase skill (costs 1 point)"') + '>+</button>' +
                 '</div>' +
                 '</div>';
@@ -1178,6 +1214,8 @@
         playerData.skillsLocked = true;
         playerData.skillsAllocationActive = false;
         playerData.skillsLockBaseline = deepCopy(playerData.skills);
+        // Lock tag selections permanently after initial creation
+        playerData.tagSkillsLocked = true;
         savePlayerData();
         updateDisplay();
     }
@@ -1578,29 +1616,36 @@
     }
 
     function renderLevelUpSkills() {
-        var pts = playerData.skillPointsAvailable || 0;
+        var pts      = playerData.skillPointsAvailable || 0;
+        var profBonus = (typeof ProgressionManager !== 'undefined')
+                        ? ProgressionManager.getProficiencyBonus(playerData.level || 1) : 2;
         var grid = document.getElementById('luSkillsGrid');
         if (!grid) return;
         grid.innerHTML = SKILLS.map(function(skill) {
-            var sp     = getSpecialForSkill(skill);
-            var val    = playerData.skills[skill] || 0;
-            var tagged = playerData.tagSkills.indexOf(skill) !== -1;
-            var bonus  = calculateSkillBonus(val, tagged);
-            var canInc = pts > 0;
+            var sp       = getSpecialForSkill(skill);
+            var spKey    = getSpecialKeyForSkill(skill);
+            var spVal    = spKey ? (playerData.special[spKey] || DEFAULT_SPECIAL_VALUE) : DEFAULT_SPECIAL_VALUE;
+            var spMod    = getSpecialModifier(spVal);
+            var val      = playerData.skills[skill] || 0;
+            var tagged   = playerData.tagSkills.indexOf(skill) !== -1;
+            var bonus    = calculateSkillBonus(spVal, tagged, profBonus);
+            var canInc   = pts > 0;
             var baseline = (playerData.skillsLockBaseline || {})[skill] || 0;
-            var canDec = val > baseline;
-            var displayVal = tagged ? val + TAG_SKILL_BONUS : val;
+            var canDec   = val > baseline;
+            var bonusBreakdown = tagged
+                ? formatBonus(spMod) + ' [' + escHtml(sp) + '] + ' + profBonus + ' [Prof] = ' + formatBonus(bonus)
+                : formatBonus(spMod) + ' [' + escHtml(sp) + ']';
             return '<div class="skill-item' + (canInc ? ' lu-glow' : '') + '">' +
                 '<div class="skill-left">' +
                     '<div class="skill-info">' +
                         '<div class="skill-name">'+escHtml(skill)+'</div>' +
                         '<div class="skill-special">'+escHtml(sp)+'</div>' +
-                        '<div class="skill-bonus">Bonus: '+formatBonus(bonus)+'</div>' +
+                        '<div class="skill-bonus">Bonus: '+bonusBreakdown+'</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="skill-controls">' +
                     '<button class="skill-btn lu-skill-btn' + (!canDec ? ' skill-btn-disabled' : '') + '" data-skill="' + escHtml(skill) + '" data-delta="-1" ' + (!canDec ? 'disabled' : 'title="Decrease (refunds 1 point)"') + ' tabindex="0">-</button>' +
-                    '<span class="skill-value">'+displayVal+'</span>' +
+                    '<span class="skill-value">'+val+'</span>' +
                     '<button class="skill-btn lu-skill-btn' + (!canInc ? ' skill-btn-disabled' : '') + '" data-skill="' + escHtml(skill) + '" data-delta="1" ' + (!canInc ? 'disabled title="No skill points available"' : 'title="Increase skill (costs 1 point)"') + ' tabindex="0">+</button>' +
                 '</div>' +
                 '</div>';
