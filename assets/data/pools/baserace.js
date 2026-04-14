@@ -1,1 +1,146 @@
-
+window.baseRaces = [
+  {
+    name: "Human",
+    description: "The average wastelander, versatile and common throughout the wastes.",
+    hitDie: "(1d6) 100 + 10 per Endurance point.",
+    startingPerksAndTraits: "One extra Perk at Level 1",
+    specialCaps: {
+      enduranceMin: null,
+      enduranceMax: null,
+      strengthMin: null,
+      strengthMax: null,
+      perceptionMin: null,
+      perceptionMax: null,
+      charismaMin: null,
+      charismaMax: null,
+      intelligenceMin: null,
+      intelligenceMax: null,
+      agilityMin: null,
+      agilityMax: null,
+      luckMin: null,
+      luckMax: null
+    },
+    specialPointAllocation: 28,
+    savingThrowProf: ["Player may choose both"]
+  },
+  {
+    name: "Ghoul",
+    description: "Irradiated humans with necrotic skin; resilient but often shunned.",
+    hitDie: "(1d4) + 10 per Endurance point.",
+    startingPerksAndTraits: "Rad Child (Perk); Heal 1 HP per 10 Rads taken.",
+    specialCaps: {
+      enduranceMin: 5,
+      enduranceMax: null,
+      strengthMin: null,
+      strengthMax: 7,
+      perceptionMin: null,
+      perceptionMax: null,
+      charismaMin: null,
+      charismaMax: null,
+      intelligenceMin: null,
+      intelligenceMax: null,
+      agilityMin: null,
+      agilityMax: null,
+      luckMin: null,
+      luckMax: null
+    },
+    specialPointAllocation: 25,
+    savingThrowProf: ["Endurance", "Player may choose other"]
+  },
+  {
+    name: "Super Mutant",
+    description: "Massive, mutated humanoids created by FEV; incredibly strong and hardy.",
+    hitDie: "(1d10) 150 + 10 per Endurance point.",
+    startingPerksAndTraits: "Unarmored AC is +2",
+    specialCaps: {
+      enduranceMin: null,
+      enduranceMax: null,
+      strengthMin: 5,
+      strengthMax: null,
+      perceptionMin: null,
+      perceptionMax: null,
+      charismaMin: null,
+      charismaMax: null,
+      intelligenceMin: null,
+      intelligenceMax: 7,
+      agilityMin: null,
+      agilityMax: null,
+      luckMin: null,
+      luckMax: null
+    },
+    specialPointAllocation: 25,
+    savingThrowProf: ["Strength", "Player may choose other"]
+  },
+  {
+    name: "Deathclaw",
+    description: "The apex predator of the wastes, known for their speed and lethal claws.",
+    hitDie: "(1d12) 150 + 10 per Endurance point.",
+    startingPerksAndTraits: "Vicious Claw attack: 1d8 damage plus 1d4 of bleeding damage",
+    specialCaps: {
+      enduranceMin: null,
+      enduranceMax: null,
+      strengthMin: null,
+      strengthMax: null,
+      perceptionMin: null,
+      perceptionMax: null,
+      charismaMin: null,
+      charismaMax: 7,
+      intelligenceMin: null,
+      intelligenceMax: null,
+      agilityMin: 5,
+      agilityMax: null,
+      luckMin: null,
+      luckMax: null
+    },
+    specialPointAllocation: 25,
+    savingThrowProf: ["Agility", "Player may choose other"]
+  },
+  {
+    name: "Synth",
+    description: "Advanced AI in robotic bodies; metal skeletons make them heavy but durable.",
+    hitDie: "(1d8) 120 + 10 per Endurance point.",
+    startingPerksAndTraits: "Immune to drugs and Sanity system.",
+    specialCaps: {
+      enduranceMin: null,
+      enduranceMax: null,
+      strengthMin: null,
+      strengthMax: null,
+      perceptionMin: 5,
+      perceptionMax: null,
+      charismaMin: null,
+      charismaMax: null,
+      intelligenceMin: null,
+      intelligenceMax: null,
+      agilityMin: null,
+      agilityMax: null,
+      luckMin: null,
+      luckMax: 7
+    },
+    specialPointAllocation: 25,
+    savingThrowProf: ["Perception", "Player may choose other"]
+  },
+  {
+    name: "Cryptid",
+    description: "Not much is known about these creatures, but we know they vary.",
+    hitDie: "(1d6) 100 + 10 per Endurance point.",
+    startingPerksAndTraits: "",
+    specialCaps: {
+      enduranceMin: null,
+      enduranceMax: null,
+      strengthMin: null,
+      strengthMax: null,
+      perceptionMin: null,
+      perceptionMax: 7,
+      charismaMin: null,
+      charismaMax: null,
+      intelligenceMin: null,
+      intelligenceMax: null,
+      agilityMin: null,
+      agilityMax: null,
+      luckMin: 5,
+      luckMax: null
+    },
+    specialPointAllocation: 25,
+    savingThrowProf: ["Luck", "Player may choose other"]
+  }
+];
