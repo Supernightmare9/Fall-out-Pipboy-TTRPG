@@ -1500,7 +1500,7 @@
         var bannerMsg = document.getElementById('ccBannerMsg');
         if (locked) {
             if (badge)       { badge.textContent = '\u2713 DONE'; badge.style.color = 'var(--vault-gold)'; badge.style.borderColor = 'var(--vault-gold)'; }
-            if (headerBadge) { headerBadge.textContent = '\u{1F512} LOCKED'; headerBadge.style.color = 'var(--vault-gold)'; headerBadge.style.borderColor = 'var(--vault-gold)'; }
+            if (headerBadge) { headerBadge.textContent = '\uD83D\uDD12 LOCKED'; headerBadge.style.color = 'var(--vault-gold)'; headerBadge.style.borderColor = 'var(--vault-gold)'; }
             if (banner)      { banner.classList.remove('unlocked'); banner.classList.add('locked'); }
             if (bannerMsg)   { bannerMsg.textContent = 'Character is finalized and locked. Fields are view-only.'; }
             var stepRow = document.getElementById('ccStepRow');
@@ -1533,9 +1533,9 @@
             var bs = localStorage.getItem(lsKey('characterBackstory'));
             if (bsEl && bs) bsEl.value = bs;
             // Live summary updates
-            function _debCC(fn, ms) { var t; return function() { clearTimeout(t); t = setTimeout(fn, ms); }; }
-            if (nameEl)  nameEl.addEventListener('input', _debCC(_ccUpdateSummary, 250));
-            if (clsEl)   clsEl.addEventListener('input', _debCC(_ccUpdateSummary, 250));
+            function _debounce(fn, ms) { var t; return function() { clearTimeout(t); t = setTimeout(fn, ms); }; }
+            if (nameEl)  nameEl.addEventListener('input', _debounce(_ccUpdateSummary, 250));
+            if (clsEl)   clsEl.addEventListener('input', _debounce(_ccUpdateSummary, 250));
             if (alignEl) alignEl.addEventListener('change', _ccUpdateSummary);
             _ccUpdateProgress();
         }

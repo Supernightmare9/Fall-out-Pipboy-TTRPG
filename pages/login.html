@@ -555,7 +555,7 @@
             sessionStorage.setItem('campaignId', _selectedPlayerCampaignCode);
             // Redirect to data.html for character creation if not yet finalized;
             // otherwise go directly to the main game (combat.html).
-            var handle = (_pendingAccount && _pendingAccount.username || '').toLowerCase();
+            var handle = ((_pendingAccount && _pendingAccount.username) || '').toLowerCase();
             var isLocked = localStorage.getItem('charCreationLocked_' + handle) === 'true';
             window.location.href = isLocked ? 'player/combat.html' : 'player/data.html';
         }
