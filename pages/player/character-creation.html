@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pip-Boy — Character Creation | Vault 215</title>
+    <link rel="stylesheet" href="../../css/branding.css">
+    <link rel="stylesheet" href="../../css/player/playerstyle.css">
+    <style>
+        :root {
+            --vault-primary:  #4ade80;
+            --vault-secondary:#fbbf24;
+            --vault-dark:     #0a0a0a;
+            --vault-darker:   #1a1a1a;
+            --vault-accent:   #c084fc;
+            --vault-success:  #4ade80;
+            --vault-error:    #ff6b6b;
+            --vault-warning:  #fbbf24;
+            --vault-info:     #60a5fa;
+            --vault-green:    #4ade80;
+            --vault-gold:     #fbbf24;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html, body {
+            width:100%; min-height:100vh;
+            background-color:var(--vault-dark);
+            color:var(--vault-green);
+            font-family:'Courier New', monospace;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(58,102,20,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(58,102,20,0.1) 0%, transparent 50%);
+        }
+        body { padding:20px; }
+        body::before {
+            content:'';
+            position:fixed; top:0; left:0;
+            width:100%; height:100%;
+            background:repeating-linear-gradient(0deg,rgba(0,0,0,0.12),rgba(0,0,0,0.12) 1px,transparent 1px,transparent 2px);
+            pointer-events:none; z-index:10;
+        }
+        .container { position:relative; z-index:1; max-width:900px; margin:0 auto; }
+
+        /* ── HEADER ── */
+        .vault-header {
+            text-align:center; margin-bottom:24px; padding:20px 30px;
+            background-color:var(--vault-darker);
+            border:3px solid var(--vault-green);
+            box-shadow:0 0 30px rgba(74,222,128,0.3);
+        }
+        .vault-badge   { font-size:9px; color:var(--vault-gold); letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+        .vault-title   { font-size:24px; font-weight:bold; letter-spacing:4px; color:var(--vault-green); text-shadow:0 0 10px var(--vault-green); animation:glow 2s ease-in-out infinite; margin-bottom:6px; }
+        .vault-subtitle{ font-size:11px; color:var(--vault-gold); letter-spacing:2px; }
+        @keyframes glow {
+            0%,100%{ text-shadow:0 0 10px var(--vault-green); }
+            50%    { text-shadow:0 0 20px var(--vault-green), 0 0 30px rgba(74,222,128,0.5); }
+        }
+
+        /* ── STEP PROGRESS ── */
+        .step-bar {
+            display:flex; gap:0; margin-bottom:24px;
+            border:1px solid rgba(74,222,128,0.3);
+        }
+        .step {
+            flex:1; padding:10px 6px; text-align:center;
+            font-size:10px; letter-spacing:1px; text-transform:uppercase;
+            background:var(--vault-darker); color:rgba(74,222,128,0.45);
+            border-right:1px solid rgba(74,222,128,0.2);
+            transition:all 0.2s;
+        }
+        .step:last-child { border-right:none; }
+        .step.active { color:var(--vault-gold); background:rgba(251,191,36,0.08); border-bottom:2px solid var(--vault-gold); }
+        .step.done   { color:var(--vault-green); background:rgba(74,222,128,0.05); }
+        .step-num    { display:block; font-size:16px; font-weight:bold; margin-bottom:2px; }
+
+        /* ── PANELS ── */
+        .panel {
+            background:var(--vault-darker); border:1px solid rgba(74,222,128,0.3);
+            padding:20px; margin-bottom:20px;
+        }
+        .panel-title {
+            font-size:11px; font-weight:bold; letter-spacing:2px; text-transform:uppercase;
+            color:var(--vault-gold); text-shadow:0 0 5px rgba(251,191,36,0.5);
+            border-bottom:1px solid rgba(251,191,36,0.3); padding-bottom:8px; margin-bottom:16px;
+        }
+        .panel-locked {
+            opacity:0.4; pointer-events:none; user-select:none;
+            position:relative;
+        }
+        .panel-locked::after {
+            content:'🔒 Complete previous step first';
+            position:absolute; inset:0;
+            display:flex; align-items:center; justify-content:center;
+            font-size:11px; letter-spacing:1px; text-transform:uppercase;
+            color:rgba(251,191,36,0.7);
+            background:rgba(10,10,10,0.55);
+            pointer-events:none;
+        }
+
+        /* ── SELECTION CARDS ── */
+        .card-grid {
+            display:grid;
+            grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+            gap:12px;
+        }
+        .card {
+            background:var(--vault-dark); border:1px solid rgba(74,222,128,0.25);
+            padding:12px; cursor:pointer; transition:all 0.15s;
+        }
+        .card:hover  { border-color:rgba(74,222,128,0.6); box-shadow:0 0 8px rgba(74,222,128,0.2); }
+        .card.selected {
+            border-color:var(--vault-gold); box-shadow:0 0 12px rgba(251,191,36,0.3);
+            background:rgba(251,191,36,0.05);
+        }
+        .card-name {
+            font-size:13px; font-weight:bold; color:var(--vault-gold);
+            letter-spacing:1px; margin-bottom:4px;
+        }
+        .card-desc {
+            font-size:10px; color:rgba(74,222,128,0.7); line-height:1.5;
+            margin-bottom:8px;
+        }
+        .card-perk {
+            font-size:9px; color:rgba(96,165,250,0.85); border-top:1px solid rgba(74,222,128,0.15);
+            padding-top:6px; margin-top:4px; line-height:1.4;
+        }
+        .card-caps {
+            font-size:9px; color:rgba(251,191,36,0.6); margin-top:4px; line-height:1.4;
+        }
+
+        /* none/pureblood card */
+        .card-pureblood {
+            border-style:dashed; border-color:rgba(74,222,128,0.4);
+        }
+        .card-pureblood .card-name { color:var(--vault-green); }
+
+        /* ── SUMMARY PANEL ── */
+        .summary-row {
+            display:flex; flex-wrap:wrap; gap:10px; margin-bottom:10px;
+        }
+        .summary-chip {
+            font-size:10px; padding:4px 10px;
+            border:1px solid rgba(74,222,128,0.35);
+            background:rgba(74,222,128,0.05);
+            color:var(--vault-green); letter-spacing:0.5px;
+        }
+        .summary-chip.gold {
+            border-color:rgba(251,191,36,0.5);
+            background:rgba(251,191,36,0.07);
+            color:var(--vault-gold);
+        }
+
+        /* ── SPECIAL ALLOCATION ── */
+        .sp-section {
+            background:var(--vault-darker);
+            border:1px solid rgba(74,222,128,0.2);
+            padding:14px; margin-bottom:16px;
+        }
+        .sp-section-header {
+            display:flex; justify-content:space-between; align-items:center;
+            margin-bottom:10px;
+        }
+        .sp-section-title {
+            font-size:14px; font-weight:bold; letter-spacing:3px;
+            color:var(--vault-gold); text-shadow:0 0 6px rgba(251,191,36,0.5);
+            text-transform:uppercase;
+        }
+        .sp-status {
+            font-size:9px; letter-spacing:1px;
+            color:rgba(74,222,128,0.45); text-transform:uppercase;
+            padding:2px 8px; border:1px solid rgba(74,222,128,0.2);
+        }
+        .sp-status.sp-alloc-active {
+            color:var(--vault-gold); border-color:rgba(251,191,36,0.5);
+            animation:blinkBorder 1.5s ease-in-out infinite;
+        }
+        @keyframes blinkBorder {
+            0%,100%{ border-color:rgba(251,191,36,0.5); }
+            50%    { border-color:rgba(251,191,36,0.9); }
+        }
+        .sp-row {
+            display:flex; gap:6px; justify-content:center; flex-wrap:wrap;
+        }
+        .sp-attr {
+            display:flex; flex-direction:column; align-items:center;
+            background:var(--vault-dark); border:1px solid rgba(74,222,128,0.2);
+            padding:6px 5px 8px; flex:1; min-width:46px; max-width:70px;
+            transition:border-color 0.2s;
+        }
+        .sp-attr.sp-attr-active { border-color:rgba(74,222,128,0.4); }
+        .sp-attr-letter {
+            font-size:14px; font-weight:bold; color:var(--vault-gold);
+            letter-spacing:1px; line-height:1; margin-bottom:1px;
+        }
+        .sp-attr-name {
+            font-size:6px; color:rgba(74,222,128,0.5); letter-spacing:0.3px;
+            text-transform:uppercase; text-align:center; margin-bottom:4px; white-space:nowrap;
+        }
+        .sp-attr-val {
+            font-size:22px; font-weight:bold; color:var(--vault-green);
+            text-shadow:0 0 5px rgba(74,222,128,0.4); line-height:1; min-width:24px;
+            text-align:center;
+        }
+        .sp-btn {
+            width:22px; height:20px; background:rgba(74,222,128,0.08);
+            border:1px solid rgba(74,222,128,0.3); color:var(--vault-green);
+            font-size:14px; font-weight:bold; cursor:pointer; line-height:1;
+            transition:all 0.15s; padding:0; text-align:center;
+        }
+        .sp-btn:disabled { opacity:0.3; cursor:not-allowed; }
+        .sp-btn:not(:disabled):hover { background:rgba(74,222,128,0.2); border-color:var(--vault-green); }
+
+        /* ── POINTS POOL ── */
+        .points-pool {
+            display:flex; align-items:center; gap:8px;
+            font-size:11px; letter-spacing:1px; color:rgba(74,222,128,0.6);
+            padding:8px 12px; border:1px solid rgba(74,222,128,0.2);
+            background:rgba(74,222,128,0.04); margin-bottom:12px;
+        }
+        .points-value {
+            font-size:20px; font-weight:bold; color:var(--vault-gold);
+            text-shadow:0 0 5px rgba(251,191,36,0.4); min-width:28px; text-align:center;
+        }
+        .points-zero { color:rgba(74,222,128,0.3) !important; }
+
+        /* ── BUTTONS ── */
+        .action-btn {
+            background:rgba(74,222,128,0.08); border:1px solid rgba(74,222,128,0.4);
+            color:var(--vault-green); font-family:'Courier New',monospace;
+            font-size:11px; font-weight:bold; letter-spacing:1px; text-transform:uppercase;
+            padding:10px 20px; cursor:pointer; transition:all 0.15s;
+        }
+        .action-btn:hover { background:rgba(74,222,128,0.18); border-color:var(--vault-green); }
+        .action-btn:disabled { opacity:0.35; cursor:not-allowed; }
+        .action-btn.btn-gold {
+            border-color:rgba(251,191,36,0.6); color:var(--vault-gold);
+            background:rgba(251,191,36,0.08);
+        }
+        .action-btn.btn-gold:hover { background:rgba(251,191,36,0.18); border-color:var(--vault-gold); }
+        .btn-row { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+
+        /* ── MESSAGES ── */
+        .msg-box { min-height:18px; font-size:10px; letter-spacing:0.5px; margin-top:8px; }
+        .msg-box.ok  { color:var(--vault-success); }
+        .msg-box.err { color:var(--vault-error); }
+
+        /* ── CAP LEGEND ── */
+        .cap-legend {
+            font-size:9px; color:rgba(74,222,128,0.4); letter-spacing:0.5px;
+            margin-top:8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="vault-header">
+        <div class="vault-badge">VAULT-TEC INDUSTRIES PIP-BOY 3000</div>
+        <div class="vault-title">CHARACTER CREATION</div>
+        <div class="vault-subtitle">RACE &amp; GENE SELECTION PROTOCOL</div>
+        <div style="margin-top:10px;">
+            <a href="stats.html" class="back-to-char-btn" aria-label="Go to Stats page">&larr; Back to Stats</a>
+        </div>
+    </div>
+
+    <!-- STEP PROGRESS BAR -->
+    <div class="step-bar" id="stepBar" role="list">
+        <div class="step active" id="step1Indicator" role="listitem">
+            <span class="step-num">1</span>BASE RACE
+        </div>
+        <div class="step" id="step2Indicator" role="listitem">
+            <span class="step-num">2</span>GENE POOL
+        </div>
+        <div class="step" id="step3Indicator" role="listitem">
+            <span class="step-num">3</span>S.P.E.C.I.A.L.
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 1 — BASE RACE
+    ══════════════════════════════════════════════════════ -->
+    <div class="panel" id="panelRace">
+        <div class="panel-title">&#127939; Step 1 — Choose Your Base Race <span style="font-size:9px;color:var(--vault-error);">(Required)</span></div>
+        <p style="font-size:10px;color:rgba(74,222,128,0.6);margin-bottom:14px;line-height:1.6;">
+            Your base race determines your starting hit die, S.P.E.C.I.A.L. point pool, hard attribute caps,
+            and a signature starting perk or trait. You must choose a race before allocating any other stats.
+        </p>
+        <div class="card-grid" id="raceCardGrid" role="radiogroup" aria-label="Base Race Selection"></div>
+        <div class="msg-box" id="raceMsgBox"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 2 — GENE POOL
+    ══════════════════════════════════════════════════════ -->
+    <div class="panel panel-locked" id="panelGene">
+        <div class="panel-title">&#9762; Step 2 — Choose Your Gene Pool Mutation <span style="font-size:9px;color:rgba(74,222,128,0.45);">(Optional)</span></div>
+        <p style="font-size:10px;color:rgba(74,222,128,0.6);margin-bottom:14px;line-height:1.6;">
+            Mixing your DNA with a wasteland creature grants a powerful starting perk at the cost of your purity.
+            Alternatively, choose <strong style="color:var(--vault-green);">None / Pureblood</strong> to stay unmixed
+            and gain an extra perk point every 5 levels plus an additional hit die on short rests.
+        </p>
+        <div class="card-grid" id="geneCardGrid" role="radiogroup" aria-label="Gene Pool Selection"></div>
+        <div class="msg-box" id="geneMsgBox"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         SUMMARY — shown once both selections are made
+    ══════════════════════════════════════════════════════ -->
+    <div class="panel panel-locked" id="panelSummary" style="border-color:rgba(251,191,36,0.35);">
+        <div class="panel-title" style="border-color:rgba(251,191,36,0.3);">&#128196; Selection Summary</div>
+        <div class="summary-row" id="summaryChips"></div>
+        <div id="summaryPerks" style="font-size:10px;color:rgba(74,222,128,0.7);line-height:1.7;"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 3 — S.P.E.C.I.A.L. ALLOCATION
+    ══════════════════════════════════════════════════════ -->
+    <div class="panel panel-locked" id="panelSpecial">
+        <div class="panel-title">&#9733; Step 3 — Allocate S.P.E.C.I.A.L. Attributes</div>
+        <p style="font-size:10px;color:rgba(74,222,128,0.6);margin-bottom:14px;line-height:1.6;">
+            Distribute your point pool across the seven core attributes. Values must stay within the min/max
+            caps set by your race. Spend every point before locking in.
+        </p>
+
+        <!-- Points remaining pool -->
+        <div class="points-pool">
+            <span style="letter-spacing:1px;">POINTS REMAINING:</span>
+            <span class="points-value" id="specialPointsRemaining">0</span>
+            <span style="font-size:9px;opacity:0.6;">/ <span id="specialPointsTotal">0</span></span>
+        </div>
+
+        <!-- SPECIAL row -->
+        <div class="sp-section">
+            <div class="sp-section-header">
+                <span class="sp-section-title">S.P.E.C.I.A.L.</span>
+                <span id="ccSpStatus" class="sp-status">AWAITING RACE SELECTION</span>
+            </div>
+            <div class="sp-row" id="ccSpRow" role="group" aria-label="S.P.E.C.I.A.L. attribute adjustments"></div>
+        </div>
+
+        <!-- Cap legend -->
+        <div class="cap-legend" id="specialCapLegend"></div>
+
+        <!-- Saving Throws -->
+        <div id="savingThrowInfo" style="font-size:10px;color:rgba(74,222,128,0.55);margin-top:10px;line-height:1.6;"></div>
+
+        <div class="msg-box" id="specialMsgBox"></div>
+
+        <div class="btn-row">
+            <button class="action-btn btn-gold" id="lockSpecialBtn" onclick="lockSpecial()" disabled>
+                &#128190; Lock In S.P.E.C.I.A.L.
+            </button>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         FINISH — link to stats page
+    ══════════════════════════════════════════════════════ -->
+    <div class="panel panel-locked" id="panelFinish" style="text-align:center;border-color:rgba(251,191,36,0.4);">
+        <div class="panel-title" style="border-color:rgba(251,191,36,0.3);text-align:center;">&#9989; Creation Complete!</div>
+        <p style="font-size:11px;color:rgba(74,222,128,0.75);margin-bottom:16px;line-height:1.7;">
+            Your character is ready for the Wasteland. Proceed to Skills &amp; Stats to continue your build.
+        </p>
+        <a href="stats.html" class="action-btn btn-gold" style="display:inline-block;text-decoration:none;">
+            &#9658; Open Stats &amp; Skills Page
+        </a>
+    </div>
+
+</div><!-- /container -->
+
+<!-- ── DATA POOLS ── -->
+<script src="../../assets/data/pools/base-race.js"></script>
+<script src="../../assets/data/pools/gene-pool.js"></script>
+<!-- ── CREATION LOGIC ── -->
+<script src="../../assets/logic/character-creation.js"></script>
+
+<script>
+// ============================================================================
+//  Character Creation — Page Controller
+//  All DOM interactions for character-creation.html live here.
+// ============================================================================
+'use strict';
+
+var CC  = window.CharacterCreation;
+
+// S.P.E.C.I.A.L. attribute metadata (mirrors stats.html)
+var SPECIAL_ATTRS = [
+    { key:'strength',     letter:'S', name:'Strength'     },
+    { key:'perception',   letter:'P', name:'Perception'   },
+    { key:'endurance',    letter:'E', name:'Endurance'     },
+    { key:'charisma',     letter:'C', name:'Charisma'      },
+    { key:'intelligence', letter:'I', name:'Intelligence'  },
+    { key:'agility',      letter:'A', name:'Agility'       },
+    { key:'luck',         letter:'L', name:'Luck'          }
+];
+
+// During creation attributes start at 0 (unassigned) and are built up
+// from the pool.  0 is a valid "not yet spent" value; 10 is the hard max.
+// Once locked in, stats.html enforces SPECIAL_MIN = 1 for live play.
+var SPECIAL_MIN = 0;
+var SPECIAL_MAX = 10;
+
+// Working playerData — loaded from localStorage on DOMContentLoaded
+var pd;
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+
+function escHtml(s) {
+    return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showMsg(id, text, isOk) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = text;
+    el.className   = 'msg-box ' + (isOk ? 'ok' : 'err');
+    setTimeout(function () { el.textContent = ''; el.className = 'msg-box'; }, 4000);
+}
+
+function unlockPanel(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('panel-locked');
+}
+
+function markStepDone(stepId)   {
+    var el = document.getElementById(stepId);
+    if (el) { el.classList.remove('active'); el.classList.add('done'); }
+}
+
+function markStepActive(stepId) {
+    var el = document.getElementById(stepId);
+    if (el) { el.classList.remove('done'); el.classList.add('active'); }
+}
+
+// ── STEP 1: BASE RACE ────────────────────────────────────────────────────────
+
+function buildRaceCards() {
+    var grid  = document.getElementById('raceCardGrid');
+    var races = window.baseRaces || [];
+    if (!races.length) {
+        grid.innerHTML = '<p style="color:var(--vault-error);font-size:10px;">⚠ Race pool not loaded. Check base-race.js is included.</p>';
+        return;
+    }
+
+    grid.innerHTML = races.map(function (race, idx) {
+        var caps     = buildCapsText(race.specialCaps);
+        var isSelected = pd.baseRace && pd.baseRace.name === race.name;
+        return '<div class="card' + (isSelected ? ' selected' : '') + '"' +
+               ' role="radio" aria-checked="' + (isSelected ? 'true' : 'false') + '"' +
+               ' tabindex="0"' +
+               ' onclick="selectRace(' + idx + ')"' +
+               ' onkeydown="if(event.key===\'Enter\'||event.key===\' \')selectRace(' + idx + ')"' +
+               ' title="Select ' + escHtml(race.name) + '">' +
+               '<div class="card-name">' + escHtml(race.name) + '</div>' +
+               '<div class="card-desc">'  + escHtml(race.description) + '</div>' +
+               (race.startingPerksAndTraits
+                    ? '<div class="card-perk">&#9733; ' + escHtml(race.startingPerksAndTraits) + '</div>'
+                    : '') +
+               (caps
+                    ? '<div class="card-caps">Caps: ' + escHtml(caps) + '</div>'
+                    : '<div class="card-caps">No SPECIAL caps</div>') +
+               '<div style="font-size:9px;color:rgba(74,222,128,0.4);margin-top:4px;">' +
+               'Points: <strong style="color:var(--vault-gold);">' + (race.specialPointAllocation||'?') + '</strong> &nbsp;|&nbsp; ' +
+               'Hit Die: ' + escHtml(race.hitDie || '—') + '</div>' +
+               '</div>';
+    }).join('');
+}
+
+function buildCapsText(caps) {
+    if (!caps) return '';
+    var parts = [];
+    ['strength','perception','endurance','charisma','intelligence','agility','luck'].forEach(function (k) {
+        var min = caps[k + 'Min'], max = caps[k + 'Max'];
+        var abbr = k.charAt(0).toUpperCase();
+        if (min !== null && min !== undefined) parts.push(abbr + '≥' + min);
+        if (max !== null && max !== undefined) parts.push(abbr + '≤' + max);
+    });
+    return parts.join(', ');
+}
+
+function selectRace(idx) {
+    var race = (window.baseRaces || [])[idx];
+    if (!race) return;
+
+    CC.applyBaseRace(pd, race);
+
+    // If gene pool was already decided, re-enforce caps
+    CC._enforceSpecialCaps(pd);
+
+    CC.savePlayerData(pd);
+    buildRaceCards();
+    markStepDone('step1Indicator');
+    markStepActive('step2Indicator');
+    unlockPanel('panelGene');
+
+    // If gene pool choice was already made, refresh downstream panels too
+    if (pd.isPureblood !== null) {
+        refreshSummary();
+        unlockPanel('panelSummary');
+        unlockPanel('panelSpecial');
+        markStepActive('step3Indicator');
+    }
+
+    updateSpecialPanel();
+    showMsg('raceMsgBox', '✓ Race set to ' + race.name, true);
+}
+
+// ── STEP 2: GENE POOL ────────────────────────────────────────────────────────
+
+function buildGeneCards() {
+    var grid  = document.getElementById('geneCardGrid');
+    var genes = window.genePool || [];
+
+    // Pureblood option (always first)
+    var pureSelected = pd.isPureblood === true;
+    var html = '<div class="card card-pureblood' + (pureSelected ? ' selected' : '') + '"' +
+        ' role="radio" aria-checked="' + (pureSelected ? 'true' : 'false') + '"' +
+        ' tabindex="0"' +
+        ' onclick="selectGene(null)"' +
+        ' onkeydown="if(event.key===\'Enter\'||event.key===\' \')selectGene(null)"' +
+        ' title="Stay as a pureblood — no DNA mixing">' +
+        '<div class="card-name">None / Pureblood</div>' +
+        '<div class="card-desc">Keep your DNA pure. No gene pool mutation is applied.</div>' +
+        '<div class="card-perk">&#9733; Pureblood Bonus: +1 Perk Point every 5 levels; +1 hit die on short rests.</div>' +
+        '</div>';
+
+    if (!genes.length) {
+        html += '<p style="color:var(--vault-error);font-size:10px;">⚠ Gene pool not loaded. Check gene-pool.js is included.</p>';
+    } else {
+        html += genes.map(function (gene, idx) {
+            var isSelected = !pd.isPureblood && pd.genePool && pd.genePool.name === gene.name;
+            return '<div class="card' + (isSelected ? ' selected' : '') + '"' +
+                   ' role="radio" aria-checked="' + (isSelected ? 'true' : 'false') + '"' +
+                   ' tabindex="0"' +
+                   ' onclick="selectGene(' + idx + ')"' +
+                   ' onkeydown="if(event.key===\'Enter\'||event.key===\' \')selectGene(' + idx + ')"' +
+                   ' title="Select gene pool: ' + escHtml(gene.name) + '">' +
+                   '<div class="card-name">' + escHtml(gene.name) + '</div>' +
+                   '<div class="card-desc">'  + escHtml(gene.description) + '</div>' +
+                   '<div class="card-perk">&#9762; ' + escHtml(gene.startingPerk) + '</div>' +
+                   '</div>';
+        }).join('');
+    }
+
+    grid.innerHTML = html;
+}
+
+function selectGene(idx) {
+    if (idx === null) {
+        CC.applyPureblood(pd);
+    } else {
+        var gene = (window.genePool || [])[idx];
+        if (!gene) return;
+        CC.applyGenePool(pd, gene);
+    }
+
+    CC.savePlayerData(pd);
+    buildGeneCards();
+    refreshSummary();
+    unlockPanel('panelSummary');
+    unlockPanel('panelSpecial');
+    markStepDone('step2Indicator');
+    markStepActive('step3Indicator');
+    updateSpecialPanel();
+
+    var name = pd.isPureblood ? 'Pureblood (no mutation)' : pd.genePool.name;
+    showMsg('geneMsgBox', '✓ Gene pool set: ' + name, true);
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────────
+
+function refreshSummary() {
+    var chips   = document.getElementById('summaryChips');
+    var perks   = document.getElementById('summaryPerks');
+    if (!chips || !perks) return;
+
+    var html = '';
+    if (pd.baseRace) {
+        html += '<span class="summary-chip gold">Race: ' + escHtml(pd.baseRace.name) + '</span>';
+        html += '<span class="summary-chip gold">Points: ' + (pd.baseRace.specialPointAllocation||'?') + '</span>';
+        html += '<span class="summary-chip gold">Hit Die: ' + escHtml(pd.baseRace.hitDie||'—') + '</span>';
+    }
+    if (pd.isPureblood === true) {
+        html += '<span class="summary-chip">Gene: Pureblood ☆</span>';
+    } else if (pd.genePool) {
+        html += '<span class="summary-chip">Gene: ' + escHtml(pd.genePool.name) + '</span>';
+    }
+    chips.innerHTML = html || '<span style="color:rgba(74,222,128,0.35);font-size:10px;">No selections yet.</span>';
+
+    var perkHtml = '';
+    if (pd.baseRace && pd.baseRace.startingPerksAndTraits) {
+        perkHtml += '<div><strong style="color:var(--vault-gold);">Race Perk/Trait:</strong> ' + escHtml(pd.baseRace.startingPerksAndTraits) + '</div>';
+    }
+    if (pd.isPureblood === true) {
+        perkHtml += '<div><strong style="color:var(--vault-gold);">Pureblood Bonus:</strong> +1 Perk Point every 5 levels; +1 hit die on short rests.</div>';
+    } else if (pd.genePool) {
+        perkHtml += '<div><strong style="color:var(--vault-gold);">Gene Pool Perk:</strong> ' + escHtml(pd.genePool.startingPerk) + '</div>';
+    }
+    if (pd.baseRace && pd.baseRace.savingThrowProf && pd.baseRace.savingThrowProf.length) {
+        perkHtml += '<div><strong style="color:var(--vault-gold);">Saving Throws:</strong> ' + pd.baseRace.savingThrowProf.map(escHtml).join(', ') + '</div>';
+    }
+    perks.innerHTML = perkHtml || '<span style="color:rgba(74,222,128,0.35);font-size:10px;">—</span>';
+}
+
+// ── STEP 3: S.P.E.C.I.A.L. ALLOCATION ────────────────────────────────────────
+
+function updateSpecialPanel() {
+    var raceSelected = !!pd.raceSelected;
+    var allocActive  = raceSelected && (pd.isPureblood !== null) && !!pd.specialAllocationActive;
+
+    var remaining = CC.getRemainingSpecialPoints(pd);
+    var total     = pd.specialPointAllocation || 0;
+
+    var remEl  = document.getElementById('specialPointsRemaining');
+    var totEl  = document.getElementById('specialPointsTotal');
+    var status = document.getElementById('ccSpStatus');
+    var row    = document.getElementById('ccSpRow');
+    var legend = document.getElementById('specialCapLegend');
+    var stInfo = document.getElementById('savingThrowInfo');
+    var lockBtn= document.getElementById('lockSpecialBtn');
+
+    if (remEl) {
+        remEl.textContent = remaining;
+        remEl.className   = 'points-value' + (remaining <= 0 ? ' points-zero' : '');
+    }
+    if (totEl) totEl.textContent = total;
+
+    if (status) {
+        if (!raceSelected) {
+            status.textContent = 'AWAITING RACE SELECTION';
+            status.className   = 'sp-status';
+        } else if (pd.isPureblood === null) {
+            status.textContent = 'AWAITING GENE POOL CHOICE';
+            status.className   = 'sp-status';
+        } else if (allocActive) {
+            status.textContent = 'ALLOCATION MODE ACTIVE';
+            status.className   = 'sp-status sp-alloc-active';
+        } else {
+            status.textContent = 'ATTRIBUTES LOCKED';
+            status.className   = 'sp-status';
+        }
+    }
+
+    if (!row) return;
+
+    // Build SPECIAL attribute widgets
+    var caps = (pd.baseRace && pd.baseRace.specialCaps) ? pd.baseRace.specialCaps : {};
+    row.innerHTML = SPECIAL_ATTRS.map(function (attr) {
+        var val    = (pd.special && typeof pd.special[attr.key] === 'number') ? pd.special[attr.key] : 0;
+        var capMin = caps[attr.key + 'Min'];
+        var capMax = caps[attr.key + 'Max'];
+        var effMin = (capMin !== null && capMin !== undefined) ? Math.max(SPECIAL_MIN, capMin) : SPECIAL_MIN;
+        var effMax = (capMax !== null && capMax !== undefined) ? Math.min(SPECIAL_MAX, capMax) : SPECIAL_MAX;
+
+        var canInc = allocActive && val < effMax && remaining > 0;
+        var canDec = allocActive && val > effMin;
+
+        var nameId = 'cc-sp-name-' + attr.key;
+        var valId  = 'cc-sp-val-'  + attr.key;
+
+        return '<div class="sp-attr' + (raceSelected ? ' sp-attr-active' : '') + '"' +
+               ' role="group" aria-labelledby="' + nameId + '">' +
+            '<button class="sp-btn sp-plus"' + (!canInc ? ' disabled' : '') +
+               ' onclick="ccAdjustSpecial(\'' + attr.key + '\',1)"' +
+               ' aria-label="Increase ' + attr.name + '"' +
+               ' title="' + (canInc ? 'Increase ' + attr.name : 'Locked or at cap') + '">+</button>' +
+            '<span class="sp-attr-val" id="' + valId + '">' + (val || 0) + '</span>' +
+            '<span class="sp-attr-letter" aria-hidden="true">' + attr.letter + '</span>' +
+            '<span class="sp-attr-name" id="' + nameId + '">' + attr.name + '</span>' +
+            '<button class="sp-btn sp-minus"' + (!canDec ? ' disabled' : '') +
+               ' onclick="ccAdjustSpecial(\'' + attr.key + '\',-1)"' +
+               ' aria-label="Decrease ' + attr.name + '"' +
+               ' title="' + (canDec ? 'Decrease ' + attr.name : 'Locked or at floor') + '">-</button>' +
+            '</div>';
+    }).join('');
+
+    // Cap legend
+    if (legend && pd.baseRace) {
+        var capParts = buildCapsText(pd.baseRace.specialCaps);
+        legend.textContent = capParts ? 'Race caps: ' + capParts : 'No SPECIAL caps for this race.';
+    }
+
+    // Saving throw info
+    if (stInfo && pd.baseRace && pd.baseRace.savingThrowProf) {
+        stInfo.textContent = 'Saving Throw Proficiencies: ' + pd.baseRace.savingThrowProf.join(', ');
+    }
+
+    // Lock In button: enabled only when all points are spent (remaining === 0)
+    if (lockBtn) {
+        lockBtn.disabled = !(allocActive && remaining === 0);
+    }
+}
+
+window.ccAdjustSpecial = function (key, delta) {
+    if (!pd.raceSelected || !pd.specialAllocationActive || pd.isPureblood === null) return;
+    if (!pd.special) pd.special = {};
+
+    var caps   = (pd.baseRace && pd.baseRace.specialCaps) ? pd.baseRace.specialCaps : {};
+    var capMin = caps[key + 'Min'];
+    var capMax = caps[key + 'Max'];
+    var effMin = (capMin !== null && capMin !== undefined) ? Math.max(SPECIAL_MIN, capMin) : SPECIAL_MIN;
+    var effMax = (capMax !== null && capMax !== undefined) ? Math.min(SPECIAL_MAX, capMax) : SPECIAL_MAX;
+
+    var cur       = typeof pd.special[key] === 'number' ? pd.special[key] : 0;
+    var remaining = CC.getRemainingSpecialPoints(pd);
+
+    if (delta > 0 && (remaining <= 0 || cur >= effMax)) return;
+    if (delta < 0 && cur <= effMin) return;
+
+    pd.special[key] = cur + delta;
+    CC.savePlayerData(pd);
+    updateSpecialPanel();
+};
+
+function lockSpecial() {
+    var remaining = CC.getRemainingSpecialPoints(pd);
+    if (remaining !== 0) {
+        showMsg('specialMsgBox', '⚠ Spend all ' + pd.specialPointAllocation + ' points before locking.', false);
+        return;
+    }
+    pd.specialAllocationActive = false;
+    // Persist special to pipboySpecial as well (mirrors stats.html convention)
+    try {
+        var handle = (sessionStorage.getItem('username') || localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
+        localStorage.setItem('pipboySpecial_' + handle, JSON.stringify(pd.special));
+    } catch (e) {}
+
+    CC.savePlayerData(pd);
+    updateSpecialPanel();
+    unlockPanel('panelFinish');
+    markStepDone('step3Indicator');
+    showMsg('specialMsgBox', '✓ S.P.E.C.I.A.L. locked in!', true);
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', function () {
+    pd = CC.initPlayerData();
+
+    buildRaceCards();
+    buildGeneCards();
+    refreshSummary();
+
+    // Restore progress state from saved data
+    if (pd.raceSelected) {
+        markStepDone('step1Indicator');
+        unlockPanel('panelGene');
+    }
+    if (pd.isPureblood !== null) {
+        markStepDone('step2Indicator');
+        unlockPanel('panelSummary');
+        unlockPanel('panelSpecial');
+        markStepActive('step3Indicator');
+    }
+    if (!pd.specialAllocationActive && pd.raceSelected && pd.isPureblood !== null) {
+        // Already locked in (returning to page after completion)
+        unlockPanel('panelFinish');
+        markStepDone('step3Indicator');
+    }
+
+    updateSpecialPanel();
+});
+</script>
+
+<script src="../../assets/helpers/navigation/playernavigation.js"></script>
+</body>
+</html>

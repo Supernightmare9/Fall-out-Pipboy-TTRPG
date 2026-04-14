@@ -58,10 +58,18 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 const {
   SEED_SESSION_CODE,
   SEED_PLAYER_HANDLE,
-  TEST_PLAYER_DATA
+  TEST_PLAYER_DATA,
+  DILLON_PLAYER_HANDLE,
+  DILLON_PLAYER_DATA
 } = (process.env.NODE_ENV !== 'production')
   ? require('./server/playerDataSeed')
-  : { SEED_SESSION_CODE: null, SEED_PLAYER_HANDLE: null, TEST_PLAYER_DATA: null };
+  : {
+      SEED_SESSION_CODE:   null,
+      SEED_PLAYER_HANDLE:  null,
+      TEST_PLAYER_DATA:    null,
+      DILLON_PLAYER_HANDLE:null,
+      DILLON_PLAYER_DATA:  null
+    };
 
 // ── INT bonus helper ──────────────────────────────────────────────────────────
 // Inline table mirrors fallout_stat_bonuses.js (intStatBonus) and
@@ -345,7 +353,20 @@ function defaultPlayerData() {
     perkPointsAvailable: 0,
     perkSelectionActive: false,
     debuffs: [],
-    boosts: []
+    boosts: [],
+    // ── Character creation ────────────────────────────────────────────────────
+    // raceSelected: true once the player has picked a base race.
+    // specialAllocationActive: true while SPECIAL points can be assigned.
+    // baseRace: the full race object from window.baseRaces (or null pre-selection).
+    // genePool: the full gene pool object from window.genePool, or null.
+    // isPureblood: true if the player skipped the gene pool; null if not yet decided.
+    // specialPointAllocation: the point budget granted by the chosen race.
+    raceSelected:            false,
+    specialAllocationActive: false,
+    baseRace:                null,
+    genePool:                null,
+    isPureblood:             null,
+    specialPointAllocation:  0
   };
 }
 
@@ -369,6 +390,26 @@ function defaultPlayerData() {
       })
     };
     console.log(`[dev] Seeded test player '${SEED_PLAYER_HANDLE}' into session '${SEED_SESSION_CODE}'`);
+  }
+}());
+
+// ── Pre-seed Dillon — demo/campaign player ────────────────────────────────────
+// Dillon is a Human / Yao Guai character with race + gene pool already selected
+// and S.P.E.C.I.A.L. locked in.  Connect with handle 'dillon' / VAULT01 to use.
+// ⚠️  DEV ONLY — skipped in production (NODE_ENV=production).
+(function seedDillonPlayer() {
+  if (!DILLON_PLAYER_HANDLE || !DILLON_PLAYER_DATA) return; // production guard
+  const session = getOrCreateSession(SEED_SESSION_CODE);
+  if (!session.players[DILLON_PLAYER_HANDLE]) {
+    const defaults = defaultPlayerData();
+    session.players[DILLON_PLAYER_HANDLE] = {
+      socketId: null,
+      data: Object.assign(defaults, DILLON_PLAYER_DATA, {
+        special: Object.assign({}, defaults.special, DILLON_PLAYER_DATA.special),
+        skills:  Object.assign({}, defaults.skills,  DILLON_PLAYER_DATA.skills)
+      })
+    };
+    console.log(`[dev] Seeded demo player '${DILLON_PLAYER_HANDLE}' into session '${SEED_SESSION_CODE}'`);
   }
 }());
 
