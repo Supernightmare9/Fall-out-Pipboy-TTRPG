@@ -296,6 +296,14 @@
                 <button type="submit">ACCESS VAULT</button>
             </form>
             <div id="loginError" class="error-msg"></div>
+
+            <!-- ── DILLON QUICK-LOGIN (test / demo account) ── -->
+            <div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(74,222,128,0.2);">
+                <div style="font-size:9px;letter-spacing:2px;color:rgba(251,191,36,0.55);text-align:center;margin-bottom:10px;text-transform:uppercase;">⬡ Developer Test Account</div>
+                <button type="button" onclick="loginAsDillon()" class="campaign-join-btn" style="margin-bottom:0;background-color:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.7);color:#f59e0b;text-shadow:0 0 6px rgba(245,158,11,0.5);">
+                    👤 Login as Dillon (Test)
+                </button>
+            </div>
         </div>
 
         <!-- ═══════════════════════════════════
@@ -393,6 +401,23 @@
                 }
             }
         }());
+
+        // ═══════════════════════════════════════════════════════
+        // DILLON — ONE-CLICK QUICK LOGIN (test/demo account)
+        // Bypasses campaign selection and goes directly to
+        // data.html so the full character creation flow can be
+        // demonstrated without extra steps.
+        // ═══════════════════════════════════════════════════════
+        function loginAsDillon() {
+            sessionStorage.setItem('username', 'dillon');
+            sessionStorage.setItem('role', 'player');
+            localStorage.setItem('PIPBOY_PLAYER_HANDLE', 'dillon');
+            localStorage.setItem('PIPBOY_SERVER_URL', window.location.origin);
+            // Use the dev seed session so server-side data is available
+            localStorage.setItem('PIPBOY_SESSION_CODE', 'VAULT01');
+            sessionStorage.setItem('campaignId', 'VAULT01');
+            window.location.href = 'player/data.html';
+        }
 
         // ═══════════════════════════════════════════════════════
         // HELPER — hide all sections
@@ -528,7 +553,11 @@
             // Store the selected campaign's session code so PlayerSync uses it
             localStorage.setItem('PIPBOY_SESSION_CODE', _selectedPlayerCampaignCode);
             sessionStorage.setItem('campaignId', _selectedPlayerCampaignCode);
-            window.location.href = 'player/combat.html';
+            // Redirect to data.html for character creation if not yet finalized;
+            // otherwise go directly to the main game (combat.html).
+            var handle = (_pendingAccount && _pendingAccount.username || '').toLowerCase();
+            var isLocked = localStorage.getItem('charCreationLocked_' + handle) === 'true';
+            window.location.href = isLocked ? 'player/combat.html' : 'player/data.html';
         }
 
         // ═══════════════════════════════════════════════════════

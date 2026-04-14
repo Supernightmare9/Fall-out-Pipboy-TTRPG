@@ -375,8 +375,16 @@
                 </div>
 
                 <div class="btn-row" style="margin-top:20px;">
-                    <button class="vault-btn restart-btn" onclick="GOAT.restart()">↻ RESTART TEST</button>
-                    <button class="vault-btn" onclick="window.location.href='stats.html'">📊 GO TO STATS</button>
+                    <button class="vault-btn restart-btn" onclick="if(window._goatCancelRedirect)window._goatCancelRedirect();GOAT.restart()">&#x21BB; RESTART TEST</button>
+                    <button class="vault-btn" onclick="window.location.href='stats.html'">&#128202; GO TO STATS</button>
+                </div>
+
+                <!-- Auto-redirect notice — appears when countdown is active -->
+                <div id="goatRedirectNotice" style="display:none;margin-top:14px;padding:10px 14px;border:1px solid rgba(74,222,128,0.25);font-size:11px;color:rgba(74,222,128,0.65);letter-spacing:1px;text-align:center;">
+                    &#9654; Auto-redirecting to S.P.E.C.I.A.L. allocation in
+                    <strong id="goatRedirectSeconds" style="color:var(--vault-gold);">30</strong>s&hellip;
+                    &nbsp;|&nbsp;<a href="stats.html" style="color:var(--vault-green);text-decoration:none;">Go now &#9654;</a>
+                    &nbsp;|&nbsp;<a href="javascript:void(0)" onclick="window._goatCancelRedirect()" style="color:rgba(255,107,107,0.8);text-decoration:none;">Cancel</a>
                 </div>
             </div>
 
@@ -631,6 +639,73 @@ document.addEventListener('keydown', function (e) {
         focused.click();
     }
 });
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// G.O.A.T. RESULTS → AUTO-REDIRECT to stats.html
+// -----------------------------------------------------------------------
+// After the test completes and the results screen is shown, a 30-second
+// countdown automatically redirects the player to stats.html for
+// S.P.E.C.I.A.L. point allocation and skill tagging.
+//
+// The redirect can be cancelled by clicking "Cancel" in the notice or by
+// pressing "↻ RESTART TEST" (which calls window._goatCancelRedirect()).
+// ═══════════════════════════════════════════════════════════════════════════
+(function () {
+    'use strict';
+
+    var REDIRECT_DELAY_SEC = 30;
+    var _timer    = null;
+    var _remaining = REDIRECT_DELAY_SEC;
+
+    function _update() {
+        var el = document.getElementById('goatRedirectSeconds');
+        if (el) el.textContent = _remaining;
+    }
+
+    function _stop() {
+        clearInterval(_timer);
+        _timer = null;
+        var notice = document.getElementById('goatRedirectNotice');
+        if (notice) notice.style.display = 'none';
+    }
+
+    function _start() {
+        _stop();
+        _remaining = REDIRECT_DELAY_SEC;
+        var notice = document.getElementById('goatRedirectNotice');
+        if (notice) notice.style.display = 'block';
+        _update();
+        _timer = setInterval(function () {
+            _remaining--;
+            _update();
+            if (_remaining <= 0) {
+                _stop();
+                window.location.replace('stats.html');
+            }
+        }, 1000);
+    }
+
+    // Expose cancel so the Restart button and Cancel link can stop the timer
+    window._goatCancelRedirect = _stop;
+
+    // Watch for the results screen becoming visible
+    document.addEventListener('DOMContentLoaded', function () {
+        var resultsScreen = document.getElementById('screen-results');
+        if (!resultsScreen) return;
+        var observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (m) {
+                if (m.attributeName === 'style') {
+                    var visible = resultsScreen.style.display !== 'none' &&
+                                  resultsScreen.style.display !== '';
+                    if (visible) { _start(); } else { _stop(); }
+                }
+            });
+        });
+        observer.observe(resultsScreen, { attributes: true });
+    });
+}());
 </script>
 </body>
 </html>

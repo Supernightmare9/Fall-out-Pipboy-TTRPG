@@ -278,9 +278,83 @@
             .vault-header { padding: 16px; }
             .card-grid { grid-template-columns: 1fr; }
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           CHARACTER CREATION WIZARD — embedded in data.html
+           All creation-specific styles are prefixed with .cc-
+        ═══════════════════════════════════════════════════════════ */
+
+        /* Status banner at top of creation section */
+        .cc-banner {
+            display: flex; align-items: flex-start; gap: 12px;
+            padding: 12px 16px; margin-bottom: 20px;
+            border: 2px solid; border-radius: 0;
+        }
+        .cc-banner.unlocked { border-color: var(--vault-green); background: rgba(74,222,128,0.05); }
+        .cc-banner.locked   { border-color: var(--vault-gold);  background: rgba(251,191,36,0.05); }
+        .cc-banner-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+        .cc-banner-text { flex: 1; font-size: 11px; letter-spacing: 1px; line-height: 1.5; }
+        .cc-banner-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--vault-gold); margin-bottom: 4px; }
+
+        /* Step progress indicator */
+        .cc-step-row { display: flex; gap: 4px; margin-bottom: 20px; }
+        .cc-step {
+            flex: 1; text-align: center; padding: 7px 4px;
+            font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+            border: 1px solid rgba(74,222,128,0.2); opacity: 0.4; transition: all 0.2s;
+        }
+        .cc-step.active { opacity: 1; border-color: var(--vault-gold); color: var(--vault-gold); }
+        .cc-step.done   { opacity: 0.9; border-color: var(--vault-green); color: var(--vault-green); }
+
+        /* Race / gene pool selection cards */
+        .cc-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; margin: 10px 0 4px; }
+        .cc-card {
+            background: rgba(0,0,0,0.3); border: 2px solid rgba(74,222,128,0.3);
+            padding: 12px 14px; cursor: pointer; transition: all 0.2s;
+        }
+        .cc-card:hover { border-color: var(--vault-green); box-shadow: 0 0 10px rgba(74,222,128,0.2); }
+        .cc-card.selected { border-color: var(--vault-gold); background: rgba(251,191,36,0.07); box-shadow: 0 0 14px rgba(251,191,36,0.25); }
+        .cc-card.pureblood { border-style: dashed; }
+        .cc-card.cc-readonly { pointer-events: none; cursor: default; }
+        .cc-card-name { font-size: 12px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; color: var(--vault-gold); }
+        .cc-card-pts  { font-size: 10px; color: var(--vault-green); font-weight: bold; margin-bottom: 5px; }
+        .cc-card-desc { font-size: 10px; line-height: 1.5; opacity: 0.75; margin-bottom: 6px; }
+        .cc-card-perk { font-size: 10px; color: var(--vault-accent); border-top: 1px solid rgba(74,222,128,0.2); padding-top: 6px; margin-top: 2px; }
+
+        /* Inline feedback messages */
+        .cc-msg { font-size: 11px; letter-spacing: 1px; padding: 5px 10px; min-height: 24px; margin-top: 6px; }
+        .cc-msg.ok  { color: var(--vault-green); border-left: 3px solid var(--vault-green); }
+        .cc-msg.err { color: var(--vault-error);  border-left: 3px solid var(--vault-error); }
+
+        /* Readonly summary grid */
+        .cc-ro-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .cc-ro-field  { }
+        .cc-ro-label  { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 3px; }
+        .cc-ro-value  { font-size: 13px; color: var(--vault-gold); letter-spacing: 1px; }
+
+        /* Finalize button */
+        .cc-finalize-btn {
+            width: 100%; background: rgba(251,191,36,0.08); border: 2px solid var(--vault-gold);
+            color: var(--vault-gold); font-family: 'Courier New', monospace; font-size: 12px;
+            font-weight: bold; letter-spacing: 2px; text-transform: uppercase;
+            padding: 14px 20px; cursor: pointer; transition: all 0.3s; margin-top: 16px;
+            text-shadow: 0 0 8px rgba(251,191,36,0.4);
+        }
+        .cc-finalize-btn:hover { background: rgba(251,191,36,0.15); box-shadow: 0 0 20px rgba(251,191,36,0.4); }
+        .cc-finalize-btn:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; }
     </style>
 </head>
 <body>
+
+<!-- ── SESSION GUARD ── redirect to login if not authenticated ── -->
+<script>
+(function(){
+    var role = sessionStorage.getItem('role');
+    if (role !== 'player' && role !== 'admin') {
+        window.location.replace('../login.html');
+    }
+}());
+</script>
 <div class="page-wrapper">
 
     <div class="page-layout">
@@ -288,6 +362,11 @@
         <aside class="sidebar">
             <div class="sidebar-title">&#9672; Data Categories</div>
             <nav class="sidebar-nav">
+                <!-- Character Creation is listed first; JS will activate it for new players -->
+                <button class="sidebar-btn" onclick="showSection('char-creation')" id="btn-char-creation">
+                    <span class="btn-icon">&#9883;</span> Char. Creation
+                    <span class="sidebar-count" id="cc-sidebar-badge" style="background:rgba(74,222,128,0.15);border-color:rgba(74,222,128,0.4);">NEW</span>
+                </button>
                 <button class="sidebar-btn active" onclick="showSection('campaigns')" id="btn-campaigns">
                     <span class="btn-icon">&#x1F4CB;</span> Campaign Data
                     <span class="sidebar-count" id="count-campaigns">0</span>
@@ -325,6 +404,128 @@
         </aside>
 
         <main class="main-content">
+
+            <!-- ══════════════════════════════════════════════════════════════
+                 CHARACTER CREATION
+                 Editable until the character is finalized; locked (readonly)
+                 thereafter.  On finalization the player is redirected to
+                 special_test.html → stats.html.
+            ══════════════════════════════════════════════════════════════ -->
+            <div class="section-panel" id="section-char-creation">
+                <div class="section-header">
+                    <div class="section-title-row">
+                        <span class="section-icon">&#9883;</span>
+                        <span class="section-title">Character Creation</span>
+                    </div>
+                    <span class="section-count-badge" id="ccHeaderBadge" style="color:var(--vault-green);border-color:var(--vault-green);">UNLOCKED</span>
+                </div>
+
+                <!-- STATUS BANNER -->
+                <div class="cc-banner unlocked" id="ccBanner">
+                    <span class="cc-banner-icon">&#9762;</span>
+                    <div class="cc-banner-text">
+                        <div class="cc-banner-label">Creation Status</div>
+                        <div id="ccBannerMsg">Select your race (required) and optionally a gene pool mutation. Fill in your details, then finalize — this cannot be undone.</div>
+                    </div>
+                </div>
+
+                <!-- STEP PROGRESS -->
+                <div class="cc-step-row" id="ccStepRow">
+                    <div class="cc-step active" id="ccStep1">&#9312; Race</div>
+                    <div class="cc-step" id="ccStep2">&#9313; Gene Pool</div>
+                    <div class="cc-step" id="ccStep3">&#9314; Details</div>
+                    <div class="cc-step" id="ccStep4">&#9315; Finalize</div>
+                </div>
+
+                <!-- ── CREATION AREA (visible when unlocked) ── -->
+                <div id="ccCreationArea">
+
+                    <!-- STEP 1: BASE RACE -->
+                    <div class="char-section">
+                        <div class="char-section-title">&#9312; Base Race <span style="color:var(--vault-error);font-size:9px;">(required)</span></div>
+                        <p style="font-size:11px;opacity:0.75;line-height:1.6;margin-bottom:12px;">
+                            Your race determines your S.P.E.C.I.A.L. point pool, stat caps, and starting traits.
+                            You must select a race before advancing.
+                        </p>
+                        <div class="cc-card-grid" id="ccRaceGrid">
+                            <div style="opacity:0.4;font-size:11px;">Loading race data…</div>
+                        </div>
+                        <div class="cc-msg" id="ccRaceMsg"></div>
+                    </div>
+
+                    <!-- STEP 2: GENE POOL (optional) -->
+                    <div class="char-section">
+                        <div class="char-section-title">&#9313; Gene Pool Mutation <span style="font-size:9px;color:rgba(74,222,128,0.45);">(Optional)</span></div>
+                        <p style="font-size:11px;opacity:0.75;line-height:1.6;margin-bottom:12px;">
+                            A gene pool mutation grants a starting perk. You may remain Pureblood by choosing that option or
+                            by skipping this step — the pureblood flag will be set automatically if nothing is selected.
+                        </p>
+                        <div class="cc-card-grid" id="ccGeneGrid">
+                            <div style="opacity:0.4;font-size:11px;">Loading gene pool data…</div>
+                        </div>
+                        <div class="cc-msg" id="ccGeneMsg"></div>
+                    </div>
+
+                    <!-- STEP 3: CHARACTER DETAILS -->
+                    <div class="char-section">
+                        <div class="char-section-title">&#9314; Character Details</div>
+                        <div class="info-field">
+                            <div class="info-label">Character Name <span style="color:var(--vault-error);">*</span></div>
+                            <input type="text" class="info-input" id="ccCharName" placeholder="Enter character name" maxlength="60">
+                        </div>
+                        <div class="info-field">
+                            <div class="info-label">Occupation / Class</div>
+                            <input type="text" class="info-input" id="ccCharClass" placeholder="e.g., Scavenger, Soldier" maxlength="60">
+                        </div>
+                        <div class="info-field">
+                            <div class="info-label">Alignment</div>
+                            <select class="info-input" id="ccCharAlignment" style="cursor:pointer;">
+                                <option value="">Select alignment…</option>
+                                <option value="Good">Good (Helpful)</option>
+                                <option value="Neutral">Neutral (Survivor)</option>
+                                <option value="Evil">Evil (Raider)</option>
+                                <option value="Chaotic">Chaotic (Wild Card)</option>
+                            </select>
+                        </div>
+                        <div class="info-field">
+                            <div class="info-label">Backstory</div>
+                            <textarea class="info-textarea" id="ccCharBackstory" placeholder="Write your character's backstory…" style="min-height:100px;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: FINALIZE -->
+                    <div class="char-section" id="ccFinalizePanel" style="border-color:rgba(251,191,36,0.35);">
+                        <div class="char-section-title" style="color:var(--vault-gold);">&#9315; Finalize Character</div>
+                        <p style="font-size:11px;opacity:0.75;line-height:1.6;margin-bottom:10px;">
+                            Once confirmed, all choices are <strong style="color:var(--vault-error);">permanently locked</strong>.
+                            You will be redirected to the G.O.A.T. aptitude test, then to S.P.E.C.I.A.L. allocation on stats.html.
+                        </p>
+                        <!-- Live pre-finalize summary -->
+                        <div id="ccFinalSummary" style="font-size:12px;line-height:1.8;opacity:0.85;margin-bottom:8px;padding:10px 12px;background:rgba(0,0,0,0.25);border:1px solid rgba(74,222,128,0.15);"></div>
+                        <button class="cc-finalize-btn" id="ccFinalizeBtn" onclick="finalizeCharacter()" disabled>
+                            &#9889; FINALIZE &amp; PROCEED TO G.O.A.T. TEST
+                        </button>
+                        <div class="cc-msg" id="ccFinalizeMsg"></div>
+                    </div>
+
+                </div><!-- /ccCreationArea -->
+
+                <!-- ── READONLY AREA (visible when locked) ── -->
+                <div id="ccReadonlyArea" style="display:none;">
+                    <div class="char-section" style="border-color:rgba(251,191,36,0.4);">
+                        <div class="char-section-title" style="color:var(--vault-gold);">&#128274; Character Locked — View Only</div>
+                        <p style="font-size:11px;opacity:0.65;margin-bottom:16px;line-height:1.6;">
+                            Your character has been finalized. All fields are read-only.
+                        </p>
+                        <div class="cc-ro-grid" id="ccLockedSummary"></div>
+                        <div class="btn-group" style="margin-top:20px;">
+                            <a class="action-btn btn-gold" href="special_test.html" style="border-color:var(--vault-gold);color:var(--vault-gold);text-decoration:none;display:inline-flex;align-items:center;gap:6px;">&#9658; G.O.A.T. Test</a>
+                            <a class="action-btn" href="stats.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;">&#128202; SPECIAL / Skills</a>
+                        </div>
+                    </div>
+                </div><!-- /ccReadonlyArea -->
+
+            </div><!-- /section-char-creation -->
 
             <!-- CAMPAIGNS -->
             <div class="section-panel active" id="section-campaigns">
@@ -620,7 +821,7 @@
     // ═══════════════════════════════════════════
     // SIDEBAR NAVIGATION
     // ═══════════════════════════════════════════
-    var SECTIONS = ['campaigns','character','enemies','items','npcs','localstorage','backup','notes','factions'];
+    var SECTIONS = ['char-creation','campaigns','character','enemies','items','npcs','localstorage','backup','notes','factions'];
 
     function showSection(name) {
         SECTIONS.forEach(function(s) {
@@ -1008,6 +1209,336 @@
             try { display = JSON.stringify(JSON.parse(e.value), null, 2); } catch(_) {}
             return '<div class="settings-card"><div class="settings-key">' + escapeHtml(e.key) + '</div><div class="settings-value">' + escapeHtml(display) + '</div></div>';
         }).join('');
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // CHARACTER CREATION WIZARD
+    // -----------------------------------------------------------------------
+    // Embedded character creation flow.  Depends on:
+    //   window.CharacterCreation  — assets/logic/character-creation.js
+    //   window.baseRaces          — assets/data/pools/base-race.js
+    //   window.genePool           — assets/data/pools/gene-pool.js
+    //
+    // Extension guide:
+    //   • To add new creation steps, insert a new .char-section block in the
+    //     HTML above and wire it in _ccUpdateProgress().
+    //   • To enforce additional data on finalization, add to finalizeCharacter().
+    //   • Lock state key: lsKey('charCreationLocked')  → 'true' / null
+    //   • Player data key: managed by CharacterCreation.savePlayerData()
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /** Working playerData object used during creation. */
+    var _cc = null;
+
+    /** Returns true if character creation has been locked for the current player. */
+    function isCharCreationLocked() {
+        return localStorage.getItem(lsKey('charCreationLocked')) === 'true';
+    }
+
+    // ── CARD RENDERERS ────────────────────────────────────────────────────
+
+    /** Render the race selection cards from window.baseRaces. */
+    function buildCCRaceCards() {
+        var grid = document.getElementById('ccRaceGrid');
+        if (!grid) return;
+        var races = window.baseRaces || [];
+        if (!races.length) {
+            grid.innerHTML = '<div style="opacity:0.4;font-size:11px;">No race data loaded. Check base-race.js.</div>';
+            return;
+        }
+        grid.innerHTML = races.map(function (race, idx) {
+            var sel = _cc && _cc.baseRace && _cc.baseRace.name === race.name;
+            var pts = race.specialPointAllocation || '?';
+            var perk = race.startingPerksAndTraits || '';
+            return '<div class="cc-card' + (sel ? ' selected' : '') + '"' +
+                ' role="radio" aria-checked="' + !!sel + '" tabindex="0"' +
+                ' onclick="selectCCRace(' + idx + ')"' +
+                ' onkeydown="if(event.key===\'Enter\'||event.key===\' \')selectCCRace(' + idx + ')">' +
+                '<div class="cc-card-name">' + escapeHtml(race.name) + '</div>' +
+                '<div class="cc-card-pts">SPECIAL Points: ' + escapeHtml(String(pts)) + '</div>' +
+                '<div class="cc-card-desc">' + escapeHtml(race.description || '') + '</div>' +
+                (perk ? '<div class="cc-card-perk">&#10022; ' + escapeHtml(perk) + '</div>' : '') +
+                '</div>';
+        }).join('');
+    }
+
+    /** Render the gene pool selection cards from window.genePool. */
+    function buildCCGeneCards() {
+        var grid = document.getElementById('ccGeneGrid');
+        if (!grid) return;
+        var genes = window.genePool || [];
+        var pbSel = _cc && _cc.isPureblood === true && !(_cc.genePool);
+        // Pureblood option always shown first
+        var html = '<div class="cc-card pureblood' + (pbSel ? ' selected' : '') + '"' +
+            ' role="radio" aria-checked="' + !!pbSel + '" tabindex="0"' +
+            ' onclick="selectCCGene(null)"' +
+            ' onkeydown="if(event.key===\'Enter\'||event.key===\' \')selectCCGene(null)">' +
+            '<div class="cc-card-name">Pureblood</div>' +
+            '<div class="cc-card-desc">No gene pool mutation. Remain a pure representative of your race.</div>' +
+            '<div class="cc-card-perk">&#10022; isPureblood flag will be set.</div>' +
+            '</div>';
+        html += genes.map(function (gene, idx) {
+            var sel = _cc && _cc.genePool && _cc.genePool.name === gene.name;
+            return '<div class="cc-card' + (sel ? ' selected' : '') + '"' +
+                ' role="radio" aria-checked="' + !!sel + '" tabindex="0"' +
+                ' onclick="selectCCGene(' + idx + ')"' +
+                ' onkeydown="if(event.key===\'Enter\'||event.key===\' \')selectCCGene(' + idx + ')">' +
+                '<div class="cc-card-name">' + escapeHtml(gene.name) + '</div>' +
+                '<div class="cc-card-desc">' + escapeHtml(gene.description || '') + '</div>' +
+                (gene.startingPerk ? '<div class="cc-card-perk">&#10022; ' + escapeHtml(gene.startingPerk) + '</div>' : '') +
+                '</div>';
+        }).join('');
+        grid.innerHTML = html;
+    }
+
+    // ── SELECTION HANDLERS ─────────────────────────────────────────────────
+
+    /** Select a base race by its index in window.baseRaces. */
+    function selectCCRace(idx) {
+        if (!window.CharacterCreation) return;
+        var race = (window.baseRaces || [])[idx];
+        if (!race) return;
+        window.CharacterCreation.applyBaseRace(_cc, race);
+        window.CharacterCreation.savePlayerData(_cc);
+        buildCCRaceCards();
+        buildCCGeneCards();
+        _ccUpdateProgress();
+        _ccMsg('ccRaceMsg', '\u2713 Race set to ' + race.name, true);
+    }
+
+    /**
+     * Select a gene pool by its index in window.genePool, or pass null
+     * to select Pureblood.  If gene pool is not selected at finalize time
+     * it will default to Pureblood automatically.
+     */
+    function selectCCGene(idx) {
+        if (!window.CharacterCreation) return;
+        if (idx === null) {
+            window.CharacterCreation.applyPureblood(_cc);
+        } else {
+            var gene = (window.genePool || [])[idx];
+            if (!gene) return;
+            window.CharacterCreation.applyGenePool(_cc, gene);
+        }
+        window.CharacterCreation.savePlayerData(_cc);
+        buildCCGeneCards();
+        _ccUpdateProgress();
+        var label = idx === null
+            ? '\u2713 Pureblood selected — no mutation.'
+            : '\u2713 Gene pool set to ' + (window.genePool[idx] || {}).name;
+        _ccMsg('ccGeneMsg', label, true);
+    }
+
+    // ── PROGRESS & SUMMARY ────────────────────────────────────────────────
+
+    /** Refresh step indicators, finalize button state, and live summary. */
+    function _ccUpdateProgress() {
+        var hasRace = !!(_cc && _cc.raceSelected);
+        var hasGene = !!(_cc && (_cc.isPureblood !== null || _cc.genePool));
+        _ccSetStep('ccStep1', hasRace ? 'done' : 'active');
+        _ccSetStep('ccStep2', hasGene ? 'done' : (hasRace ? 'active' : ''));
+        _ccSetStep('ccStep3', hasRace ? 'active' : '');
+        _ccSetStep('ccStep4', hasRace ? 'active' : '');
+        var btn = document.getElementById('ccFinalizeBtn');
+        if (btn) btn.disabled = !hasRace;
+        _ccUpdateSummary();
+    }
+
+    function _ccSetStep(id, state) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('active', 'done');
+        if (state) el.classList.add(state);
+    }
+
+    /** Render the live pre-finalize summary box. */
+    function _ccUpdateSummary() {
+        var el = document.getElementById('ccFinalSummary');
+        if (!el || !_cc) return;
+        var lines = [];
+        if (_cc.baseRace) {
+            lines.push('Race: <strong>' + escapeHtml(_cc.baseRace.name) + '</strong>' +
+                ' &mdash; ' + escapeHtml(String(_cc.baseRace.specialPointAllocation || '?')) + ' SPECIAL pts');
+        } else {
+            lines.push('<span style="opacity:0.45;">Race not yet selected</span>');
+        }
+        if (_cc.isPureblood === true && !_cc.genePool) {
+            lines.push('Gene Pool: <strong>Pureblood</strong>');
+        } else if (_cc.genePool) {
+            lines.push('Gene Pool: <strong>' + escapeHtml(_cc.genePool.name) + '</strong>' +
+                (_cc.genePool.startingPerk ? ' &mdash; ' + escapeHtml(_cc.genePool.startingPerk) : ''));
+        } else {
+            lines.push('Gene Pool: <span style="opacity:0.45;">not selected (will default to Pureblood)</span>');
+        }
+        var nameEl = document.getElementById('ccCharName');
+        if (nameEl && nameEl.value.trim()) lines.push('Name: ' + escapeHtml(nameEl.value.trim()));
+        el.innerHTML = lines.join('<br>');
+    }
+
+    function _ccMsg(id, text, isOk) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = text;
+        el.className = 'cc-msg ' + (isOk ? 'ok' : 'err');
+        setTimeout(function () { el.textContent = ''; el.className = 'cc-msg'; }, 4000);
+    }
+
+    // ── FINALIZATION ──────────────────────────────────────────────────────
+
+    /**
+     * Finalize character creation:
+     *  1. Ensure race is selected (required).
+     *  2. Auto-apply Pureblood if no gene pool was chosen.
+     *  3. Save all details into playerData and the legacy characterData key.
+     *  4. Prompt for confirmation — one last chance to go back.
+     *  5. Lock creation and redirect to special_test.html.
+     */
+    function finalizeCharacter() {
+        if (!_cc || !_cc.raceSelected) {
+            _ccMsg('ccFinalizeMsg', '\u26a0 You must select a race before finalizing.', false);
+            return;
+        }
+        // Auto-apply Pureblood when no gene pool has been selected
+        if (!_cc.genePool && _cc.isPureblood === null) {
+            window.CharacterCreation.applyPureblood(_cc);
+            window.CharacterCreation.savePlayerData(_cc);
+            buildCCGeneCards();
+        }
+        // Gather identity fields
+        var nameEl  = document.getElementById('ccCharName');
+        var clsEl   = document.getElementById('ccCharClass');
+        var alignEl = document.getElementById('ccCharAlignment');
+        var bsEl    = document.getElementById('ccCharBackstory');
+        var charName  = nameEl  ? nameEl.value.trim()  : '';
+        var charClass = clsEl   ? clsEl.value.trim()   : '';
+        var charAlign = alignEl ? alignEl.value        : '';
+        var charBs    = bsEl    ? bsEl.value           : '';
+        if (!charName) {
+            _ccMsg('ccFinalizeMsg', '\u26a0 Please enter a character name before finalizing.', false);
+            if (nameEl) nameEl.focus();
+            return;
+        }
+        var raceName = _cc.baseRace ? _cc.baseRace.name : 'Unknown';
+        var geneName = _cc.isPureblood ? 'Pureblood' : (_cc.genePool ? _cc.genePool.name : 'Pureblood');
+        var pts      = _cc.baseRace ? (_cc.baseRace.specialPointAllocation || '?') : '?';
+        var msg = 'Finalize character "' + charName + '"?\n\n' +
+            'Race: '          + raceName + '\n' +
+            'Gene Pool: '     + geneName + '\n' +
+            'SPECIAL Points: ' + pts + '\n\n' +
+            'WARNING: This CANNOT be undone.\n' +
+            'You will be sent to the G.O.A.T. test, then SPECIAL allocation.\n\n' +
+            'Proceed?';
+        if (!confirm(msg)) return;
+        // Persist all details into playerData
+        _cc.name      = charName;
+        _cc.class     = charClass;
+        _cc.alignment = charAlign;
+        _cc.backstory = charBs;
+        window.CharacterCreation.savePlayerData(_cc);
+        // Also save into the legacy characterData key used by the Character Data section
+        localStorage.setItem(lsKey('characterData'), JSON.stringify({
+            name: charName, race: raceName, class: charClass, alignment: charAlign
+        }));
+        localStorage.setItem(lsKey('characterBackstory'), charBs);
+        // Set the creation lock flag
+        localStorage.setItem(lsKey('charCreationLocked'), 'true');
+        // Redirect to G.O.A.T. aptitude test
+        window.location.href = 'special_test.html';
+    }
+
+    // ── LOCKED / READONLY VIEW ────────────────────────────────────────────
+
+    /** Render the readonly character summary shown after finalization. */
+    function _renderCCLocked() {
+        var el = document.getElementById('ccLockedSummary');
+        if (!el) return;
+        var pd = window.CharacterCreation ? window.CharacterCreation.loadPlayerData() : null;
+        var cd = null;
+        try { cd = JSON.parse(localStorage.getItem(lsKey('characterData')) || 'null'); } catch (e) {}
+        var bs = localStorage.getItem(lsKey('characterBackstory')) || '';
+        var name     = (pd && pd.name)      || (cd && cd.name)      || '—';
+        var race     = (pd && pd.baseRace && pd.baseRace.name) || (cd && cd.race) || '—';
+        var geneName = (pd && pd.isPureblood) ? 'Pureblood'
+                     : (pd && pd.genePool && pd.genePool.name) || 'Pureblood';
+        var pts      = (pd && pd.baseRace && pd.baseRace.specialPointAllocation) || '—';
+        var cls      = (pd && pd.class)     || (cd && cd.class)     || '—';
+        var align    = (pd && pd.alignment) || (cd && cd.alignment) || '—';
+        function roField(lbl, val) {
+            return '<div class="cc-ro-field">' +
+                '<div class="cc-ro-label">' + escapeHtml(lbl) + '</div>' +
+                '<div class="cc-ro-value">' + escapeHtml(String(val)) + '</div>' +
+                '</div>';
+        }
+        el.innerHTML =
+            roField('Character Name', name) +
+            roField('Base Race', race) +
+            roField('Gene Pool', geneName) +
+            roField('SPECIAL Points', pts) +
+            roField('Class', cls) +
+            roField('Alignment', align);
+        if (bs) {
+            el.insertAdjacentHTML('afterend',
+                '<div class="cc-ro-field" style="grid-column:1/-1;margin-top:12px;">' +
+                '<div class="cc-ro-label">Backstory</div>' +
+                '<div style="font-size:11px;opacity:0.8;line-height:1.6;white-space:pre-wrap;">' +
+                escapeHtml(bs) + '</div></div>');
+        }
+    }
+
+    // ── INIT ──────────────────────────────────────────────────────────────
+
+    /**
+     * Initialize the Character Creation section.
+     * Call this after DOMContentLoaded and after pool scripts have loaded.
+     */
+    function initCharCreation() {
+        var locked = isCharCreationLocked();
+        // Update sidebar badge
+        var badge = document.getElementById('cc-sidebar-badge');
+        var headerBadge = document.getElementById('ccHeaderBadge');
+        var banner = document.getElementById('ccBanner');
+        var bannerMsg = document.getElementById('ccBannerMsg');
+        if (locked) {
+            if (badge)       { badge.textContent = '\u2713 DONE'; badge.style.color = 'var(--vault-gold)'; badge.style.borderColor = 'var(--vault-gold)'; }
+            if (headerBadge) { headerBadge.textContent = '\u{1F512} LOCKED'; headerBadge.style.color = 'var(--vault-gold)'; headerBadge.style.borderColor = 'var(--vault-gold)'; }
+            if (banner)      { banner.classList.remove('unlocked'); banner.classList.add('locked'); }
+            if (bannerMsg)   { bannerMsg.textContent = 'Character is finalized and locked. Fields are view-only.'; }
+            var stepRow = document.getElementById('ccStepRow');
+            if (stepRow) stepRow.style.display = 'none';
+            var creationArea = document.getElementById('ccCreationArea');
+            if (creationArea) creationArea.style.display = 'none';
+            var readonlyArea = document.getElementById('ccReadonlyArea');
+            if (readonlyArea) readonlyArea.style.display = 'block';
+            _renderCCLocked();
+        } else {
+            // Creation mode — check that the CC library loaded
+            if (!window.CharacterCreation) {
+                var area = document.getElementById('ccCreationArea');
+                if (area) area.innerHTML = '<div class="empty-state">[ character-creation.js not loaded ]</div>';
+                return;
+            }
+            _cc = window.CharacterCreation.initPlayerData();
+            buildCCRaceCards();
+            buildCCGeneCards();
+            // Restore any previously typed details
+            var cd = null;
+            try { cd = JSON.parse(localStorage.getItem(lsKey('characterData')) || 'null'); } catch (e) {}
+            var nameEl  = document.getElementById('ccCharName');
+            var clsEl   = document.getElementById('ccCharClass');
+            var alignEl = document.getElementById('ccCharAlignment');
+            var bsEl    = document.getElementById('ccCharBackstory');
+            if (nameEl)  nameEl.value  = (_cc.name  || (cd && cd.name)      || '');
+            if (clsEl)   clsEl.value   = (_cc.class || (cd && cd.class)     || '');
+            if (alignEl) alignEl.value = (_cc.alignment || (cd && cd.alignment) || '');
+            var bs = localStorage.getItem(lsKey('characterBackstory'));
+            if (bsEl && bs) bsEl.value = bs;
+            // Live summary updates
+            function _debCC(fn, ms) { var t; return function() { clearTimeout(t); t = setTimeout(fn, ms); }; }
+            if (nameEl)  nameEl.addEventListener('input', _debCC(_ccUpdateSummary, 250));
+            if (clsEl)   clsEl.addEventListener('input', _debCC(_ccUpdateSummary, 250));
+            if (alignEl) alignEl.addEventListener('change', _ccUpdateSummary);
+            _ccUpdateProgress();
+        }
     }
 
     // ═══════════════════════════════════════════
@@ -1475,8 +2006,26 @@
 
         // Populate backup campaign dropdown
         populateBackupCampaignSelect();
+
+        // ── CHARACTER CREATION INIT ────────────────────────────────────────
+        // initCharCreation() relies on CharacterCreation, baseRaces, and
+        // genePool which are all loaded by the external scripts below the
+        // inline block; they are guaranteed to be executed before
+        // DOMContentLoaded fires.
+        initCharCreation();
+
+        // Auto-navigate to the creation section for players who haven't
+        // finalized yet; otherwise leave the default (campaigns) visible.
+        if (!isCharCreationLocked()) {
+            showSection('char-creation');
+        }
     });
 </script>
+
+<!-- Character-creation data pools & logic (must come before closing </body>) -->
+<script src="../../assets/data/pools/base-race.js"></script>
+<script src="../../assets/data/pools/gene-pool.js"></script>
+<script src="../../assets/logic/character-creation.js"></script>
 
 <!-- Data Sources -->
 <script src="../../assets/data/campaigns.js"></script>

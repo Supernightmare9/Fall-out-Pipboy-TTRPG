@@ -157,6 +157,25 @@ const ACCOUNTS = [
     }
   },
   {
+    // ── Dillon — Test / Demo Player ──────────────────────────────────────────
+    // Dillon is a dedicated test account that flows through the full character
+    // creation experience.  Use the "Login as Dillon" quick-login button on the
+    // login page to access this account.
+    username: "Dillon",
+    role: "player",
+    isDevAccount: true,
+    characters: [],
+    settings: { ...DEFAULT_PLAYER_SETTINGS },
+    preferences: {
+      displayColor: "#f59e0b",
+      displayName: "Dillon",
+      theme: "dark",
+      font: "monospace",
+      soundEnabled: true,
+      notificationsEnabled: true
+    }
+  },
+  {
     username: "Overseer",
     role: "admin",
     pin: "082998",
