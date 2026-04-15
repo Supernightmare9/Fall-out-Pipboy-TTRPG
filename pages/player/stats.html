@@ -524,6 +524,39 @@
         }
         .sp-validation.err { color: var(--vault-error); }
         .sp-validation.ok  { color: var(--vault-success); }
+        .sp-controls {
+            margin-top: 8px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .sp-lock-note {
+            font-size: 9px;
+            color: rgba(74,222,128,0.6);
+            letter-spacing: 0.4px;
+        }
+        .sp-section.sp-locked {
+            border-color: rgba(160,160,160,0.4);
+            border-top-color: rgba(160,160,160,0.6);
+            background: rgba(28,28,28,0.95);
+        }
+        .sp-section.sp-locked .sp-attr {
+            border-color: rgba(160,160,160,0.35);
+            background: rgba(46,46,46,0.7);
+        }
+        .sp-section.sp-locked .sp-attr-letter,
+        .sp-section.sp-locked .sp-attr-name,
+        .sp-section.sp-locked .sp-attr-val,
+        .sp-section.sp-locked .sp-meta-points,
+        .sp-section.sp-locked .sp-meta-caps {
+            color: rgba(190,190,190,0.8);
+            text-shadow: none;
+        }
+        .sp-section.sp-locked .sp-btn {
+            opacity: 0.4;
+        }
         .creation-effects-panel {
             margin-top: 12px;
             padding-top: 10px;
@@ -589,6 +622,10 @@
                 <div id="spCapsInfo" class="sp-meta-caps">Caps: N/A</div>
             </div>
             <div id="spValidation" class="sp-validation" aria-live="polite"></div>
+            <div class="sp-controls">
+                <span id="spLockNote" class="sp-lock-note"></span>
+                <button id="lockSpecialBtn" class="update-btn" onclick="lockInSpecial()" style="display:none;">🔒 Lock In SPECIAL</button>
+            </div>
         </div>
 
         <!-- TABS NAV -->
@@ -889,7 +926,7 @@
         skillPointsAvailable:0, perkPointsAvailable:0, selectedPerks:[], perkSelectionActive:false,
         skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false,
         special:{ strength:0, perception:0, endurance:0, charisma:0, intelligence:0, agility:0, luck:0 },
-        specialAllocationActive:false, raceSelected:false,
+        specialAllocationActive:false, raceSelected:false, statsLocked:false,
         creationBonuses: null, creationBonusMeta: null, purebloodRestDieBonus: 0
     };
     var debuffs    = [];
@@ -1059,11 +1096,14 @@
     function updateSpecialDisplay() {
         ensureValidSpecial();
         var raceSelected = !!playerData.raceSelected;
+        var statsLocked  = !!playerData.statsLocked;
         var allocActive  = raceSelected && !!playerData.specialAllocationActive;
         var enforceErr   = enforceSpecialAllocationState();
         var remaining    = getSpecialPointsRemaining();
         var pool         = getSpecialPoolTotal();
         var row = document.getElementById('spRow');
+        var sectionEl = document.getElementById('spSection');
+        if (sectionEl) sectionEl.classList.toggle('sp-locked', statsLocked);
         if (!row) return;
 
         row.innerHTML = SPECIAL_ATTRS.map(function(attr) {
@@ -1072,7 +1112,7 @@
             var effVal     = getEffectiveSpecialValueByKey(attr.key);
             var bonusVal   = getBonusForSpecial(attr.key);
             var perkUnlock = raceSelected && hasSPECIALAdjustPerk(attr.key);
-            var canAdjust  = allocActive || perkUnlock;
+            var canAdjust  = !statsLocked && (allocActive || perkUnlock);
             var canInc = canAdjust && val < caps.max && (deltaAllowed(1, remaining, perkUnlock));
             var canDec = canAdjust && val > caps.min;
             var nameId = 'sp-name-' + attr.key;
@@ -1104,6 +1144,9 @@
             if (!raceSelected) {
                 statusEl.textContent = 'AWAITING RACE SELECTION';
                 statusEl.className   = 'sp-status';
+            } else if (statsLocked) {
+                statusEl.textContent = '🔒 STATS LOCKED';
+                statusEl.className   = 'sp-status';
             } else if (playerData.isPureblood === null) {
                 statusEl.textContent = 'AWAITING GENE POOL CHOICE';
                 statusEl.className   = 'sp-status';
@@ -1120,11 +1163,30 @@
         if (ptsEl) ptsEl.textContent = 'Points: ' + Math.max(0, remaining) + ' / ' + pool + ' remaining';
         var capsEl = document.getElementById('spCapsInfo');
         if (capsEl) capsEl.textContent = describeSpecialCaps();
+        var lockBtn = document.getElementById('lockSpecialBtn');
+        if (lockBtn) {
+            if (allocActive && !statsLocked) {
+                lockBtn.style.display = '';
+                lockBtn.disabled = (remaining !== 0);
+                lockBtn.style.opacity = (remaining === 0) ? '1' : '0.5';
+            } else {
+                lockBtn.style.display = 'none';
+            }
+        }
+        var lockNoteEl = document.getElementById('spLockNote');
+        if (lockNoteEl) {
+            lockNoteEl.textContent = statsLocked
+                ? '🔒 Finalized — S.P.E.C.I.A.L. is read-only.'
+                : (allocActive ? 'Finalize to make S.P.E.C.I.A.L. permanent.' : '');
+        }
         var valEl = document.getElementById('spValidation');
         if (valEl) {
             if (!raceSelected) {
                 valEl.textContent = 'Select your race on Character Data to unlock SPECIAL allocation.';
                 valEl.className = 'sp-validation';
+            } else if (statsLocked) {
+                valEl.textContent = '🔒 SPECIAL and derived values are finalized and cannot be changed.';
+                valEl.className = 'sp-validation ok';
             } else if (enforceErr) {
                 valEl.textContent = '⚠ ' + enforceErr;
                 valEl.className = 'sp-validation err';
@@ -1150,6 +1212,7 @@
     // Adjust a single S.P.E.C.I.A.L. attribute by +1 or -1.
     function adjustSpecial(key, delta) {
         ensureValidSpecial();
+        if (playerData.statsLocked) return;
         var raceSelected = !!playerData.raceSelected;
         var allocActive  = raceSelected && !!playerData.specialAllocationActive;
         var perkUnlock   = raceSelected && hasSPECIALAdjustPerk(key);
@@ -1168,6 +1231,26 @@
         savePlayerData();
         updateSpecialDisplay();
         updateDisplay();
+    }
+
+    function lockInSpecial() {
+        if (!!playerData.statsLocked) return;
+        if (!playerData.raceSelected || !playerData.specialAllocationActive) return;
+        var remaining = getSpecialPointsRemaining();
+        if (remaining !== 0) return;
+        showConfirmModal(
+            'Lock In S.P.E.C.I.A.L.',
+            'Are you sure? You cannot change your stats after this.',
+            function() {
+                playerData.statsLocked = true;
+                playerData.specialAllocationActive = false;
+                enforceSpecialAllocationState();
+                syncEffectiveSpecialStorage();
+                savePlayerData();
+                updateSpecialDisplay();
+                updateDisplay();
+            }
+        );
     }
 
     function switchTab(tabName, btn) {
@@ -1205,6 +1288,7 @@
         // Migration: initialize specialAllocationActive and raceSelected for existing saves
         if (playerData.specialAllocationActive === undefined) playerData.specialAllocationActive = false;
         if (playerData.raceSelected === undefined) playerData.raceSelected = false;
+        if (playerData.statsLocked === undefined) playerData.statsLocked = false;
         // Migration: initialize skillsAllocationActive for existing saves
         if (playerData.skillsAllocationActive === undefined) {
             playerData.skillsAllocationActive = ((playerData.skillPointsAvailable || 0) > 0 && !playerData.skillsLocked);
