@@ -624,7 +624,7 @@
             <div id="spValidation" class="sp-validation" aria-live="polite"></div>
             <div class="sp-controls">
                 <span id="spLockNote" class="sp-lock-note"></span>
-                <button id="lockSpecialBtn" class="update-btn" onclick="lockInSpecial()" style="display:none;">🔒 Lock In SPECIAL</button>
+                <button id="lockSpecialBtn" class="update-btn" onclick="lockInSpecial()" style="display:none;" aria-label="Lock in SPECIAL stats permanently" title="Lock in SPECIAL stats permanently">🔒 Lock In SPECIAL</button>
             </div>
         </div>
 
@@ -1234,7 +1234,7 @@
     }
 
     function lockInSpecial() {
-        if (!!playerData.statsLocked) return;
+        if (playerData.statsLocked) return;
         if (!playerData.raceSelected || !playerData.specialAllocationActive) return;
         var remaining = getSpecialPointsRemaining();
         if (remaining !== 0) return;
