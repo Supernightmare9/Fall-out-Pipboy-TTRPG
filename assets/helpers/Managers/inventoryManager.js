@@ -107,6 +107,148 @@ var InventoryManager = (function() {
         return baseAc + acBonus;
     }
 
+    var SPECIAL_KEYS = ['strength', 'perception', 'endurance', 'charisma', 'intelligence', 'agility', 'luck'];
+
+    function _emptySpecialBonuses() {
+        return {
+            strength: 0, perception: 0, endurance: 0, charisma: 0,
+            intelligence: 0, agility: 0, luck: 0
+        };
+    }
+
+    function _toNumber(val, fallback) {
+        if (fallback === undefined) fallback = 0;
+        var n = Number(val);
+        return Number.isFinite(n) ? n : fallback;
+    }
+
+    function getEquipmentItemIdentity(slotValue) {
+        if (!slotValue) return null;
+        if (typeof slotValue === 'string') return slotValue;
+        if (typeof slotValue === 'object') {
+            return slotValue.uid || slotValue.id || null;
+        }
+        return null;
+    }
+
+    function getEquippedItemIds(equipment) {
+        if (!equipment || typeof equipment !== 'object') return [];
+        return Object.keys(equipment).map(function(slot) {
+            return getEquipmentItemIdentity(equipment[slot]);
+        }).filter(Boolean);
+    }
+
+    function getEquippedItemForSlot(equipment, slotKey, inventory) {
+        if (!equipment || !slotKey || !Array.isArray(inventory)) return null;
+        var identity = getEquipmentItemIdentity(equipment[slotKey]);
+        if (!identity) return null;
+        return inventory.find(function(item) {
+            return item && (item.uid === identity || item.id === identity);
+        }) || null;
+    }
+
+    function _parseSpecialToken(token) {
+        var t = String(token || '').trim().toLowerCase();
+        if (t === 'str') return 'strength';
+        if (t === 'per') return 'perception';
+        if (t === 'end') return 'endurance';
+        if (t === 'cha') return 'charisma';
+        if (t === 'int') return 'intelligence';
+        if (t === 'agi') return 'agility';
+        if (t === 'luk') return 'luck';
+        if (SPECIAL_KEYS.indexOf(t) !== -1) return t;
+        return null;
+    }
+
+    function _addSpecialBonus(specialBonuses, key, amount) {
+        if (!specialBonuses || !key) return;
+        specialBonuses[key] = _toNumber(specialBonuses[key], 0) + _toNumber(amount, 0);
+    }
+
+    function _extractBonusesFromEffects(item, out) {
+        if (!item || !item.effects || typeof item.effects !== 'object') return;
+        if (typeof item.effects.ac === 'number') out.ac += item.effects.ac;
+        if (typeof item.effects.armorClass === 'number') out.ac += item.effects.armorClass;
+        if (typeof item.effects.maxHp === 'number') out.maxHp += item.effects.maxHp;
+        if (item.effects.special && typeof item.effects.special === 'object') {
+            Object.keys(item.effects.special).forEach(function(rawKey) {
+                var key = _parseSpecialToken(rawKey);
+                if (!key) return;
+                _addSpecialBonus(out.special, key, item.effects.special[rawKey]);
+            });
+        }
+    }
+
+    function _extractBonusesFromProperties(item, out) {
+        if (!item || !Array.isArray(item.properties)) return;
+        item.properties.forEach(function(propRaw) {
+            var prop = String(propRaw || '');
+            var acMatch = prop.match(/([+-]\d+)\s*AC/i);
+            if (acMatch) out.ac += parseInt(acMatch[1], 10);
+
+            var longMatch = prop.match(/([+-]?\d+)\s*(?:to\s+)?(strength|perception|endurance|charisma|intelligence|agility|luck)/i);
+            if (longMatch) {
+                var longKey = _parseSpecialToken(longMatch[2]);
+                if (longKey) _addSpecialBonus(out.special, longKey, parseInt(longMatch[1], 10));
+            }
+
+            var shortMatch = prop.match(/([+-]?\d+)\s*(STR|PER|END|CHA|INT|AGI|LUK)\b/i);
+            if (shortMatch) {
+                var shortKey = _parseSpecialToken(shortMatch[2]);
+                if (shortKey) _addSpecialBonus(out.special, shortKey, parseInt(shortMatch[1], 10));
+            }
+
+            if (/strength\s*boost/i.test(prop) && !longMatch && !shortMatch) {
+                _addSpecialBonus(out.special, 'strength', 1);
+            }
+        });
+    }
+
+    function calculateEquippedBonuses(equipment, inventory) {
+        var out = { ac: 0, maxHp: 0, special: _emptySpecialBonuses() };
+        if (!equipment || typeof equipment !== 'object' || !Array.isArray(inventory)) return out;
+        Object.keys(equipment).forEach(function(slotKey) {
+            var item = getEquippedItemForSlot(equipment, slotKey, inventory);
+            if (!item) return;
+            if (typeof item.armorClass === 'number') out.ac += item.armorClass;
+            _extractBonusesFromEffects(item, out);
+            _extractBonusesFromProperties(item, out);
+        });
+        return out;
+    }
+
+    function applyEquipmentEffectsToPlayerData(playerData, equipment, inventory) {
+        if (!playerData || typeof playerData !== 'object') return null;
+        if (!playerData.special || typeof playerData.special !== 'object' || Array.isArray(playerData.special)) {
+            playerData.special = _emptySpecialBonuses();
+        }
+        SPECIAL_KEYS.forEach(function(key) {
+            if (typeof playerData.special[key] !== 'number') playerData.special[key] = 0;
+        });
+
+        var prev = playerData.inventoryEffectBonuses && typeof playerData.inventoryEffectBonuses === 'object'
+            ? playerData.inventoryEffectBonuses
+            : { ac: 0, maxHp: 0, special: _emptySpecialBonuses() };
+        if (!prev.special || typeof prev.special !== 'object') prev.special = _emptySpecialBonuses();
+
+        var next = calculateEquippedBonuses(equipment, inventory);
+        var baseSpecial = {};
+        SPECIAL_KEYS.forEach(function(key) {
+            baseSpecial[key] = _toNumber(playerData.special[key], 0) - _toNumber(prev.special[key], 0);
+            playerData.special[key] = baseSpecial[key] + _toNumber(next.special[key], 0);
+        });
+
+        var baseAc = _toNumber(playerData.ac, 10) - _toNumber(prev.ac, 0);
+        playerData.ac = baseAc + _toNumber(next.ac, 0);
+
+        var baseMaxHp = _toNumber(playerData.maxHp, _toNumber(playerData.hp, 100)) - _toNumber(prev.maxHp, 0);
+        playerData.maxHp = Math.max(1, baseMaxHp + _toNumber(next.maxHp, 0));
+        playerData.hp = Math.min(_toNumber(playerData.hp, playerData.maxHp), playerData.maxHp);
+
+        playerData.inventoryEffectBonuses = next;
+        return next;
+    }
+
     // ── CONSUMABLE USAGE ─────────────────────────────────────
     function useConsumable(item, character) {
         if (!item || item.type !== 'consumable') {
@@ -194,7 +336,7 @@ var InventoryManager = (function() {
 
     function removeItemFromInventory(inventory, itemId, quantity) {
         quantity = quantity || 1;
-        var idx = inventory.findIndex(function(i) { return i.id === itemId; });
+        var idx = inventory.findIndex(function(i) { return i.id === itemId || i.uid === itemId; });
         if (idx === -1) return false;
         inventory[idx].quantity = (inventory[idx].quantity || 1) - quantity;
         if (inventory[idx].quantity <= 0) {
@@ -243,6 +385,11 @@ var InventoryManager = (function() {
         unequipItem:               unequipItem,
         getValidSlotsForItem:      getValidSlotsForItem,
         calculateArmorClass:       calculateArmorClass,
+        calculateEquippedBonuses:  calculateEquippedBonuses,
+        applyEquipmentEffectsToPlayerData: applyEquipmentEffectsToPlayerData,
+        getEquipmentItemIdentity:  getEquipmentItemIdentity,
+        getEquippedItemIds:        getEquippedItemIds,
+        getEquippedItemForSlot:    getEquippedItemForSlot,
 
         useConsumable:             useConsumable,
         getWeaponDamageBonus:      getWeaponDamageBonus,
@@ -264,3 +411,7 @@ var InventoryManager = (function() {
         EQUIPMENT_SLOTS:           EQUIPMENT_SLOTS
     };
 })();
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = InventoryManager;
+}

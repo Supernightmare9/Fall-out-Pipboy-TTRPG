@@ -2836,16 +2836,52 @@
     }
 
     // ── INVENTORY TAB ────────────────────────────────────────────
-    // Reads from vault_inventory localStorage first (synced with inventory.html),
-    // falling back to campaign.inventory if not set.
+    function inventoryLsKey(base) {
+        var handle = (sessionStorage.getItem('username') ||
+                      localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
+        return base + '_' + handle;
+    }
+
+    function getPlayerInventoryData() {
+        try {
+            var raw = localStorage.getItem(inventoryLsKey('pipboyPlayerData'));
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function savePlayerInventoryData(playerData, items, equipment) {
+        var pd = (playerData && typeof playerData === 'object') ? playerData : getPlayerInventoryData();
+        if (Array.isArray(items)) {
+            pd.inventory = items.slice();
+            localStorage.setItem(inventoryLsKey('vault_inventory'), JSON.stringify(items));
+        }
+        if (equipment && typeof equipment === 'object') {
+            pd.equipment = Object.assign({}, equipment);
+            localStorage.setItem(inventoryLsKey('vault_equipment'), JSON.stringify(equipment));
+        }
+        localStorage.setItem(inventoryLsKey('pipboyPlayerData'), JSON.stringify(pd));
+        if (pd.special && typeof pd.special === 'object') {
+            localStorage.setItem(inventoryLsKey('pipboySpecial'), JSON.stringify(pd.special));
+        }
+        if (typeof pd.ac === 'number') {
+            localStorage.setItem(inventoryLsKey('pipboyAC'), String(pd.ac));
+        }
+    }
+
+    // Reads from player-scoped vault_inventory localStorage first (synced with inventory.html),
+    // then from playerData.inventory.
     function getDisplayInventory(campaign) {
         try {
-            var raw = localStorage.getItem('vault_inventory');
+            var raw = localStorage.getItem(inventoryLsKey('vault_inventory'));
             if (raw) {
                 var parsed = JSON.parse(raw);
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+                if (Array.isArray(parsed)) return parsed;
             }
         } catch(e) {}
+        var pd = getPlayerInventoryData();
+        if (Array.isArray(pd.inventory)) return pd.inventory;
         return []; // Inventory pools not yet connected — show empty until linked
     }
 
@@ -2859,16 +2895,18 @@
         return _TYPE_ABBR[key] || 'MSC';
     }
 
-    // Returns equipment from vault_equipment localStorage (inventory.html slot names)
-    // or falls back to campaign player entry equipment.
+    // Returns equipment from player-scoped vault_equipment localStorage (inventory.html slot names)
+    // or falls back to playerData / campaign player entry equipment.
     function getDisplayEquipment(myEntry) {
         try {
-            var raw = localStorage.getItem('vault_equipment');
+            var raw = localStorage.getItem(inventoryLsKey('vault_equipment'));
             if (raw) {
                 var parsed = JSON.parse(raw);
                 if (parsed && typeof parsed === 'object') return parsed;
             }
         } catch(e) {}
+        var pd = getPlayerInventoryData();
+        if (pd.equipment && typeof pd.equipment === 'object') return pd.equipment;
         return myEntry ? (myEntry.equipment || {}) : {};
     }
 
@@ -2908,7 +2946,9 @@
             return p.username === sessionStorage.getItem('username');
         });
         var equippedObj = getDisplayEquipment(myEntry);
-        var equippedIds = Object.values(equippedObj).filter(Boolean);
+        var equippedIds = (typeof InventoryManager !== 'undefined' && InventoryManager.getEquippedItemIds)
+            ? InventoryManager.getEquippedItemIds(equippedObj)
+            : Object.values(equippedObj).filter(Boolean);
 
         grid.innerHTML = items.map(function(item) {
             var typeCls     = 'type-' + escHtml(item.type || 'misc');
@@ -2919,7 +2959,7 @@
 
             var actionsHtml = '';
             if (canUse) {
-                actionsHtml += '<button class="item-action-btn use-btn" onclick="useItem(\'' + escHtml(item.id || item.uid || '') + '\', event)">USE</button>';
+                actionsHtml += '<button class="item-action-btn use-btn" onclick="useItem(\'' + escHtml(item.uid || item.id || '') + '\', event)">USE</button>';
             }
 
             return '<div class="inventory-item" data-type="' + escHtml(item.type || 'misc') + '" onclick="selectInventoryItem(this)">' +
@@ -2991,18 +3031,34 @@
         if (event) event.stopPropagation();
         if (!activeCampaign) return;
 
-        var items   = activeCampaign.inventory || [];
-        var item    = items.find(function(i) { return i.id === itemId; });
+        var items   = getDisplayInventory(activeCampaign).slice();
+        var item    = items.find(function(i) { return i.id === itemId || i.uid === itemId; });
         var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionStorage.getItem('username'); });
 
         if (!item || !myEntry) return;
 
-        var result = InventoryManager.useConsumable(item, myEntry);
+        var pd = getPlayerInventoryData();
+        var actor = {
+            currentHp: typeof pd.hp === 'number' ? pd.hp : myEntry.currentHp,
+            maxHp: typeof pd.maxHp === 'number' ? pd.maxHp : myEntry.maxHp,
+            radiationLevel: typeof pd.radiation === 'number' ? pd.radiation : 0,
+            status: pd.status || myEntry.status || 'alive'
+        };
+
+        var result = InventoryManager.useConsumable(item, actor);
         if (!result.success) return;
 
-        InventoryManager.removeItemFromInventory(activeCampaign.inventory, itemId, 1);
-        saveCampaignData(activeCampaign);
+        InventoryManager.removeItemFromInventory(items, item.uid || item.id, 1);
+        pd.hp = actor.currentHp;
+        pd.maxHp = actor.maxHp;
+        pd.radiation = actor.radiationLevel;
+        pd.status = actor.status;
+        savePlayerInventoryData(pd, items, getDisplayEquipment(myEntry));
+
+        myEntry.currentHp = actor.currentHp;
+        myEntry.maxHp = actor.maxHp;
         renderInventory(activeCampaign);
+        updateACDisplay(activeCampaign);
 
         // Update HP display if healing happened
         if (result.hpRestored > 0) {
@@ -3017,31 +3073,44 @@
         if (event) event.stopPropagation();
         if (!activeCampaign) return;
 
-        var items   = activeCampaign.inventory || [];
-        var item    = items.find(function(i) { return i.id === itemId; });
+        var items   = getDisplayInventory(activeCampaign).slice();
+        var item    = items.find(function(i) { return i.id === itemId || i.uid === itemId; });
         var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionStorage.getItem('username'); });
 
         if (!item || !myEntry) return;
-        if (!myEntry.equipment) myEntry.equipment = {};
+        var equipped = getDisplayEquipment(myEntry);
+        if (!equipped || typeof equipped !== 'object') equipped = {};
 
         // Check if already equipped in any slot
         var equippedSlot = null;
-        Object.keys(myEntry.equipment).forEach(function(slot) {
-            if (myEntry.equipment[slot] === itemId) equippedSlot = slot;
+        Object.keys(equipped).forEach(function(slot) {
+            var identity = (typeof InventoryManager !== 'undefined' && InventoryManager.getEquipmentItemIdentity)
+                ? InventoryManager.getEquipmentItemIdentity(equipped[slot])
+                : equipped[slot];
+            if (identity === itemId || identity === item.uid || identity === item.id) equippedSlot = slot;
         });
 
         if (equippedSlot) {
-            InventoryManager.unequipItem(myEntry, equippedSlot);
+            equipped[equippedSlot] = null;
             addRollResult('Unequipped ' + item.name, '');
         } else {
             var validSlots = InventoryManager.getValidSlotsForItem(item);
             if (validSlots.length > 0) {
-                InventoryManager.equipItem(myEntry, itemId, validSlots[0], activeCampaign.inventory);
+                equipped[validSlots[0]] = {
+                    uid: item.uid || item.id,
+                    id: item.id || null,
+                    name: item.name,
+                    properties: Array.isArray(item.properties) ? item.properties.slice() : []
+                };
                 addRollResult('Equipped ' + item.name, 'roll-hit');
             }
         }
 
-        saveCampaignData(activeCampaign);
+        var pd = getPlayerInventoryData();
+        if (typeof InventoryManager !== 'undefined' && InventoryManager.applyEquipmentEffectsToPlayerData) {
+            InventoryManager.applyEquipmentEffectsToPlayerData(pd, equipped, items);
+        }
+        savePlayerInventoryData(pd, items, equipped);
         renderInventory(activeCampaign);
         updateEquipmentPanel(activeCampaign);
         updateACDisplay(activeCampaign);
@@ -3121,8 +3190,18 @@
         });
         if (!myEntry) return;
 
+        var pd = getPlayerInventoryData();
+        var items = getDisplayInventory(campaign);
+        var equipped = getDisplayEquipment(myEntry);
+        if (typeof InventoryManager !== 'undefined' && InventoryManager.applyEquipmentEffectsToPlayerData) {
+            InventoryManager.applyEquipmentEffectsToPlayerData(pd, equipped, items);
+            savePlayerInventoryData(pd, items, equipped);
+        }
+
         // Calculate AC from equipped items — store as baseline if no manual override exists
-        var ac = InventoryManager.calculateArmorClass(myEntry, campaign.inventory || []);
+        var ac = (typeof pd.ac === 'number')
+            ? pd.ac
+            : InventoryManager.calculateArmorClass(myEntry, items);
         var stored = parseInt(localStorage.getItem(lsVitalsKey('pipboyAC')));
         if (isNaN(stored)) {
             // No manual override; seed localStorage with calculated value
@@ -3136,10 +3215,12 @@
             var liveDataAc = (window._livePlayerCache && window._liveMyHandle)
                              ? window._livePlayerCache[window._liveMyHandle]
                              : null;
-            var strStat = (liveDataAc && liveDataAc.special && typeof liveDataAc.special.strength === 'number')
-                          ? liveDataAc.special.strength
-                          : DEFAULT_SPECIAL_VALUE;
-            var totalWeight = InventoryManager.calculateTotalWeight(campaign.inventory || []);
+            var strStat = (pd && pd.special && typeof pd.special.strength === 'number')
+                ? pd.special.strength
+                : ((liveDataAc && liveDataAc.special && typeof liveDataAc.special.strength === 'number')
+                    ? liveDataAc.special.strength
+                    : DEFAULT_SPECIAL_VALUE);
+            var totalWeight = InventoryManager.calculateTotalWeight(items);
             var capacity    = InventoryManager.getCarryingCapacity(strStat);
             carryDisplay.textContent = Math.round(totalWeight * 10) / 10 + ' / ' + capacity + ' lbs';
         }
@@ -4212,11 +4293,25 @@
             refreshAcCombatDisplay();
             loadEffectsCombat();
         }
-        // Re-render inventory tab when vault_inventory changes (inventory.html sync)
-        if (e.key === 'vault_inventory' || e.key === 'vault_equipment') {
+        // Re-render inventory tab when player-scoped inventory/equipment changes (inventory.html sync)
+        var invKey = inventoryLsKey('vault_inventory');
+        var eqKey  = inventoryLsKey('vault_equipment');
+        var pdKey  = inventoryLsKey('pipboyPlayerData');
+        if (e.key === invKey || e.key === eqKey || e.key === pdKey) {
             if (activeCampaign) {
+                if (e.key === pdKey && e.newValue) {
+                    try {
+                        var pd = JSON.parse(e.newValue);
+                        var me = activeCampaign.players.find(function(p) { return p.username === sessionUsername; });
+                        if (me && pd) {
+                            if (typeof pd.hp === 'number') me.currentHp = pd.hp;
+                            if (typeof pd.maxHp === 'number') me.maxHp = pd.maxHp;
+                        }
+                    } catch(ex) {}
+                }
                 renderInventory(activeCampaign);
                 updateEquipmentPanel(activeCampaign);
+                updateACDisplay(activeCampaign);
             }
         }
     });
