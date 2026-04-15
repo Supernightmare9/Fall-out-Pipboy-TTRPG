@@ -175,7 +175,7 @@ const ITEMS = [
   {
     id: "item_radroach_meat_1",
     name: "Radroach Meat",
-    type: "misc",
+    type: "consumable",
     rarity: "common",
     weight: 0.2,
     value: 5,
@@ -185,7 +185,7 @@ const ITEMS = [
   {
     id: "item_dog_meat_1",
     name: "Dog Meat",
-    type: "misc",
+    type: "consumable",
     rarity: "common",
     weight: 0.5,
     value: 8,
@@ -195,7 +195,7 @@ const ITEMS = [
   {
     id: "item_mirelurk_meat_1",
     name: "Mirelurk Meat",
-    type: "misc",
+    type: "consumable",
     rarity: "uncommon",
     weight: 1,
     value: 25,
