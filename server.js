@@ -354,6 +354,14 @@ function defaultPlayerData() {
     perkSelectionActive: false,
     debuffs: [],
     boosts: [],
+    inventory: [],
+    equipment: { head: null, body: null, primaryWeapon: null, secondaryWeapon: null },
+    recipeBook: [],
+    inventoryEffectBonuses: {
+      ac: 0,
+      maxHp: 0,
+      special: { strength: 0, perception: 0, endurance: 0, charisma: 0, intelligence: 0, agility: 0, luck: 0 }
+    },
     // ── Character creation ────────────────────────────────────────────────────
     // raceSelected: true once the player has picked a base race.
     // specialAllocationActive: true while SPECIAL points can be assigned.

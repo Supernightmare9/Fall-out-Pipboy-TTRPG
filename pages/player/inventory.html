@@ -663,6 +663,7 @@
     <!-- Stats Bar -->
     <div id="stats-bar">
         <div class="title">&#127890; INVENTORY</div>
+        <div class="stat-chip" id="stat-strength" aria-label="Strength">STR: <span id="sv-strength">5</span></div>
         <div class="stat-chip" id="stat-items">ITEMS: <span id="sv-items">0</span></div>
         <div class="stat-chip" id="stat-weight">WEIGHT: <span id="sv-weight">0</span> / <span id="sv-maxw">150</span> lb</div>
         <div class="stat-chip" id="stat-value">VALUE: <span id="sv-value">0</span>&#162;</div>
@@ -908,11 +909,20 @@
 
 <script src="../../assets/data/pools/items.js"></script>
 <script src="../../assets/data/campaigns.js"></script>
+<script src="../../assets/logic/fallout_stat_bonuses.js"></script>
+<script src="../../assets/helpers/Managers/inventoryManager.js"></script>
 <script>
 /* ── Constants & State ────────────────────────────────────── */
-var LS_INV  = 'vault_inventory';
-var LS_EQ   = 'vault_equipment';
-var MAX_CARRY = 150;
+var _playerHandle = (sessionStorage.getItem('username') ||
+                     localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
+function lsKey(k) { return k + '_' + _playerHandle; }
+var LS_INV      = lsKey('vault_inventory');
+var LS_EQ       = lsKey('vault_equipment');
+var LS_PD       = lsKey('pipboyPlayerData');
+var LS_SPECIAL  = lsKey('pipboySpecial');
+var LS_AC       = lsKey('pipboyAC');
+var MAX_CARRY   = 150;
+var playerData  = {};
 
 var SLOT_CONFIG = [
     { key: 'head',            label: 'Head',             icon: '\u26CF',       types: ['armor'] },
@@ -960,84 +970,65 @@ function jsStr(text) {
 }
 
 /* ── Persistence ──────────────────────────────────────────── */
+function safeParseJson(raw, fallback) {
+    if (!raw) return fallback;
+    try { return JSON.parse(raw); } catch (e) { return fallback; }
+}
+
+function normalizeEquipment(equip) {
+    return Object.assign({}, DEFAULT_EQUIPMENT, (equip && typeof equip === 'object') ? equip : {});
+}
+
+function loadPlayerData() {
+    playerData = safeParseJson(localStorage.getItem(LS_PD), {}) || {};
+    if (!playerData.special || typeof playerData.special !== 'object' || Array.isArray(playerData.special)) {
+        playerData.special = {
+            strength: 5, perception: 5, endurance: 5, charisma: 5,
+            intelligence: 5, agility: 5, luck: 5
+        };
+    }
+    if (typeof playerData.ac !== 'number') playerData.ac = 10;
+    if (typeof playerData.maxHp !== 'number') playerData.maxHp = (typeof playerData.hp === 'number' ? playerData.hp : 100);
+    if (typeof playerData.hp !== 'number') playerData.hp = playerData.maxHp;
+}
+
+function persistPlayerData() {
+    try {
+        localStorage.setItem(LS_PD, JSON.stringify(playerData));
+        localStorage.setItem(LS_SPECIAL, JSON.stringify(playerData.special || {}));
+        if (typeof playerData.ac === 'number') localStorage.setItem(LS_AC, String(playerData.ac));
+    } catch (e) {}
+}
+
+function syncPlayerEffectsFromEquipment() {
+    if (typeof InventoryManager === 'undefined' || !InventoryManager.applyEquipmentEffectsToPlayerData) return;
+    InventoryManager.applyEquipmentEffectsToPlayerData(playerData, equipment, inventory);
+    persistPlayerData();
+}
+
 function saveData() {
+    syncPlayerEffectsFromEquipment();
+    playerData.inventory = inventory.slice();
+    playerData.equipment = normalizeEquipment(equipment);
     try {
         localStorage.setItem(LS_INV, JSON.stringify(inventory));
         localStorage.setItem(LS_EQ,  JSON.stringify(equipment));
+        localStorage.setItem(LS_PD,  JSON.stringify(playerData));
     } catch (e) { /* storage unavailable */ }
 }
 
 function loadData() {
-    var rawInv = null, rawEq = null;
-    try { rawInv = localStorage.getItem(LS_INV); } catch(e){}
-    try { rawEq  = localStorage.getItem(LS_EQ);  } catch(e){}
+    loadPlayerData();
+    var fromPlayerInv = Array.isArray(playerData.inventory) ? playerData.inventory : null;
+    var fromPlayerEq  = playerData.equipment;
+    var fromKeyInv    = safeParseJson(localStorage.getItem(LS_INV), []);
+    var fromKeyEq     = safeParseJson(localStorage.getItem(LS_EQ), DEFAULT_EQUIPMENT);
 
-    if (rawInv) {
-        try { inventory = JSON.parse(rawInv); } catch(e) { inventory = []; }
-    } else {
-        inventory = buildStarterInventory();
-    }
-
-    if (rawEq) {
-        try {
-            var parsed = JSON.parse(rawEq);
-            equipment = Object.assign({}, DEFAULT_EQUIPMENT, parsed);
-        } catch(e) { equipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT)); }
-    } else {
-        equipment = JSON.parse(JSON.stringify(DEFAULT_EQUIPMENT));
-    }
-}
-
-function buildStarterInventory() {
-    var items = [];
-    var starterIds = [
-        'item_10mm_pistol_1','item_stimpak_1','item_rad_away_1','item_nuka_cola_1',
-        'item_leather_armor_1','item_frag_grenade_1','item_hunting_knife_1','item_caps_1'
-    ];
-    var qtys = {
-        item_stimpak_1: 3, item_rad_away_1: 2, item_nuka_cola_1: 3,
-        item_caps_1: 250, item_frag_grenade_1: 2
-    };
-
-    if (typeof ITEMS !== 'undefined') {
-        for (var i = 0; i < starterIds.length; i++) {
-            var id = starterIds[i];
-            var tpl = null;
-            for (var j = 0; j < ITEMS.length; j++) {
-                if (ITEMS[j].id === id) { tpl = ITEMS[j]; break; }
-            }
-            if (tpl) items.push(makeInventoryItem(tpl, qtys[id] || 1));
-        }
-    }
-
-    if (typeof CAMPAIGNS !== 'undefined' && CAMPAIGNS.length > 0) {
-        var campInv = CAMPAIGNS[0].inventory || [];
-        for (var k = 0; k < campInv.length; k++) {
-            var ci = campInv[k];
-            var dup = false;
-            for (var m = 0; m < items.length; m++) {
-                if (items[m].name === ci.name) { dup = true; break; }
-            }
-            if (!dup) {
-                items.push({
-                    uid: 'cmp_' + ci.id,
-                    id: ci.id, name: ci.name,
-                    type: ci.type || 'misc', rarity: 'common',
-                    quantity: ci.quantity || 1, weight: ci.weight || 0,
-                    value: ci.value || 0, description: ci.description || '',
-                    properties: []
-                });
-            }
-        }
-    }
-
-    items.push({
-        uid: 'ammo_10mm_start', id: 'ammo_10mm', name: '10mm Rounds',
-        type: 'ammo', rarity: 'common', quantity: 120, weight: 0, value: 1,
-        description: 'Standard 10mm pistol ammunition.', properties: ['10mm', 'Pistol Ammo']
-    });
-
-    return items;
+    inventory = Array.isArray(fromPlayerInv) ? fromPlayerInv : (Array.isArray(fromKeyInv) ? fromKeyInv : []);
+    equipment = normalizeEquipment(fromPlayerEq || fromKeyEq);
+    playerData.inventory = inventory.slice();
+    playerData.equipment = normalizeEquipment(equipment);
+    syncPlayerEffectsFromEquipment();
 }
 
 function makeInventoryItem(tpl, qty) {
@@ -1061,9 +1052,17 @@ function renderStats() {
         totalWeight += (it.weight || 0) * q;
         totalValue  += (it.value  || 0) * q;
     }
+    var strength = (playerData && playerData.special && typeof playerData.special.strength === 'number')
+        ? playerData.special.strength : 5;
+    var carryCap = (typeof InventoryManager !== 'undefined' && InventoryManager.getCarryingCapacity)
+        ? InventoryManager.getCarryingCapacity(strength)
+        : (100 + (strength * 10));
+    MAX_CARRY = carryCap;
+
+    document.getElementById('sv-strength').textContent = strength;
     document.getElementById('sv-items').textContent  = totalItems;
     document.getElementById('sv-weight').textContent = totalWeight.toFixed(1);
-    document.getElementById('sv-maxw').textContent   = MAX_CARRY;
+    document.getElementById('sv-maxw').textContent   = carryCap;
     document.getElementById('sv-value').textContent  = totalValue.toLocaleString();
     var wChip = document.getElementById('stat-weight');
     if (totalWeight > MAX_CARRY) { wChip.classList.add('over'); }
@@ -1243,7 +1242,12 @@ function equipItem(uid, slotKey) {
     for (var key in equipment) {
         if (equipment[key] && equipment[key].uid === uid) equipment[key] = null;
     }
-    equipment[slotKey] = { uid: item.uid, name: item.name, properties: item.properties ? item.properties.slice() : [] };
+    equipment[slotKey] = {
+        uid: item.uid,
+        id: item.id,
+        name: item.name,
+        properties: item.properties ? item.properties.slice() : []
+    };
     saveData();
     renderAll();
     closeSlotModal();
@@ -1275,6 +1279,21 @@ function useItem(uid) {
         if (inventory[i].uid === uid) { item = inventory[i]; break; }
     }
     if (!item) return;
+    if (item.type === 'consumable' && typeof InventoryManager !== 'undefined' && InventoryManager.useConsumable) {
+        var character = {
+            currentHp:      (typeof playerData.hp === 'number' ? playerData.hp : playerData.maxHp),
+            maxHp:          (typeof playerData.maxHp === 'number' ? playerData.maxHp : 100),
+            radiationLevel: (typeof playerData.radiation === 'number' ? playerData.radiation : 0),
+            status:         playerData.status || 'alive'
+        };
+        var useResult = InventoryManager.useConsumable(item, character);
+        if (useResult && useResult.success) {
+            playerData.hp        = character.currentHp;
+            playerData.maxHp     = character.maxHp;
+            playerData.radiation = character.radiationLevel;
+            playerData.status    = character.status;
+        }
+    }
     if (item.quantity > 1) {
         item.quantity -= 1;
     } else {
@@ -1956,11 +1975,17 @@ function showCrStatus(msg, cls) {
 /* ═══════════════════════════════════════════════════════════
    RECIPE BOOK SYSTEM
    ═══════════════════════════════════════════════════════════ */
-var LS_RECIPES  = 'vault_recipes_v1_' + (localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player');
+var LS_RECIPES  = lsKey('vault_recipes_v1');
 var playerRecipes = [];
 var selectedRecipeId = null;
 
 function loadRecipes() {
+    LS_RECIPES = lsKey('vault_recipes_v1');
+    loadPlayerData();
+    if (Array.isArray(playerData.recipeBook)) {
+        playerRecipes = playerData.recipeBook.slice();
+        return;
+    }
     try {
         var raw = localStorage.getItem(LS_RECIPES);
         playerRecipes = raw ? JSON.parse(raw) : [];
@@ -1968,6 +1993,9 @@ function loadRecipes() {
 }
 
 function saveRecipes() {
+    LS_RECIPES = lsKey('vault_recipes_v1');
+    playerData.recipeBook = playerRecipes.slice();
+    persistPlayerData();
     try { localStorage.setItem(LS_RECIPES, JSON.stringify(playerRecipes)); } catch(e) {}
 }
 
@@ -2225,6 +2253,15 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRecipes();
     renderAll();
     initCraftSocket();
+});
+
+window.addEventListener('storage', function(e) {
+    if (!e.key) return;
+    if (e.key === LS_PD || e.key === LS_SPECIAL || e.key === LS_INV || e.key === LS_EQ || e.key === LS_RECIPES) {
+        loadData();
+        loadRecipes();
+        renderAll();
+    }
 });
 </script>
 
