@@ -2086,14 +2086,36 @@
     // ════════════════════════════════════════════════════════════
 
     // ── AUTH CHECK ──────────────────────────────────────────────
-    var sessionUsername = sessionStorage.getItem('username');
-    if (!sessionUsername) { window.location.replace('../login.html'); }
+    var sessionRole = sessionStorage.getItem('role');
+    var sessionUsername = (sessionStorage.getItem('username') ||
+                           localStorage.getItem('PIPBOY_PLAYER_HANDLE') || '').trim();
 
-    var currentAccount = ACCOUNTS.find(function(a) { return a.username === sessionUsername; });
-    if (!currentAccount) {
-        sessionStorage.clear();
+    if (sessionRole !== 'player' && sessionRole !== 'admin') {
         window.location.replace('../login.html');
-    } else if (currentAccount.role === 'admin') {
+    }
+    if (!sessionUsername) {
+        window.location.replace('../login.html');
+    }
+
+    // Keep session username hydrated from localStorage fallback so downstream
+    // logic that reads sessionStorage continues to work.
+    if (!sessionStorage.getItem('username')) {
+        sessionStorage.setItem('username', sessionUsername);
+    }
+
+    // Admins belong on the overseer hub, never on player combat.
+    if (sessionRole === 'admin') {
+        window.location.replace('../overseer/overseerhub.html');
+    }
+
+    // Keep account-role redirect safety, but use case-insensitive matching so
+    // test/dev quick-login handles (e.g. "dillon") don't fail strict lookups.
+    var currentAccount = Array.isArray(ACCOUNTS)
+        ? ACCOUNTS.find(function(a) {
+            return String(a && a.username || '').toLowerCase() === sessionUsername.toLowerCase();
+        })
+        : null;
+    if (currentAccount && currentAccount.role === 'admin') {
         window.location.replace('../overseer/overseerhub.html');
     }
 
