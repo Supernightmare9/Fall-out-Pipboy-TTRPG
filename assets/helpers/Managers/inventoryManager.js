@@ -108,6 +108,7 @@ var InventoryManager = (function() {
     }
 
     var SPECIAL_KEYS = ['strength', 'perception', 'endurance', 'charisma', 'intelligence', 'agility', 'luck'];
+    var SPECIAL_LONG_PATTERN = new RegExp('([+-]?\\d+)\\s*(?:to\\s+)?(' + SPECIAL_KEYS.join('|') + ')', 'i');
 
     function _emptySpecialBonuses() {
         return {
@@ -186,7 +187,7 @@ var InventoryManager = (function() {
             var acMatch = prop.match(/([+-]\d+)\s*AC/i);
             if (acMatch) out.ac += parseInt(acMatch[1], 10);
 
-            var longMatch = prop.match(/([+-]?\d+)\s*(?:to\s+)?(strength|perception|endurance|charisma|intelligence|agility|luck)/i);
+            var longMatch = prop.match(SPECIAL_LONG_PATTERN);
             if (longMatch) {
                 var longKey = _parseSpecialToken(longMatch[2]);
                 if (longKey) _addSpecialBonus(out.special, longKey, parseInt(longMatch[1], 10));
@@ -241,7 +242,9 @@ var InventoryManager = (function() {
         var baseAc = _toNumber(playerData.ac, 10) - _toNumber(prev.ac, 0);
         playerData.ac = baseAc + _toNumber(next.ac, 0);
 
-        var baseMaxHp = _toNumber(playerData.maxHp, _toNumber(playerData.hp, 100)) - _toNumber(prev.maxHp, 0);
+        var maxHpFallback = _toNumber(playerData.hp, 100);
+        var currentMaxHp = _toNumber(playerData.maxHp, maxHpFallback);
+        var baseMaxHp = currentMaxHp - _toNumber(prev.maxHp, 0);
         playerData.maxHp = Math.max(1, baseMaxHp + _toNumber(next.maxHp, 0));
         playerData.hp = Math.min(_toNumber(playerData.hp, playerData.maxHp), playerData.maxHp);
 

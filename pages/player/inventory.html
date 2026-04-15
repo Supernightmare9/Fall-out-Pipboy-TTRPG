@@ -663,7 +663,7 @@
     <!-- Stats Bar -->
     <div id="stats-bar">
         <div class="title">&#127890; INVENTORY</div>
-        <div class="stat-chip" id="stat-strength">STR: <span id="sv-strength">5</span></div>
+        <div class="stat-chip" id="stat-strength" aria-label="Strength">STR: <span id="sv-strength">5</span></div>
         <div class="stat-chip" id="stat-items">ITEMS: <span id="sv-items">0</span></div>
         <div class="stat-chip" id="stat-weight">WEIGHT: <span id="sv-weight">0</span> / <span id="sv-maxw">150</span> lb</div>
         <div class="stat-chip" id="stat-value">VALUE: <span id="sv-value">0</span>&#162;</div>
@@ -913,9 +913,9 @@
 <script src="../../assets/helpers/Managers/inventoryManager.js"></script>
 <script>
 /* ── Constants & State ────────────────────────────────────── */
-var _lsPlayer = (sessionStorage.getItem('username') ||
-                 localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
-function lsKey(k) { return k + '_' + _lsPlayer; }
+var _playerHandle = (sessionStorage.getItem('username') ||
+                     localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
+function lsKey(k) { return k + '_' + _playerHandle; }
 var LS_INV      = lsKey('vault_inventory');
 var LS_EQ       = lsKey('vault_equipment');
 var LS_PD       = lsKey('pipboyPlayerData');
@@ -1244,7 +1244,7 @@ function equipItem(uid, slotKey) {
     }
     equipment[slotKey] = {
         uid: item.uid,
-        id: item.id || null,
+        id: item.id,
         name: item.name,
         properties: item.properties ? item.properties.slice() : []
     };
@@ -2251,8 +2251,6 @@ function initCraftSocket() {
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
     loadRecipes();
-    saveData();
-    saveRecipes();
     renderAll();
     initCraftSocket();
 });

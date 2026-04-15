@@ -3032,7 +3032,7 @@
         if (!activeCampaign) return;
 
         var items   = getDisplayInventory(activeCampaign).slice();
-        var item    = items.find(function(i) { return i.id === itemId || i.uid === itemId; });
+        var item    = items.find(function(i) { return i.uid === itemId || i.id === itemId; });
         var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionStorage.getItem('username'); });
 
         if (!item || !myEntry) return;
@@ -3074,7 +3074,7 @@
         if (!activeCampaign) return;
 
         var items   = getDisplayInventory(activeCampaign).slice();
-        var item    = items.find(function(i) { return i.id === itemId || i.uid === itemId; });
+        var item    = items.find(function(i) { return i.uid === itemId || i.id === itemId; });
         var myEntry = activeCampaign.players.find(function(p) { return p.username === sessionStorage.getItem('username'); });
 
         if (!item || !myEntry) return;
