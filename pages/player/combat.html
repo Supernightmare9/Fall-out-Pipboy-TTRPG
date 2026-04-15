@@ -2087,36 +2087,45 @@
 
     // ── AUTH CHECK ──────────────────────────────────────────────
     var sessionRole = sessionStorage.getItem('role');
-    var sessionUsername = (sessionStorage.getItem('username') ||
+    var sessionUsernameRaw = sessionStorage.getItem('username');
+    // Keep compatibility with existing login/data pages:
+    // - sessionStorage.username is the primary session identity
+    // - localStorage.PIPBOY_PLAYER_HANDLE is the persisted player fallback
+    var sessionUsername = (sessionUsernameRaw ||
                            localStorage.getItem('PIPBOY_PLAYER_HANDLE') || '').trim();
 
-    if (sessionRole !== 'player' && sessionRole !== 'admin') {
-        window.location.replace('../login.html');
-    }
-    if (!sessionUsername) {
+    if ((sessionRole !== 'player' && sessionRole !== 'admin') || !sessionUsername) {
         window.location.replace('../login.html');
     }
 
     // Keep session username hydrated from localStorage fallback so downstream
     // logic that reads sessionStorage continues to work.
-    if (!sessionStorage.getItem('username')) {
+    if (!sessionUsernameRaw && sessionUsername) {
         sessionStorage.setItem('username', sessionUsername);
     }
 
-    // Admins belong on the overseer hub, never on player combat.
-    if (sessionRole === 'admin') {
-        window.location.replace('../overseer/overseerhub.html');
+    // Keep account-role redirect safety, including case-insensitive fallback
+    // for quick-login handles that may differ in case.
+    var currentAccount = null;
+    var sessionUsernameLower = sessionUsername.toLowerCase();
+    if (Array.isArray(ACCOUNTS)) {
+        currentAccount = ACCOUNTS.find(function(a) {
+            var accountUsername = String((a && a.username) || '');
+            var accountUsernameLower = accountUsername.toLowerCase();
+            return accountUsername === sessionUsername ||
+                   accountUsernameLower === sessionUsernameLower;
+        });
     }
-
-    // Keep account-role redirect safety, but use case-insensitive matching so
-    // test/dev quick-login handles (e.g. "dillon") don't fail strict lookups.
-    var currentAccount = Array.isArray(ACCOUNTS)
-        ? ACCOUNTS.find(function(a) {
-            return String(a && a.username || '').toLowerCase() === sessionUsername.toLowerCase();
-        })
-        : null;
-    if (currentAccount && currentAccount.role === 'admin') {
+    if (!currentAccount) {
+        sessionStorage.clear();
+        window.location.replace('../login.html');
+    } else if (currentAccount.role === 'admin') {
         window.location.replace('../overseer/overseerhub.html');
+    } else {
+        sessionUsername = String(currentAccount.username || sessionUsername);
+        if (sessionStorage.getItem('username') !== sessionUsername) {
+            sessionStorage.setItem('username', sessionUsername);
+        }
     }
 
     document.getElementById('sessionUser').textContent = sessionUsername.toUpperCase();
