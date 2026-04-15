@@ -2086,15 +2086,46 @@
     // ════════════════════════════════════════════════════════════
 
     // ── AUTH CHECK ──────────────────────────────────────────────
-    var sessionUsername = sessionStorage.getItem('username');
-    if (!sessionUsername) { window.location.replace('../login.html'); }
+    var sessionRole = sessionStorage.getItem('role');
+    var sessionUsernameRaw = sessionStorage.getItem('username');
+    // Keep compatibility with existing login/data pages:
+    // - sessionStorage.username is the primary session identity
+    // - localStorage.PIPBOY_PLAYER_HANDLE is the persisted player fallback
+    var sessionUsername = (sessionUsernameRaw ||
+                           localStorage.getItem('PIPBOY_PLAYER_HANDLE') || '').trim();
 
-    var currentAccount = ACCOUNTS.find(function(a) { return a.username === sessionUsername; });
+    if ((sessionRole !== 'player' && sessionRole !== 'admin') || !sessionUsername) {
+        window.location.replace('../login.html');
+    }
+
+    // Keep session username hydrated from localStorage fallback so downstream
+    // logic that reads sessionStorage continues to work.
+    if (!sessionUsernameRaw && sessionUsername) {
+        sessionStorage.setItem('username', sessionUsername);
+    }
+
+    // Keep account-role redirect safety, including case-insensitive fallback
+    // for quick-login handles that may differ in case.
+    var currentAccount = null;
+    var sessionUsernameLower = sessionUsername.toLowerCase();
+    if (Array.isArray(ACCOUNTS)) {
+        currentAccount = ACCOUNTS.find(function(a) {
+            var accountUsername = String((a && a.username) || '');
+            var accountUsernameLower = accountUsername.toLowerCase();
+            return accountUsername === sessionUsername ||
+                   accountUsernameLower === sessionUsernameLower;
+        });
+    }
     if (!currentAccount) {
         sessionStorage.clear();
         window.location.replace('../login.html');
     } else if (currentAccount.role === 'admin') {
         window.location.replace('../overseer/overseerhub.html');
+    } else {
+        sessionUsername = String(currentAccount.username || sessionUsername);
+        if (sessionStorage.getItem('username') !== sessionUsername) {
+            sessionStorage.setItem('username', sessionUsername);
+        }
     }
 
     document.getElementById('sessionUser').textContent = sessionUsername.toUpperCase();
