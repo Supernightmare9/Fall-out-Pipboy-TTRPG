@@ -104,24 +104,37 @@
    *
    * @param {object} pd - playerData (mutated in-place)
    */
+  function _capVal(caps, key) {
+    return caps && caps[key] !== null && caps[key] !== undefined && !isNaN(caps[key])
+      ? Number(caps[key]) : null;
+  }
+
+  function _effectiveCaps(pd, key) {
+    var raceCaps = pd.baseRace && pd.baseRace.specialCaps ? pd.baseRace.specialCaps : null;
+    var geneCaps = pd.genePool && pd.genePool.specialCaps ? pd.genePool.specialCaps : null;
+    var mins = [_capVal(raceCaps, key + 'Min'), _capVal(geneCaps, key + 'Min')].filter(function(v){ return v !== null; });
+    var maxs = [_capVal(raceCaps, key + 'Max'), _capVal(geneCaps, key + 'Max')].filter(function(v){ return v !== null; });
+    var min = mins.length ? Math.max.apply(null, mins) : null;
+    var max = maxs.length ? Math.min.apply(null, maxs) : null;
+    return { min: min, max: max };
+  }
+
   function _enforceSpecialCaps(pd) {
-    if (!pd.baseRace || !pd.baseRace.specialCaps) return;
-    var caps = pd.baseRace.specialCaps;
+    if (!pd.baseRace && !pd.genePool) return;
     var sp   = pd.special || {};
 
     var attrs = ['strength', 'perception', 'endurance', 'charisma',
                  'intelligence', 'agility', 'luck'];
 
     attrs.forEach(function (key) {
-      var minKey = key + 'Min';
-      var maxKey = key + 'Max';
+      var caps = _effectiveCaps(pd, key);
       var val    = typeof sp[key] === 'number' ? sp[key] : 0;
 
-      if (caps[minKey] !== null && caps[minKey] !== undefined) {
-        val = Math.max(val, caps[minKey]);
+      if (caps.min !== null && caps.min !== undefined) {
+        val = Math.max(val, caps.min);
       }
-      if (caps[maxKey] !== null && caps[maxKey] !== undefined) {
-        val = Math.min(val, caps[maxKey]);
+      if (caps.max !== null && caps.max !== undefined) {
+        val = Math.min(val, caps.max);
       }
       sp[key] = val;
     });

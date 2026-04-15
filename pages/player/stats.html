@@ -441,6 +441,10 @@
             margin-bottom: 4px;
             white-space: nowrap;
         }
+        .sp-attr-cap {
+            margin-top: -2px;
+            opacity: 0.65;
+        }
         .sp-attr-val {
             font-size: 22px;
             font-weight: bold;
@@ -495,6 +499,58 @@
             .sp-btn { width: 20px; height: 19px; font-size: 12px; }
             .sp-section-title { letter-spacing: 2px; }
         }
+        .sp-meta-row {
+            margin-top: 8px;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 9px;
+            color: rgba(74,222,128,0.65);
+            flex-wrap: wrap;
+        }
+        .sp-meta-points {
+            color: var(--vault-gold);
+            letter-spacing: 0.6px;
+        }
+        .sp-meta-caps {
+            color: rgba(74,222,128,0.55);
+        }
+        .sp-validation {
+            margin-top: 6px;
+            min-height: 14px;
+            font-size: 9px;
+            letter-spacing: 0.4px;
+            color: rgba(74,222,128,0.8);
+        }
+        .sp-validation.err { color: var(--vault-error); }
+        .sp-validation.ok  { color: var(--vault-success); }
+        .creation-effects-panel {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(74,222,128,0.2);
+        }
+        .creation-effects-title {
+            font-size: 10px;
+            color: var(--vault-gold);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .creation-effects-list {
+            display: grid;
+            gap: 6px;
+        }
+        .creation-effects-item {
+            font-size: 10px;
+            line-height: 1.5;
+            padding: 6px 8px;
+            border: 1px solid rgba(74,222,128,0.2);
+            background: rgba(74,222,128,0.05);
+        }
+        .creation-effects-item.manual {
+            border-color: rgba(251,191,36,0.3);
+            background: rgba(251,191,36,0.05);
+        }
     </style>
 </head>
 <body>
@@ -528,6 +584,11 @@
                 <span id="spStatus" class="sp-status">AWAITING RACE SELECTION</span>
             </div>
             <div class="sp-row" id="spRow" role="group" aria-label="S.P.E.C.I.A.L. attribute adjustments"></div>
+            <div class="sp-meta-row">
+                <div id="spPointsInfo" class="sp-meta-points">Points: N/A</div>
+                <div id="spCapsInfo" class="sp-meta-caps">Caps: N/A</div>
+            </div>
+            <div id="spValidation" class="sp-validation" aria-live="polite"></div>
         </div>
 
         <!-- TABS NAV -->
@@ -645,6 +706,18 @@
             <div class="stat-help-text" style="margin-bottom:12px;">Perks are special abilities earned at level-up milestones. Each perk provides a unique passive bonus or new capability. Perks are awarded by your Overseer and shown here automatically.</div>
             <div class="perks-grid" id="perksGrid">
                 <div class="perks-empty">No perks earned yet. Keep adventuring!</div>
+            </div>
+            <div class="creation-effects-panel">
+                <div class="creation-effects-title">⚡ Auto-Applied Starting Bonuses</div>
+                <div id="startingAutoBonusesList" class="creation-effects-list">
+                    <div class="creation-effects-item">No auto-applied starting bonuses detected.</div>
+                </div>
+            </div>
+            <div class="creation-effects-panel">
+                <div class="creation-effects-title">⚠ Starting Abilities Requiring Player/GM Action</div>
+                <div id="startingManualAbilitiesList" class="creation-effects-list">
+                    <div class="creation-effects-item manual">No manual starting abilities detected.</div>
+                </div>
             </div>
         </div>
 
@@ -811,7 +884,14 @@
                   'Explosives','Lockpick','Medicine','Science','Repair',
                   'Sneak','Speech','Unarmed','Survival'];
 
-    var playerData = { skills:{}, tagSkills:[], xp:0, level:1, tempHealth:0, tempActionPoints:0, skillPointsAvailable:0, perkPointsAvailable:0, selectedPerks:[], perkSelectionActive:false, skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false, special:{ strength:0, perception:0, endurance:0, charisma:0, intelligence:0, agility:0, luck:0 }, specialAllocationActive:false, raceSelected:false };
+    var playerData = {
+        skills:{}, tagSkills:[], xp:0, level:1, tempHealth:0, tempActionPoints:0,
+        skillPointsAvailable:0, perkPointsAvailable:0, selectedPerks:[], perkSelectionActive:false,
+        skillsLocked:false, skillsLockBaseline:{}, skillsAllocationActive:false,
+        special:{ strength:0, perception:0, endurance:0, charisma:0, intelligence:0, agility:0, luck:0 },
+        specialAllocationActive:false, raceSelected:false,
+        creationBonuses: null, creationBonusMeta: null, purebloodRestDieBonus: 0
+    };
     var debuffs    = [];
     var boosts     = [];
 
@@ -838,6 +918,8 @@
         { key: 'agility',      letter: 'A', name: 'Agility' },
         { key: 'luck',         letter: 'L', name: 'Luck' }
     ];
+    var SPECIAL_KEY_PATTERN = SPECIAL_ATTRS.map(function(attr){ return attr.key; }).join('|');
+    var SPECIAL_BONUS_REGEX = new RegExp('([+-]\\d+)\\s*(?:to\\s+)?(' + SPECIAL_KEY_PATTERN + ')', 'i');
     // 0 = "not yet set / awaiting race selection"; valid play range is 1–10.
     var SPECIAL_MIN = 1;
     var SPECIAL_MAX = 10;
@@ -851,6 +933,109 @@
         SPECIAL_ATTRS.forEach(function(a) {
             if (typeof playerData.special[a.key] !== 'number') playerData.special[a.key] = 0;
         });
+    }
+
+    function createDefaultBonusMeta() {
+        return { levelOnePerkGranted: false, purebloodPerksGranted: 0 };
+    }
+
+    function formatSigned(value) {
+        return (value >= 0 ? '+' : '') + value;
+    }
+
+    function getSpecialPoolTotal() {
+        var byRace = playerData.baseRace && typeof playerData.baseRace.specialPointAllocation === 'number'
+            ? playerData.baseRace.specialPointAllocation : null;
+        var byPlayer = typeof playerData.specialPointAllocation === 'number'
+            ? playerData.specialPointAllocation : null;
+        return byRace !== null ? byRace : (byPlayer !== null ? byPlayer : 0);
+    }
+
+    function getCapValue(caps, key) {
+        return caps && caps[key] !== null && caps[key] !== undefined && !isNaN(caps[key])
+            ? Number(caps[key]) : null;
+    }
+
+    function getEffectiveSpecialCaps(attrKey) {
+        var raceCaps = playerData.baseRace && playerData.baseRace.specialCaps ? playerData.baseRace.specialCaps : null;
+        var geneCaps = playerData.genePool && playerData.genePool.specialCaps ? playerData.genePool.specialCaps : null;
+        var minCandidates = [getCapValue(raceCaps, attrKey + 'Min'), getCapValue(geneCaps, attrKey + 'Min')].filter(function(v){ return v !== null; });
+        var maxCandidates = [getCapValue(raceCaps, attrKey + 'Max'), getCapValue(geneCaps, attrKey + 'Max')].filter(function(v){ return v !== null; });
+        var minCap = minCandidates.length ? Math.max.apply(null, minCandidates) : null;
+        var maxCap = maxCandidates.length ? Math.min.apply(null, maxCandidates) : null;
+        var effMin = minCap === null ? SPECIAL_MIN : Math.max(SPECIAL_MIN, minCap);
+        var effMax = maxCap === null ? SPECIAL_MAX : Math.min(SPECIAL_MAX, maxCap);
+        if (effMax < effMin) effMax = effMin;
+        return { min: effMin, max: effMax };
+    }
+
+    function getSpecialPointsSpent() {
+        ensureValidSpecial();
+        return SPECIAL_ATTRS.reduce(function(total, attr) {
+            var v = Number(playerData.special[attr.key]) || 0;
+            return total + Math.max(0, v);
+        }, 0);
+    }
+
+    function getSpecialPointsRemaining() {
+        return getSpecialPoolTotal() - getSpecialPointsSpent();
+    }
+
+    function getBonusForSpecial(key) {
+        var bonuses = playerData.creationBonuses && playerData.creationBonuses.special
+            ? playerData.creationBonuses.special : null;
+        return bonuses && typeof bonuses[key] === 'number' ? bonuses[key] : 0;
+    }
+
+    function getEffectiveSpecialValueByKey(key) {
+        var base = Number(playerData.special && playerData.special[key]) || 0;
+        return base + getBonusForSpecial(key);
+    }
+
+    function enforceSpecialAllocationState() {
+        ensureValidSpecial();
+        if (!playerData.raceSelected) return null;
+
+        var allocActive = !!playerData.specialAllocationActive;
+        SPECIAL_ATTRS.forEach(function(attr) {
+            var caps = getEffectiveSpecialCaps(attr.key);
+            var current = Number(playerData.special[attr.key]) || 0;
+            if (allocActive && current <= 0) current = caps.min;
+            if (current > 0) current = Math.max(caps.min, Math.min(caps.max, current));
+            playerData.special[attr.key] = current;
+        });
+
+        if (!allocActive) return null;
+        var overflow = -getSpecialPointsRemaining();
+        if (overflow <= 0) return null;
+
+        var adjusted = true;
+        while (overflow > 0 && adjusted) {
+            adjusted = false;
+            SPECIAL_ATTRS.forEach(function(attr) {
+                if (overflow <= 0) return;
+                var caps = getEffectiveSpecialCaps(attr.key);
+                var cur = Number(playerData.special[attr.key]) || 0;
+                if (cur > caps.min) {
+                    playerData.special[attr.key] = cur - 1;
+                    overflow--;
+                    adjusted = true;
+                }
+            });
+        }
+        return overflow > 0 ? ('SPECIAL allocation exceeds pool by ' + overflow + ' point(s).') : null;
+    }
+
+    function describeSpecialCaps() {
+        var parts = [];
+        SPECIAL_ATTRS.forEach(function(attr) {
+            var caps = getEffectiveSpecialCaps(attr.key);
+            var hasCap = caps.min !== SPECIAL_MIN || caps.max !== SPECIAL_MAX;
+            if (!hasCap) return;
+            var seg = attr.letter + ': ' + caps.min + '-' + caps.max;
+            parts.push(seg);
+        });
+        return parts.length ? parts.join(' | ') : 'Caps: default 1-10';
     }
 
     // Returns true when the player has a perk or gene pool item that permits
@@ -875,32 +1060,41 @@
         ensureValidSpecial();
         var raceSelected = !!playerData.raceSelected;
         var allocActive  = raceSelected && !!playerData.specialAllocationActive;
+        var enforceErr   = enforceSpecialAllocationState();
+        var remaining    = getSpecialPointsRemaining();
+        var pool         = getSpecialPoolTotal();
         var row = document.getElementById('spRow');
         if (!row) return;
 
         row.innerHTML = SPECIAL_ATTRS.map(function(attr) {
+            var caps       = getEffectiveSpecialCaps(attr.key);
             var val        = playerData.special[attr.key];
+            var effVal     = getEffectiveSpecialValueByKey(attr.key);
+            var bonusVal   = getBonusForSpecial(attr.key);
             var perkUnlock = raceSelected && hasSPECIALAdjustPerk(attr.key);
             var canAdjust  = allocActive || perkUnlock;
-            var canInc = canAdjust && val < SPECIAL_MAX;
-            var canDec = canAdjust && val > SPECIAL_MIN;
+            var canInc = canAdjust && val < caps.max && (deltaAllowed(1, remaining, perkUnlock));
+            var canDec = canAdjust && val > caps.min;
             var nameId = 'sp-name-' + attr.key;
             var valId  = 'sp-val-'  + attr.key;
+            var capLabel = 'Cap ' + caps.min + '-' + caps.max;
+            var valText = bonusVal ? (effVal + ' (' + val + (bonusVal > 0 ? '+' : '') + bonusVal + ')') : String(val);
             return '<div class="sp-attr' + (raceSelected ? ' sp-attr-active' : '') + '"' +
                     ' role="group" aria-labelledby="' + nameId + '">' +
                 '<button class="sp-btn sp-plus"' + (!canInc ? ' disabled' : '') +
                     ' onclick="adjustSpecial(\'' + attr.key + '\',1)"' +
                     ' aria-label="Increase ' + attr.name + '"' +
                     ' aria-describedby="' + valId + '"' +
-                    ' title="' + (canInc ? 'Increase ' + attr.name : 'Adjustment locked') + '">+</button>' +
-                '<span class="sp-attr-val" id="' + valId + '">' + val + '</span>' +
+                    ' title="' + (canInc ? 'Increase ' + attr.name : 'Locked, cap reached, or no points remaining') + '">+</button>' +
+                '<span class="sp-attr-val" id="' + valId + '" title="Base ' + val + (bonusVal ? (', bonus ' + (bonusVal > 0 ? '+' : '') + bonusVal) : '') + '">' + valText + '</span>' +
                 '<span class="sp-attr-letter" aria-hidden="true">' + attr.letter + '</span>' +
                 '<span class="sp-attr-name" id="' + nameId + '">' + attr.name + '</span>' +
+                '<span class="sp-attr-name sp-attr-cap">' + capLabel + '</span>' +
                 '<button class="sp-btn sp-minus"' + (!canDec ? ' disabled' : '') +
                     ' onclick="adjustSpecial(\'' + attr.key + '\',-1)"' +
                     ' aria-label="Decrease ' + attr.name + '"' +
                     ' aria-describedby="' + valId + '"' +
-                    ' title="' + (canDec ? 'Decrease ' + attr.name : 'Adjustment locked') + '">-</button>' +
+                    ' title="' + (canDec ? 'Decrease ' + attr.name : 'At minimum cap or locked') + '">-</button>' +
             '</div>';
         }).join('');
 
@@ -910,6 +1104,9 @@
             if (!raceSelected) {
                 statusEl.textContent = 'AWAITING RACE SELECTION';
                 statusEl.className   = 'sp-status';
+            } else if (playerData.isPureblood === null) {
+                statusEl.textContent = 'AWAITING GENE POOL CHOICE';
+                statusEl.className   = 'sp-status';
             } else if (allocActive) {
                 statusEl.textContent = 'ALLOCATION MODE ACTIVE';
                 statusEl.className   = 'sp-status sp-alloc-active';
@@ -918,6 +1115,36 @@
                 statusEl.className   = 'sp-status';
             }
         }
+
+        var ptsEl = document.getElementById('spPointsInfo');
+        if (ptsEl) ptsEl.textContent = 'Points: ' + Math.max(0, remaining) + ' / ' + pool + ' remaining';
+        var capsEl = document.getElementById('spCapsInfo');
+        if (capsEl) capsEl.textContent = describeSpecialCaps();
+        var valEl = document.getElementById('spValidation');
+        if (valEl) {
+            if (!raceSelected) {
+                valEl.textContent = 'Select your race on Character Data to unlock SPECIAL allocation.';
+                valEl.className = 'sp-validation';
+            } else if (enforceErr) {
+                valEl.textContent = '⚠ ' + enforceErr;
+                valEl.className = 'sp-validation err';
+            } else if (allocActive && remaining > 0) {
+                valEl.textContent = 'Spend remaining points to finish allocation.';
+                valEl.className = 'sp-validation';
+            } else if (allocActive && remaining === 0) {
+                valEl.textContent = '✓ SPECIAL pool fully allocated.';
+                valEl.className = 'sp-validation ok';
+            } else {
+                valEl.textContent = 'SPECIAL allocation is locked. Perk-based adjustments still apply.';
+                valEl.className = 'sp-validation';
+            }
+        }
+    }
+
+    function deltaAllowed(delta, remaining, perkUnlock) {
+        if (delta <= 0) return true;
+        if (perkUnlock && !playerData.specialAllocationActive) return true;
+        return remaining > 0;
     }
 
     // Adjust a single S.P.E.C.I.A.L. attribute by +1 or -1.
@@ -927,14 +1154,20 @@
         var allocActive  = raceSelected && !!playerData.specialAllocationActive;
         var perkUnlock   = raceSelected && hasSPECIALAdjustPerk(key);
         if (!allocActive && !perkUnlock) return;
+        var caps = getEffectiveSpecialCaps(key);
         var cur = playerData.special[key] || 0;
-        var nv  = Math.max(SPECIAL_MIN, Math.min(SPECIAL_MAX, cur + delta));
+        if (cur <= 0) cur = caps.min;
+        var remaining = getSpecialPointsRemaining();
+        if (delta > 0 && !deltaAllowed(delta, remaining, perkUnlock)) return;
+        var nv  = Math.max(caps.min, Math.min(caps.max, cur + delta));
         if (nv === cur) return;
         playerData.special[key] = nv;
+        enforceSpecialAllocationState();
         // Keep pipboySpecial in sync so getSpecialValue() works for perk prereqs
-        localStorage.setItem(lsKey('pipboySpecial'), JSON.stringify(playerData.special));
+        syncEffectiveSpecialStorage();
         savePlayerData();
         updateSpecialDisplay();
+        updateDisplay();
     }
 
     function switchTab(tabName, btn) {
@@ -982,6 +1215,144 @@
             playerData.tagSkillsLocked = !!playerData.skillsLocked &&
                 Object.keys(playerData.skillsLockBaseline || {}).length > 0;
         }
+        if (!playerData.creationBonusMeta || typeof playerData.creationBonusMeta !== 'object') {
+            playerData.creationBonusMeta = createDefaultBonusMeta();
+        }
+        if (playerData.purebloodRestDieBonus === undefined) playerData.purebloodRestDieBonus = 0;
+    }
+
+    function syncEffectiveSpecialStorage() {
+        var effective = {};
+        SPECIAL_ATTRS.forEach(function(attr) {
+            effective[attr.key] = getEffectiveSpecialValueByKey(attr.key);
+        });
+        localStorage.setItem(lsKey('pipboySpecial'), JSON.stringify(effective));
+    }
+
+    function getCurrentPlayerLevel() {
+        return parseInt(localStorage.getItem(lsKey('pipboyLevel')) || playerData.level || '1', 10) || 1;
+    }
+
+    function parseStartingTraitEffects(effectText, sourceLabel, out) {
+        if (!effectText) return;
+        var txt = String(effectText).trim();
+        if (!txt) return;
+
+        var handled = false;
+        var specialMatch = txt.match(SPECIAL_BONUS_REGEX);
+        if (specialMatch) {
+            var bonus = parseInt(specialMatch[1], 10) || 0;
+            var key = specialMatch[2].toLowerCase();
+            if (out.special[key] !== undefined) {
+                out.special[key] += bonus;
+                out.autoApplied.push(sourceLabel + ': ' + formatSigned(bonus) + ' ' + key.charAt(0).toUpperCase() + key.slice(1));
+                handled = true;
+            }
+        }
+
+        var acMatch = txt.match(/(?:^|\b)([+-]?\d+)\s*(?:to\s+)?(?:ac|armor class)\b/i) || txt.match(/unarmored ac is\s*([+-]?\d+)/i);
+        if (acMatch) {
+            var acBonus = parseInt(acMatch[1], 10) || 0;
+            out.acBonus += acBonus;
+            out.autoApplied.push(sourceLabel + ': ' + formatSigned(acBonus) + ' AC');
+            handled = true;
+        }
+
+        // Exclude conditional recovery text like "heal 1 HP per 10 rads" from static HP bonuses.
+        // This parser intentionally targets immediate/static HP adjustments only.
+        var hpMatch = txt.match(/([+-]?\d+)\s*(?:hp|health)\b(?!.*per\s+\d+\s*rads?)/i);
+        if (hpMatch) {
+            var hpBonus = parseInt(hpMatch[1], 10) || 0;
+            out.maxHpBonus += hpBonus;
+            out.autoApplied.push(sourceLabel + ': ' + formatSigned(hpBonus) + ' Max HP');
+            handled = true;
+        }
+
+        var initMatch = txt.match(/([+-]?\d+)\s*(?:to\s+)?initiative/i);
+        if (initMatch) {
+            var initBonus = parseInt(initMatch[1], 10) || 0;
+            out.initiativeBonus += initBonus;
+            out.autoApplied.push(sourceLabel + ': ' + formatSigned(initBonus) + ' Initiative');
+            handled = true;
+        }
+
+        var carryMatch = txt.match(/([+-]?\d+)\s*(?:extra\s+)?carry weight/i);
+        if (carryMatch) {
+            var carryBonus = parseInt(carryMatch[1], 10) || 0;
+            out.carryWeightBonus += carryBonus;
+            out.autoApplied.push(sourceLabel + ': ' + formatSigned(carryBonus) + ' Carry Weight');
+            handled = true;
+        }
+
+        if (/one extra perk at level 1|extra perk at level 1/i.test(txt)) {
+            out.levelOnePerkBonus += 1;
+            out.autoApplied.push(sourceLabel + ': +1 Perk Point at Level 1');
+            handled = true;
+        }
+
+        if (!handled) out.manualAbilities.push(sourceLabel + ': ' + txt);
+    }
+
+    function computeCreationBonuses() {
+        var out = {
+            special: { strength:0, perception:0, endurance:0, charisma:0, intelligence:0, agility:0, luck:0 },
+            acBonus: 0,
+            maxHpBonus: 0,
+            initiativeBonus: 0,
+            carryWeightBonus: 0,
+            levelOnePerkBonus: 0,
+            purebloodPerkEveryLevels: 0,
+            purebloodRestDieBonus: 0,
+            autoApplied: [],
+            manualAbilities: []
+        };
+        if (playerData.baseRace && playerData.baseRace.startingPerksAndTraits) {
+            parseStartingTraitEffects(playerData.baseRace.startingPerksAndTraits, 'Base Race', out);
+        }
+        if (playerData.genePool && playerData.genePool.startingPerk) {
+            parseStartingTraitEffects(playerData.genePool.startingPerk, 'Gene Pool', out);
+        }
+        if (playerData.isPureblood === true) {
+            out.purebloodPerkEveryLevels = 5;
+            out.purebloodRestDieBonus = 1;
+            out.autoApplied.push('Pureblood: +1 bonus perk point every 5 levels');
+            out.autoApplied.push('Pureblood: +1 extra rest die on short rests');
+        }
+        return out;
+    }
+
+    function applyCreationBonuses() {
+        playerData.creationBonuses = computeCreationBonuses();
+        playerData.purebloodRestDieBonus = playerData.creationBonuses.purebloodRestDieBonus || 0;
+        playerData.acBonusFromCreation = playerData.creationBonuses.acBonus || 0;
+        playerData.maxHpBonusFromCreation = playerData.creationBonuses.maxHpBonus || 0;
+        playerData.initiativeBonusFromCreation = playerData.creationBonuses.initiativeBonus || 0;
+        playerData.carryWeightBonusFromCreation = playerData.creationBonuses.carryWeightBonus || 0;
+
+        if (!playerData.creationBonusMeta || typeof playerData.creationBonusMeta !== 'object') {
+            playerData.creationBonusMeta = createDefaultBonusMeta();
+        }
+        var level = getCurrentPlayerLevel();
+        if (level >= 1 && playerData.creationBonuses.levelOnePerkBonus > 0 && !playerData.creationBonusMeta.levelOnePerkGranted) {
+            playerData.perkPointsAvailable = (playerData.perkPointsAvailable || 0) + playerData.creationBonuses.levelOnePerkBonus;
+            playerData.creationBonusMeta.levelOnePerkGranted = true;
+        }
+        syncEffectiveSpecialStorage();
+    }
+
+    function applyPurebloodLevelBonus(currentLevel) {
+        if (!playerData.creationBonuses || playerData.creationBonuses.purebloodPerkEveryLevels <= 0) return;
+        if (!playerData.creationBonusMeta || typeof playerData.creationBonusMeta !== 'object') {
+            playerData.creationBonusMeta = createDefaultBonusMeta();
+        }
+        var perLevels = playerData.creationBonuses.purebloodPerkEveryLevels || 0;
+        if (perLevels <= 0) return;
+        var eligible = Math.floor((currentLevel || 0) / perLevels);
+        var granted = playerData.creationBonusMeta.purebloodPerksGranted || 0;
+        if (eligible <= granted) return;
+        var add = eligible - granted;
+        playerData.perkPointsAvailable = (playerData.perkPointsAvailable || 0) + add;
+        playerData.creationBonusMeta.purebloodPerksGranted = eligible;
     }
 
     function saveEffects() {
@@ -1149,6 +1520,7 @@
     function updateDisplay() {
         // Guard: ensure skills is always a valid object before rendering
         ensureValidSkills();
+        syncEffectiveSpecialStorage();
         var pts    = playerData.skillPointsAvailable || 0;
         var locked = !!playerData.skillsLocked;
         document.getElementById('tagBadge').textContent = playerData.tagSkills.length + '/' + MAX_TAG_SKILLS;
@@ -1181,7 +1553,7 @@
         document.getElementById('skillsGrid').innerHTML = SKILLS.map(function(skill){
             var sp       = getSpecialForSkill(skill);
             var spKey    = getSpecialKeyForSkill(skill);
-            var spVal    = spKey ? (playerData.special[spKey] || DEFAULT_SPECIAL_VALUE) : DEFAULT_SPECIAL_VALUE;
+            var spVal    = spKey ? (getEffectiveSpecialValueByKey(spKey) || DEFAULT_SPECIAL_VALUE) : DEFAULT_SPECIAL_VALUE;
             var spMod    = getSpecialModifier(spVal);
             var val      = playerData.skills[skill] || 0;
             var tagged   = playerData.tagSkills.indexOf(skill) !== -1;
@@ -1237,6 +1609,24 @@
                     '<div class="perk-description">' + escHtml(desc) + '</div>' +
                     '</div>';
             }).join('');
+        updateCreationEffectsDisplay();
+    }
+
+    function updateCreationEffectsDisplay() {
+        var autoEl = document.getElementById('startingAutoBonusesList');
+        var manualEl = document.getElementById('startingManualAbilitiesList');
+        if (!autoEl || !manualEl) return;
+        var bonuses = playerData.creationBonuses || computeCreationBonuses();
+        autoEl.innerHTML = (bonuses.autoApplied && bonuses.autoApplied.length)
+            ? bonuses.autoApplied.map(function(line) {
+                return '<div class="creation-effects-item">' + escHtml(line) + '</div>';
+            }).join('')
+            : '<div class="creation-effects-item">No auto-applied starting bonuses detected.</div>';
+        manualEl.innerHTML = (bonuses.manualAbilities && bonuses.manualAbilities.length)
+            ? bonuses.manualAbilities.map(function(line) {
+                return '<div class="creation-effects-item manual">' + escHtml(line) + '</div>';
+            }).join('')
+            : '<div class="creation-effects-item manual">No manual starting abilities detected.</div>';
     }
 
     // ---- XP ----
@@ -1536,14 +1926,7 @@
         var map = { ST:'strength', PE:'perception', EN:'endurance', CH:'charisma', IN:'intelligence', AG:'agility', LK:'luck' };
         var domName = map[code];
         if (!domName) return 5; // default neutral SPECIAL value
-        try {
-            var saved = localStorage.getItem(lsKey('pipboySpecial'));
-            if (saved) {
-                var s = JSON.parse(saved);
-                if (typeof s[domName] === 'number') return s[domName];
-            }
-        } catch(e){}
-        return 5; // default neutral SPECIAL value
+        return getEffectiveSpecialValueByKey(domName) || 5;
     }
 
     function checkPerkPrereqs(perk) {
@@ -1570,7 +1953,7 @@
     }
 
     function renderLevelUpPerks() {
-        var currentLevel = parseInt(localStorage.getItem(lsKey('pipboyLevel')) || '1') || 1;
+        var currentLevel = getCurrentPlayerLevel();
         var perkPts = playerData.perkPointsAvailable || 0;
         var grid = document.getElementById('luPerkGrid');
         if (!grid) return;
@@ -1627,7 +2010,7 @@
         grid.innerHTML = SKILLS.map(function(skill) {
             var sp       = getSpecialForSkill(skill);
             var spKey    = getSpecialKeyForSkill(skill);
-            var spVal    = spKey ? (playerData.special[spKey] || DEFAULT_SPECIAL_VALUE) : DEFAULT_SPECIAL_VALUE;
+            var spVal    = spKey ? (getEffectiveSpecialValueByKey(spKey) || DEFAULT_SPECIAL_VALUE) : DEFAULT_SPECIAL_VALUE;
             var spMod    = getSpecialModifier(spVal);
             var val      = playerData.skills[skill] || 0;
             var tagged   = playerData.tagSkills.indexOf(skill) !== -1;
@@ -1797,11 +2180,14 @@
             // Already in level-up window (e.g. page reload mid-allocation) — capture baseline if not set
             if (!_levelUpBaseline) _levelUpBaseline = deepCopy(playerData);
         }
+        applyPurebloodLevelBonus(level);
     }
 
     // ---- INIT ----
     window.addEventListener('DOMContentLoaded', function() {
         loadPlayerData();
+        applyCreationBonuses();
+        enforceSpecialAllocationState();
         loadEffects();
         loadCharacterName();
         updateDisplay();
@@ -1813,6 +2199,7 @@
         updateXPDisplay(storedXP);
         refreshLevelUpTabVisibility();
         updateLevelUpTab();
+        savePlayerData();
         showOnboarding();
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
@@ -1868,6 +2255,8 @@
                     Object.assign(playerData, payload.data);
                     ensureValidSkills();
                     ensureValidSpecial();
+                    applyCreationBonuses();
+                    enforceSpecialAllocationState();
                     updateDisplay();
                     updatePerksDisplay();
                     updateEffectsDisplay();
@@ -1901,6 +2290,8 @@
                 }
                 ensureValidSkills();
                 ensureValidSpecial();
+                applyCreationBonuses();
+                enforceSpecialAllocationState();
                 updateDisplay();
                 updatePerksDisplay();
                 updateEffectsDisplay();
@@ -1943,6 +2334,7 @@
                     var gained = newLevel - oldLevel;
                     playerData.skillPointsAvailable = (playerData.skillPointsAvailable || 0) + gained * SKILL_POINTS_PER_LEVEL;
                     playerData.perkPointsAvailable  = (playerData.perkPointsAvailable  || 0) + gained;
+                    applyPurebloodLevelBonus(newLevel);
                     playerData.skillsLocked         = false;
                     playerData.skillsAllocationActive = true;
                     playerData.perkSelectionActive  = true;
