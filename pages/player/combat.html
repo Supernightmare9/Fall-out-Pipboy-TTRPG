@@ -1091,6 +1091,18 @@
         .skill-proficient { background: rgba(74,222,128,0.12); color: var(--vault-green); border: 1px solid rgba(74,222,128,0.3); }
         .skill-standard   { background: rgba(74,222,128,0.04); color: rgba(74,222,128,0.4); border: 1px solid rgba(74,222,128,0.1); }
 
+        /* ===== SAVING THROWS PANEL (combat page) ===== */
+        .combat-st-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 5px 8px; margin-bottom: 4px;
+            background: var(--vault-dark); border: 1px solid rgba(74,222,128,0.12);
+        }
+        .combat-st-row.combat-st-proficient { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.04); }
+        .combat-st-name { font-size: 10px; color: var(--vault-green); }
+        .combat-st-badge { font-size: 8px; color: var(--vault-gold); margin-left: 5px; }
+        .combat-st-value { font-size: 14px; font-weight: bold; color: var(--vault-green); min-width: 28px; text-align: right; }
+        .combat-st-value.combat-st-prof-val { color: var(--vault-gold); }
+
         /* ===== DICE ROLLER ===== */
         .dice-quick-row { display: flex; gap: 4px; flex-wrap: wrap; }
         .dice-btn {
@@ -1986,6 +1998,12 @@
                 <div class="conditions-list" id="conditionsDisplay">
                     <div class="empty-state">No active conditions.</div>
                 </div>
+
+                <!-- Saving Throws -->
+                <div class="panel-title" style="margin-top:18px;">🎲 Saving Throws</div>
+                <div id="combatSavingThrows">
+                    <div class="empty-state">Connect to sync server to view saving throws.</div>
+                </div>
             </div><!-- end combatInfoPanel -->
 
             <!-- RIGHT: INVENTORY & ABILITIES TABS -->
@@ -2065,6 +2083,7 @@
     <script src="../../assets/data/accounts.js"></script>
     <script src="../../assets/data/campaigns.js"></script>
     <script src="../../assets/data/pools/items.js"></script>
+    <script src="../../assets/data/pools/base-race.js"></script>
     <script src="../../assets/helpers/Managers/settingsManager.js"></script>
     <script src="../../assets/helpers/Managers/storageManager.js"></script>
     <!-- fallout_stat_bonuses.js must be loaded before inventoryManager.js so that
@@ -2412,6 +2431,7 @@
         refreshTempHpCombatDisplay();
         loadEffectsCombat();
         renderAbilities();
+        renderSavingThrows();
     }
 
     // ── CHARACTER INFO (LEFT) ────────────────────────────────────
@@ -3373,9 +3393,111 @@
         html += '</div>';
 
         div.innerHTML = html;
+        // Also re-render saving throws whenever abilities are refreshed
+        renderSavingThrows();
     }
 
-    // ── PROGRESSION DISPLAY ──────────────────────────────────────
+    // ── SAVING THROWS (combat sidebar) ───────────────────────────
+    // Order matches SPECIAL attributes from stats.html
+    var SPECIAL_ATTRS_COMBAT = [
+        { key: 'strength',     letter: 'S', name: 'Strength' },
+        { key: 'perception',   letter: 'P', name: 'Perception' },
+        { key: 'endurance',    letter: 'E', name: 'Endurance' },
+        { key: 'charisma',     letter: 'C', name: 'Charisma' },
+        { key: 'intelligence', letter: 'I', name: 'Intelligence' },
+        { key: 'agility',      letter: 'A', name: 'Agility' },
+        { key: 'luck',         letter: 'L', name: 'Luck' }
+    ];
+
+    /**
+     * Parse saving throw proficiencies from a race object.
+     * Returns { fixed: ['strength',...], choiceCount: N }
+     */
+    function getCombatRaceSavingThrowInfo(race) {
+        var SPECIAL_NAMES = ['Strength','Perception','Endurance','Charisma','Intelligence','Agility','Luck'];
+        var result = { fixed: [], choiceCount: 0 };
+        if (!race || !Array.isArray(race.savingThrowProf)) return result;
+        race.savingThrowProf.forEach(function(entry) {
+            if (SPECIAL_NAMES.indexOf(entry) !== -1) {
+                result.fixed.push(entry.toLowerCase());
+            } else if (typeof entry === 'string' && entry.toLowerCase().indexOf('choose') !== -1) {
+                result.choiceCount++;
+            }
+        });
+        return result;
+    }
+
+    function renderSavingThrows() {
+        var container = document.getElementById('combatSavingThrows');
+        if (!container) return;
+
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        if (!liveData) {
+            container.innerHTML = '<div class="empty-state">Connect to sync server to view saving throws.</div>';
+            return;
+        }
+
+        // Resolve the player's race from baseRaces (window.baseRaces from base-race.js)
+        var raceName   = liveData.baseRace && liveData.baseRace.name ? liveData.baseRace.name : null;
+        var raceObj    = null;
+        if (raceName && Array.isArray(window.baseRaces)) {
+            raceObj = window.baseRaces.find(function(r) { return r.name === raceName; }) || null;
+            // fall back to the embedded object if find doesn't exist
+            if (!raceObj) {
+                for (var ri = 0; ri < window.baseRaces.length; ri++) {
+                    if (window.baseRaces[ri].name === raceName) { raceObj = window.baseRaces[ri]; break; }
+                }
+            }
+        }
+        // Fallback: if live data has the full race object embedded use it directly
+        if (!raceObj && liveData.baseRace && Array.isArray(liveData.baseRace.savingThrowProf)) {
+            raceObj = liveData.baseRace;
+        }
+
+        var info     = getCombatRaceSavingThrowInfo(raceObj);
+        var profBonus = getLivePlayerProficiencyBonus(liveData);
+
+        // Build proficiency set: fixed + player choices
+        var profSet = {};
+        info.fixed.forEach(function(k) { profSet[k] = true; });
+        var chosen = Array.isArray(liveData.chosenSavingThrowProf) ? liveData.chosenSavingThrowProf : [];
+        chosen.forEach(function(k) { if (k) profSet[k] = true; });
+
+        var html = '';
+        SPECIAL_ATTRS_COMBAT.forEach(function(attr) {
+            var spVal    = (liveData.special && typeof liveData.special[attr.key] === 'number')
+                           ? liveData.special[attr.key] : DEFAULT_SPECIAL_VALUE;
+            var mod      = spVal - DEFAULT_SPECIAL_VALUE;
+            var isProfic = !!profSet[attr.key];
+            var total    = mod + (isProfic ? profBonus : 0);
+            var totalFmt = (total >= 0 ? '+' : '') + total;
+            html += '<div class="combat-st-row' + (isProfic ? ' combat-st-proficient' : '') + '" ' +
+                'title="' + escHtml(attr.name + ': mod ' + (mod >= 0 ? '+' : '') + mod + (isProfic ? ' + Prof +' + profBonus : '') + ' = ' + totalFmt) + '">' +
+                '<span class="combat-st-name">' + escHtml(attr.name) +
+                    (isProfic ? '<span class="combat-st-badge">&#10022;</span>' : '') +
+                '</span>' +
+                '<span class="combat-st-value' + (isProfic ? ' combat-st-prof-val' : '') + '">' + totalFmt + '</span>' +
+                '</div>';
+        });
+
+        // Show player-choice note if applicable
+        if (info.choiceCount > 0) {
+            var chosenNames = chosen
+                .filter(function(k) { return !!k; })
+                .map(function(k) {
+                    var a = SPECIAL_ATTRS_COMBAT.filter(function(x) { return x.key === k; })[0];
+                    return a ? a.name : k;
+                });
+            var choiceNote = chosenNames.length > 0
+                ? 'Choice profs: ' + chosenNames.join(', ')
+                : 'Choose ' + info.choiceCount + ' proficiencie(s) on Stats page';
+            html += '<div style="font-size:8px;color:rgba(251,191,36,0.6);margin-top:5px;letter-spacing:0.5px;">' +
+                escHtml(choiceNote) + '</div>';
+        }
+
+        container.innerHTML = html || '<div class="empty-state">No race selected.</div>';
+    }
     // Reads the canonical XP from the server live cache when connected;
     // falls back to ProgressionManager (localStorage) when offline.
     function updateProgressionDisplay() {

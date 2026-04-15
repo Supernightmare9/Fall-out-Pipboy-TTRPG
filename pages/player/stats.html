@@ -274,6 +274,55 @@
 
         .skill-btn-disabled { opacity: 0.3; cursor: not-allowed; }
 
+        /* TAG SKILLS LOCK BUTTON */
+        .tag-lock-btn {
+            background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.5);
+            color: var(--vault-gold); font-family: 'Courier New', monospace;
+            font-size: 9px; font-weight: bold; padding: 3px 10px;
+            cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s;
+        }
+        .tag-lock-btn:hover { background: rgba(251,191,36,0.2); box-shadow: 0 0 8px rgba(251,191,36,0.4); }
+        .tag-skills-locked-label {
+            font-size: 9px; color: rgba(251,191,36,0.7); letter-spacing: 1px;
+            text-transform: uppercase; border: 1px solid rgba(251,191,36,0.3);
+            padding: 2px 8px;
+        }
+
+        /* SAVING THROWS TAB */
+        .saving-throws-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;
+        }
+        @media (max-width: 560px) { .saving-throws-grid { grid-template-columns: 1fr; } }
+        .st-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; background: var(--vault-dark);
+            border: 1px solid rgba(74,222,128,0.15); transition: border-color 0.15s;
+        }
+        .st-row.st-proficient { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.04); }
+        .st-row:hover { border-color: rgba(74,222,128,0.35); }
+        .st-row.st-proficient:hover { border-color: rgba(251,191,36,0.7); }
+        .st-left { flex: 1; }
+        .st-name { font-size: 11px; font-weight: bold; color: var(--vault-green); }
+        .st-profbadge { font-size: 8px; color: var(--vault-gold); letter-spacing: 1px; margin-top: 2px; }
+        .st-breakdown { font-size: 9px; color: rgba(74,222,128,0.6); margin-top: 2px; }
+        .st-total { font-size: 20px; font-weight: bold; color: var(--vault-green); text-shadow: 0 0 5px rgba(74,222,128,0.4); min-width: 36px; text-align: right; }
+        .st-total.st-total-prof { color: var(--vault-gold); text-shadow: 0 0 5px rgba(251,191,36,0.4); }
+        .st-choice-section {
+            margin-top: 14px; padding: 10px 12px;
+            border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.04);
+        }
+        .st-choice-title { font-size: 10px; font-weight: bold; color: var(--vault-gold); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+        .st-choice-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 10px; }
+        .st-choice-label { color: rgba(74,222,128,0.7); }
+        .st-choice-select {
+            background: var(--vault-dark); border: 1px solid rgba(251,191,36,0.4);
+            color: var(--vault-green); font-family: 'Courier New', monospace;
+            font-size: 10px; padding: 3px 8px; outline: none; flex: 1;
+        }
+        .st-choice-select:focus { border-color: var(--vault-gold); }
+        .st-choice-select:disabled { opacity: 0.5; cursor: not-allowed; }
+        .st-no-race { font-size: 10px; color: rgba(74,222,128,0.4); font-style: italic; padding: 12px 0; }
+
         @media (max-width: 480px) { body { padding: 10px; } .vault-title { font-size: 18px; letter-spacing: 2px; } .hp-current { font-size: 28px; } .tab-btn { padding: 6px 10px; font-size: 9px; } }
 
         /* INLINE HELP TEXT */
@@ -631,6 +680,7 @@
         <!-- TABS NAV -->
         <div class="tab-buttons">
             <button class="tab-btn active" onclick="switchTab('skills', this)">&#127919; SKILLS</button>
+            <button class="tab-btn"        onclick="switchTab('saves', this)">&#127959; SAVING THROWS</button>
             <button class="tab-btn"        onclick="switchTab('perks', this)">&#11088; PERKS</button>
             <button class="tab-btn"        onclick="switchTab('effects', this)">&#10022; EFFECTS</button>
             <button class="tab-btn level-up-tab-btn" id="levelUpTabBtn" onclick="switchTab('levelup', this)" style="display:none;border-color:rgba(251,191,36,0.6);color:#fbbf24;animation:blinkText 1s ease-in-out infinite;">&#11014; LEVEL UP</button>
@@ -728,6 +778,8 @@
             <div class="stat-help-text" style="margin-bottom:12px;">Skills represent your character's training (0–100 allocation value). Each skill's <strong>modifier</strong> is derived from its governing S.P.E.C.I.A.L. stat (score 5 = 0; each point above/below adds/subtracts 1). Skill points (earned on level-up) track how much you have invested in a skill. Check up to 3 skills as Tag Skills <strong>at creation</strong> to add your proficiency bonus to that skill's modifier. Lock in your allocation when done.</div>
             <div class="tag-header">
                 TAG SKILLS: <span class="tag-count-badge" id="tagBadge">0/3</span>
+                <button id="lockTagSkillsBtn" class="tag-lock-btn" onclick="lockInTagSkills()" style="display:none;" title="Permanently lock your tag skill selections">&#128274; Lock In Tag Skills</button>
+                <span id="tagSkillsLockedLabel" class="tag-skills-locked-label" style="display:none;">&#128274; TAG SKILLS LOCKED</span>
             </div>
             <div class="skill-points-pool">
                 <span class="skill-points-label">Skill Points Available:</span>
@@ -736,6 +788,14 @@
                 <button id="lockInBtn" class="update-btn" onclick="lockInSkills()" style="margin-left:12px;display:none;">Lock In Skills</button>
             </div>
             <div class="skills-grid" id="skillsGrid"></div>
+        </div>
+
+        <!-- TAB 2: SAVING THROWS -->
+        <div class="tab-content" id="tab-saves">
+            <div class="stat-help-text" style="margin-bottom:12px;">Saving throws represent your ability to resist hazards. Each throw's bonus equals the governing S.P.E.C.I.A.L. stat's ability modifier (stat − 5). If your race grants proficiency in that throw, your proficiency bonus is also added. Choose any player-selectable proficiencies below.</div>
+            <div id="savingThrowsContent">
+                <div class="st-no-race">Saving throws will appear once you have selected a race.</div>
+            </div>
         </div>
 
         <!-- TAB 3: PERKS -->
@@ -1303,6 +1363,10 @@
             playerData.creationBonusMeta = createDefaultBonusMeta();
         }
         if (playerData.purebloodRestDieBonus === undefined) playerData.purebloodRestDieBonus = 0;
+        // Migration: initialize chosenSavingThrowProf for existing saves
+        if (!Array.isArray(playerData.chosenSavingThrowProf)) {
+            playerData.chosenSavingThrowProf = [];
+        }
     }
 
     function syncEffectiveSpecialStorage() {
@@ -1630,8 +1694,19 @@
             }
         }
 
+        // Update Lock In Tag Skills button visibility
+        var tagLockBtn   = document.getElementById('lockTagSkillsBtn');
+        var tagLockLabel = document.getElementById('tagSkillsLockedLabel');
+        var tagLocked    = !!playerData.tagSkillsLocked;
+        if (tagLockBtn) {
+            // Show lock button when tags not yet locked and at least one tag is selected
+            tagLockBtn.style.display = (!tagLocked && playerData.tagSkills.length > 0) ? '' : 'none';
+        }
+        if (tagLockLabel) {
+            tagLockLabel.style.display = tagLocked ? '' : 'none';
+        }
+
         var atMax      = playerData.tagSkills.length >= MAX_TAG_SKILLS;
-        var tagLocked  = !!playerData.tagSkillsLocked;
         var profBonus  = (typeof ProgressionManager !== 'undefined')
                          ? ProgressionManager.getProficiencyBonus(playerData.level || 1) : 2;
         document.getElementById('skillsGrid').innerHTML = SKILLS.map(function(skill){
@@ -1665,6 +1740,8 @@
                 '</div>' +
                 '</div>';
         }).join('');
+        // Keep saving throws in sync whenever skills/race/level change
+        updateSavingThrowsDisplay();
     }
 
     // ---- LOCK IN SKILLS ----
@@ -1677,6 +1754,142 @@
         playerData.tagSkillsLocked = true;
         savePlayerData();
         updateDisplay();
+    }
+
+    // ---- LOCK IN TAG SKILLS (separate, can happen before skills are spent) ----
+    function lockInTagSkills() {
+        if (playerData.tagSkillsLocked) return;
+        showConfirmModal(
+            'Lock In Tag Skills',
+            'Are you sure? Your ' + playerData.tagSkills.length + ' selected Tag Skill(s) will be permanently locked: ' +
+                (playerData.tagSkills.length > 0 ? playerData.tagSkills.join(', ') : '(none)') + '. This cannot be undone.',
+            function() {
+                playerData.tagSkillsLocked = true;
+                savePlayerData();
+                updateDisplay();
+            }
+        );
+    }
+
+    // ---- SAVING THROWS ----
+
+    /**
+     * Parse the race's savingThrowProf array into:
+     *   { fixed: ['strength','endurance',...], choiceCount: 1 }
+     * "Player may choose" entries increment choiceCount.
+     */
+    function getRaceSavingThrowInfo(race) {
+        var SPECIAL_NAMES = ['Strength','Perception','Endurance','Charisma','Intelligence','Agility','Luck'];
+        var result = { fixed: [], choiceCount: 0 };
+        if (!race || !Array.isArray(race.savingThrowProf)) return result;
+        race.savingThrowProf.forEach(function(entry) {
+            if (SPECIAL_NAMES.indexOf(entry) !== -1) {
+                result.fixed.push(entry.toLowerCase());
+            } else if (typeof entry === 'string' && entry.toLowerCase().indexOf('choose') !== -1) {
+                result.choiceCount++;
+            }
+        });
+        return result;
+    }
+
+    /**
+     * Returns the set of SPECIAL keys (lowercase) the player is currently
+     * proficient in for saving throws: fixed race prof + player choices.
+     */
+    function getActiveSavingThrowProfs() {
+        var race = playerData.baseRace || null;
+        var info = getRaceSavingThrowInfo(race);
+        var profs = {};
+        info.fixed.forEach(function(k) { profs[k] = true; });
+        var chosen = Array.isArray(playerData.chosenSavingThrowProf) ? playerData.chosenSavingThrowProf : [];
+        chosen.forEach(function(k) { if (k) profs[k] = true; });
+        return profs;
+    }
+
+    /** Handler called when a player-choice saving throw proficiency select changes. */
+    window.onSavingThrowChoiceChange = function(idx, value) {
+        if (!Array.isArray(playerData.chosenSavingThrowProf)) {
+            playerData.chosenSavingThrowProf = [];
+        }
+        playerData.chosenSavingThrowProf[idx] = value || '';
+        savePlayerData();
+        updateSavingThrowsDisplay();
+    };
+
+    function updateSavingThrowsDisplay() {
+        var container = document.getElementById('savingThrowsContent');
+        if (!container) return;
+
+        var race = playerData.baseRace || null;
+        if (!race) {
+            container.innerHTML = '<div class="st-no-race">Saving throws will appear once you have selected a race.</div>';
+            return;
+        }
+
+        var info      = getRaceSavingThrowInfo(race);
+        var profs     = getActiveSavingThrowProfs();
+        var profBonus = (typeof ProgressionManager !== 'undefined')
+                        ? ProgressionManager.getProficiencyBonus(playerData.level || 1) : 2;
+        var chosen    = Array.isArray(playerData.chosenSavingThrowProf) ? playerData.chosenSavingThrowProf : [];
+
+        // Fixed race proficiencies set (for disabling in choice dropdowns)
+        var fixedSet = {};
+        info.fixed.forEach(function(k) { fixedSet[k] = true; });
+
+        // Build saving throw rows for all 7 SPECIAL stats
+        var html = '<div class="saving-throws-grid">';
+        SPECIAL_ATTRS.forEach(function(attr) {
+            var spVal    = getEffectiveSpecialValueByKey(attr.key) || DEFAULT_SPECIAL_VALUE;
+            var mod      = getSpecialModifier(spVal);
+            var isProfic = !!profs[attr.key];
+            var total    = mod + (isProfic ? profBonus : 0);
+            var totalFmt = (total >= 0 ? '+' : '') + total;
+            var modFmt   = (mod >= 0 ? '+' : '') + mod;
+            var breakdown = isProfic
+                ? modFmt + ' [' + attr.letter + '] + ' + profBonus + ' [Prof] = ' + totalFmt
+                : modFmt + ' [' + attr.letter + ']';
+            html += '<div class="st-row' + (isProfic ? ' st-proficient' : '') + '">' +
+                '<div class="st-left">' +
+                    '<div class="st-name">' + attr.name + '</div>' +
+                    (isProfic ? '<div class="st-profbadge">&#10022; PROFICIENT (+' + profBonus + ')</div>' : '') +
+                    '<div class="st-breakdown">' + breakdown + '</div>' +
+                '</div>' +
+                '<div class="st-total' + (isProfic ? ' st-total-prof' : '') + '">' + totalFmt + '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+
+        // Player-choice proficiency selectors (if race grants any)
+        if (info.choiceCount > 0) {
+            var SPECIAL_OPTIONS = SPECIAL_ATTRS.map(function(a) { return a; });
+            html += '<div class="st-choice-section">';
+            html += '<div class="st-choice-title">&#127919; Choose Saving Throw Proficiency</div>';
+            html += '<div class="stat-help-text" style="margin-bottom:8px;">Your race allows you to select ' +
+                info.choiceCount + ' additional saving throw proficiencie(s). Choose the S.P.E.C.I.A.L. stat(s) below.</div>';
+            for (var i = 0; i < info.choiceCount; i++) {
+                var currentChoice = chosen[i] || '';
+                // Other chosen slots (to avoid picking the same stat twice)
+                var otherChoices = [];
+                for (var j = 0; j < info.choiceCount; j++) {
+                    if (j !== i && chosen[j]) otherChoices.push(chosen[j]);
+                }
+                html += '<div class="st-choice-row">';
+                html += '<span class="st-choice-label">Choice ' + (i + 1) + ':</span>';
+                html += '<select class="st-choice-select" onchange="onSavingThrowChoiceChange(' + i + ', this.value)">';
+                html += '<option value="">-- Select --</option>';
+                SPECIAL_OPTIONS.forEach(function(a) {
+                    // Disable fixed race profs and already-chosen-in-other-slot stats
+                    var disabled = fixedSet[a.key] || otherChoices.indexOf(a.key) !== -1;
+                    var selected = (a.key === currentChoice) ? ' selected' : '';
+                    html += '<option value="' + a.key + '"' + selected + (disabled ? ' disabled' : '') + '>' + a.name + '</option>';
+                });
+                html += '</select>';
+                html += '</div>';
+            }
+            html += '</div>';
+        }
+
+        container.innerHTML = html;
     }
 
     // ---- PERKS ----
