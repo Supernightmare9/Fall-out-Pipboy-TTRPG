@@ -281,6 +281,17 @@
     },
 
     /**
+     * Award terminal-hack XP to this player via the server.
+     * The server applies the player's INT bonus and emits 'player:xp-updated'.
+     * @param {number} rawXp  Base XP before INT bonus (typically 50)
+     */
+    pushTerminalXP: function (rawXp) {
+      if (!_socket || !_connected) return;
+      _socket.emit('player:terminal-xp', { rawXp: rawXp });
+      _flashSync();
+    },
+
+    /**
      * Send a health mutation to the server for centralised processing.
      * @param {string} type   'damage'|'heal'|'addRads'|'removeRads'|'setTempHp'
      * @param {number} amount Non-negative integer

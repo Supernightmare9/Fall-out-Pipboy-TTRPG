@@ -881,6 +881,63 @@ io.on('connection', (socket) => {
   });
 
 
+  // ── PLAYER: terminal hacking XP award ────────────────────────────────────
+  // Payload: { rawXp: number }
+  // Emitted by the terminal minigame client when the player successfully hacks
+  // a terminal.  The server applies the player's INT bonus (via
+  // _getIntXPMultiplier), updates player.data.xp, and broadcasts
+  // 'player:xp-updated' so every UI panel (combat, stats) stays in sync.
+  // Only the acting player receives XP — no party-wide award.
+  socket.on('player:terminal-xp', ({ rawXp } = {}) => {
+    const { role, sessionCode, handle } = socket.data || {};
+    if (role !== 'player' || !sessionCode || !handle) return;
+
+    const session = sessions[sessionCode];
+    if (!session || !session.players[handle]) return;
+
+    if (typeof rawXp !== 'number' || rawXp <= 0) return;
+
+    const player = session.players[handle];
+
+    // Apply INT bonus server-side so the client cannot bypass it
+    const intStat  = (player.data.special && typeof player.data.special.intelligence === 'number')
+                     ? player.data.special.intelligence : 5;
+    const intBonus = _getIntXPMultiplier(intStat);
+    const finalXp  = Math.round(rawXp * intBonus);
+
+    const oldXp    = player.data.xp || 0;
+    const newXp    = oldXp + finalXp;
+    const oldLevel = _deriveLevel(oldXp);
+    const newLevel = _deriveLevel(newXp);
+    player.data.xp    = newXp;
+    player.data.level = newLevel;
+
+    const levelsGained = newLevel > oldLevel
+      ? Array.from({ length: newLevel - oldLevel }, (_, i) => oldLevel + i + 1)
+      : [];
+
+    // Push canonical XP update back to this player's socket
+    socket.emit('player:xp-updated', {
+      xp:           newXp,
+      level:        newLevel,
+      gained:       finalXp,
+      levelsGained: levelsGained,
+      source:       'Terminal Hack'
+    });
+
+    // Notify Overseer with fresh snapshot
+    if (session.overseerSocketId) {
+      io.to(session.overseerSocketId).emit('overseer:player-update', {
+        handle,
+        field:    'xp',
+        value:    newXp,
+        snapshot: player.data
+      });
+    }
+
+    console.log(`[player:terminal-xp] ${handle} @ ${sessionCode} | raw ${rawXp} → final ${finalXp} XP (INT ${intStat} ×${intBonus})`);
+  });
+
   // Payload: { awards: [{ playerHandle, xp, message }] }
   // Immediately delivers per-player XP grants mid-combat.  Each eligible player
   // receives a 'player:xp-updated' event with their new canonical XP total so

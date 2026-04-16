@@ -836,7 +836,7 @@
                     <dt>DIFFICULTY</dt>
                     <dd>Determined by your Intelligence stat. Higher INT = shorter words, fewer choices, more attempts.</dd>
                     <dt>XP REWARD</dt>
-                    <dd>EASY: 25 XP &nbsp;|&nbsp; MEDIUM: 50 XP &nbsp;|&nbsp; HARD: 100 XP</dd>
+                    <dd>50 XP base plus your Intelligence bonus (INT multiplier ×3% per point). Higher INT = more XP.</dd>
                 </dl>
                 <hr style="border-color:rgba(0,170,34,0.25);margin:10px 0;">
                 <strong style="color:var(--terminal-bright);letter-spacing:3px;">SYSTEM COMMANDS</strong>
@@ -863,6 +863,9 @@
 </div><!-- /terminal-wrapper -->
 
 <script src="../assets/logic/xp/xpprogression.js"></script>
+<script src="../assets/logic/xp/xpdistribution.js"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+<script src="../assets/helpers/sync/playerSync.js"></script>
 <script>
 // ════════════════════════════════════════════════
 //  FALLOUT TERMINAL HACKING MINIGAME
@@ -919,7 +922,8 @@ let gameState = {
     guessedWords: [],
     gameOver: false,
     playerName: 'UNKNOWN',
-    intelligence: 5
+    intelligence: 5,
+    playerHandle: 'player'
 };
 
 // ── INITIALISE ────────────────────────────────
@@ -938,6 +942,9 @@ function loadPlayerInfo() {
         localStorage.getItem('PIPBOY_PLAYER_HANDLE') ||
         'player'
     ).toLowerCase();
+
+    // Store handle in gameState so awardXP can use the scoped localStorage key
+    gameState.playerHandle = playerHandle;
 
     // Primary: player-scoped pipboyPlayerData — includes current buffs/debuffs
     try {
@@ -1346,36 +1353,35 @@ function guessWord(word) {
 // ── XP AWARD ─────────────────────────────────
 
 function awardXP() {
-    const xpReward = DIFFICULTY_CONFIG[gameState.difficulty].xp;
+    // Base reward: 50 XP + INT bonus (using the game's standard multiplier table)
+    const BASE_XP = 50;
+    const xpReward = calcXpWithIntBonus(BASE_XP, gameState.intelligence);
 
-    // Update pipboyPlayerData using xp_system.js level calculation
+    const playerHandle = gameState.playerHandle;
+
+    // Update player-scoped pipboyPlayerData (same key used by loadPlayerInfo).
+    // Falls back to the legacy unscoped key as seed data so the first XP award
+    // migrates any existing pre-scoped record into the scoped slot.
     try {
-        const saved = localStorage.getItem('pipboyPlayerData');
-        let playerData = saved ? JSON.parse(saved) : { xp: 0, level: 1 };
-        const oldXP = playerData.xp || 0;
-        const newXP = oldXP + xpReward;
-        playerData.xp = newXP;
+        const scopedKey  = 'pipboyPlayerData_' + playerHandle;
+        const saved      = localStorage.getItem(scopedKey) ||
+                           localStorage.getItem('pipboyPlayerData'); // legacy fallback / migration seed
+        let playerData   = saved ? JSON.parse(saved) : { xp: 0, level: 1 };
+        const newXP      = (playerData.xp || 0) + xpReward;
+        playerData.xp    = newXP;
         playerData.level = getLevelFromXP(newXP);
-        localStorage.setItem('pipboyPlayerData', JSON.stringify(playerData));
+        localStorage.setItem(scopedKey, JSON.stringify(playerData));
         localStorage.setItem('pipboyXP', String(newXP));
         localStorage.setItem('pipboyLevel', String(playerData.level));
     } catch (e) {
         console.error('Terminal: error saving XP to pipboyPlayerData:', e);
     }
 
-    // Update currentPlayer if it exists
-    try {
-        const saved = localStorage.getItem('currentPlayer');
-        if (saved) {
-            const player = JSON.parse(saved);
-            const oldXP = player.xp || 0;
-            const newXP = oldXP + xpReward;
-            player.xp = newXP;
-            player.level = getLevelFromXP(newXP);
-            localStorage.setItem('currentPlayer', JSON.stringify(player));
-        }
-    } catch (e) {
-        console.error('Terminal: error saving XP to currentPlayer:', e);
+    // Sync with the server (canonical XP source) so all Pip-Boy pages stay current.
+    // The server applies INT bonus again server-side for authoritative storage;
+    // we pass the raw base XP (50) rather than the already-multiplied value.
+    if (typeof PlayerSync !== 'undefined' && PlayerSync.isConnected()) {
+        PlayerSync.pushTerminalXP(BASE_XP);
     }
 
     setTimeout(function () { showVictory(xpReward); }, 800);
@@ -1385,7 +1391,7 @@ function awardXP() {
 
 function showVictory(xp) {
     document.getElementById('victoryName').textContent = gameState.playerName;
-    document.getElementById('victoryXP').textContent = '+ ' + xp + ' XP AWARDED';
+    document.getElementById('victoryXP').textContent = 'YOU GAINED ' + xp + ' XP!';
     document.getElementById('victoryOverlay').classList.add('active');
 }
 
@@ -1489,6 +1495,47 @@ function execLoreCmd() {
     output.textContent = '> ' + response;
     output.className   = 'lore-output response';
 }
+</script>
+
+<script>
+// ── SOCKET / SERVER SYNC (optional — degrades gracefully when offline) ────────
+// Connect to the game server so XP earned in the terminal is reflected in the
+// canonical server-side player record and pushed to all Pip-Boy UI panels.
+// If the server is unreachable the terminal falls back to localStorage-only.
+(function () {
+    'use strict';
+
+    if (typeof PlayerSync === 'undefined') return;
+
+    const sessionCode  = sessionStorage.getItem('PIPBOY_SESSION_CODE') ||
+                         localStorage.getItem('PIPBOY_SESSION_CODE')  || '';
+    const playerHandle = gameState.playerHandle || 'player';
+
+    if (!sessionCode) return; // no active session — skip socket connection
+
+    PlayerSync.init({
+        sessionCode:  sessionCode,
+        playerHandle: playerHandle,
+
+        onXpUpdated: function (payload) {
+            // Server confirmed the canonical XP update; keep localStorage in sync
+            if (payload && typeof payload.xp === 'number') {
+                const scopedKey = 'pipboyPlayerData_' + playerHandle;
+                try {
+                    const saved = localStorage.getItem(scopedKey);
+                    const data  = saved ? JSON.parse(saved) : {};
+                    data.xp    = payload.xp;
+                    data.level = payload.level || data.level;
+                    localStorage.setItem(scopedKey, JSON.stringify(data));
+                    localStorage.setItem('pipboyXP',    String(payload.xp));
+                    if (payload.level) {
+                        localStorage.setItem('pipboyLevel', String(payload.level));
+                    }
+                } catch (e) { console.warn('Terminal: could not persist server XP update to localStorage:', e); }
+            }
+        }
+    });
+}());
 </script>
 
 <!-- Player Navigation (shared hamburger menu) -->
