@@ -264,6 +264,49 @@
         /* HIDDEN INPUTS */
         #importFileInput, #imageUploadInput { display: none; }
 
+        /* SESSION BLOCKS */
+        .session-block {
+            background-color: var(--vault-darker);
+            border: 2px solid rgba(74,222,128,0.4);
+            box-shadow: 0 0 10px rgba(74,222,128,0.15);
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        .session-block-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 12px; padding-bottom: 10px;
+            border-bottom: 1px solid rgba(74,222,128,0.2);
+        }
+        .session-title { font-size: 14px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; color: var(--vault-gold); }
+        .session-date  { font-size: 10px; letter-spacing: 2px; opacity: 0.5; text-transform: uppercase; margin-top: 3px; }
+        .session-body  { font-size: 12px; line-height: 1.7; }
+        .session-body h2 { font-size: 15px; color: var(--vault-gold); letter-spacing: 2px; margin: 12px 0 6px; }
+        .session-body h3 { font-size: 13px; color: var(--vault-gold); letter-spacing: 2px; margin: 10px 0 5px; }
+        .session-body h4 { font-size: 11px; color: var(--vault-gold); letter-spacing: 2px; margin: 8px 0 4px; }
+        .session-body p  { margin: 6px 0; }
+        .session-body ul, .session-body ol { padding-left: 20px; margin: 6px 0; }
+        .session-body li { margin: 2px 0; }
+        .session-body blockquote { border-left: 3px solid rgba(251,191,36,0.5); padding-left: 12px; color: rgba(74,222,128,0.7); margin: 6px 0; font-style: italic; }
+        .session-body hr   { border: none; border-top: 1px solid rgba(74,222,128,0.3); margin: 10px 0; }
+        .session-body code { background: rgba(74,222,128,0.1); padding: 1px 5px; font-family: 'Courier New', monospace; font-size: 11px; }
+        .session-body strong { color: var(--vault-gold); }
+
+        /* NPC CARDS (custom player-added) */
+        .npc-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(74,222,128,0.25); padding: 14px 16px; margin-bottom: 10px; }
+        .npc-card.attitude-friendly { border-color: rgba(74,222,128,0.5); }
+        .npc-card.attitude-hostile  { border-color: rgba(255,107,107,0.4); }
+        .npc-card.attitude-neutral  { border-color: rgba(251,191,36,0.4); }
+        .npc-card-header  { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+        .npc-card-name    { font-size: 13px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; color: var(--vault-gold); }
+        .npc-card-meta    { font-size: 10px; letter-spacing: 1px; opacity: 0.6; margin-bottom: 8px; }
+        .npc-card-field   { margin-bottom: 5px; }
+        .npc-card-label   { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.45; margin-bottom: 2px; }
+        .npc-card-value   { font-size: 11px; line-height: 1.5; opacity: 0.85; white-space: pre-wrap; }
+
+        /* READ-ONLY FIELD */
+        .readonly-value { font-size: 13px; color: var(--vault-gold); letter-spacing: 1px; padding: 8px 12px; background: rgba(0,0,0,0.25); border: 1px solid rgba(251,191,36,0.25); min-height: 36px; }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .page-layout { flex-direction: column; height: auto; overflow: visible; }
@@ -368,19 +411,11 @@
                     <span class="sidebar-count" id="cc-sidebar-badge" style="background:rgba(74,222,128,0.15);border-color:rgba(74,222,128,0.4);">NEW</span>
                 </button>
                 <button class="sidebar-btn active" onclick="showSection('campaigns')" id="btn-campaigns">
-                    <span class="btn-icon">&#x1F4CB;</span> Campaign Data
+                    <span class="btn-icon">&#x1F4CB;</span> Campaign
                     <span class="sidebar-count" id="count-campaigns">0</span>
                 </button>
                 <button class="sidebar-btn" onclick="showSection('character')" id="btn-character">
                     <span class="btn-icon">&#x1F464;</span> Character Data
-                </button>
-                <button class="sidebar-btn" onclick="showSection('enemies')" id="btn-enemies">
-                    <span class="btn-icon">&#x1F479;</span> Enemies
-                    <span class="sidebar-count" id="count-enemies">0</span>
-                </button>
-                <button class="sidebar-btn" onclick="showSection('items')" id="btn-items">
-                    <span class="btn-icon">&#x1F381;</span> Items
-                    <span class="sidebar-count" id="count-items">0</span>
                 </button>
                 <button class="sidebar-btn" onclick="showSection('npcs')" id="btn-npcs">
                     <span class="btn-icon">&#x1F9D1;</span> NPCs
@@ -527,17 +562,41 @@
 
             </div><!-- /section-char-creation -->
 
-            <!-- CAMPAIGNS -->
+            <!-- CAMPAIGN (session chronicle) -->
             <div class="section-panel active" id="section-campaigns">
                 <div class="section-header">
                     <div class="section-title-row">
                         <span class="section-icon">&#x1F4CB;</span>
-                        <span class="section-title">Campaign Data</span>
+                        <span class="section-title">Campaign</span>
                         <span class="section-count-badge" id="campaigns-total">0</span>
                     </div>
+                    <button class="action-btn" onclick="openAddSession()" id="btnOpenAddSession">&#x2795; Add Session</button>
                 </div>
-                <input type="text" class="search-bar" id="search-campaigns" placeholder="Search campaigns..." oninput="filterCampaigns()">
-                <div class="campaign-grid" id="campaigns-grid"></div>
+
+                <!-- Add Session Form (initially hidden) -->
+                <div id="addSessionForm" class="char-section" style="display:none;">
+                    <div class="char-section-title">&#x1F4DD; New Session Entry</div>
+                    <div class="info-field">
+                        <div class="info-label">Session Title <span style="color:var(--vault-error);">*</span></div>
+                        <input type="text" class="info-input" id="sessionTitleInput" placeholder="e.g., Session 1: Into the Wasteland" maxlength="120">
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Date</div>
+                        <input type="date" class="info-input" id="sessionDateInput">
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Session Notes <span style="opacity:0.5;font-size:9px;">(Markdown supported)</span></div>
+                        <textarea class="info-textarea" id="sessionContentInput" placeholder="Write what happened this session...&#10;&#10;Supports **bold**, *italic*, # headers, - lists, > blockquotes, `code`, and --- dividers." style="min-height:220px;"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="action-btn" onclick="saveSessionNote()">&#x2713; Save Session</button>
+                        <button class="action-btn danger" onclick="closeAddSession()">&#x2715; Cancel</button>
+                    </div>
+                    <div class="status-message" id="sessionMessage"></div>
+                </div>
+
+                <!-- Session blocks list -->
+                <div id="sessions-list"></div>
             </div>
 
             <!-- CHARACTER -->
@@ -565,16 +624,12 @@
                                 <input type="text" class="info-input" id="charName" placeholder="Enter character name" value="Vault Dweller">
                             </div>
                             <div class="info-field">
-                                <div class="info-label">Race</div>
-                                <select class="info-input" id="charRace" style="cursor:pointer;">
-                                    <option value="">Select a race...</option>
-                                    <option value="Human">Human</option>
-                                    <option value="Ghoul">Ghoul</option>
-                                    <option value="Super Mutant">Super Mutant</option>
-                                    <option value="Synth">Synth</option>
-                                    <option value="Mirelurk">Mirelurk</option>
-                                    <option value="Other">Other</option>
-                                </select>
+                                <div class="info-label">Race <span style="opacity:0.5;font-size:9px;">(from character creation)</span></div>
+                                <div class="readonly-value" id="charRaceDisplay">&#x2014;</div>
+                            </div>
+                            <div class="info-field">
+                                <div class="info-label">Gene Pool <span style="opacity:0.5;font-size:9px;">(from character creation)</span></div>
+                                <div class="readonly-value" id="charGenePoolDisplay">&#x2014;</div>
                             </div>
                             <div class="info-field">
                                 <div class="info-label">Vault Number</div>
@@ -614,46 +669,66 @@
                 </div>
             </div>
 
-            <!-- ENEMIES -->
-            <div class="section-panel" id="section-enemies">
-                <div class="section-header">
-                    <div class="section-title-row">
-                        <span class="section-icon">&#x1F479;</span>
-                        <span class="section-title">Enemy Bestiary</span>
-                        <span class="section-count-badge" id="enemies-total">0</span>
-                    </div>
-                </div>
-                <input type="text" class="search-bar" id="search-enemies" placeholder="Search enemies..." oninput="filterEnemies()">
-                <div class="filter-row" id="enemy-filters"></div>
-                <div class="card-grid" id="enemies-grid"></div>
-            </div>
-
-            <!-- ITEMS -->
-            <div class="section-panel" id="section-items">
-                <div class="section-header">
-                    <div class="section-title-row">
-                        <span class="section-icon">&#x1F381;</span>
-                        <span class="section-title">Item Templates</span>
-                        <span class="section-count-badge" id="items-total">0</span>
-                    </div>
-                </div>
-                <input type="text" class="search-bar" id="search-items" placeholder="Search items..." oninput="filterItems()">
-                <div class="filter-row" id="item-filters"></div>
-                <div class="card-grid" id="items-grid"></div>
-            </div>
-
-            <!-- NPCS -->
+            <!-- NPCS (player-driven custom NPCs) -->
             <div class="section-panel" id="section-npcs">
                 <div class="section-header">
                     <div class="section-title-row">
                         <span class="section-icon">&#x1F9D1;</span>
-                        <span class="section-title">NPC Templates</span>
+                        <span class="section-title">NPCs</span>
                         <span class="section-count-badge" id="npcs-total">0</span>
                     </div>
+                    <button class="action-btn" onclick="openAddNPC()" id="btnOpenAddNPC">&#x2795; Add NPC</button>
                 </div>
-                <input type="text" class="search-bar" id="search-npcs" placeholder="Search NPCs..." oninput="filterNPCs()">
-                <div class="filter-row" id="npc-filters"></div>
-                <div class="card-grid" id="npcs-grid"></div>
+
+                <!-- Add NPC Form (initially hidden) -->
+                <div id="addNPCForm" class="char-section" style="display:none;">
+                    <div class="char-section-title">&#x1F9D1; New NPC</div>
+                    <div class="info-field">
+                        <div class="info-label">Name <span style="color:var(--vault-error);">*</span></div>
+                        <input type="text" class="info-input" id="npcNameInput" placeholder="NPC name" maxlength="100">
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Role / Occupation</div>
+                        <input type="text" class="info-input" id="npcRoleInput" placeholder="e.g., Merchant, Ally, Gang Leader" maxlength="100">
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Appearance</div>
+                        <textarea class="info-textarea" id="npcAppearanceInput" placeholder="Describe their appearance, clothing, distinguishing features..." style="min-height:80px;"></textarea>
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Attitude</div>
+                        <select class="info-input" id="npcAttitudeInput" style="cursor:pointer;">
+                            <option value="neutral">Neutral</option>
+                            <option value="friendly">Friendly</option>
+                            <option value="hostile">Hostile</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Location / Where Found</div>
+                        <input type="text" class="info-input" id="npcLocInput" placeholder="e.g., Diamond City, Abandoned Vault" maxlength="120">
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Faction / Affiliation</div>
+                        <input type="text" class="info-input" id="npcFactionInput" placeholder="e.g., Brotherhood of Steel, Raiders, Independent" maxlength="100">
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Notes</div>
+                        <textarea class="info-textarea" id="npcNotesInput" placeholder="Notes, backstory, quest info, things they said..." style="min-height:80px;"></textarea>
+                    </div>
+                    <div class="info-field">
+                        <div class="info-label">Extra Info</div>
+                        <textarea class="info-textarea" id="npcExtraInput" placeholder="Any other details — stats, known inventory, connections, secrets, etc." style="min-height:60px;"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button class="action-btn" onclick="addCustomNPC()">&#x2713; Add NPC</button>
+                        <button class="action-btn danger" onclick="closeAddNPC()">&#x2715; Cancel</button>
+                    </div>
+                    <div class="status-message" id="npcMessage"></div>
+                </div>
+
+                <!-- NPC list -->
+                <div id="customNpcsList"></div>
             </div>
 
             <!-- LOCALSTORAGE -->
@@ -821,7 +896,7 @@
     // ═══════════════════════════════════════════
     // SIDEBAR NAVIGATION
     // ═══════════════════════════════════════════
-    var SECTIONS = ['char-creation','campaigns','character','enemies','items','npcs','localstorage','backup','notes','factions'];
+    var SECTIONS = ['char-creation','campaigns','character','npcs','localstorage','backup','notes','factions'];
 
     function showSection(name) {
         SECTIONS.forEach(function(s) {
@@ -884,244 +959,158 @@
     }
 
     // ═══════════════════════════════════════════
-    // CAMPAIGNS
+    // SIMPLE MARKDOWN RENDERER
+    // Safe: HTML-escapes raw text before applying
+    // markdown transformations.
     // ═══════════════════════════════════════════
-    function renderCampaigns(data) {
-        var grid = document.getElementById('campaigns-grid');
-        document.getElementById('campaigns-total').textContent = data.length;
-        document.getElementById('count-campaigns').textContent = data.length;
-        if (!data.length) { grid.innerHTML = '<div class="empty-state">[ NO CAMPAIGN DATA FOUND ]</div>'; return; }
+    function simpleMarkdown(text) {
+        if (!text) return '';
+        var lines = String(text).split('\n');
+        var out = [];
+        var inUl = false;
+        var inOl = false;
 
-        grid.innerHTML = data.map(function(c) {
-            var statusClass = 'status-' + escapeHtml(c.status || 'active');
-            var statusBadgeClass = 'badge-' + escapeHtml(c.status || 'active');
+        function esc(s) {
+            return String(s)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
 
-            var playersHtml = (c.players || []).map(function(p) {
-                var name = escapeHtml(p.characterName || p.username);
-                var joinedDate = p.joinedDate ? '<div style="opacity:0.6;">Joined: ' + escapeHtml(p.joinedDate) + '</div>' : '';
-                var skills = (p.skills || []).length ? '<div style="margin-top:6px;opacity:0.75;">Skills: ' + escapeHtml(p.skills.join(', ')) + '</div>' : '';
-                var abilities = (p.abilities || []).length ? '<div style="opacity:0.75;">Abilities: ' + escapeHtml(p.abilities.join(', ')) + '</div>' : '';
-                var backstory = p.backstory ? '<div style="margin-top:6px;opacity:0.85;">' + escapeHtml(p.backstory) + '</div>' : '';
-                return '<details class="player-accordion">' +
-                    '<summary>' + name + '</summary>' +
-                    '<div class="player-accordion-body">' + joinedDate + skills + abilities + backstory + '</div>' +
-                '</details>';
-            }).join('');
+        function applyInline(s) {
+            return s
+                .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/__(.+?)__/g, '<strong>$1</strong>')
+                .replace(/_([^_\n]+)_/g, '<em>$1</em>')
+                .replace(/`([^`\n]+)`/g, '<code>$1</code>');
+        }
 
-            var questsHtml = (c.quests || []).map(function(q) {
-                var chipClass = 'chip-' + escapeHtml(q.status || 'active');
-                var progress = Number(q.progress) || 0;
-                return '<div class="quest-item">' +
-                    '<div class="quest-info">' +
-                        '<div class="quest-title">' + escapeHtml(q.title) + '</div>' +
-                        '<div style="font-size:10px;opacity:0.6;">' + escapeHtml(q.description || '') + '</div>' +
-                        '<div class="quest-progress-bar"><div class="quest-progress-fill" style="width:' + progress + '%"></div></div>' +
-                    '</div>' +
-                    '<span class="quest-status-chip ' + chipClass + '">' + escapeHtml(q.status || 'active') + '</span>' +
-                '</div>';
-            }).join('') || '<div style="opacity:0.4;font-size:11px;">No quests logged.</div>';
+        function closeLists() {
+            if (inUl) { out.push('</ul>'); inUl = false; }
+            if (inOl) { out.push('</ol>'); inOl = false; }
+        }
 
-            var inventoryCount = (c.inventory || []).length;
-            var sessionCount = (c.sessions || []).length;
-            var copyKey = storeCopy(JSON.stringify(c, null, 2));
+        lines.forEach(function(rawLine) {
+            var h3m = rawLine.match(/^### (.+)/);
+            var h2m = rawLine.match(/^## (.+)/);
+            var h1m = rawLine.match(/^# (.+)/);
+            if (h3m) { closeLists(); out.push('<h4>' + applyInline(esc(h3m[1])) + '</h4>'); return; }
+            if (h2m) { closeLists(); out.push('<h3>' + applyInline(esc(h2m[1])) + '</h3>'); return; }
+            if (h1m) { closeLists(); out.push('<h2>' + applyInline(esc(h1m[1])) + '</h2>'); return; }
 
-            return '<div class="campaign-card ' + statusClass + '" data-name="' + escapeHtml((c.name || '').toLowerCase()) + '">' +
-                '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">' +
+            if (/^(-{3,}|\*{3,}|_{3,})$/.test(rawLine.trim())) { closeLists(); out.push('<hr>'); return; }
+
+            var bqm = rawLine.match(/^>\s?(.*)/);
+            if (bqm) { closeLists(); out.push('<blockquote>' + applyInline(esc(bqm[1])) + '</blockquote>'); return; }
+
+            var ulm = rawLine.match(/^[*\-]\s+(.*)/);
+            if (ulm) {
+                if (inOl) { out.push('</ol>'); inOl = false; }
+                if (!inUl) { out.push('<ul>'); inUl = true; }
+                out.push('<li>' + applyInline(esc(ulm[1])) + '</li>');
+                return;
+            }
+
+            var olm = rawLine.match(/^\d+\.\s+(.*)/);
+            if (olm) {
+                if (inUl) { out.push('</ul>'); inUl = false; }
+                if (!inOl) { out.push('<ol>'); inOl = true; }
+                out.push('<li>' + applyInline(esc(olm[1])) + '</li>');
+                return;
+            }
+
+            closeLists();
+            if (rawLine.trim() === '') { out.push('<br>'); return; }
+            out.push('<p>' + applyInline(esc(rawLine)) + '</p>');
+        });
+        closeLists();
+        return out.join('');
+    }
+
+    // ═══════════════════════════════════════════
+    // CAMPAIGN SESSION CHRONICLE
+    // ═══════════════════════════════════════════
+    var campaignSessionsData = [];
+    try { campaignSessionsData = JSON.parse(localStorage.getItem(lsKey('campaignSessions')) || '[]'); } catch(e) {}
+
+    function renderSessionNotes() {
+        var list = document.getElementById('sessions-list');
+        var total = document.getElementById('campaigns-total');
+        var sideCount = document.getElementById('count-campaigns');
+        if (total) total.textContent = campaignSessionsData.length;
+        if (sideCount) sideCount.textContent = campaignSessionsData.length;
+        if (!list) return;
+        if (!campaignSessionsData.length) {
+            list.innerHTML = '<div class="empty-state">[ No sessions recorded yet. Click <strong>+ Add Session</strong> to start your chronicle. ]</div>';
+            return;
+        }
+        list.innerHTML = campaignSessionsData.map(function(s) {
+            var bodyHtml = simpleMarkdown(s.content || '');
+            var delKey = storeCopy(s.id);
+            return '<div class="session-block">' +
+                '<div class="session-block-header">' +
                     '<div>' +
-                        '<div class="campaign-name">' + escapeHtml(c.name) + '</div>' +
-                        '<div class="campaign-meta">ID: ' + escapeHtml(c.id) + ' &nbsp;|&nbsp; Overseer: ' + escapeHtml(c.overseerId || 'Unknown') + ' &nbsp;|&nbsp; Created: ' + escapeHtml(c.created || '') + '</div>' +
+                        '<div class="session-title">' + escapeHtml(s.title) + '</div>' +
+                        '<div class="session-date">&#x1F4C5; ' + escapeHtml(s.date || 'No date') + '</div>' +
                     '</div>' +
-                    '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">' +
-                        '<span class="status-badge ' + statusBadgeClass + '">' + escapeHtml(c.status || 'active') + '</span>' +
-                        '<button class="copy-btn" onclick="copyFromStore(' + copyKey + ', this)">\u2398 Copy</button>' +
-                    '</div>' +
+                    '<button class="copy-btn" style="color:var(--vault-error);border-color:rgba(255,107,107,0.3);flex-shrink:0;" ' +
+                        'onclick="deleteSessionNote(\'' + escapeHtml(s.id) + '\')">&#x2715; Remove</button>' +
                 '</div>' +
-                '<div style="font-size:11px;opacity:0.75;line-height:1.6;margin-bottom:10px;">' + escapeHtml(c.description || '') + '</div>' +
-                '<div style="display:flex;gap:12px;font-size:10px;letter-spacing:1px;opacity:0.6;">' +
-                    '<span>\U0001f465 ' + (c.players || []).length + ' Players</span>' +
-                    '<span>\U0001f392 ' + inventoryCount + ' Items</span>' +
-                    '<span>\U0001f4cb ' + (c.quests || []).length + ' Quests</span>' +
-                    '<span>\U0001f4c5 ' + sessionCount + ' Sessions</span>' +
-                '</div>' +
-                '<div class="campaign-section-label">Players</div>' +
-                '<div>' + (playersHtml || '<div style="opacity:0.4;font-size:11px;">No players.</div>') + '</div>' +
-                '<div class="campaign-section-label">Quests</div>' +
-                '<div class="quest-list">' + questsHtml + '</div>' +
+                '<div class="session-body">' + bodyHtml + '</div>' +
             '</div>';
         }).join('');
     }
 
-    function filterCampaigns() {
-        var q = document.getElementById('search-campaigns').value.toLowerCase();
-        document.querySelectorAll('#campaigns-grid .campaign-card').forEach(function(card) {
-            card.style.display = (card.dataset.name || '').includes(q) ? '' : 'none';
+    function openAddSession() {
+        var form = document.getElementById('addSessionForm');
+        if (form) { form.style.display = 'block'; }
+        var btnOpen = document.getElementById('btnOpenAddSession');
+        if (btnOpen) btnOpen.style.display = 'none';
+        // Auto-fill today's date
+        var dateInput = document.getElementById('sessionDateInput');
+        if (dateInput && !dateInput.value) {
+            var today = new Date().toISOString().slice(0, 10);
+            dateInput.value = today;
+        }
+        var titleInput = document.getElementById('sessionTitleInput');
+        if (titleInput) titleInput.focus();
+    }
+
+    function closeAddSession() {
+        var form = document.getElementById('addSessionForm');
+        if (form) form.style.display = 'none';
+        var btnOpen = document.getElementById('btnOpenAddSession');
+        if (btnOpen) btnOpen.style.display = '';
+        document.getElementById('sessionTitleInput').value = '';
+        document.getElementById('sessionDateInput').value = '';
+        document.getElementById('sessionContentInput').value = '';
+        setMsg('sessionMessage', '', 'success');
+    }
+
+    function saveSessionNote() {
+        var title   = document.getElementById('sessionTitleInput').value.trim();
+        var date    = document.getElementById('sessionDateInput').value;
+        var content = document.getElementById('sessionContentInput').value.trim();
+        if (!title) { setMsg('sessionMessage', '\u26a0 Session title is required.', 'error'); return; }
+        campaignSessionsData.push({
+            id:      'sess-' + Date.now(),
+            title:   title,
+            date:    date || new Date().toISOString().slice(0, 10),
+            content: content,
+            created: new Date().toISOString()
         });
+        localStorage.setItem(lsKey('campaignSessions'), JSON.stringify(campaignSessionsData));
+        closeAddSession();
+        renderSessionNotes();
+        setMsg('sessionMessage', '\u2713 Session saved!', 'success');
     }
 
-    // ═══════════════════════════════════════════
-    // ENEMIES
-    // ═══════════════════════════════════════════
-    var enemyFilterActive = 'all';
-
-    function renderEnemies(data) {
-        var grid = document.getElementById('enemies-grid');
-        document.getElementById('enemies-total').textContent = data.length;
-        document.getElementById('count-enemies').textContent = data.length;
-        if (!data.length) { grid.innerHTML = '<div class="empty-state">[ No enemies added yet. ]</div>'; return; }
-
-        var difficulties = ['all'];
-        data.forEach(function(e) { if (e.difficulty && difficulties.indexOf(e.difficulty) === -1) difficulties.push(e.difficulty); });
-        document.getElementById('enemy-filters').innerHTML = difficulties.map(function(d) {
-            return '<button class="filter-btn' + (d === enemyFilterActive ? ' active' : '') + '" onclick="setEnemyFilter(\'' + escapeHtml(d) + '\')">' + escapeHtml(d === 'all' ? 'All' : d) + '</button>';
-        }).join('');
-
-        var query = (document.getElementById('search-enemies').value || '').toLowerCase();
-
-        grid.innerHTML = data.map(function(enemy) {
-            var diff = enemy.difficulty || 'common';
-            var badgeClass = 'badge-' + escapeHtml(diff);
-            var cardClass = 'difficulty-' + escapeHtml(diff);
-            var abilitiesHtml = (enemy.abilities || []).map(function(a) { return '<span class="card-tag">' + escapeHtml(a) + '</span>'; }).join('');
-            var lootHtml = (enemy.loot || []).map(function(l) { return '<span class="card-tag" style="border-color:rgba(251,191,36,0.3);color:rgba(251,191,36,0.8);">' + escapeHtml(l) + '</span>'; }).join('');
-            var hidden = (enemyFilterActive !== 'all' && diff !== enemyFilterActive) || (query && !(enemy.name || '').toLowerCase().includes(query));
-            var copyKey = storeCopy(JSON.stringify(enemy, null, 2));
-
-            return '<div class="data-card ' + cardClass + '" data-difficulty="' + escapeHtml(diff) + '" data-name="' + escapeHtml((enemy.name||'').toLowerCase()) + '" style="' + (hidden ? 'display:none' : '') + '">' +
-                '<div class="card-header"><div class="card-name">' + escapeHtml(enemy.name) + '</div><span class="difficulty-badge ' + badgeClass + '">' + escapeHtml(diff) + '</span></div>' +
-                '<div class="card-description">' + escapeHtml(enemy.description || '') + '</div>' +
-                '<div class="card-stats">' +
-                    '<div class="card-stat"><div class="stat-label">HP</div><div class="stat-value">' + escapeHtml(String(enemy.hp)) + '</div></div>' +
-                    '<div class="card-stat"><div class="stat-label">AC</div><div class="stat-value">' + escapeHtml(String(enemy.ac)) + '</div></div>' +
-                    '<div class="card-stat"><div class="stat-label">Initiative</div><div class="stat-value">' + escapeHtml(String(enemy.initiative)) + '</div></div>' +
-                    '<div class="card-stat"><div class="stat-label">Type</div><div class="stat-value">' + escapeHtml(enemy.type || '\u2014') + '</div></div>' +
-                '</div>' +
-                (abilitiesHtml ? '<div style="margin-bottom:6px;font-size:9px;letter-spacing:2px;opacity:0.5;text-transform:uppercase;">Abilities</div><div class="card-tags">' + abilitiesHtml + '</div>' : '') +
-                (lootHtml ? '<div style="margin-bottom:6px;font-size:9px;letter-spacing:2px;opacity:0.5;text-transform:uppercase;">Loot</div><div class="card-tags">' + lootHtml + '</div>' : '') +
-                '<div class="card-actions"><button class="copy-btn" onclick="copyFromStore(' + copyKey + ', this)">\u2398 Copy</button></div>' +
-            '</div>';
-        }).join('');
-    }
-
-    function setEnemyFilter(diff) {
-        enemyFilterActive = diff;
-        if (typeof ENEMIES !== 'undefined') renderEnemies(ENEMIES);
-    }
-
-    function filterEnemies() {
-        var q = (document.getElementById('search-enemies').value || '').toLowerCase();
-        document.querySelectorAll('#enemies-grid .data-card').forEach(function(card) {
-            var name = card.dataset.name || '';
-            var diff = card.dataset.difficulty || '';
-            card.style.display = ((enemyFilterActive === 'all' || diff === enemyFilterActive) && (!q || name.includes(q))) ? '' : 'none';
-        });
-    }
-
-    // ═══════════════════════════════════════════
-    // ITEMS
-    // ═══════════════════════════════════════════
-    var itemFilterActive = 'all';
-
-    function renderItems(data) {
-        var grid = document.getElementById('items-grid');
-        document.getElementById('items-total').textContent = data.length;
-        document.getElementById('count-items').textContent = data.length;
-        if (!data.length) { grid.innerHTML = '<div class="empty-state">[ No items added yet. ]</div>'; return; }
-
-        var types = ['all'];
-        data.forEach(function(i) { if (i.type && types.indexOf(i.type) === -1) types.push(i.type); });
-        document.getElementById('item-filters').innerHTML = types.map(function(t) {
-            return '<button class="filter-btn' + (t === itemFilterActive ? ' active' : '') + '" onclick="setItemFilter(\'' + escapeHtml(t) + '\')">' + escapeHtml(t === 'all' ? 'All Types' : t) + '</button>';
-        }).join('');
-
-        var query = (document.getElementById('search-items').value || '').toLowerCase();
-
-        grid.innerHTML = data.map(function(item) {
-            var rarity = item.rarity || 'common';
-            var badgeClass = 'badge-' + escapeHtml(rarity);
-            var cardClass = 'rarity-' + escapeHtml(rarity);
-            var propsHtml = (item.properties || []).map(function(p) { return '<span class="card-tag">' + escapeHtml(p) + '</span>'; }).join('');
-            var hidden = (itemFilterActive !== 'all' && (item.type || '') !== itemFilterActive) || (query && !(item.name || '').toLowerCase().includes(query));
-            var copyKey = storeCopy(JSON.stringify(item, null, 2));
-
-            return '<div class="data-card ' + cardClass + '" data-type="' + escapeHtml(item.type||'') + '" data-name="' + escapeHtml((item.name||'').toLowerCase()) + '" style="' + (hidden ? 'display:none' : '') + '">' +
-                '<div class="card-header"><div class="card-name">' + escapeHtml(item.name) + '</div><span class="rarity-badge ' + badgeClass + '">' + escapeHtml(rarity) + '</span></div>' +
-                '<div class="card-description">' + escapeHtml(item.description || '') + '</div>' +
-                '<div class="card-stats">' +
-                    '<div class="card-stat"><div class="stat-label">Type</div><div class="stat-value">' + escapeHtml(item.type || '\u2014') + '</div></div>' +
-                    '<div class="card-stat"><div class="stat-label">Weight</div><div class="stat-value">' + escapeHtml(String(item.weight)) + ' lbs</div></div>' +
-                    '<div class="card-stat"><div class="stat-label">Value</div><div class="stat-value">' + escapeHtml(String(item.value)) + ' \u00a2</div></div>' +
-                    '<div class="card-stat"><div class="stat-label">Rarity</div><div class="stat-value" style="color:inherit;">' + escapeHtml(rarity) + '</div></div>' +
-                '</div>' +
-                (propsHtml ? '<div class="card-tags">' + propsHtml + '</div>' : '') +
-                '<div class="card-actions"><button class="copy-btn" onclick="copyFromStore(' + copyKey + ', this)">\u2398 Copy</button></div>' +
-            '</div>';
-        }).join('');
-    }
-
-    function setItemFilter(type) {
-        itemFilterActive = type;
-        if (typeof ITEMS !== 'undefined') renderItems(ITEMS);
-    }
-
-    function filterItems() {
-        var q = (document.getElementById('search-items').value || '').toLowerCase();
-        document.querySelectorAll('#items-grid .data-card').forEach(function(card) {
-            var name = card.dataset.name || '';
-            var type = card.dataset.type || '';
-            card.style.display = ((itemFilterActive === 'all' || type === itemFilterActive) && (!q || name.includes(q))) ? '' : 'none';
-        });
-    }
-
-    // ═══════════════════════════════════════════
-    // NPCS
-    // ═══════════════════════════════════════════
-    var npcFilterActive = 'all';
-
-    function renderNPCTemplates(data) {
-        var grid = document.getElementById('npcs-grid');
-        document.getElementById('npcs-total').textContent = data.length;
-        document.getElementById('count-npcs').textContent = data.length;
-        if (!data.length) { grid.innerHTML = '<div class="empty-state">[ NO NPC DATA FOUND ]</div>'; return; }
-
-        var attitudes = ['all'];
-        data.forEach(function(n) { if (n.attitude && attitudes.indexOf(n.attitude) === -1) attitudes.push(n.attitude); });
-        document.getElementById('npc-filters').innerHTML = attitudes.map(function(a) {
-            return '<button class="filter-btn' + (a === npcFilterActive ? ' active' : '') + '" onclick="setNPCFilter(\'' + escapeHtml(a) + '\')">' + escapeHtml(a === 'all' ? 'All' : a) + '</button>';
-        }).join('');
-
-        var query = (document.getElementById('search-npcs').value || '').toLowerCase();
-
-        grid.innerHTML = data.map(function(npc) {
-            var attitude = npc.attitude || 'neutral';
-            var badgeClass = 'badge-' + escapeHtml(attitude);
-            var cardClass = 'attitude-' + escapeHtml(attitude);
-            var questsHtml = (npc.quests || []).map(function(q) { return '<span class="card-tag" style="border-color:rgba(192,132,252,0.4);color:rgba(192,132,252,0.8);">' + escapeHtml(q) + '</span>'; }).join('');
-            var hidden = (npcFilterActive !== 'all' && attitude !== npcFilterActive) || (query && !(npc.name || '').toLowerCase().includes(query));
-            var copyKey = storeCopy(JSON.stringify(npc, null, 2));
-
-            return '<div class="data-card ' + cardClass + '" data-attitude="' + escapeHtml(attitude) + '" data-name="' + escapeHtml((npc.name||'').toLowerCase()) + '" style="' + (hidden ? 'display:none' : '') + '">' +
-                '<div class="card-header"><div class="card-name">' + escapeHtml(npc.name) + '</div><span class="attitude-badge ' + badgeClass + '">' + escapeHtml(attitude) + '</span></div>' +
-                '<div style="font-size:10px;letter-spacing:1px;color:var(--vault-gold);margin-bottom:8px;">' + escapeHtml(npc.role || '') + ' &nbsp;&middot;&nbsp; ' + escapeHtml(npc.faction || 'none') + '</div>' +
-                '<div class="card-description">' + escapeHtml(npc.description || '') + '</div>' +
-                '<div class="card-stats"><div class="card-stat" style="grid-column:1/-1;"><div class="stat-label">Location</div><div class="stat-value" style="font-size:11px;">' + escapeHtml(npc.location || '\u2014') + '</div></div></div>' +
-                (questsHtml ? '<div style="margin-bottom:6px;font-size:9px;letter-spacing:2px;opacity:0.5;text-transform:uppercase;">Quests</div><div class="card-tags">' + questsHtml + '</div>' : '') +
-                '<div class="card-actions"><button class="copy-btn" onclick="copyFromStore(' + copyKey + ', this)">\u2398 Copy</button></div>' +
-            '</div>';
-        }).join('');
-    }
-
-    function setNPCFilter(attitude) {
-        npcFilterActive = attitude;
-        if (typeof NPCS !== 'undefined') renderNPCTemplates(NPCS);
-    }
-
-    function filterNPCs() {
-        var q = (document.getElementById('search-npcs').value || '').toLowerCase();
-        document.querySelectorAll('#npcs-grid .data-card').forEach(function(card) {
-            var name = card.dataset.name || '';
-            var att = card.dataset.attitude || '';
-            card.style.display = ((npcFilterActive === 'all' || att === npcFilterActive) && (!q || name.includes(q))) ? '' : 'none';
-        });
+    function deleteSessionNote(id) {
+        if (!confirm('Remove this session note?')) return;
+        campaignSessionsData = campaignSessionsData.filter(function(s) { return s.id !== id; });
+        localStorage.setItem(lsKey('campaignSessions'), JSON.stringify(campaignSessionsData));
+        renderSessionNotes();
     }
 
     // ═══════════════════════════════════════════
@@ -1546,21 +1535,30 @@
     // ═══════════════════════════════════════════
     function saveCharacterData() {
         var name = document.getElementById('charName').value;
-        var race = document.getElementById('charRace').value;
         var cls = document.getElementById('charClass').value;
         var alignment = document.getElementById('charAlignment').value;
-        localStorage.setItem(lsKey('characterData'), JSON.stringify({ name: name, race: race, class: cls, alignment: alignment }));
+        // Race and gene pool are read-only (from character creation) — never overwrite them here.
+        var saved = {};
+        try { saved = JSON.parse(localStorage.getItem(lsKey('characterData')) || '{}'); } catch(e) {}
+        saved.name      = name;
+        saved.class     = cls;
+        saved.alignment = alignment;
+        localStorage.setItem(lsKey('characterData'), JSON.stringify(saved));
         setMsg('saveMessage', '\u2713 Character data saved!', 'success');
     }
 
     function clearCharacterData() {
-        if (!confirm('Clear all character data?')) return;
+        if (!confirm('Clear character name, class and alignment? Race and gene pool (set during character creation) are preserved.')) return;
         document.getElementById('charName').value = 'Vault Dweller';
-        document.getElementById('charRace').value = '';
         document.getElementById('charClass').value = '';
         document.getElementById('charAlignment').value = '';
         document.getElementById('characterImageContainer').innerHTML = '<div class="char-image-placeholder">No image uploaded</div>';
-        localStorage.removeItem(lsKey('characterData'));
+        var saved = {};
+        try { saved = JSON.parse(localStorage.getItem(lsKey('characterData')) || '{}'); } catch(e) {}
+        saved.name  = 'Vault Dweller';
+        saved.class = '';
+        saved.alignment = '';
+        localStorage.setItem(lsKey('characterData'), JSON.stringify(saved));
         localStorage.removeItem(lsKey('characterImage'));
         setMsg('saveMessage', '\u2713 Character data cleared!', 'success');
     }
@@ -1577,17 +1575,42 @@
         setMsg('backstoryMessage', '\u2713 Backstory cleared!', 'success');
     }
 
+    function _getPlayerDataFromStorage() {
+        try {
+            var handle = (sessionStorage.getItem('username') || localStorage.getItem('PIPBOY_PLAYER_HANDLE') || 'player').toLowerCase();
+            var raw = localStorage.getItem('pipboyPlayerData_' + handle);
+            if (raw) return JSON.parse(raw);
+        } catch(e) {}
+        return null;
+    }
+
     function loadCharacterData() {
-        var saved = localStorage.getItem(lsKey('characterData'));
+        var saved = null;
+        try { saved = JSON.parse(localStorage.getItem(lsKey('characterData')) || 'null'); } catch(e) {}
         if (saved) {
-            try {
-                var d = JSON.parse(saved);
-                document.getElementById('charName').value = d.name || 'Vault Dweller';
-                document.getElementById('charRace').value = d.race || '';
-                document.getElementById('charClass').value = d.class || '';
-                document.getElementById('charAlignment').value = d.alignment || '';
-            } catch(e) {}
+            document.getElementById('charName').value      = saved.name      || 'Vault Dweller';
+            document.getElementById('charClass').value     = saved.class     || '';
+            document.getElementById('charAlignment').value = saved.alignment || '';
         }
+
+        // Auto-fill Race and Gene Pool from character creation (pipboyPlayerData)
+        var pd = _getPlayerDataFromStorage();
+        var raceEl     = document.getElementById('charRaceDisplay');
+        var geneEl     = document.getElementById('charGenePoolDisplay');
+        var raceName   = (pd && pd.baseRace && pd.baseRace.name) || (saved && saved.race) || '\u2014';
+        var geneName;
+        if (pd && pd.isPureblood) {
+            geneName = 'Pureblood';
+        } else if (pd && pd.genePool && pd.genePool.name) {
+            geneName = pd.genePool.name;
+        } else if (pd && pd.raceSelected) {
+            geneName = 'Pureblood';
+        } else {
+            geneName = '\u2014';
+        }
+        if (raceEl) raceEl.textContent = raceName;
+        if (geneEl) geneEl.textContent = geneName;
+
         var img = localStorage.getItem(lsKey('characterImage'));
         if (img) {
             var imgEl = document.createElement('img');
@@ -1610,33 +1633,97 @@
     function renderCustomNPCs() {
         var list = document.getElementById('customNpcsList');
         if (!list) return;
+        var total     = document.getElementById('npcs-total');
+        var sideCount = document.getElementById('count-npcs');
+        if (total)     total.textContent     = customNPCsData.length;
+        if (sideCount) sideCount.textContent = customNPCsData.length;
         if (!customNPCsData.length) {
-            list.innerHTML = '<li style="opacity:0.4;font-size:11px;padding:8px 0;">No custom NPCs added yet.</li>';
+            list.innerHTML = '<div class="empty-state">[ No NPCs recorded yet. Click <strong>+ Add NPC</strong> to add one. ]</div>';
             return;
         }
         list.innerHTML = customNPCsData.map(function(npc) {
-            return '<li style="background:rgba(0,0,0,0.3);border:1px solid rgba(74,222,128,0.2);padding:10px 14px;margin-bottom:8px;">' +
-                '<div style="display:flex;justify-content:space-between;align-items:center;">' +
-                    '<strong style="font-size:12px;letter-spacing:1px;">' + escapeHtml(npc.name) + '</strong>' +
-                    '<button class="copy-btn" style="color:var(--vault-error);border-color:rgba(255,107,107,0.3);" onclick="deleteCustomNPC(\'' + escapeHtml(npc.id) + '\')">\u2715 Del</button>' +
+            var attitude = npc.attitude || 'neutral';
+            var attLabel = attitude.charAt(0).toUpperCase() + attitude.slice(1);
+            var attColor = attitude === 'friendly' ? 'var(--vault-green)'
+                         : attitude === 'hostile'  ? 'var(--vault-error)'
+                         : 'var(--vault-gold)';
+            function fieldHtml(label, val) {
+                if (!val) return '';
+                return '<div class="npc-card-field">' +
+                    '<div class="npc-card-label">' + label + '</div>' +
+                    '<div class="npc-card-value">' + escapeHtml(val) + '</div>' +
+                '</div>';
+            }
+            return '<div class="npc-card attitude-' + escapeHtml(attitude) + '">' +
+                '<div class="npc-card-header">' +
+                    '<div>' +
+                        '<div class="npc-card-name">' + escapeHtml(npc.name) + '</div>' +
+                        '<div class="npc-card-meta">' +
+                            (npc.role ? escapeHtml(npc.role) + (npc.faction ? ' &nbsp;&middot;&nbsp; ' : '') : '') +
+                            (npc.faction ? escapeHtml(npc.faction) : '') +
+                            ' &nbsp;<span style="color:' + attColor + ';font-size:9px;letter-spacing:1.5px;text-transform:uppercase;border:1px solid currentColor;padding:1px 5px;">' + escapeHtml(attLabel) + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<button class="copy-btn" style="color:var(--vault-error);border-color:rgba(255,107,107,0.3);flex-shrink:0;" ' +
+                        'onclick="deleteCustomNPC(\'' + escapeHtml(npc.id) + '\')">&#x2715; Del</button>' +
                 '</div>' +
-                '<div style="font-size:10px;opacity:0.7;margin-top:4px;">' + escapeHtml(npc.description) + '</div>' +
-                '<div style="font-size:10px;opacity:0.5;margin-top:2px;">' + escapeHtml(npc.location) + (npc.notes ? ' \u00b7 ' + escapeHtml(npc.notes) : '') + '</div>' +
-            '</li>';
+                fieldHtml('Appearance', npc.appearance) +
+                fieldHtml('Location', npc.location) +
+                fieldHtml('Notes', npc.notes) +
+                fieldHtml('Extra Info', npc.extra) +
+            '</div>';
         }).join('');
+    }
+
+    function openAddNPC() {
+        var form = document.getElementById('addNPCForm');
+        if (form) form.style.display = 'block';
+        var btnOpen = document.getElementById('btnOpenAddNPC');
+        if (btnOpen) btnOpen.style.display = 'none';
+        var nameInput = document.getElementById('npcNameInput');
+        if (nameInput) nameInput.focus();
+    }
+
+    function closeAddNPC() {
+        var form = document.getElementById('addNPCForm');
+        if (form) form.style.display = 'none';
+        var btnOpen = document.getElementById('btnOpenAddNPC');
+        if (btnOpen) btnOpen.style.display = '';
+        ['npcNameInput','npcRoleInput','npcLocInput','npcFactionInput','npcNotesInput','npcExtraInput'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        ['npcAppearanceInput'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        var att = document.getElementById('npcAttitudeInput');
+        if (att) att.value = 'neutral';
+        setMsg('npcMessage', '', 'success');
     }
 
     function addCustomNPC() {
         var name = document.getElementById('npcNameInput').value.trim();
         if (!name) { setMsg('npcMessage', '\u26a0 NPC name is required.', 'error'); return; }
-        customNPCsData.push({ id: 'cnpc-' + Date.now(), name: name, description: document.getElementById('npcDescInput').value.trim(), location: document.getElementById('npcLocInput').value.trim(), notes: document.getElementById('npcNotesInput').value.trim() });
+        customNPCsData.push({
+            id:         'cnpc-' + Date.now(),
+            name:       name,
+            role:       document.getElementById('npcRoleInput').value.trim(),
+            appearance: document.getElementById('npcAppearanceInput').value.trim(),
+            attitude:   document.getElementById('npcAttitudeInput').value || 'neutral',
+            location:   document.getElementById('npcLocInput').value.trim(),
+            faction:    document.getElementById('npcFactionInput').value.trim(),
+            notes:      document.getElementById('npcNotesInput').value.trim(),
+            extra:      document.getElementById('npcExtraInput').value.trim()
+        });
         localStorage.setItem(lsKey('customNPCs'), JSON.stringify(customNPCsData));
-        ['npcNameInput','npcDescInput','npcLocInput','npcNotesInput'].forEach(function(id) { document.getElementById(id).value = ''; });
+        closeAddNPC();
         renderCustomNPCs();
         setMsg('npcMessage', '\u2713 ' + name + ' added!', 'success');
     }
 
     function deleteCustomNPC(id) {
+        if (!confirm('Remove this NPC?')) return;
         customNPCsData = customNPCsData.filter(function(n) { return n.id !== id; });
         localStorage.setItem(lsKey('customNPCs'), JSON.stringify(customNPCsData));
         renderCustomNPCs();
@@ -1967,42 +2054,16 @@
         function debounce(fn, ms) { var t; return function() { clearTimeout(t); t = setTimeout(fn, ms); }; }
         var charName = document.getElementById('charName');
         if (charName) charName.addEventListener('input', debounce(saveCharacterData, 500));
-        ['charRace','charClass','charAlignment'].forEach(function(id) {
+        ['charClass','charAlignment'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) el.addEventListener('change', saveCharacterData);
         });
 
-        // Load campaign data — filter to only the logged-in player's entry
-        if (typeof CAMPAIGNS !== 'undefined') {
-            var _myUsername = sessionStorage.getItem('username') ||
-                              localStorage.getItem('PIPBOY_PLAYER_HANDLE') || '';
-            if (!_myUsername) {
-                // No authenticated user — show nothing; redirect to login
-                document.getElementById('campaigns-grid').innerHTML =
-                    '<div class="empty-state">[ NOT AUTHENTICATED — please log in ]</div>';
-            } else {
-                // Build a view that only exposes this player's entry in each campaign
-                var _playerCampaigns = CAMPAIGNS.map(function(c) {
-                    var myEntry = (c.players || []).filter(function(p) {
-                        return p.username === _myUsername;
-                    });
-                    return Object.assign({}, c, { players: myEntry });
-                }).filter(function(c) {
-                    return c.players.length > 0;
-                });
-                renderCampaigns(_playerCampaigns);
-            }
-        } else {
-            document.getElementById('campaigns-grid').innerHTML =
-                '<div class="empty-state">[ campaigns.js not loaded ]</div>';
-        }
+        // Initialize campaign session chronicle
+        renderSessionNotes();
 
-        // Enemies and items start blank — players add their own entries
-        renderEnemies([]);
-        renderItems([]);
-
-        if (typeof NPCS !== 'undefined') renderNPCTemplates(NPCS);
-        else document.getElementById('npcs-grid').innerHTML = '<div class="empty-state">[ npcs.js not loaded ]</div>';
+        // Initialize custom NPCs
+        renderCustomNPCs();
 
         // Populate backup campaign dropdown
         populateBackupCampaignSelect();
@@ -2027,11 +2088,8 @@
 <script src="../../assets/data/pools/gene-pool.js"></script>
 <script src="../../assets/logic/character-creation.js"></script>
 
-<!-- Data Sources -->
+<!-- Data Sources (no longer used by this page; kept for backward compat. if other pages reference them) -->
 <script src="../../assets/data/campaigns.js"></script>
-<script src="../../assets/data/pools/enemies.js"></script>
-<script src="../../assets/data/pools/items.js"></script>
-<script src="../../assets/data/pools/npcs.js"></script>
 
 <!-- Navigation & Settings -->
 <script src="../../assets/helpers/Managers/backupManager.js"></script>
