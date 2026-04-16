@@ -383,7 +383,7 @@ describe('ingredientLabel', () => {
   test('{ type, name } returns name', () => {
     expect(CraftingUtils.ingredientLabel({ type: 'metal', name: 'Any Metal' })).toBe('Any Metal');
   });
-  test('{ type } only returns synthesised label', () => {
-    expect(CraftingUtils.ingredientLabel({ type: 'chemical' })).toBe('Any chemical');
+  test('{ type } only returns synthesised label with capitalised type', () => {
+    expect(CraftingUtils.ingredientLabel({ type: 'chemical' })).toBe('Any Chemical');
   });
 });

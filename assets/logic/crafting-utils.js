@@ -41,7 +41,10 @@
    */
   function normaliseIngredient(ingredient) {
     if (ingredient && typeof ingredient === 'object') {
-      return { name: ingredient.name || ('Any ' + ingredient.type), type: ingredient.type || null };
+      var rawName = ingredient.name || ('Any ' + (ingredient.type
+        ? ingredient.type.charAt(0).toUpperCase() + ingredient.type.slice(1)
+        : '?'));
+      return { name: rawName, type: ingredient.type || null };
     }
     if (typeof ingredient === 'string') {
       if (ingredient.startsWith('Any ')) {

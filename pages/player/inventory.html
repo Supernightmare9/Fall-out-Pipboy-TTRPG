@@ -1063,7 +1063,6 @@ function loadData() {
     var fromPlayerJunk = Array.isArray(playerData.junk) ? playerData.junk : null;
     var fromKeyJunk    = safeParseJson(localStorage.getItem(LS_JUNK), []);
     playerJunk = fromPlayerJunk || fromKeyJunk;
-    playerData.junk = playerJunk.slice();
 }
 
 function makeInventoryItem(tpl, qty) {
