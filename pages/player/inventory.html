@@ -2021,6 +2021,17 @@ function _allRecipes(){ return (typeof window !== 'undefined' && window.recipesP
 function loadRecipes() {
     LS_RECIPES = lsKey('vault_recipes_v1');
     loadPlayerData();
+
+    // One-time migration: clear any recipes that were auto-accumulated before
+    // the grant-only system was introduced. The server handles this for
+    // server-persisted data; this guard covers client-local-only storage.
+    if (!playerData.recipeBookGrantedOnly) {
+        playerData.recipeBook          = [];
+        playerData.recipeBookGrantedOnly = true;
+        persistPlayerData();
+        try { localStorage.removeItem(LS_RECIPES); } catch(e) {}
+    }
+
     if (Array.isArray(playerData.recipeBook)) {
         playerRecipes = playerData.recipeBook.slice();
         return;
@@ -2303,11 +2314,8 @@ function initCraftSocket() {
         saveData();
         renderAll();
 
-        // Save recipe to recipe book
-        addToRecipeBook(recipe);
-
         showCraftNotification(
-            '\u2605 OVERSEER APPROVED!\n"' + recipe.name + '" crafted and added to inventory.\nRecipe saved to your Recipe Book!',
+            '\u2605 OVERSEER APPROVED!\n"' + recipe.name + '" crafted and added to inventory.',
             'approved'
         );
     });
@@ -2320,6 +2328,19 @@ function initCraftSocket() {
             'Reason: ' + (payload.reason || 'Not approved.'),
             'rejected'
         );
+    });
+
+    // Overseer granted one or more recipes directly
+    craftSocket.on('player:recipes-granted', function(payload) {
+        var recipes = Array.isArray(payload.recipes) ? payload.recipes : [];
+        recipes.forEach(function(recipe) { addToRecipeBook(recipe); });
+        if (recipes.length > 0) {
+            var msg = payload.message || (recipes.length === 1
+                ? '\u2605 NEW RECIPE UNLOCKED!\n"' + recipes[0].name + '" added to your Recipe Book!'
+                : '\u2605 ' + recipes.length + ' NEW RECIPES UNLOCKED!\nCheck your Recipe Book.');
+            showCraftNotification(msg, 'approved');
+            renderRecipeBook();
+        }
     });
 }
 
