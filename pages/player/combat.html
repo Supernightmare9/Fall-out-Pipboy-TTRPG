@@ -3518,8 +3518,7 @@
 
             // Roll result (shown once a roll has been made)
             if (isRolled) {
-                var rollCls = stEntry.total >= (stEntry.dc || 10) ? 'combat-st-roll-success' : 'combat-st-roll-fail';
-                html += '<span class="combat-st-roll-result ' + rollCls + '">' +
+                html += '<span class="combat-st-roll-result">' +
                     escHtml('[d20:' + stEntry.d20 + '] + [' + (stEntry.modifier >= 0 ? '+' : '') + stEntry.modifier + '] = ' + stEntry.total) +
                     '</span>';
             }
