@@ -169,10 +169,15 @@ function loadSessionsFromDisk() {
       if (data.campaignId) session.campaignId = data.campaignId;
       for (const [handle, playerData] of Object.entries(data.players || {})) {
         if (!session.players[handle]) {
-          session.players[handle] = {
-            socketId: null,
-            data: Object.assign(defaultPlayerData(), playerData)
-          };
+          const merged = Object.assign(defaultPlayerData(), playerData);
+          // Migration: clear any auto-accumulated recipes from before the
+          // grant-only system was introduced (one-time per player).
+          if (!merged.recipeBookGrantedOnly) {
+            merged.recipeBook = [];
+            merged.recipeBookGrantedOnly = true;
+            console.log(`[migrate] Cleared recipe book for '${handle}' in session '${code}' (pre-grant-only data).`);
+          }
+          session.players[handle] = { socketId: null, data: merged };
         }
       }
       // Restore resource pools if present in the saved file
@@ -357,6 +362,7 @@ function defaultPlayerData() {
     inventory: [],
     equipment: { head: null, body: null, primaryWeapon: null, secondaryWeapon: null },
     recipeBook: [],
+    recipeBookGrantedOnly: true,
     inventoryEffectBonuses: {
       ac: 0,
       maxHp: 0,
@@ -1280,6 +1286,60 @@ io.on('connection', (socket) => {
     // Clean up
     delete session.craftRequests[requestId];
     console.log(`[craft:approve] requestId=${requestId} for ${request.fromHandle} → "${finalName}" session=${sessionCode}`);
+  });
+
+  // ── OVERSEER: grant recipes to players ────────────────────────────────────
+  // Payload: { playerHandles: string[], recipes: RecipeObject[] }
+  // Adds the supplied recipes to each named player's recipeBook (deduplicating
+  // by recipeId). Notifies online players via `player:recipes-granted`.
+  socket.on('overseer:grant-recipes', ({ playerHandles, recipes } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+    if (!Array.isArray(playerHandles) || playerHandles.length === 0) return;
+    if (!Array.isArray(recipes) || recipes.length === 0) return;
+
+    // Sanitise: keep only well-formed recipe objects with a recipeId and name
+    const validRecipes = recipes.filter(
+      r => r && typeof r === 'object' && typeof r.recipeId === 'string' && r.recipeId && typeof r.name === 'string'
+    );
+    if (validRecipes.length === 0) return;
+
+    // Sanitise: keep only non-empty string handles
+    const validHandles = playerHandles.filter(h => typeof h === 'string' && h.trim());
+
+    const results = [];
+    for (const handle of validHandles) {
+      const player = session.players[handle];
+      if (!player) continue;
+
+      const existing    = Array.isArray(player.data.recipeBook) ? player.data.recipeBook : [];
+      const existingIds = new Set(existing.map(r => r.recipeId));
+      const newRecipes  = validRecipes.filter(r => !existingIds.has(r.recipeId));
+
+      if (newRecipes.length > 0) {
+        player.data.recipeBook          = existing.concat(newRecipes);
+        player.data.recipeBookGrantedOnly = true;
+
+        // Notify the player if they are online
+        if (player.socketId) {
+          io.to(player.socketId).emit('player:recipes-granted', {
+            recipes: newRecipes,
+            message: newRecipes.length === 1
+              ? `New recipe unlocked: "${newRecipes[0].name}"!`
+              : `${newRecipes.length} new recipes added to your Recipe Book!`
+          });
+        }
+
+        results.push({ handle, added: newRecipes.length });
+        console.log(`[overseer:grant-recipes] Granted ${newRecipes.length} recipe(s) to '${handle}' in session ${sessionCode}`);
+      }
+    }
+
+    saveSessionToDisk(sessionCode, session);
+    socket.emit('overseer:recipes-granted-ack', { results });
   });
 
   // ── CRAFTING: Overseer rejects a pending request ──────────────────────────

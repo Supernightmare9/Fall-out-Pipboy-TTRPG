@@ -363,6 +363,7 @@
                 <div class="panel-header">
                     <span class="panel-title">📋 RECIPE DETAILS — <span id="detailRecipeName">SELECT A RECIPE</span></span>
                     <div style="display:flex;gap:6px;">
+                        <button class="cmd-btn success" onclick="showGiftPanel()" title="Gift this recipe to player(s)">🎁 GIFT TO PLAYER</button>
                         <button class="cmd-btn" onclick="editRecipe()" title="Edit this recipe">✏ EDIT</button>
                         <button class="cmd-btn danger" onclick="deleteRecipe()" title="Delete this recipe">🗑 DELETE</button>
                     </div>
@@ -370,6 +371,22 @@
                 <div class="panel-body" id="recipeDetailBody">
                     <div style="font-size:11px;color:rgba(232,232,232,.4);text-align:center;padding:20px;">
                         [ SELECT A RECIPE FROM THE LIBRARY ]
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gift Recipe Panel (hidden by default) -->
+            <div class="panel hidden" id="giftPanel" style="border-color:var(--overseer-green);background:rgba(0,204,102,.05);">
+                <div class="panel-header" style="background:rgba(0,204,102,.12);border-bottom:2px solid var(--overseer-green);">
+                    <span class="panel-title" style="color:var(--overseer-green-bright);">🎁 GIFT RECIPE — <span id="giftRecipeName"></span></span>
+                    <button class="cmd-btn" onclick="hideGiftPanel()">✕ CANCEL</button>
+                </div>
+                <div class="panel-body">
+                    <div style="font-size:11px;color:rgba(232,232,232,.6);letter-spacing:1px;margin-bottom:10px;">SELECT PLAYER(S) TO RECEIVE THIS RECIPE:</div>
+                    <div id="giftPlayerList" style="display:flex;flex-direction:column;gap:2px;margin-bottom:14px;max-height:200px;overflow-y:auto;"></div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button class="cmd-btn" onclick="hideGiftPanel()">CANCEL</button>
+                        <button class="cmd-btn success" onclick="confirmGiftRecipe()">✓ GRANT RECIPE</button>
                     </div>
                 </div>
             </div>
@@ -850,6 +867,68 @@
     };
 
     // ═══════════════════════════════════════════════════════════════════════════
+    //  RECIPE GIFT — grant selected recipe to one or more players
+    // ═══════════════════════════════════════════════════════════════════════════
+    var connectedPlayers = []; // { handle } objects from session snapshot
+
+    function renderGiftPanel() {
+        var panel = document.getElementById('giftPanel');
+        if (!panel) return;
+        if (!selectedRecipeId || connectedPlayers.length === 0) {
+            panel.classList.add('hidden');
+            return;
+        }
+        var recipe = null;
+        for (var i = 0; i < masterRecipes.length; i++) {
+            if (masterRecipes[i].recipeId === selectedRecipeId) { recipe = masterRecipes[i]; break; }
+        }
+        if (!recipe) { panel.classList.add('hidden'); return; }
+
+        var listEl = document.getElementById('giftPlayerList');
+        if (listEl) {
+            var html = '';
+            connectedPlayers.forEach(function(p) {
+                html += '<label style="display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer;font-size:11px;color:var(--overseer-white);letter-spacing:1px;">' +
+                    '<input type="checkbox" class="gift-player-cb" value="' + escapeHtml(p.handle) + '" style="accent-color:var(--overseer-green);width:14px;height:14px;">' +
+                    escapeHtml(p.handle.toUpperCase()) +
+                '</label>';
+            });
+            listEl.innerHTML = html;
+        }
+        var nameEl = document.getElementById('giftRecipeName');
+        if (nameEl) nameEl.textContent = recipe.name.toUpperCase();
+        panel.classList.remove('hidden');
+    }
+
+    window.showGiftPanel = function() {
+        renderGiftPanel();
+    };
+
+    window.confirmGiftRecipe = function() {
+        if (!selectedRecipeId || !_socket) return;
+        var recipe = null;
+        for (var i = 0; i < masterRecipes.length; i++) {
+            if (masterRecipes[i].recipeId === selectedRecipeId) { recipe = masterRecipes[i]; break; }
+        }
+        if (!recipe) return;
+
+        var handles = [];
+        document.querySelectorAll('.gift-player-cb:checked').forEach(function(cb) {
+            handles.push(cb.value);
+        });
+        if (handles.length === 0) { showToast('Select at least one player.', true); return; }
+
+        _socket.emit('overseer:grant-recipes', { playerHandles: handles, recipes: [recipe] });
+        document.getElementById('giftPanel').classList.add('hidden');
+        showToast('Recipe "' + recipe.name + '" granted to: ' + handles.join(', ') + '.');
+    };
+
+    window.hideGiftPanel = function() {
+        var panel = document.getElementById('giftPanel');
+        if (panel) panel.classList.add('hidden');
+    };
+
+    // ═══════════════════════════════════════════════════════════════════════════
     //  SOCKET.IO
     // ═══════════════════════════════════════════════════════════════════════════
     function setConnStatus(cls, txt) {
@@ -866,8 +945,12 @@
             _socket.emit('overseer:join', { sessionCode: _sessionCode, adminCode: _adminCode });
         });
 
-        _socket.on('session:joined', function() {
+        _socket.on('session:joined', function(payload) {
             setConnStatus('live', '⬤ LIVE');
+            // Capture the player list so we can show them in the gift panel
+            if (payload && Array.isArray(payload.players)) {
+                connectedPlayers = payload.players.map(function(p) { return { handle: p.handle }; });
+            }
         });
 
         _socket.on('disconnect', function() {
@@ -894,6 +977,27 @@
             if (!recipe) return;
             addToMasterRecipes(recipe);
             renderRecipeList();
+        });
+
+        // Track players joining after the overseer connected
+        _socket.on('overseer:player-joined', function(payload) {
+            if (!payload || !payload.handle) return;
+            var exists = false;
+            for (var i = 0; i < connectedPlayers.length; i++) {
+                if (connectedPlayers[i].handle === payload.handle) { exists = true; break; }
+            }
+            if (!exists) connectedPlayers.push({ handle: payload.handle });
+        });
+
+        // Ack when recipes are granted
+        _socket.on('overseer:recipes-granted-ack', function(payload) {
+            var results = Array.isArray(payload && payload.results) ? payload.results : [];
+            if (results.length === 0) {
+                showToast('No new recipes granted (may already be known).');
+            } else {
+                var summary = results.map(function(r){ return r.handle + ' (+' + r.added + ')'; }).join(', ');
+                showToast('✓ Recipes granted — ' + summary);
+            }
         });
     }
 
