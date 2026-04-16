@@ -1219,7 +1219,11 @@ function renderFeedback(lines) {
 function generateDuds(count) {
     const brackets  = [['(', ')'], ['[', ']'], ['{', '}'], ['<', '>']];
     const junkChars = '!@#$%^&*-+=|;:,.<>?/~';
-    const wordLen   = gameState.wordList[0] ? gameState.wordList[0].length : 6;
+    // Derive a sensible fallback word length from the current difficulty config
+    const diffWordLen = { easy: 5, medium: 8, hard: 10 };
+    const wordLen = gameState.wordList[0]
+        ? gameState.wordList[0].length
+        : (diffWordLen[gameState.difficulty] || 6);
     const duds = [];
     for (let i = 0; i < count; i++) {
         const br = brackets[randomInt(0, brackets.length - 1)];
@@ -1248,7 +1252,12 @@ function useDud(id) {
 
     let effect = '';
 
-    if (removable.length > 0 && (Math.random() < 0.5 || gameState.attemptsLeft >= gameState.maxAttempts)) {
+    // Prefer ENTRY REMOVED when attempts are already full (TRIES RESET would waste the dud),
+    // otherwise pick randomly between the two effects.
+    const attemptsAtMax = gameState.attemptsLeft >= gameState.maxAttempts;
+    const shouldRemove  = removable.length > 0 && (attemptsAtMax || Math.random() < 0.5);
+
+    if (shouldRemove) {
         // Remove a random non-password word
         const toRemove = removable[randomInt(0, removable.length - 1)];
         gameState.wordList = gameState.wordList.filter(function (w) { return w !== toRemove; });
