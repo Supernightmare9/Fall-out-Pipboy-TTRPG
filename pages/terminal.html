@@ -377,6 +377,26 @@
             text-shadow: 0 0 12px var(--terminal-glow);
         }
 
+        /* ── DUD / JUNK ENTRIES ──────────── */
+        .word-btn.dud-btn {
+            color: var(--terminal-amber);
+            border-color: rgba(255, 170, 0, 0.55);
+            opacity: 0.85;
+            font-style: italic;
+        }
+
+        .word-btn.dud-btn::before {
+            content: '';
+        }
+
+        .word-btn.dud-btn:hover:not(:disabled) {
+            background: rgba(255, 170, 0, 0.10);
+            border-color: var(--terminal-amber);
+            color: var(--terminal-amber);
+            text-shadow: 0 0 8px rgba(255, 170, 0, 0.6);
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+        }
+
         /* ── FEEDBACK CONSOLE ────────────── */
         .feedback-section {
             border: 1px solid rgba(0, 170, 34, 0.4);
@@ -754,7 +774,7 @@
 
         <!-- WORD SELECTION -->
         <div class="words-section">
-            <div class="word-prompt">SELECT WORD TO ATTEMPT TERMINAL ACCESS</div>
+            <div class="word-prompt">SELECT WORD OR JUNK SEQUENCE TO ATTEMPT TERMINAL ACCESS</div>
             <div class="words-grid" id="wordsGrid"></div>
         </div>
 
@@ -809,10 +829,12 @@
                     <dd>Select the correct password from the word list to gain terminal access.</dd>
                     <dt>LIKENESS</dt>
                     <dd>After each wrong guess, LIKENESS shows how many letters match the password at the same position. Use it to narrow down your choice.</dd>
+                    <dt>JUNK SEQUENCES</dt>
+                    <dd>Bracketed entries like <span style="color:var(--terminal-amber)">(#!@$%)</span> are junk. Clicking one either removes a dud word from the list or resets your remaining attempts.</dd>
                     <dt>ATTEMPTS</dt>
-                    <dd>You have 4 attempts. Each wrong guess costs one. Run out and the terminal locks.</dd>
+                    <dd>Based on Intelligence — EASY (INT 7–10): 5 &nbsp;|&nbsp; MEDIUM (INT 4–6): 4 &nbsp;|&nbsp; HARD (INT 1–3): 3. Run out and the terminal locks.</dd>
                     <dt>DIFFICULTY</dt>
-                    <dd>Determined by your Intelligence stat. Higher INT = shorter words = easier hack.</dd>
+                    <dd>Determined by your Intelligence stat. Higher INT = shorter words, fewer choices, more attempts.</dd>
                     <dt>XP REWARD</dt>
                     <dd>EASY: 25 XP &nbsp;|&nbsp; MEDIUM: 50 XP &nbsp;|&nbsp; HARD: 100 XP</dd>
                 </dl>
@@ -878,12 +900,10 @@ const WORD_POOLS = {
 // ── DIFFICULTY CONFIG ─────────────────────────
 
 const DIFFICULTY_CONFIG = {
-    easy:   { label: 'EASY',   xp: 25,  wordCount: 8  },
-    medium: { label: 'MEDIUM', xp: 50,  wordCount: 8  },
-    hard:   { label: 'HARD',   xp: 100, wordCount: 8  }
+    easy:   { label: 'EASY',   xp: 25,  wordCount: 8,  dudCount: 4, maxAttempts: 5 },
+    medium: { label: 'MEDIUM', xp: 50,  wordCount: 10, dudCount: 3, maxAttempts: 4 },
+    hard:   { label: 'HARD',   xp: 100, wordCount: 12, dudCount: 2, maxAttempts: 3 }
 };
-
-const MAX_ATTEMPTS = 4;
 
 // ── GAME STATE ────────────────────────────────
 
@@ -891,7 +911,11 @@ let gameState = {
     difficulty: 'medium',
     password: '',
     wordList: [],
-    attemptsLeft: MAX_ATTEMPTS,
+    dudList: [],       // [{ id, text }] – junk/bracket sequences
+    displayList: [],   // shuffled combined list [{type:'word'|'dud', value, id?}]
+    usedDuds: [],      // ids of consumed dud items
+    attemptsLeft: 4,
+    maxAttempts: 4,
     guessedWords: [],
     gameOver: false,
     playerName: 'UNKNOWN',
@@ -908,27 +932,50 @@ window.addEventListener('DOMContentLoaded', function () {
 function loadPlayerInfo() {
     let intelligenceLoaded = false;
 
-    // Primary: load from characterData
+    // Determine player handle (mirrors convention in stats.html / character-creation.js)
+    const playerHandle = (
+        sessionStorage.getItem('username') ||
+        localStorage.getItem('PIPBOY_PLAYER_HANDLE') ||
+        'player'
+    ).toLowerCase();
+
+    // Primary: player-scoped pipboyPlayerData — includes current buffs/debuffs
     try {
-        const charData = localStorage.getItem('characterData');
-        if (charData) {
-            const parsed = JSON.parse(charData);
+        const scopedData = localStorage.getItem('pipboyPlayerData_' + playerHandle);
+        if (scopedData) {
+            const parsed = JSON.parse(scopedData);
             if (parsed.name) gameState.playerName = parsed.name.toUpperCase();
-            if (parsed.stats && parsed.stats.intelligence !== undefined) {
-                gameState.intelligence = parseInt(parsed.stats.intelligence) || 5;
+            if (parsed.special && parsed.special.intelligence !== undefined) {
+                gameState.intelligence = parseInt(parsed.special.intelligence) || 5;
                 intelligenceLoaded = true;
-            }
-        } else {
-            console.warn('Terminal: no characterData found in localStorage');
-            // Show a non-blocking notice in the feedback section
-            const feedbackSection = document.getElementById('feedbackSection');
-            if (feedbackSection) {
-                feedbackSection.innerHTML =
-                    '<div class="feedback-line new">WARNING: NO CHARACTER DATA FOUND. DEFAULTING TO INTELLIGENCE: 5.<span class="cursor-blink"></span></div>';
             }
         }
     } catch (e) {
-        console.error('Terminal: error parsing characterData:', e);
+        console.error('Terminal: error reading pipboyPlayerData:', e);
+    }
+
+    // Secondary: legacy characterData key
+    if (!intelligenceLoaded) {
+        try {
+            const charData = localStorage.getItem('characterData');
+            if (charData) {
+                const parsed = JSON.parse(charData);
+                if (parsed.name && gameState.playerName === 'UNKNOWN') gameState.playerName = parsed.name.toUpperCase();
+                if (parsed.stats && parsed.stats.intelligence !== undefined) {
+                    gameState.intelligence = parseInt(parsed.stats.intelligence) || 5;
+                    intelligenceLoaded = true;
+                }
+            } else {
+                console.warn('Terminal: no characterData found in localStorage');
+                const feedbackSection = document.getElementById('feedbackSection');
+                if (feedbackSection) {
+                    feedbackSection.innerHTML =
+                        '<div class="feedback-line new">WARNING: NO CHARACTER DATA FOUND. DEFAULTING TO INTELLIGENCE: 5.<span class="cursor-blink"></span></div>';
+                }
+            }
+        } catch (e) {
+            console.error('Terminal: error parsing characterData:', e);
+        }
     }
 
     // Fallback name from currentPlayer
@@ -942,10 +989,11 @@ function loadPlayerInfo() {
         } catch (e) { /* keep default */ }
     }
 
-    // Fallback intelligence from pipboySpecial
+    // Tertiary: player-scoped pipboySpecial, then unscoped fallback
     if (!intelligenceLoaded) {
         try {
-            const special = localStorage.getItem('pipboySpecial');
+            const special = localStorage.getItem('pipboySpecial_' + playerHandle) ||
+                            localStorage.getItem('pipboySpecial');
             if (special) {
                 const parsed = JSON.parse(special);
                 if (parsed.intelligence !== undefined) {
@@ -1010,7 +1058,18 @@ function startNewGame() {
     // Ensure password is in word list
     gameState.password = gameState.wordList[randomInt(0, gameState.wordList.length - 1)];
 
-    gameState.attemptsLeft = MAX_ATTEMPTS;
+    // Generate junk/dud sequences
+    gameState.dudList = generateDuds(config.dudCount);
+    gameState.usedDuds = [];
+
+    // Build a shuffled combined display list (words + duds interleaved)
+    const combined = [];
+    gameState.wordList.forEach(function (w) { combined.push({ type: 'word', value: w }); });
+    gameState.dudList.forEach(function (d)  { combined.push({ type: 'dud',  value: d.text, id: d.id }); });
+    gameState.displayList = shuffle(combined);
+
+    gameState.attemptsLeft = config.maxAttempts;
+    gameState.maxAttempts  = config.maxAttempts;
     gameState.guessedWords = [];
     gameState.gameOver = false;
 
@@ -1051,12 +1110,12 @@ function renderAttempts() {
     const countEl  = document.getElementById('attemptsCount');
 
     blocksEl.innerHTML = '';
-    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    for (let i = 0; i < gameState.maxAttempts; i++) {
         const block = document.createElement('div');
         block.className = 'attempt-block' + (i >= gameState.attemptsLeft ? ' used' : '');
         blocksEl.appendChild(block);
     }
-    countEl.textContent = gameState.attemptsLeft + '/' + MAX_ATTEMPTS;
+    countEl.textContent = gameState.attemptsLeft + '/' + gameState.maxAttempts;
 }
 
 function renderCharGrid() {
@@ -1101,22 +1160,43 @@ function renderWordList() {
     const wordsGrid = document.getElementById('wordsGrid');
     wordsGrid.innerHTML = '';
 
-    gameState.wordList.forEach(function (word) {
-        const btn = document.createElement('button');
-        btn.className = 'word-btn';
-        btn.textContent = word;
-        btn.dataset.word = word;
+    gameState.displayList.forEach(function (item) {
+        if (item.type === 'dud') {
+            // Skip already-used duds
+            if (gameState.usedDuds.includes(item.id)) return;
 
-        if (gameState.gameOver) {
-            btn.disabled = true;
-        } else if (gameState.guessedWords.includes(word)) {
-            btn.classList.add('guessed');
-            btn.disabled = true;
+            const btn = document.createElement('button');
+            btn.className = 'word-btn dud-btn';
+            btn.textContent = item.value;
+            btn.dataset.dudId = item.id;
+            btn.title = 'JUNK SEQUENCE — click to access';
+
+            if (gameState.gameOver) {
+                btn.disabled = true;
+            } else {
+                btn.addEventListener('click', function () { useDud(item.id); });
+            }
+            wordsGrid.appendChild(btn);
+
         } else {
-            btn.addEventListener('click', function () { guessWord(word); });
-        }
+            // Real word — skip if it was removed by a dud
+            if (!gameState.wordList.includes(item.value)) return;
 
-        wordsGrid.appendChild(btn);
+            const btn = document.createElement('button');
+            btn.className = 'word-btn';
+            btn.textContent = item.value;
+            btn.dataset.word = item.value;
+
+            if (gameState.gameOver) {
+                btn.disabled = true;
+            } else if (gameState.guessedWords.includes(item.value)) {
+                btn.classList.add('guessed');
+                btn.disabled = true;
+            } else {
+                btn.addEventListener('click', function () { guessWord(item.value); });
+            }
+            wordsGrid.appendChild(btn);
+        }
     });
 }
 
@@ -1132,6 +1212,69 @@ function renderFeedback(lines) {
         }
         section.appendChild(div);
     });
+}
+
+// ── JUNK / DUD GENERATOR ──────────────────────
+
+function generateDuds(count) {
+    const brackets  = [['(', ')'], ['[', ']'], ['{', '}'], ['<', '>']];
+    const junkChars = '!@#$%^&*-+=|;:,.<>?/~';
+    // Derive a sensible fallback word length from the current difficulty config
+    const diffWordLen = { easy: 5, medium: 8, hard: 10 };
+    const wordLen = gameState.wordList[0]
+        ? gameState.wordList[0].length
+        : (diffWordLen[gameState.difficulty] || 6);
+    const duds = [];
+    for (let i = 0; i < count; i++) {
+        const br = brackets[randomInt(0, brackets.length - 1)];
+        const innerLen = randomInt(Math.max(3, wordLen - 2), wordLen + 2);
+        let inner = '';
+        for (let j = 0; j < innerLen; j++) {
+            inner += junkChars[randomInt(0, junkChars.length - 1)];
+        }
+        duds.push({ id: 'dud_' + i, text: br[0] + inner + br[1] });
+    }
+    return duds;
+}
+
+// ── DUD HANDLER ───────────────────────────────
+
+function useDud(id) {
+    if (gameState.gameOver) return;
+    if (gameState.usedDuds.includes(id)) return;
+
+    gameState.usedDuds.push(id);
+
+    // Find words that can be removed: not the password, not already guessed
+    const removable = gameState.wordList.filter(function (w) {
+        return w !== gameState.password && !gameState.guessedWords.includes(w);
+    });
+
+    let effect = '';
+
+    // Prefer ENTRY REMOVED when attempts are already full (TRIES RESET would waste the dud),
+    // otherwise pick randomly between the two effects.
+    const attemptsAtMax = gameState.attemptsLeft >= gameState.maxAttempts;
+    const shouldRemove  = removable.length > 0 && (attemptsAtMax || Math.random() < 0.5);
+
+    if (shouldRemove) {
+        // Remove a random non-password word
+        const toRemove = removable[randomInt(0, removable.length - 1)];
+        gameState.wordList = gameState.wordList.filter(function (w) { return w !== toRemove; });
+        effect = 'ENTRY REMOVED';
+    } else {
+        // Reset attempts
+        gameState.attemptsLeft = gameState.maxAttempts;
+        effect = 'TRIES RESET';
+    }
+
+    const dudText = (gameState.dudList.find(function (d) { return d.id === id; }) || {}).text || id;
+    renderFeedback([
+        { text: 'JUNK ACCESSED: ' + dudText, isNew: false },
+        { text: effect,                       isNew: true  }
+    ]);
+    renderAttempts();
+    renderWordList();
 }
 
 // ── LIKENESS ALGORITHM ────────────────────────
@@ -1179,7 +1322,7 @@ function guessWord(word) {
         gameState.gameOver = true;
 
         feedbackLines.push({ text: 'WORD ENTERED: ' + word,              isNew: false });
-        feedbackLines.push({ text: 'LIKENESS: ' + calcLikeness(word, gameState.password) + '/' + gameState.password.length, isNew: false });
+        feedbackLines.push({ text: 'LIKENESS: ' + calcLikeness(word, gameState.password) + '/' + gameState.password.length + ' CORRECT', isNew: false });
         feedbackLines.push({ text: 'TERMINAL LOCKED. ACCESS DENIED.',    isNew: true  });
         renderFeedback(feedbackLines);
 
@@ -1192,7 +1335,7 @@ function guessWord(word) {
         // ── WRONG GUESS ──
         const likeness = calcLikeness(word, gameState.password);
         feedbackLines.push({ text: 'WORD ENTERED: ' + word,              isNew: false });
-        feedbackLines.push({ text: 'LIKENESS: ' + likeness + '/' + gameState.password.length, isNew: true  });
+        feedbackLines.push({ text: 'LIKENESS: ' + likeness + '/' + gameState.password.length + ' CORRECT', isNew: true  });
         renderFeedback(feedbackLines);
 
         renderAttempts();
