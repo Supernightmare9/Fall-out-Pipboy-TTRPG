@@ -1359,11 +1359,13 @@ function awardXP() {
 
     const playerHandle = gameState.playerHandle;
 
-    // Update player-scoped pipboyPlayerData (same key used by loadPlayerInfo)
+    // Update player-scoped pipboyPlayerData (same key used by loadPlayerInfo).
+    // Falls back to the legacy unscoped key as seed data so the first XP award
+    // migrates any existing pre-scoped record into the scoped slot.
     try {
         const scopedKey  = 'pipboyPlayerData_' + playerHandle;
         const saved      = localStorage.getItem(scopedKey) ||
-                           localStorage.getItem('pipboyPlayerData');
+                           localStorage.getItem('pipboyPlayerData'); // legacy fallback / migration seed
         let playerData   = saved ? JSON.parse(saved) : { xp: 0, level: 1 };
         const newXP      = (playerData.xp || 0) + xpReward;
         playerData.xp    = newXP;
@@ -1529,7 +1531,7 @@ function execLoreCmd() {
                     if (payload.level) {
                         localStorage.setItem('pipboyLevel', String(payload.level));
                     }
-                } catch (e) { /* non-fatal */ }
+                } catch (e) { console.warn('Terminal: could not persist server XP update to localStorage:', e); }
             }
         }
     });
