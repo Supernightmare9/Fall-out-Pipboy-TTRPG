@@ -1598,10 +1598,16 @@
         var raceEl     = document.getElementById('charRaceDisplay');
         var geneEl     = document.getElementById('charGenePoolDisplay');
         var raceName   = (pd && pd.baseRace && pd.baseRace.name) || (saved && saved.race) || '\u2014';
-        var geneName   = (pd && pd.isPureblood) ? 'Pureblood'
-                       : (pd && pd.genePool && pd.genePool.name) ? pd.genePool.name
-                       : (pd && pd.raceSelected) ? 'Pureblood'
-                       : '\u2014';
+        var geneName;
+        if (pd && pd.isPureblood) {
+            geneName = 'Pureblood';
+        } else if (pd && pd.genePool && pd.genePool.name) {
+            geneName = pd.genePool.name;
+        } else if (pd && pd.raceSelected) {
+            geneName = 'Pureblood';
+        } else {
+            geneName = '\u2014';
+        }
         if (raceEl) raceEl.textContent = raceName;
         if (geneEl) geneEl.textContent = geneName;
 
