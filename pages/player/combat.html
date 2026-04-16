@@ -1096,12 +1096,41 @@
             display: flex; justify-content: space-between; align-items: center;
             padding: 5px 8px; margin-bottom: 4px;
             background: var(--vault-dark); border: 1px solid rgba(74,222,128,0.12);
+            flex-wrap: wrap; gap: 4px;
         }
         .combat-st-row.combat-st-proficient { border-color: rgba(251,191,36,0.4); background: rgba(251,191,36,0.04); }
+        .combat-st-row.combat-st-locked { border-color: rgba(74,222,128,0.08); opacity: 0.7; }
+        .combat-st-row.combat-st-proficient.combat-st-locked { border-color: rgba(251,191,36,0.2); }
         .combat-st-name { font-size: 10px; color: var(--vault-green); }
         .combat-st-badge { font-size: 8px; color: var(--vault-gold); margin-left: 5px; }
         .combat-st-value { font-size: 14px; font-weight: bold; color: var(--vault-green); min-width: 28px; text-align: right; }
         .combat-st-value.combat-st-prof-val { color: var(--vault-gold); }
+        .combat-st-actions { display: flex; align-items: center; gap: 4px; }
+        .combat-st-roll-result {
+            font-size: 9px; color: rgba(74,222,128,0.7); font-style: italic; flex: 1;
+            min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .combat-st-roll-result.combat-st-roll-success { color: #4ade80; }
+        .combat-st-roll-result.combat-st-roll-fail    { color: #f87171; }
+        .combat-st-roll-btn {
+            font-size: 9px; padding: 2px 7px; cursor: pointer;
+            background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.35);
+            color: var(--vault-green); font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;
+        }
+        .combat-st-roll-btn:hover { background: rgba(74,222,128,0.2); }
+        .combat-st-lockin-btn {
+            font-size: 9px; padding: 2px 7px; cursor: pointer;
+            background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.5);
+            color: var(--vault-gold); font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;
+        }
+        .combat-st-lockin-btn:hover { background: rgba(251,191,36,0.25); box-shadow: 0 0 6px rgba(251,191,36,0.3); }
+        .combat-st-locked-tag {
+            font-size: 8px; color: rgba(251,191,36,0.55); letter-spacing: 1px;
+            text-transform: uppercase; border: 1px solid rgba(251,191,36,0.25);
+            padding: 1px 6px; white-space: nowrap;
+        }
 
         /* ===== DICE ROLLER ===== */
         .dice-quick-row { display: flex; gap: 4px; flex-wrap: wrap; }
@@ -3464,6 +3493,7 @@
         var chosen = Array.isArray(liveData.chosenSavingThrowProf) ? liveData.chosenSavingThrowProf : [];
         chosen.forEach(function(k) { if (k) profSet[k] = true; });
 
+        var stResults = getSavingThrowResults();
         var html = '';
         SPECIAL_ATTRS_COMBAT.forEach(function(attr) {
             var spVal    = (liveData.special && typeof liveData.special[attr.key] === 'number')
@@ -3472,13 +3502,42 @@
             var isProfic = !!profSet[attr.key];
             var total    = mod + (isProfic ? profBonus : 0);
             var totalFmt = (total >= 0 ? '+' : '') + total;
-            html += '<div class="combat-st-row' + (isProfic ? ' combat-st-proficient' : '') + '" ' +
+            var stEntry  = stResults[attr.key] || null;
+            var isLocked = stEntry && stEntry.locked;
+            var isRolled = stEntry && typeof stEntry.d20 === 'number';
+
+            var rowCls = 'combat-st-row' +
+                (isProfic ? ' combat-st-proficient' : '') +
+                (isLocked ? ' combat-st-locked' : '');
+
+            html += '<div class="' + rowCls + '" ' +
                 'title="' + escHtml(attr.name + ': mod ' + (mod >= 0 ? '+' : '') + mod + (isProfic ? ' + Prof +' + profBonus : '') + ' = ' + totalFmt) + '">' +
                 '<span class="combat-st-name">' + escHtml(attr.name) +
                     (isProfic ? '<span class="combat-st-badge">&#10022;</span>' : '') +
-                '</span>' +
-                '<span class="combat-st-value' + (isProfic ? ' combat-st-prof-val' : '') + '">' + totalFmt + '</span>' +
-                '</div>';
+                '</span>';
+
+            // Roll result (shown once a roll has been made)
+            if (isRolled) {
+                var rollCls = stEntry.total >= (stEntry.dc || 10) ? 'combat-st-roll-success' : 'combat-st-roll-fail';
+                html += '<span class="combat-st-roll-result ' + rollCls + '">' +
+                    escHtml('[d20:' + stEntry.d20 + '] + [' + (stEntry.modifier >= 0 ? '+' : '') + stEntry.modifier + '] = ' + stEntry.total) +
+                    '</span>';
+            }
+
+            // Right-side actions: modifier + roll button / lock-in / locked tag
+            html += '<div class="combat-st-actions">';
+            if (isLocked) {
+                html += '<span class="combat-st-value' + (isProfic ? ' combat-st-prof-val' : '') + '">' + totalFmt + '</span>' +
+                    '<span class="combat-st-locked-tag">&#128274; LOCKED</span>';
+            } else if (isRolled) {
+                html += '<button class="combat-st-roll-btn" onclick="rollSavingThrow(\'' + escHtml(attr.key) + '\')" title="Re-roll">[REROLL]</button>' +
+                    '<button class="combat-st-lockin-btn" onclick="lockInSavingThrow(\'' + escHtml(attr.key) + '\')">[LOCK IN]</button>';
+            } else {
+                html += '<span class="combat-st-value' + (isProfic ? ' combat-st-prof-val' : '') + '">' + totalFmt + '</span>' +
+                    '<button class="combat-st-roll-btn" onclick="rollSavingThrow(\'' + escHtml(attr.key) + '\')">[ROLL]</button>';
+            }
+            html += '</div>';
+            html += '</div>';
         });
 
         // Show player-choice note if applicable
@@ -3498,7 +3557,95 @@
 
         container.innerHTML = html || '<div class="empty-state">No race selected.</div>';
     }
-    // Reads the canonical XP from the server live cache when connected;
+
+    // ── SAVING THROW — LOCK-IN HELPERS ───────────────────────────
+    function getSavingThrowResults() {
+        try {
+            var raw = localStorage.getItem(lsVitalsKey('savingThrowResults'));
+            return raw ? JSON.parse(raw) : {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveSavingThrowResults(results) {
+        localStorage.setItem(lsVitalsKey('savingThrowResults'), JSON.stringify(results));
+    }
+
+    window.rollSavingThrow = function(statKey) {
+        if (typeof DiceRoller === 'undefined') { addRollResult('Dice roller not available.'); return; }
+
+        var liveData = (window._livePlayerCache && window._liveMyHandle)
+                       ? window._livePlayerCache[window._liveMyHandle] : null;
+        if (!liveData) { addRollResult('Connect to sync server first.'); return; }
+
+        // Check if this save is already locked
+        var results = getSavingThrowResults();
+        if (results[statKey] && results[statKey].locked) { return; }
+
+        // Calculate modifier (same logic as renderSavingThrows)
+        var spVal    = (liveData.special && typeof liveData.special[statKey] === 'number')
+                       ? liveData.special[statKey] : DEFAULT_SPECIAL_VALUE;
+        var mod      = spVal - DEFAULT_SPECIAL_VALUE;
+        var info     = getCombatRaceSavingThrowInfo(
+            (function() {
+                var raceName = liveData.baseRace && liveData.baseRace.name ? liveData.baseRace.name : null;
+                var raceObj  = null;
+                if (raceName && Array.isArray(window.baseRaces)) {
+                    for (var ri = 0; ri < window.baseRaces.length; ri++) {
+                        if (window.baseRaces[ri].name === raceName) { raceObj = window.baseRaces[ri]; break; }
+                    }
+                }
+                if (!raceObj && liveData.baseRace && Array.isArray(liveData.baseRace.savingThrowProf)) {
+                    raceObj = liveData.baseRace;
+                }
+                return raceObj;
+            })()
+        );
+        var profBonus = getLivePlayerProficiencyBonus(liveData);
+        var profSet   = {};
+        info.fixed.forEach(function(k) { profSet[k] = true; });
+        var chosen = Array.isArray(liveData.chosenSavingThrowProf) ? liveData.chosenSavingThrowProf : [];
+        chosen.forEach(function(k) { if (k) profSet[k] = true; });
+        var isProfic = !!profSet[statKey];
+        var totalMod = mod + (isProfic ? profBonus : 0);
+
+        var d20    = DiceRoller.roll(20);
+        var total  = d20 + totalMod;
+        var attr   = SPECIAL_ATTRS_COMBAT.filter(function(a) { return a.key === statKey; })[0];
+        var name   = attr ? attr.name : statKey;
+
+        results[statKey] = {
+            d20:      d20,
+            modifier: totalMod,
+            total:    total,
+            locked:   false,
+            timestamp: new Date().toISOString()
+        };
+        saveSavingThrowResults(results);
+
+        var desc = name + ' Save: [d20:' + d20 + '] + [' + (totalMod >= 0 ? '+' : '') + totalMod + '] = ' + total;
+        addRollResult(desc);
+        broadcastRoll(sessionUsername + ' rolled ' + desc, 'important');
+
+        renderSavingThrows();
+    };
+
+    window.lockInSavingThrow = function(statKey) {
+        var results = getSavingThrowResults();
+        if (!results[statKey] || typeof results[statKey].d20 !== 'number') { return; }
+        if (results[statKey].locked) { return; }
+
+        results[statKey].locked = true;
+        saveSavingThrowResults(results);
+
+        var attr  = SPECIAL_ATTRS_COMBAT.filter(function(a) { return a.key === statKey; })[0];
+        var name  = attr ? attr.name : statKey;
+        addRollResult('🔒 ' + name + ' Save LOCKED IN: ' + results[statKey].total, 'roll-hit');
+        broadcastRoll(sessionUsername + ' locked in ' + name + ' Save: ' + results[statKey].total, 'important');
+
+        renderSavingThrows();
+    };
     // falls back to ProgressionManager (localStorage) when offline.
     function updateProgressionDisplay() {
         var liveData = (window._livePlayerCache && window._liveMyHandle)
