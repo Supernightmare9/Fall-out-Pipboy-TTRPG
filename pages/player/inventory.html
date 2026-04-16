@@ -813,6 +813,28 @@
     <!-- Recipe Book View -->
     <div id="view-recipebook" style="display:none">
         <div id="recipebook-layout">
+            <!-- Filter bar -->
+            <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+                <input id="rb-search" type="text" placeholder="Search recipes…"
+                       oninput="renderRecipeBook()"
+                       style="flex:1;min-width:140px;background:#0d1a0d;border:1px solid #4ade80;color:#4ade80;font-family:'Courier New',monospace;font-size:11px;padding:5px 8px;letter-spacing:1px">
+                <select id="rb-category" onchange="renderRecipeBook()"
+                        style="background:#0d1a0d;border:1px solid #4ade80;color:#4ade80;font-family:'Courier New',monospace;font-size:11px;padding:5px 8px;letter-spacing:1px">
+                    <option value="">ALL CATEGORIES</option>
+                    <option value="Aid">AID</option>
+                    <option value="Food">FOOD</option>
+                    <option value="Drink">DRINK</option>
+                    <option value="Chem">CHEM</option>
+                    <option value="Utility">UTILITY</option>
+                    <option value="Weapon">WEAPON</option>
+                    <option value="Armor">ARMOR</option>
+                    <option value="Misc">MISC</option>
+                </select>
+                <label style="display:flex;align-items:center;gap:5px;font-size:10px;color:#9ca3af;letter-spacing:1px;cursor:pointer">
+                    <input id="rb-craftable-only" type="checkbox" onchange="renderRecipeBook()">
+                    CRAFTABLE ONLY
+                </label>
+            </div>
             <div style="display:grid;grid-template-columns:260px 1fr;gap:10px;min-height:400px">
                 <!-- LEFT: recipe list -->
                 <div>
@@ -908,8 +930,11 @@
 </div>
 
 <script src="../../assets/data/pools/items.js"></script>
+<script src="../../assets/data/pools/junk.js"></script>
+<script src="../../assets/data/pools/recipes-pool.js"></script>
 <script src="../../assets/data/campaigns.js"></script>
 <script src="../../assets/logic/fallout_stat_bonuses.js"></script>
+<script src="../../assets/logic/crafting-utils.js"></script>
 <script src="../../assets/helpers/Managers/inventoryManager.js"></script>
 <script>
 /* ── Constants & State ────────────────────────────────────── */
@@ -921,8 +946,10 @@ var LS_EQ       = lsKey('vault_equipment');
 var LS_PD       = lsKey('pipboyPlayerData');
 var LS_SPECIAL  = lsKey('pipboySpecial');
 var LS_AC       = lsKey('pipboyAC');
+var LS_JUNK     = lsKey('vault_junk_v1');
 var MAX_CARRY   = 150;
 var playerData  = {};
+var playerJunk  = [];
 
 var SLOT_CONFIG = [
     { key: 'head',            label: 'Head',             icon: '\u26CF',       types: ['armor'] },
@@ -1010,10 +1037,12 @@ function saveData() {
     syncPlayerEffectsFromEquipment();
     playerData.inventory = inventory.slice();
     playerData.equipment = normalizeEquipment(equipment);
+    playerData.junk = playerJunk.slice();
     try {
-        localStorage.setItem(LS_INV, JSON.stringify(inventory));
-        localStorage.setItem(LS_EQ,  JSON.stringify(equipment));
-        localStorage.setItem(LS_PD,  JSON.stringify(playerData));
+        localStorage.setItem(LS_INV,  JSON.stringify(inventory));
+        localStorage.setItem(LS_EQ,   JSON.stringify(equipment));
+        localStorage.setItem(LS_PD,   JSON.stringify(playerData));
+        localStorage.setItem(LS_JUNK, JSON.stringify(playerJunk));
     } catch (e) { /* storage unavailable */ }
 }
 
@@ -1029,6 +1058,12 @@ function loadData() {
     playerData.inventory = inventory.slice();
     playerData.equipment = normalizeEquipment(equipment);
     syncPlayerEffectsFromEquipment();
+
+    // Load player junk from playerData first, then fall back to dedicated key
+    var fromPlayerJunk = Array.isArray(playerData.junk) ? playerData.junk : null;
+    var fromKeyJunk    = safeParseJson(localStorage.getItem(LS_JUNK), []);
+    playerJunk = fromPlayerJunk || fromKeyJunk;
+    playerData.junk = playerJunk.slice();
 }
 
 function makeInventoryItem(tpl, qty) {
@@ -1979,6 +2014,11 @@ var LS_RECIPES  = lsKey('vault_recipes_v1');
 var playerRecipes = [];
 var selectedRecipeId = null;
 
+// Expose master pools to CraftingUtils (set from window globals loaded by script tags)
+function _junkPool()  { return (typeof window !== 'undefined' && window.junkItems)    ? window.junkItems    : []; }
+function _itemPool()  { return (typeof window !== 'undefined' && window.ITEMS)        ? window.ITEMS        : []; }
+function _allRecipes(){ return (typeof window !== 'undefined' && window.recipesPool)  ? window.recipesPool  : []; }
+
 function loadRecipes() {
     LS_RECIPES = lsKey('vault_recipes_v1');
     loadPlayerData();
@@ -2013,19 +2053,48 @@ function renderRecipeBook() {
     var listEl = document.getElementById('rb-recipe-list');
     if (!listEl) return;
 
-    if (playerRecipes.length === 0) {
-        listEl.innerHTML = '<div class="rb-empty">[ NO RECIPES KNOWN ]\n\nGet items approved by the Overseer to unlock recipes.</div>';
+    // Read filter inputs
+    var searchEl    = document.getElementById('rb-search');
+    var catEl       = document.getElementById('rb-category');
+    var craftEl     = document.getElementById('rb-craftable-only');
+    var query       = searchEl    ? searchEl.value    : '';
+    var category    = catEl       ? catEl.value       : '';
+    var craftOnly   = craftEl     ? craftEl.checked   : false;
+
+    // Apply text/category filtering
+    var visible = (typeof CraftingUtils !== 'undefined')
+        ? CraftingUtils.filterRecipes(playerRecipes, query, category)
+        : playerRecipes.slice();
+
+    // Optionally limit to craftable items
+    if (craftOnly && typeof CraftingUtils !== 'undefined') {
+        visible = visible.filter(function(r) {
+            return CraftingUtils.checkCanCraft(r, inventory, playerJunk, _junkPool(), _itemPool());
+        });
+    }
+
+    if (visible.length === 0) {
+        listEl.innerHTML = '<div class="rb-empty">' +
+            (playerRecipes.length === 0
+                ? '[ NO RECIPES KNOWN ]\n\nGet items approved by the Overseer to unlock recipes.'
+                : '[ NO RECIPES MATCH FILTERS ]') +
+            '</div>';
         renderRecipeBookDetail(null);
         return;
     }
 
     var html = '';
-    for (var i = 0; i < playerRecipes.length; i++) {
-        var r = playerRecipes[i];
+    for (var i = 0; i < visible.length; i++) {
+        var r = visible[i];
         var isActive = selectedRecipeId === r.recipeId;
+        var canCraft = (typeof CraftingUtils !== 'undefined')
+            ? CraftingUtils.checkCanCraft(r, inventory, playerJunk, _junkPool(), _itemPool())
+            : false;
         html += '<div class="rb-recipe-row' + (isActive ? ' active' : '') + '" onclick="selectRbRecipe(\'' + jsStr(r.recipeId) + '\')">' +
-            '<div class="rb-recipe-name">' + escapeHtml(r.name) + '</div>' +
-            '<div class="rb-recipe-meta">' + escapeHtml(r.type || 'misc').toUpperCase() + ' · Wt:' + (r.weight || 0) + ' Val:' + (r.value || 0) + '</div>' +
+            '<div class="rb-recipe-name">' + escapeHtml(r.name) +
+                (canCraft ? ' <span style="font-size:9px;color:#4ade80">&#9711;</span>' : '') + '</div>' +
+            '<div class="rb-recipe-meta">' + escapeHtml((r.type || r.category || 'misc')).toUpperCase() +
+                ' · Wt:' + (r.weight || 0) + ' Val:' + (r.value || 0) + '</div>' +
         '</div>';
     }
     listEl.innerHTML = html;
@@ -2052,22 +2121,32 @@ function renderRecipeBookDetail(recipe) {
         return;
     }
 
-    var ingsHtml = '<div class="rb-ingredients">';
     var ingredients = recipe.ingredients || [];
+    var ingsHtml = '<div class="rb-ingredients">';
     if (ingredients.length === 0) {
         ingsHtml += '<div style="font-size:11px;color:#9ca3af">No ingredients listed.</div>';
     } else {
         for (var i = 0; i < ingredients.length; i++) {
             var ing = ingredients[i];
-            // Check if player has this in inventory (prefer uid, fall back to id for recipe flexibility)
-            var haveIt = false;
-            for (var j = 0; j < inventory.length; j++) {
-                var matchUid = ing.uid && inventory[j].uid === ing.uid;
-                var matchId  = !matchUid && ing.id && inventory[j].id === ing.id;
-                if (matchUid || matchId) { haveIt = true; break; }
-            }
+            var label = (typeof CraftingUtils !== 'undefined')
+                ? CraftingUtils.ingredientLabel(ing)
+                : (ing && typeof ing === 'object' ? (ing.name || ing.type || '?') : String(ing));
+            var isWild = (typeof CraftingUtils !== 'undefined') && CraftingUtils.isWildcard(ing);
+            var haveIt = (typeof CraftingUtils !== 'undefined')
+                ? CraftingUtils.checkIngredient(ing, inventory, playerJunk, _junkPool(), _itemPool())
+                : (function(ingSpec){
+                    // Fallback: uid/id match in inventory only
+                    for (var j = 0; j < inventory.length; j++) {
+                        var matchUid = ingSpec.uid && inventory[j].uid === ingSpec.uid;
+                        var matchId  = !matchUid && ingSpec.id && inventory[j].id === ingSpec.id;
+                        if (matchUid || matchId) return true;
+                    }
+                    return false;
+                  })(ing);
             ingsHtml += '<div class="rb-ing-row">' +
-                '<span class="rb-ing-name">' + escapeHtml(ing.name) + '</span>' +
+                '<span class="rb-ing-name">' + escapeHtml(label) +
+                    (isWild ? ' <span style="font-size:9px;color:#9ca3af">(wildcard)</span>' : '') +
+                '</span>' +
                 '<span style="font-size:10px;color:' + (haveIt ? '#4ade80' : '#ff6b6b') + '">' +
                     (haveIt ? '\u2713 HAVE' : '\u2717 MISSING') + '</span>' +
             '</div>';
@@ -2075,23 +2154,18 @@ function renderRecipeBookDetail(recipe) {
     }
     ingsHtml += '</div>';
 
-    // Check if player can craft (has all ingredients)
-    var canCraft = ingredients.length > 0;
-    for (var k = 0; k < ingredients.length; k++) {
-        var have = false;
-        for (var m = 0; m < inventory.length; m++) {
-            var mUid = ingredients[k].uid && inventory[m].uid === ingredients[k].uid;
-            var mId  = !mUid && ingredients[k].id && inventory[m].id === ingredients[k].id;
-            if (mUid || mId) { have = true; break; }
-        }
-        if (!have) { canCraft = false; break; }
-    }
+    var canCraft = (typeof CraftingUtils !== 'undefined')
+        ? CraftingUtils.checkCanCraft(recipe, inventory, playerJunk, _junkPool(), _itemPool())
+        : false;
 
     detailEl.innerHTML =
         '<div class="rb-detail-label">RECIPE NAME</div>' +
         '<div class="rb-detail-value">' + escapeHtml(recipe.name) + '</div>' +
-        '<div class="rb-detail-label">TYPE</div>' +
-        '<div class="rb-detail-value">' + escapeHtml(recipe.type || 'misc').toUpperCase() + '</div>' +
+        '<div class="rb-detail-label">CATEGORY</div>' +
+        '<div class="rb-detail-value">' + escapeHtml((recipe.category || recipe.type || 'misc')).toUpperCase() + '</div>' +
+        (recipe.requiredSkill ? '<div class="rb-detail-label">REQUIRED SKILL</div><div class="rb-detail-value">' + escapeHtml(recipe.requiredSkill) + '</div>' : '') +
+        '<div class="rb-detail-label">EFFECT</div>' +
+        '<div class="rb-detail-value" style="color:rgba(74,222,128,0.85)">' + escapeHtml(recipe.effect || '—') + '</div>' +
         '<div class="rb-detail-label">DESCRIPTION</div>' +
         '<div class="rb-detail-value" style="color:rgba(232,232,232,0.7);font-style:italic">' + escapeHtml(recipe.description || '—') + '</div>' +
         '<div class="rb-detail-label">WEIGHT / VALUE</div>' +
@@ -2111,32 +2185,34 @@ function craftFromRecipe(recipeId) {
     }
     if (!recipe) return;
 
-    // Consume ingredients (match by uid first, fall back to id for recipe-based crafting)
-    var consumed = [];
-    for (var j = 0; j < (recipe.ingredients || []).length; j++) {
-        var ing = recipe.ingredients[j];
-        for (var k = inventory.length - 1; k >= 0; k--) {
-            var matchUid = ing.uid && inventory[k].uid === ing.uid;
-            var matchId  = !matchUid && ing.id && inventory[k].id === ing.id;
-            if (matchUid || matchId) {
-                consumed.push(inventory[k].name);
-                var qty = (inventory[k].quantity !== undefined ? inventory[k].quantity : 1) - 1;
-                if (qty <= 0) {
-                    inventory.splice(k, 1);
-                } else {
-                    inventory[k].quantity = qty;
+    var consumed;
+    if (typeof CraftingUtils !== 'undefined') {
+        // Use CraftingUtils to consume from both inventory and junk, junk preferred
+        consumed = CraftingUtils.consumeIngredients(recipe, inventory, playerJunk, _junkPool(), _itemPool());
+    } else {
+        // Fallback: legacy uid/id matching against inventory only
+        consumed = [];
+        for (var j = 0; j < (recipe.ingredients || []).length; j++) {
+            var ing = recipe.ingredients[j];
+            for (var k = inventory.length - 1; k >= 0; k--) {
+                var matchUid = ing.uid && inventory[k].uid === ing.uid;
+                var matchId  = !matchUid && ing.id && inventory[k].id === ing.id;
+                if (matchUid || matchId) {
+                    consumed.push({ name: inventory[k].name, source: 'inventory' });
+                    var qty = (inventory[k].quantity !== undefined ? inventory[k].quantity : 1) - 1;
+                    if (qty <= 0) { inventory.splice(k, 1); } else { inventory[k].quantity = qty; }
+                    break;
                 }
-                break;
             }
         }
     }
 
-    // Add crafted item
+    // Add crafted item to inventory
     var craftedItem = {
         uid:         'craft_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
         id:          'crafted_' + Date.now(),
         name:        recipe.name,
-        type:        recipe.type || 'misc',
+        type:        recipe.type || recipe.category || 'misc',
         rarity:      'uncommon',
         quantity:    1,
         weight:      recipe.weight || 0,
@@ -2149,7 +2225,8 @@ function craftFromRecipe(recipeId) {
     saveData();
     renderAll();
     renderRecipeBook();
-    showCraftNotification('\u2713 CRAFTED "' + recipe.name + '" FROM RECIPE!\nAdded to inventory.', 'approved');
+    var consumedNames = consumed.map(function(c){ return c.name; }).join(', ');
+    showCraftNotification('\u2713 CRAFTED "' + recipe.name + '" FROM RECIPE!\nUsed: ' + (consumedNames || 'ingredients') + '.', 'approved');
 }
 
 /* ═══════════════════════════════════════════════════════════
