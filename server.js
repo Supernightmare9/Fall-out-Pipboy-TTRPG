@@ -1298,16 +1298,26 @@ io.on('connection', (socket) => {
 
     const session = sessions[sessionCode];
     if (!session) return;
-    if (!Array.isArray(playerHandles) || !Array.isArray(recipes) || recipes.length === 0) return;
+    if (!Array.isArray(playerHandles) || playerHandles.length === 0) return;
+    if (!Array.isArray(recipes) || recipes.length === 0) return;
+
+    // Sanitise: keep only well-formed recipe objects with a recipeId and name
+    const validRecipes = recipes.filter(
+      r => r && typeof r === 'object' && typeof r.recipeId === 'string' && r.recipeId && typeof r.name === 'string'
+    );
+    if (validRecipes.length === 0) return;
+
+    // Sanitise: keep only non-empty string handles
+    const validHandles = playerHandles.filter(h => typeof h === 'string' && h.trim());
 
     const results = [];
-    for (const handle of playerHandles) {
+    for (const handle of validHandles) {
       const player = session.players[handle];
       if (!player) continue;
 
       const existing    = Array.isArray(player.data.recipeBook) ? player.data.recipeBook : [];
       const existingIds = new Set(existing.map(r => r.recipeId));
-      const newRecipes  = recipes.filter(r => r.recipeId && !existingIds.has(r.recipeId));
+      const newRecipes  = validRecipes.filter(r => !existingIds.has(r.recipeId));
 
       if (newRecipes.length > 0) {
         player.data.recipeBook          = existing.concat(newRecipes);
@@ -1332,7 +1342,8 @@ io.on('connection', (socket) => {
     socket.emit('overseer:recipes-granted-ack', { results });
   });
 
-  // ── CRAFTING: Overseer rejects a pending request ──────────────────────────  // Payload: { requestId, reason }
+  // ── CRAFTING: Overseer rejects a pending request ──────────────────────────
+  // Payload: { requestId, reason }
   socket.on('craft:reject', ({ requestId, reason } = {}) => {
     const { role, sessionCode } = socket.data || {};
     if (role !== 'overseer' || !sessionCode) return;

@@ -2333,6 +2333,10 @@ function initCraftSocket() {
     // Overseer granted one or more recipes directly
     craftSocket.on('player:recipes-granted', function(payload) {
         var recipes = Array.isArray(payload.recipes) ? payload.recipes : [];
+        // Accept only well-formed recipe objects
+        recipes = recipes.filter(function(r) {
+            return r && typeof r === 'object' && r.recipeId && r.name;
+        });
         recipes.forEach(function(recipe) { addToRecipeBook(recipe); });
         if (recipes.length > 0) {
             var msg = payload.message || (recipes.length === 1
