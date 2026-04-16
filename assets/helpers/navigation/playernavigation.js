@@ -4,6 +4,14 @@
 // ═══════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Detect whether we are in the pages/player/ subdirectory or directly
+    // under pages/ (e.g. terminal.html).  All relative hrefs are adjusted
+    // accordingly so links work correctly from both locations.
+    const _isPlayerSubdir = window.location.pathname.includes('/player/');
+    const _playerBase  = _isPlayerSubdir ? '' : 'player/';
+    const _terminalHref = _isPlayerSubdir ? '../terminal.html' : 'terminal.html';
+    const _loginHref    = _isPlayerSubdir ? '../login.html'    : 'login.html';
+
     // Create hamburger menu HTML
     const menuHTML = `
         <!-- HAMBURGER TOGGLE BUTTON -->
@@ -20,13 +28,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div id="navCampaignName" class="nav-campaign-display"></div>
             </div>
             <ul class="nav-list">
-                <li><a href="combat.html" class="nav-link" data-page="combat">⚔ COMBAT</a></li>
-                <li><a href="stats.html" class="nav-link" data-page="stats">📊 STATS<span id="navLevelUpBadge" style="display:none;margin-left:6px;font-size:10px;color:#fbbf24;animation:navLevelUpPulse 1s ease-in-out infinite;" title="Level up available!">⭐</span></a></li>
-                <li><a href="inventory.html" class="nav-link" data-page="inventory">🎒 INVENTORY</a></li>
-                <li><a href="data.html" class="nav-link" data-page="data">📋 DATA</a></li>
-                <li><a href="../terminal.html" class="nav-link" data-page="terminal">🖥️ TERMINAL</a></li>
-                <li><a href="special_test.html" class="nav-link" data-page="special_test">📋 G.O.A.T. TEST</a></li>
-                <li><a href="character_sheet.html" class="nav-link" data-page="character_sheet">🗒️ CHAR SHEET</a></li>
+                <li><a href="${_playerBase}combat.html" class="nav-link" data-page="combat">⚔ COMBAT</a></li>
+                <li><a href="${_playerBase}stats.html" class="nav-link" data-page="stats">📊 STATS<span id="navLevelUpBadge" style="display:none;margin-left:6px;font-size:10px;color:#fbbf24;animation:navLevelUpPulse 1s ease-in-out infinite;" title="Level up available!">⭐</span></a></li>
+                <li><a href="${_playerBase}inventory.html" class="nav-link" data-page="inventory">🎒 INVENTORY</a></li>
+                <li><a href="${_playerBase}data.html" class="nav-link" data-page="data">📋 DATA</a></li>
+                <li><a href="${_terminalHref}" class="nav-link" data-page="terminal">🖥️ TERMINAL</a></li>
+                <li><a href="${_playerBase}special_test.html" class="nav-link" data-page="special_test">📋 G.O.A.T. TEST</a></li>
+                <li><a href="${_playerBase}character_sheet.html" class="nav-link" data-page="character_sheet">🗒️ CHAR SHEET</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -38,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <!-- TERMINAL BUTTON (top-right) -->
         <div id="terminalAccess" class="terminal-access">
-            <a href="terminal.html" class="terminal-btn">🖥️ TERMINAL</a>
+            <a href="${_terminalHref}" class="terminal-btn">🖥️ TERMINAL</a>
         </div>
     `;
 
@@ -446,7 +454,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function logout() {
         closeMenu();
         sessionStorage.clear();
-        window.location.href = '../login.html';
+        window.location.href = _loginHref;
     }
 
     if (logoutBtn) {
