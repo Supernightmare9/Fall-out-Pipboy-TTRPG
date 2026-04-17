@@ -4786,18 +4786,18 @@
         } else if (section === 'special') {
             // Use explicit parsing without || fallback so 0 (valid for Luck)
             // is preserved rather than replaced by the minimum-5 default.
-            function _spInt(id, def) {
+            function parseStatValue(id, def) {
                 var v = parseInt(document.getElementById(id).value, 10);
                 return isNaN(v) ? def : v;
             }
             OverseerSync.updatePlayer(handle, 'special', {
-                strength:    _spInt('poSStr', 5),
-                perception:  _spInt('poSPer', 5),
-                endurance:   _spInt('poSEnd', 5),
-                charisma:    _spInt('poSCha', 5),
-                intelligence:_spInt('poSInt', 5),
-                agility:     _spInt('poSAgi', 5),
-                luck:        _spInt('poSLck', 5)
+                strength:    parseStatValue('poSStr', 5),
+                perception:  parseStatValue('poSPer', 5),
+                endurance:   parseStatValue('poSEnd', 5),
+                charisma:    parseStatValue('poSCha', 5),
+                intelligence:parseStatValue('poSInt', 5),
+                agility:     parseStatValue('poSAgi', 5),
+                luck:        parseStatValue('poSLck', 5)
             });
         } else if (section === 'skills') {
             var skillsObj = {};

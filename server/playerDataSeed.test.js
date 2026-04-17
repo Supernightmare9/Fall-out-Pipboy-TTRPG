@@ -67,7 +67,7 @@ describe('DILLON_PLAYER_DATA identity', () => {
     expect(DILLON_PLAYER_DATA.specialAllocationActive).toBe(false);
   });
 
-  test('statsLocked is true (SPECIAL is finalised, not editable)', () => {
+  test('statsLocked is true (SPECIAL is finalized, not editable)', () => {
     expect(DILLON_PLAYER_DATA.statsLocked).toBe(true);
   });
 });
