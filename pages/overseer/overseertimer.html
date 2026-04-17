@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault 215 — Decision Timer</title>
+    <link rel="stylesheet" href="../../css/branding.css">
+    <link rel="stylesheet" href="../../css/overseer/overseerstyle.css">
+    <style>
+        :root {
+            --overseer-blue:        #0a1628;
+            --overseer-blue-mid:    #0d2045;
+            --overseer-blue-bright: #1a3a6e;
+            --overseer-gold:        #d4a017;
+            --overseer-gold-bright: #f0c040;
+            --overseer-gold-dim:    #8b6914;
+            --overseer-white:       #e8e8e8;
+            --overseer-red:         #cc2200;
+            --overseer-red-bright:  #ff3300;
+            --overseer-green:       #00cc66;
+            --overseer-green-bright:#00ff80;
+            --overseer-dark:        #04080f;
+            --overseer-border:      #2a5298;
+            --overseer-glow-gold:   rgba(212,160,23,0.6);
+
+            /* Nuclear / Warning palette */
+            --nuke-yellow:          #ffe000;
+            --nuke-orange:          #ff7700;
+            --nuke-red:             #ff2200;
+            --nuke-glow-yellow:     rgba(255,224,0,0.7);
+            --nuke-glow-orange:     rgba(255,119,0,0.7);
+            --nuke-glow-red:        rgba(255,34,0,0.7);
+        }
+
+        *{margin:0;padding:0;box-sizing:border-box;}
+
+        body {
+            width:100%;min-height:100vh;
+            background-color:var(--overseer-dark);
+            color:var(--overseer-white);
+            font-family:'Courier New',monospace;
+            background-image:
+                radial-gradient(circle at 15% 30%,rgba(42,82,152,.12) 0%,transparent 55%),
+                radial-gradient(circle at 85% 70%,rgba(212,160,23,.08) 0%,transparent 55%);
+        }
+
+        /* Scanline overlay */
+        body::before {
+            content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+            background:repeating-linear-gradient(0deg,rgba(0,0,0,.18),rgba(0,0,0,.18) 1px,transparent 1px,transparent 3px);
+            pointer-events:none;z-index:9999;
+        }
+
+        /* ── COMMAND BAR ──────────────────────────────────────────── */
+        .command-bar {
+            background:var(--overseer-blue-mid);
+            border-bottom:2px solid var(--overseer-gold);
+            box-shadow:0 2px 20px var(--overseer-glow-gold);
+            padding:14px 24px 14px 80px;
+            display:flex;align-items:center;justify-content:space-between;
+            flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;
+        }
+        .command-bar-left{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+        .overseer-title-bar{font-size:18px;font-weight:bold;color:var(--overseer-gold-bright);letter-spacing:3px;text-shadow:0 0 10px var(--overseer-glow-gold);}
+        .overseer-badge{font-size:9px;color:var(--overseer-gold-bright);letter-spacing:2px;text-transform:uppercase;}
+
+        /* ── MAIN LAYOUT ──────────────────────────────────────────── */
+        .timer-page {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            min-height:calc(100vh - 70px);
+            padding:30px 20px;
+            gap:36px;
+        }
+
+        /* ── NUCLEAR CLOCK DISPLAY ────────────────────────────────── */
+        .timer-display-wrapper {
+            position:relative;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:12px;
+        }
+
+        .timer-label {
+            font-family:'Courier New',monospace;
+            font-size:11px;
+            letter-spacing:4px;
+            text-transform:uppercase;
+            color:var(--nuke-yellow);
+            text-shadow:0 0 8px var(--nuke-glow-yellow);
+        }
+
+        /* Outer ring / frame */
+        .timer-frame {
+            position:relative;
+            border:4px solid var(--nuke-yellow);
+            border-radius:12px;
+            padding:30px 44px;
+            background:radial-gradient(ellipse at center, rgba(20,10,0,0.95) 0%, rgba(4,8,15,0.98) 100%);
+            box-shadow:
+                0 0 30px var(--nuke-glow-yellow),
+                0 0 60px rgba(255,224,0,0.2),
+                inset 0 0 40px rgba(0,0,0,0.8);
+        }
+
+        /* Corner hazard chevrons */
+        .timer-frame::before,
+        .timer-frame::after {
+            content:'☢';
+            position:absolute;
+            font-size:22px;
+            color:var(--nuke-yellow);
+            text-shadow:0 0 10px var(--nuke-glow-yellow);
+            opacity:0.6;
+        }
+        .timer-frame::before { top:8px; left:12px; }
+        .timer-frame::after  { top:8px; right:12px; }
+
+        /* The digit group */
+        #timerDisplay {
+            font-family:'Courier New',monospace;
+            font-size:clamp(64px, 14vw, 120px);
+            font-weight:bold;
+            letter-spacing:8px;
+            color:var(--nuke-yellow);
+            text-shadow:
+                0 0 10px var(--nuke-glow-yellow),
+                0 0 30px rgba(255,224,0,0.5),
+                0 0 60px rgba(255,224,0,0.2);
+            user-select:none;
+            min-width:260px;
+            text-align:center;
+            transition:color 0.4s, text-shadow 0.4s;
+        }
+
+        /* Status tag under the digits */
+        .timer-status-tag {
+            font-family:'Courier New',monospace;
+            font-size:10px;
+            letter-spacing:3px;
+            text-transform:uppercase;
+            padding:4px 14px;
+            border:1px solid var(--nuke-yellow);
+            border-radius:2px;
+            color:var(--nuke-yellow);
+            text-shadow:0 0 6px var(--nuke-glow-yellow);
+            background:rgba(255,224,0,0.05);
+            min-width:160px;
+            text-align:center;
+            transition:color 0.4s, border-color 0.4s, text-shadow 0.4s;
+        }
+
+        /* ── WARNING STATES ───────────────────────────────────────── */
+        /* Orange: <= 10s */
+        body.warn-orange #timerDisplay {
+            color:var(--nuke-orange);
+            text-shadow:0 0 10px var(--nuke-glow-orange), 0 0 30px rgba(255,119,0,0.5), 0 0 60px rgba(255,119,0,0.2);
+        }
+        body.warn-orange .timer-frame { border-color:var(--nuke-orange); box-shadow:0 0 30px var(--nuke-glow-orange), 0 0 60px rgba(255,119,0,0.2), inset 0 0 40px rgba(0,0,0,0.8); }
+        body.warn-orange .timer-label { color:var(--nuke-orange); text-shadow:0 0 8px var(--nuke-glow-orange); }
+        body.warn-orange .timer-status-tag { color:var(--nuke-orange); border-color:var(--nuke-orange); text-shadow:0 0 6px var(--nuke-glow-orange); }
+
+        /* Red: <= 5s */
+        body.warn-red #timerDisplay {
+            color:var(--nuke-red);
+            text-shadow:0 0 10px var(--nuke-glow-red), 0 0 30px rgba(255,34,0,0.5), 0 0 60px rgba(255,34,0,0.2);
+        }
+        body.warn-red .timer-frame { border-color:var(--nuke-red); box-shadow:0 0 30px var(--nuke-glow-red), 0 0 60px rgba(255,34,0,0.2), inset 0 0 40px rgba(0,0,0,0.8); }
+        body.warn-red .timer-label { color:var(--nuke-red); text-shadow:0 0 8px var(--nuke-glow-red); }
+        body.warn-red .timer-status-tag { color:var(--nuke-red); border-color:var(--nuke-red); text-shadow:0 0 6px var(--nuke-glow-red); }
+
+        /* Pulse animation for warning states */
+        @keyframes warnPulse {
+            0%,100% { opacity:1; }
+            50%      { opacity:0.5; }
+        }
+        body.warn-red #timerDisplay { animation:warnPulse 0.6s ease-in-out infinite; }
+        body.warn-orange #timerDisplay { animation:warnPulse 1.2s ease-in-out infinite; }
+
+        /* ── ALERT OVERLAY (on completion) ───────────────────────── */
+        #alertOverlay {
+            position:fixed;
+            inset:0;
+            z-index:10000;
+            background:rgba(180,0,0,0.0);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            pointer-events:none;
+            transition:background 0.3s;
+        }
+        #alertOverlay.active {
+            pointer-events:auto;
+            animation:flashScreen 0.4s ease-in-out infinite alternate;
+        }
+        @keyframes flashScreen {
+            0%   { background:rgba(180,0,0,0.0); }
+            100% { background:rgba(180,0,0,0.18); }
+        }
+
+        .alert-box {
+            background:var(--overseer-dark);
+            border:4px solid var(--nuke-red);
+            border-radius:10px;
+            padding:40px 56px;
+            text-align:center;
+            box-shadow:0 0 60px var(--nuke-glow-red), 0 0 120px rgba(255,34,0,0.3);
+            animation:alertPop 0.25s ease-out forwards;
+            max-width:500px;
+            width:90%;
+        }
+        @keyframes alertPop {
+            from { transform:scale(0.7); opacity:0; }
+            to   { transform:scale(1);   opacity:1; }
+        }
+
+        .alert-hazard {
+            font-size:56px;
+            line-height:1;
+            margin-bottom:14px;
+            animation:spinSlow 2s linear infinite;
+        }
+        @keyframes spinSlow {
+            from { transform:rotate(0deg); }
+            to   { transform:rotate(360deg); }
+        }
+
+        .alert-title {
+            font-family:'Courier New',monospace;
+            font-size:28px;
+            font-weight:bold;
+            letter-spacing:4px;
+            color:var(--nuke-red);
+            text-shadow:0 0 14px var(--nuke-glow-red);
+            text-transform:uppercase;
+            margin-bottom:8px;
+        }
+
+        .alert-subtitle {
+            font-family:'Courier New',monospace;
+            font-size:12px;
+            letter-spacing:2px;
+            color:var(--overseer-white);
+            opacity:0.8;
+            margin-bottom:24px;
+            text-transform:uppercase;
+        }
+
+        .alert-dismiss-btn {
+            background:var(--nuke-red);
+            border:2px solid var(--nuke-red);
+            color:#fff;
+            font-family:'Courier New',monospace;
+            font-size:13px;
+            font-weight:bold;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            padding:12px 32px;
+            cursor:pointer;
+            border-radius:4px;
+            box-shadow:0 0 20px var(--nuke-glow-red);
+            transition:all 0.2s;
+        }
+        .alert-dismiss-btn:hover {
+            background:#fff;
+            color:var(--nuke-red);
+            box-shadow:0 0 30px var(--nuke-glow-red);
+        }
+
+        /* ── PRESET BUTTONS ───────────────────────────────────────── */
+        .preset-section {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:10px;
+        }
+        .preset-label {
+            font-size:10px;
+            letter-spacing:3px;
+            color:var(--overseer-gold-dim);
+            text-transform:uppercase;
+        }
+        .preset-btns {
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+        .preset-btn {
+            background:var(--overseer-blue-mid);
+            border:2px solid var(--overseer-gold);
+            color:var(--overseer-gold);
+            font-family:'Courier New',monospace;
+            font-size:12px;
+            font-weight:bold;
+            letter-spacing:1px;
+            padding:10px 20px;
+            cursor:pointer;
+            border-radius:3px;
+            text-transform:uppercase;
+            transition:all 0.2s;
+            box-shadow:0 0 8px rgba(212,160,23,0.2);
+        }
+        .preset-btn:hover {
+            background:rgba(212,160,23,0.15);
+            border-color:var(--overseer-gold-bright);
+            color:var(--overseer-gold-bright);
+            box-shadow:0 0 18px rgba(212,160,23,0.4);
+        }
+
+        /* ── CUSTOM TIME INPUT ────────────────────────────────────── */
+        .custom-section {
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            gap:10px;
+        }
+        .custom-label {
+            font-size:10px;
+            letter-spacing:3px;
+            color:var(--overseer-gold-dim);
+            text-transform:uppercase;
+        }
+        .custom-inputs {
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .time-input {
+            background:var(--overseer-blue-mid);
+            border:2px solid var(--overseer-blue-bright);
+            color:var(--nuke-yellow);
+            font-family:'Courier New',monospace;
+            font-size:28px;
+            font-weight:bold;
+            text-align:center;
+            width:70px;
+            padding:8px 4px;
+            border-radius:3px;
+            box-shadow:inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .time-input:focus {
+            outline:none;
+            border-color:var(--nuke-yellow);
+            box-shadow:0 0 10px rgba(255,224,0,0.3), inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .time-sep {
+            font-size:32px;
+            font-weight:bold;
+            color:var(--overseer-gold);
+            line-height:1;
+        }
+        .set-btn {
+            background:var(--overseer-blue-mid);
+            border:2px solid var(--overseer-gold);
+            color:var(--overseer-gold);
+            font-family:'Courier New',monospace;
+            font-size:11px;
+            font-weight:bold;
+            letter-spacing:1px;
+            padding:10px 18px;
+            cursor:pointer;
+            border-radius:3px;
+            text-transform:uppercase;
+            transition:all 0.2s;
+            margin-left:6px;
+        }
+        .set-btn:hover {
+            background:rgba(212,160,23,0.15);
+            border-color:var(--overseer-gold-bright);
+            color:var(--overseer-gold-bright);
+        }
+
+        /* ── CONTROL BUTTONS ──────────────────────────────────────── */
+        .control-btns {
+            display:flex;
+            gap:14px;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+        .ctrl-btn {
+            font-family:'Courier New',monospace;
+            font-size:14px;
+            font-weight:bold;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            padding:14px 36px;
+            cursor:pointer;
+            border-radius:4px;
+            border:2px solid;
+            transition:all 0.2s;
+            min-width:130px;
+        }
+        .ctrl-btn-start {
+            background:rgba(0,204,102,0.1);
+            border-color:var(--overseer-green);
+            color:var(--overseer-green-bright);
+            text-shadow:0 0 8px rgba(0,204,102,0.6);
+            box-shadow:0 0 12px rgba(0,204,102,0.2);
+        }
+        .ctrl-btn-start:hover {
+            background:rgba(0,204,102,0.25);
+            box-shadow:0 0 24px rgba(0,204,102,0.4);
+        }
+        .ctrl-btn-pause {
+            background:rgba(255,224,0,0.08);
+            border-color:var(--nuke-yellow);
+            color:var(--nuke-yellow);
+            text-shadow:0 0 8px rgba(255,224,0,0.6);
+            box-shadow:0 0 12px rgba(255,224,0,0.15);
+        }
+        .ctrl-btn-pause:hover {
+            background:rgba(255,224,0,0.2);
+            box-shadow:0 0 24px rgba(255,224,0,0.35);
+        }
+        .ctrl-btn-reset {
+            background:rgba(255,34,0,0.08);
+            border-color:var(--nuke-red);
+            color:var(--nuke-red);
+            text-shadow:0 0 8px rgba(255,34,0,0.6);
+            box-shadow:0 0 12px rgba(255,34,0,0.15);
+        }
+        .ctrl-btn-reset:hover {
+            background:rgba(255,34,0,0.2);
+            box-shadow:0 0 24px rgba(255,34,0,0.35);
+        }
+        .ctrl-btn:disabled {
+            opacity:0.3;
+            cursor:not-allowed;
+            transform:none !important;
+        }
+
+        /* ── SCROLLBAR ────────────────────────────────────────────── */
+        ::-webkit-scrollbar{width:6px;}
+        ::-webkit-scrollbar-track{background:var(--overseer-dark);}
+        ::-webkit-scrollbar-thumb{background:var(--overseer-blue-bright);border-radius:3px;}
+    </style>
+</head>
+<body>
+
+<!-- SESSION GUARD: overseer only -->
+<script>
+(function(){
+    var role = sessionStorage.getItem('role');
+    if(role !== 'admin'){ window.location.replace('../login.html'); }
+})();
+</script>
+
+<!-- HAMBURGER NAV -->
+<script src="../../assets/helpers/Managers/settingsManager.js"></script>
+<script src="../../assets/helpers/navigation/overseer-navigation.js"></script>
+
+<!-- COMMAND BAR -->
+<div class="command-bar">
+    <div class="command-bar-left">
+        <div>
+            <div class="overseer-title-bar">⏱ DECISION TIMER</div>
+            <div class="overseer-badge">☢ VAULT 215 — COUNTDOWN MODULE — AUTHORITY CONSOLE</div>
+        </div>
+        <span id="campaignDisplay" style="font-size:10px;color:rgba(212,160,23,.6);letter-spacing:1px;text-transform:uppercase;"></span>
+    </div>
+</div>
+
+<!-- ALERT OVERLAY (shown on countdown completion) -->
+<div id="alertOverlay">
+    <!-- populated by JS when timer reaches zero -->
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="timer-page">
+
+    <!-- NUCLEAR DISPLAY -->
+    <div class="timer-display-wrapper">
+        <div class="timer-label">☢ DECISION COUNTDOWN ☢</div>
+        <div class="timer-frame">
+            <div id="timerDisplay">00:00</div>
+        </div>
+        <div id="timerStatusTag" class="timer-status-tag">STANDBY</div>
+    </div>
+
+    <!-- PRESET BUTTONS -->
+    <div class="preset-section">
+        <div class="preset-label">Quick Set</div>
+        <div class="preset-btns">
+            <button class="preset-btn" data-seconds="30">30 SEC</button>
+            <button class="preset-btn" data-seconds="60">1 MIN</button>
+            <button class="preset-btn" data-seconds="120">2 MIN</button>
+            <button class="preset-btn" data-seconds="300">5 MIN</button>
+        </div>
+    </div>
+
+    <!-- CUSTOM TIME INPUT -->
+    <div class="custom-section">
+        <div class="custom-label">Custom Time</div>
+        <div class="custom-inputs">
+            <input type="number" id="inputMin" class="time-input" min="0" max="99" value="0" title="Minutes">
+            <span class="time-sep">:</span>
+            <input type="number" id="inputSec" class="time-input" min="0" max="59" value="30" title="Seconds">
+            <button id="setCustomBtn" class="set-btn">SET</button>
+        </div>
+    </div>
+
+    <!-- CONTROL BUTTONS -->
+    <div class="control-btns">
+        <button id="startBtn" class="ctrl-btn ctrl-btn-start">▶ START</button>
+        <button id="pauseBtn" class="ctrl-btn ctrl-btn-pause" disabled>⏸ PAUSE</button>
+        <button id="resetBtn" class="ctrl-btn ctrl-btn-reset">↺ RESET</button>
+    </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// VAULT 215 — NUCLEAR COUNTDOWN TIMER
+// Session-persistent via sessionStorage. Overseer-only.
+// ═══════════════════════════════════════════════════════════════════
+
+const STORAGE_KEY = 'overseer_timer_state';
+
+// ── State ──────────────────────────────────────────────────────────
+let totalSeconds   = 30;   // configured duration
+let remaining      = 30;   // seconds left
+let isRunning      = false;
+let tickInterval   = null;
+let alertAudio     = null;
+
+// ── DOM refs ───────────────────────────────────────────────────────
+const timerDisplay  = document.getElementById('timerDisplay');
+const statusTag     = document.getElementById('timerStatusTag');
+const startBtn      = document.getElementById('startBtn');
+const pauseBtn      = document.getElementById('pauseBtn');
+const resetBtn      = document.getElementById('resetBtn');
+const alertOverlay  = document.getElementById('alertOverlay');
+const inputMin      = document.getElementById('inputMin');
+const inputSec      = document.getElementById('inputSec');
+const setCustomBtn  = document.getElementById('setCustomBtn');
+
+// ── Helpers ────────────────────────────────────────────────────────
+function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+}
+
+function saveState() {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+        totalSeconds,
+        remaining,
+        isRunning,
+        savedAt: isRunning ? Date.now() : null
+    }));
+}
+
+function loadState() {
+    try {
+        const raw = sessionStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const s = JSON.parse(raw);
+        totalSeconds = s.totalSeconds || 30;
+
+        // Compensate for time elapsed while the page was not loaded
+        if (s.isRunning && s.savedAt) {
+            const elapsed = Math.floor((Date.now() - s.savedAt) / 1000);
+            remaining = Math.max(0, (s.remaining || 0) - elapsed);
+            isRunning = remaining > 0;
+        } else {
+            remaining = s.remaining !== undefined ? s.remaining : totalSeconds;
+            isRunning = false;
+        }
+        return true;
+    } catch(e) { return false; }
+}
+
+function applyWarnClass() {
+    document.body.classList.remove('warn-orange','warn-red');
+    if (remaining <= 5 && remaining > 0)       document.body.classList.add('warn-red');
+    else if (remaining <= 10 && remaining > 0) document.body.classList.add('warn-orange');
+}
+
+function updateDisplay() {
+    timerDisplay.textContent = formatTime(remaining);
+    applyWarnClass();
+}
+
+function setStatus(text) {
+    statusTag.textContent = text;
+}
+
+function updateButtons() {
+    if (isRunning) {
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+    } else {
+        startBtn.disabled = remaining === 0;
+        pauseBtn.disabled = true;
+    }
+}
+
+// ── Alert / completion ─────────────────────────────────────────────
+function buildAlertSound() {
+    // Generate alarm tone via Web Audio API
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function beep(freq, startTime, duration) {
+            const osc  = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, startTime);
+            gain.gain.setValueAtTime(0.4, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        }
+
+        const now = ctx.currentTime;
+        // Rapid alarm pattern: high–low–high–low  × 3
+        for (let i = 0; i < 3; i++) {
+            beep(880, now + i * 0.5,      0.2);
+            beep(440, now + i * 0.5 + 0.25, 0.2);
+        }
+    } catch(e) { /* audio not supported */ }
+}
+
+function showAlert() {
+    buildAlertSound();
+    alertOverlay.innerHTML = `
+        <div class="alert-box">
+            <div class="alert-hazard">☢</div>
+            <div class="alert-title">TIME'S UP!</div>
+            <div class="alert-subtitle">DECISION WINDOW EXPIRED — VAULT PROTOCOL ENFORCED</div>
+            <button class="alert-dismiss-btn" id="dismissAlertBtn">⚠ DISMISS</button>
+        </div>
+    `;
+    alertOverlay.classList.add('active');
+    document.getElementById('dismissAlertBtn').addEventListener('click', dismissAlert);
+}
+
+function dismissAlert() {
+    alertOverlay.classList.remove('active');
+    alertOverlay.innerHTML = '';
+    document.body.classList.remove('warn-orange','warn-red');
+}
+
+// ── Tick ───────────────────────────────────────────────────────────
+function tick() {
+    if (remaining <= 0) {
+        clearInterval(tickInterval);
+        tickInterval   = null;
+        isRunning      = false;
+        remaining      = 0;
+        updateDisplay();
+        setStatus('EXPIRED');
+        updateButtons();
+        saveState();
+        showAlert();
+        return;
+    }
+    remaining--;
+    updateDisplay();
+    setStatus(isRunning ? 'COUNTING DOWN…' : 'PAUSED');
+    saveState();
+}
+
+// ── Controls ───────────────────────────────────────────────────────
+function startTimer() {
+    if (isRunning || remaining <= 0) return;
+    isRunning = true;
+    tickInterval = setInterval(tick, 1000);
+    setStatus('COUNTING DOWN…');
+    updateButtons();
+    saveState();
+}
+
+function pauseTimer() {
+    if (!isRunning) return;
+    clearInterval(tickInterval);
+    tickInterval = null;
+    isRunning    = false;
+    setStatus('PAUSED');
+    updateButtons();
+    saveState();
+}
+
+function resetTimer() {
+    clearInterval(tickInterval);
+    tickInterval = null;
+    isRunning    = false;
+    remaining    = totalSeconds;
+    dismissAlert();
+    updateDisplay();
+    setStatus('STANDBY');
+    updateButtons();
+    saveState();
+}
+
+function setTime(seconds) {
+    if (isRunning) pauseTimer();
+    totalSeconds = seconds;
+    remaining    = seconds;
+    updateDisplay();
+    setStatus('STANDBY');
+    updateButtons();
+    saveState();
+}
+
+// ── Event listeners ────────────────────────────────────────────────
+startBtn.addEventListener('click', startTimer);
+pauseBtn.addEventListener('click', pauseTimer);
+resetBtn.addEventListener('click', resetTimer);
+
+document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        setTime(parseInt(this.dataset.seconds, 10));
+    });
+});
+
+setCustomBtn.addEventListener('click', function() {
+    const m = Math.max(0, parseInt(inputMin.value, 10) || 0);
+    const s = Math.max(0, Math.min(59, parseInt(inputSec.value, 10) || 0));
+    const total = m * 60 + s;
+    if (total <= 0) return;
+    setTime(total);
+    inputMin.value = m;
+    inputSec.value = String(s).padStart(2,'0');
+});
+
+// Allow Enter on custom inputs
+[inputMin, inputSec].forEach(el => {
+    el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') setCustomBtn.click();
+    });
+});
+
+// Prevent invalid values in number inputs
+inputSec.addEventListener('change', function() {
+    let v = parseInt(this.value, 10);
+    if (isNaN(v) || v < 0) v = 0;
+    if (v > 59) v = 59;
+    this.value = v;
+});
+inputMin.addEventListener('change', function() {
+    let v = parseInt(this.value, 10);
+    if (isNaN(v) || v < 0) v = 0;
+    if (v > 99) v = 99;
+    this.value = v;
+});
+
+// ── Init ───────────────────────────────────────────────────────────
+(function init() {
+    const restored = loadState();
+    if (!restored) {
+        remaining    = totalSeconds;
+        isRunning    = false;
+    }
+    updateDisplay();
+
+    if (isRunning) {
+        setStatus('COUNTING DOWN…');
+    } else if (remaining === 0) {
+        setStatus('EXPIRED');
+    } else if (remaining < totalSeconds) {
+        setStatus('PAUSED');
+    } else {
+        setStatus('STANDBY');
+    }
+
+    updateButtons();
+
+    if (isRunning) {
+        // Resume ticking; tick once immediately to sync display then schedule the interval
+        tick();
+        if (isRunning) {
+            tickInterval = setInterval(tick, 1000);
+        }
+    }
+
+    if (remaining === 0 && !isRunning) {
+        // Was expired when page reloaded
+        document.body.classList.remove('warn-orange','warn-red');
+    }
+
+    // Campaign display
+    var campaignId = sessionStorage.getItem('campaignId');
+    if (campaignId) {
+        var el = document.getElementById('campaignDisplay');
+        if (el) el.textContent = '⚑ ' + (sessionStorage.getItem('campaignName') || campaignId);
+    }
+})();
+</script>
+
+</body>
+</html>
