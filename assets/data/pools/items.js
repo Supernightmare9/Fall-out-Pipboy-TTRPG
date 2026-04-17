@@ -233,3 +233,8 @@ const ITEMS = [
     properties: ["Crafting Ingredient", "Armor Component"]
   }
 ];
+
+// Make available globally for script tag loading
+if (typeof window !== 'undefined') { window.ITEMS = ITEMS; }
+// CommonJS fallback (non-browser environments like Node.js)
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') { module.exports = ITEMS; }
