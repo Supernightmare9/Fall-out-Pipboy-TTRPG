@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <ul class="nav-list">
                 <li><a href="overseerhub.html" class="nav-link" data-page="overseerhub">🖥️ OVERSEER HUB</a></li>
                 <li><a href="overseercrafting.html" class="nav-link" data-page="overseercrafting">🛠️ CRAFTING</a></li>
+                <li><a href="overseertimer.html" class="nav-link" data-page="overseertimer">⏱ TIMER</a></li>
             </ul>
             <div class="logout-container">
                 <button id="logoutBtn" class="logout-button">🚪 LOGOUT</button>
@@ -403,6 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const path = window.location.pathname;
         if (path.includes('overseercrafting')) return 'overseercrafting';
         if (path.includes('overseerhub')) return 'overseerhub';
+        if (path.includes('overseertimer')) return 'overseertimer';
         return null;
     }
 
