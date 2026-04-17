@@ -213,15 +213,22 @@ function seedDefaultCampaignsIfNeeded() {
 
   // ── Safe Haven campaign ─────────────────────────────────────────────────────
   const SAFE_HAVEN_CODE    = 'SAFEHAVEN';
-  const SAFE_HAVEN_PLAYERS = ['David', 'Moe', 'Zach', 'Katie', 'Jade', 'Nikki'];
+  const SAFE_HAVEN_PLAYERS = ['David', 'Moe', 'Zach', 'Katie', 'Jade', 'Nikki', 'Dillon'];
   const safeHaven = getOrCreateSession(SAFE_HAVEN_CODE);
   safeHaven.campaignId = 'safe-haven';
   for (const name of SAFE_HAVEN_PLAYERS) {
     const handle = name.toLowerCase();
     if (!safeHaven.players[handle]) {
+      // Use Dillon's pre-built demo data when seeding his account
+      const baseData = (handle === DILLON_PLAYER_HANDLE && DILLON_PLAYER_DATA)
+        ? Object.assign(defaultPlayerData(), DILLON_PLAYER_DATA, {
+            special: Object.assign({}, defaultPlayerData().special, DILLON_PLAYER_DATA.special),
+            skills:  Object.assign({}, defaultPlayerData().skills,  DILLON_PLAYER_DATA.skills)
+          })
+        : Object.assign(defaultPlayerData(), { name });
       safeHaven.players[handle] = {
         socketId: null,
-        data: Object.assign(defaultPlayerData(), { name })
+        data: baseData
       };
     }
   }

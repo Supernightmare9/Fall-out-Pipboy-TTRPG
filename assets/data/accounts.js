@@ -164,7 +164,16 @@ const ACCOUNTS = [
     username: "Dillon",
     role: "player",
     isDevAccount: true,
-    characters: [],
+    characters: [
+      {
+        id: "char_dillon_1",
+        name: "Dillon",
+        campaignId: "campaign_001",
+        currentHp: 160,
+        maxHp: 160,
+        displayColor: "#f59e0b"
+      }
+    ],
     settings: { ...DEFAULT_PLAYER_SETTINGS },
     preferences: {
       displayColor: "#f59e0b",

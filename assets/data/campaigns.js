@@ -6,7 +6,7 @@
 const CAMPAIGNS = [
   {
     id: "campaign_001",
-    name: "The Mojave Wasteland",
+    name: "Safe Haven",
     overseerId: "Overseer",
     status: "active",
     created: "2025-03-19",
@@ -112,6 +112,22 @@ const CAMPAIGNS = [
         skills: ["Performance", "Persuasion", "Deception"],
         abilities: ["Bardic Inspiration", "Jack of All Trades", "Song of Rest"],
         joinedDate: "2025-03-19"
+      },
+      {
+        username: "Dillon",
+        characterId: "char_dillon_1",
+        characterName: "Dillon",
+        currentHp: 160,
+        maxHp: 160,
+        ac: 10,
+        initiative: 0,
+        inInitiative: false,
+        status: "alive",
+        proficiencyBonus: 2,
+        stats: { str: 5, per: 5, end: 6, cha: 4, int: 4, agi: 4, lck: 0 },
+        skills: ["Survival", "Speech", "Melee Weapons"],
+        abilities: ["One extra Perk at Level 1 (Human)", "Animal Instinct: Gain 1 action surge per long rest (Yao Guai)"],
+        joinedDate: "2026-04-17"
       }
     ],
 
