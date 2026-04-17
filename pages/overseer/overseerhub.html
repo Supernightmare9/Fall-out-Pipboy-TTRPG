@@ -4053,6 +4053,11 @@
         t._poTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
     }
 
+    // Generate a unique item UID for overseer-created/gifted items
+    function _makeItemUid(prefix) {
+        return (prefix || 'item') + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5);
+    }
+
     function _getLivePlayers() {
         return window._overseerLivePlayers || {};
     }
@@ -4606,7 +4611,7 @@
 
         var pool = (typeof window._overseerGetItemPool === 'function') ? window._overseerGetItemPool() : [];
         var gifted = [];
-        panel.querySelectorAll('input[type="checkbox"]:checked').forEach(function(chk, _i) {
+        panel.querySelectorAll('input[type="checkbox"]:checked').forEach(function(chk) {
             var itemId = chk.value;
             var item = null;
             for (var i = 0; i < pool.length; i++) { if (pool[i].id === itemId) { item = pool[i]; break; } }
@@ -4616,7 +4621,7 @@
             var qtyInp = row ? row.querySelector('input[type="number"]') : null;
             var qty = qtyInp ? Math.max(1, parseInt(qtyInp.value, 10) || 1) : 1;
             gifted.push({
-                uid:         'gift_' + item.id + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,5),
+                uid:         _makeItemUid('gift_' + item.id),
                 id:          item.id,
                 name:        item.name,
                 type:        item.type        || 'misc',
@@ -4776,8 +4781,8 @@
         if (!nameEl || !nameEl.value.trim()) { poShowToast('Item name is required.', true); return; }
 
         var newItem = {
-            uid:         'oi_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
-            id:          'overseer_item_' + Date.now(),
+            uid:         _makeItemUid('oi'),
+            id:          _makeItemUid('overseer_item'),
             name:        nameEl.value.trim(),
             type:        (document.getElementById('poAddItem_type')   || {}).value  || 'misc',
             rarity:      (document.getElementById('poAddItem_rarity') || {}).value  || 'common',

@@ -2296,12 +2296,15 @@ function initCraftSocket() {
     if (typeof io === 'undefined') return;    // Socket.IO not loaded
 
     // Wrap saveData so every local save also pushes to the server.
-    // This ensures the Overseer hub always has the latest inventory view.
-    var _origSaveData = saveData;
-    saveData = function() {
-        _origSaveData.apply(this, arguments);
-        _pushInventoryToServer();
-    };
+    // Guard against double-wrapping if initCraftSocket is somehow called more than once.
+    if (!saveData._syncWrapped) {
+        var _origSaveData = saveData;
+        saveData = function() {
+            _origSaveData.apply(this, arguments);
+            _pushInventoryToServer();
+        };
+        saveData._syncWrapped = true;
+    }
 
     try {
         craftSocket = io('', { transports: ['websocket', 'polling'] });
