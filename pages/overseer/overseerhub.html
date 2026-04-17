@@ -4538,8 +4538,129 @@
     };
 
     window.poGiftItems = function() {
-        if (!_currentHandle) { poShowToast('Select a player first.', true); return; }
-        poShowToast('Gift Items: feature coming soon for ' + _currentHandle + '.');
+        var handle = _requireHandle();
+        if (!handle) return;
+
+        // Remove any existing panel so it is always rebuilt with the correct handle
+        var oldPanel = document.getElementById('poGiftItemsPanel');
+        if (oldPanel) {
+            if (oldPanel._forHandle === handle && oldPanel.style.display !== 'none') {
+                // Same player — just toggle off
+                oldPanel.style.display = 'none';
+                return;
+            }
+            oldPanel.parentNode.removeChild(oldPanel);
+        }
+
+        var panel = document.createElement('div');
+        panel.id = 'poGiftItemsPanel';
+        panel._forHandle = handle;  // tag for toggle detection
+        panel.style.cssText = [
+            'position:fixed', 'top:80px', 'right:20px', 'width:340px', 'max-height:500px',
+            'overflow-y:auto', 'background:var(--overseer-dark)',
+            'border:1px solid rgba(74,222,128,0.3)', 'padding:14px', 'z-index:1001',
+            'font-family:"Share Tech Mono",monospace', 'font-size:11px', 'box-shadow:0 4px 24px rgba(0,0,0,.7)'
+        ].join(';');
+
+        var escFn = function(s) {
+            return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        };
+
+        // ── Render the panel content ──────────────────────────────────────────
+        function renderGiftPanel() {
+            var pool2 = (typeof window._overseerGetItemPool === 'function') ? window._overseerGetItemPool() : [];
+            var rows = pool2.length > 0
+                ? pool2.map(function(it, idx) {
+                    return '<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid rgba(74,222,128,0.08);">'
+                        + '<input type="checkbox" id="gift-chk-' + idx + '" value="' + escFn(it.id) + '" style="margin:0;accent-color:var(--overseer-green);">'
+                        + '<label for="gift-chk-' + idx + '" style="flex:1;cursor:pointer;color:rgba(232,232,232,.85);">' + escFn(it.name)
+                            + ' <span style="color:rgba(232,232,232,.35);font-size:10px;">[' + escFn((it.type||'misc').toUpperCase()) + ']</span></label>'
+                        + '<input type="number" id="gift-qty-' + idx + '" value="1" min="1" max="99"'
+                            + ' style="width:40px;background:rgba(0,0,0,.4);border:1px solid rgba(74,222,128,.3);color:var(--overseer-green);'
+                            + 'font-family:inherit;font-size:10px;padding:2px 4px;text-align:center;">'
+                        + '</div>';
+                  }).join('')
+                : '<div style="color:rgba(232,232,232,.4);padding:8px 0;">No items in pool — go to the ITEMS tab to add items to the pool first.</div>';
+
+            panel.innerHTML =
+                '<div style="color:var(--overseer-green);font-size:12px;letter-spacing:1px;margin-bottom:10px;">&#x1F381; GIFT ITEMS \u2014 <span style="color:var(--overseer-gold);">' + escFn(handle) + '</span>'
+                    + '<button onclick="document.getElementById(\'poGiftItemsPanel\').style.display=\'none\';"'
+                    + ' style="float:right;background:none;border:none;color:rgba(232,232,232,.5);cursor:pointer;font-size:13px;line-height:1;">&#x2715;</button></div>'
+                + '<div style="max-height:330px;overflow-y:auto;margin-bottom:10px;">' + rows + '</div>'
+                + (pool2.length > 0
+                    ? '<button class="cmd-btn success" style="width:100%;margin-top:4px;" onclick="poConfirmGiftItems(\'' + escFn(handle) + '\')">&#x2714; GIFT SELECTED ITEMS</button>'
+                    : '')
+                + '<button class="cmd-btn" style="width:100%;margin-top:6px;" onclick="document.getElementById(\'poGiftItemsPanel\').style.display=\'none\';">[CLOSE]</button>';
+        }
+
+        // Expose re-render so confirm can refresh
+        panel._render = renderGiftPanel;
+        renderGiftPanel();
+        document.body.appendChild(panel);
+    };
+
+    window.poConfirmGiftItems = function(handle) {
+        if (!handle) return;
+        var panel = document.getElementById('poGiftItemsPanel');
+        if (!panel) return;
+
+        var pool = (typeof window._overseerGetItemPool === 'function') ? window._overseerGetItemPool() : [];
+        var gifted = [];
+        panel.querySelectorAll('input[type="checkbox"]:checked').forEach(function(chk, _i) {
+            var itemId = chk.value;
+            var item = null;
+            for (var i = 0; i < pool.length; i++) { if (pool[i].id === itemId) { item = pool[i]; break; } }
+            if (!item) return;
+            // Find the associated quantity input by checkbox sibling structure
+            var row = chk.parentElement;
+            var qtyInp = row ? row.querySelector('input[type="number"]') : null;
+            var qty = qtyInp ? Math.max(1, parseInt(qtyInp.value, 10) || 1) : 1;
+            gifted.push({
+                uid:         'gift_' + item.id + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,5),
+                id:          item.id,
+                name:        item.name,
+                type:        item.type        || 'misc',
+                rarity:      item.rarity      || 'common',
+                quantity:    qty,
+                weight:      item.weight      || 0,
+                value:       item.value       || 0,
+                description: item.description || '',
+                properties:  Array.isArray(item.properties) ? item.properties.slice() : []
+            });
+        });
+
+        if (gifted.length === 0) { poShowToast('No items selected.', true); return; }
+
+        // Merge gifted items into the player's current live inventory
+        var currentData = _getCurrentData() || {};
+        var currentInventory = Array.isArray(currentData.inventory) ? currentData.inventory.slice() : [];
+        gifted.forEach(function(giftItem) {
+            // If an identical item already exists, increase its quantity
+            var existing = null;
+            for (var i = 0; i < currentInventory.length; i++) {
+                if (currentInventory[i].id === giftItem.id) { existing = currentInventory[i]; break; }
+            }
+            if (existing) {
+                existing.quantity = (existing.quantity || 1) + giftItem.quantity;
+            } else {
+                currentInventory.push(giftItem);
+            }
+        });
+
+        // Push merged inventory to player via OverseerSync
+        OverseerSync.updatePlayer(handle, 'inventory', currentInventory);
+
+        // Also update local mirror so future gifts use the latest state
+        if (_getLivePlayers()[handle]) {
+            _getLivePlayers()[handle].inventory = currentInventory;
+        }
+
+        // Refresh the inventory display in the form
+        _renderInventory(currentInventory);
+
+        var names = gifted.map(function(g) { return g.name + ' x' + g.quantity; }).join(', ');
+        poShowToast('\u2714 Gifted ' + gifted.length + ' item(s) to ' + handle + ': ' + names.substring(0, 60));
+        panel.style.display = 'none';
     };
 
     window.poAddXP = function() {
@@ -4588,8 +4709,103 @@
     };
 
     window.poAddInventoryItem = function() {
-        if (!_currentHandle) { poShowToast('Select a player first.', true); return; }
-        poShowToast('Add Item: feature coming soon.');
+        var handle = _requireHandle();
+        if (!handle) return;
+
+        // Remove any stale panel so it's always rebuilt with the current handle
+        var oldPanel = document.getElementById('poAddItemPanel');
+        if (oldPanel) {
+            if (oldPanel._forHandle === handle && oldPanel.style.display !== 'none') {
+                oldPanel.style.display = 'none';
+                return;
+            }
+            oldPanel.parentNode.removeChild(oldPanel);
+        }
+
+        var panel = document.createElement('div');
+        panel.id = 'poAddItemPanel';
+        panel._forHandle = handle;
+        panel.style.cssText = [
+            'position:fixed', 'top:80px', 'left:20px', 'width:300px',
+            'background:var(--overseer-dark)', 'border:1px solid rgba(232,168,0,0.3)',
+            'padding:14px', 'z-index:1001', 'font-family:"Share Tech Mono",monospace',
+            'font-size:11px', 'box-shadow:0 4px 24px rgba(0,0,0,.7)'
+        ].join(';');
+
+        var inputStyle = 'background:rgba(0,0,0,.4);border:1px solid rgba(74,222,128,.3);color:var(--overseer-green);'
+            + 'font-family:inherit;font-size:11px;padding:4px 6px;width:100%;box-sizing:border-box;';
+        var selStyle = inputStyle + 'cursor:pointer;';
+        var labelStyle = 'display:block;color:rgba(232,232,232,.5);font-size:10px;letter-spacing:1px;margin-bottom:3px;';
+        var rowStyle = 'margin-bottom:8px;';
+
+        panel.innerHTML =
+            '<div style="color:var(--overseer-gold);font-size:12px;letter-spacing:1px;margin-bottom:10px;">&#x2795; ADD ITEM \u2014 <span style="color:var(--overseer-green);">'
+                + _esc(handle) + '</span>'
+                + '<button onclick="document.getElementById(\'poAddItemPanel\').style.display=\'none\';"'
+                + ' style="float:right;background:none;border:none;color:rgba(232,232,232,.5);cursor:pointer;font-size:13px;line-height:1;">&#x2715;</button></div>'
+            + '<div style="' + rowStyle + '"><label style="' + labelStyle + '">ITEM NAME *</label>'
+                + '<input id="poAddItem_name" type="text" placeholder="e.g. Stimpak" style="' + inputStyle + '"></div>'
+            + '<div style="' + rowStyle + '"><label style="' + labelStyle + '">TYPE</label>'
+                + '<select id="poAddItem_type" style="' + selStyle + '">'
+                + '<option value="misc">Misc</option><option value="weapon">Weapon</option>'
+                + '<option value="armor">Armor</option><option value="consumable">Consumable</option>'
+                + '<option value="ammo">Ammo</option></select></div>'
+            + '<div style="' + rowStyle + '"><label style="' + labelStyle + '">RARITY</label>'
+                + '<select id="poAddItem_rarity" style="' + selStyle + '">'
+                + '<option value="common">Common</option><option value="uncommon">Uncommon</option>'
+                + '<option value="rare">Rare</option><option value="legendary">Legendary</option>'
+                + '</select></div>'
+            + '<div style="display:flex;gap:8px;margin-bottom:8px;">'
+                + '<div style="flex:1;"><label style="' + labelStyle + '">QTY</label>'
+                    + '<input id="poAddItem_qty" type="number" value="1" min="1" max="999" style="' + inputStyle + '"></div>'
+                + '<div style="flex:1;"><label style="' + labelStyle + '">WEIGHT</label>'
+                    + '<input id="poAddItem_wt" type="number" value="0" min="0" step="0.1" style="' + inputStyle + '"></div>'
+                + '<div style="flex:1;"><label style="' + labelStyle + '">VALUE</label>'
+                    + '<input id="poAddItem_val" type="number" value="0" min="0" style="' + inputStyle + '"></div>'
+            + '</div>'
+            + '<div style="' + rowStyle + '"><label style="' + labelStyle + '">DESCRIPTION (optional)</label>'
+                + '<input id="poAddItem_desc" type="text" placeholder="Item description..." style="' + inputStyle + '"></div>'
+            + '<button class="cmd-btn success" style="width:100%;margin-top:4px;" onclick="poSubmitAddItem(\'' + _esc(handle) + '\')">&#x2714; ADD TO INVENTORY</button>'
+            + '<button class="cmd-btn" style="width:100%;margin-top:6px;" onclick="document.getElementById(\'poAddItemPanel\').style.display=\'none\';">[CANCEL]</button>';
+
+        document.body.appendChild(panel);
+    };
+
+    window.poSubmitAddItem = function(handle) {
+        var nameEl = document.getElementById('poAddItem_name');
+        if (!nameEl || !nameEl.value.trim()) { poShowToast('Item name is required.', true); return; }
+
+        var newItem = {
+            uid:         'oi_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+            id:          'overseer_item_' + Date.now(),
+            name:        nameEl.value.trim(),
+            type:        (document.getElementById('poAddItem_type')   || {}).value  || 'misc',
+            rarity:      (document.getElementById('poAddItem_rarity') || {}).value  || 'common',
+            quantity:    Math.max(1, parseInt((document.getElementById('poAddItem_qty') || {}).value, 10) || 1),
+            weight:      parseFloat((document.getElementById('poAddItem_wt')  || {}).value) || 0,
+            value:       parseFloat((document.getElementById('poAddItem_val') || {}).value) || 0,
+            description: ((document.getElementById('poAddItem_desc')  || {}).value  || '').trim(),
+            properties:  []
+        };
+
+        // Merge into player's current inventory
+        var currentData = _getCurrentData() || {};
+        var currentInventory = Array.isArray(currentData.inventory) ? currentData.inventory.slice() : [];
+        currentInventory.push(newItem);
+
+        // Push to player via OverseerSync
+        OverseerSync.updatePlayer(handle, 'inventory', currentInventory);
+
+        // Update local mirror
+        if (_getLivePlayers()[handle]) {
+            _getLivePlayers()[handle].inventory = currentInventory;
+        }
+        _renderInventory(currentInventory);
+
+        poShowToast('\u2714 Added "' + newItem.name + '" to ' + handle + '\'s inventory');
+
+        var panel = document.getElementById('poAddItemPanel');
+        if (panel) panel.style.display = 'none';
     };
 
     window.poEquipItem = function() {
@@ -5144,6 +5360,9 @@
             })
             .catch(function(e) { console.warn('[ipLoadPool] failed:', e.message); });
     };
+
+    // Expose item pool for other tabs (e.g. Players tab Gift Items)
+    window._overseerGetItemPool = function() { return _ipItems.slice(); };
 
     function ipShowToast(msg, isError) {
         var t = document.getElementById('statusToast');

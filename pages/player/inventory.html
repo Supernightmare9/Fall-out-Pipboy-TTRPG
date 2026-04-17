@@ -2253,28 +2253,73 @@ function showCraftNotification(msg, cls) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SOCKET.IO — CRAFTING REAL-TIME CONNECTION
+   SOCKET.IO — CRAFTING & REAL-TIME SYNC CONNECTION
    ═══════════════════════════════════════════════════════════ */
 var craftSocket          = null;
 var craftSocketConnected = false;
 var _myHandle    = localStorage.getItem('PIPBOY_PLAYER_HANDLE') || '';
 var _sessionCode = localStorage.getItem('PIPBOY_SESSION_CODE')  || '';
 
+/* Show a brief sync toast in the bottom-right corner. */
+function _showInventorySyncToast(msg, isWarning) {
+    var el = document.getElementById('inv-sync-toast');
+    if (!el) {
+        el = document.createElement('div');
+        el.id = 'inv-sync-toast';
+        el.style.cssText = [
+            'position:fixed', 'bottom:44px', 'right:12px', 'z-index:9998',
+            'padding:5px 10px', 'font-family:"Courier New",monospace', 'font-size:10px',
+            'letter-spacing:1px', 'border-radius:2px', 'pointer-events:none',
+            'transition:opacity 0.3s', 'background:rgba(10,26,10,0.92)',
+            'color:#4ade80', 'border:1px solid #4ade80'
+        ].join(';');
+        document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.color  = isWarning ? '#fbbf24' : '#4ade80';
+    el.style.borderColor = isWarning ? '#fbbf24' : '#4ade80';
+    el.style.opacity = '1';
+    clearTimeout(el._invTimer);
+    el._invTimer = setTimeout(function() { el.style.opacity = '0'; }, 2800);
+}
+
+/* Push current inventory and equipment to the server so the Overseer
+   always has an up-to-date view, even when changes originate client-side. */
+function _pushInventoryToServer() {
+    if (!craftSocket || !craftSocketConnected) return;
+    craftSocket.emit('player:update', { field: 'inventory', value: inventory });
+    craftSocket.emit('player:update', { field: 'equipment', value: playerData.equipment });
+}
+
 function initCraftSocket() {
     if (!_myHandle || !_sessionCode) return; // no credentials, skip
     if (typeof io === 'undefined') return;    // Socket.IO not loaded
+
+    // Wrap saveData so every local save also pushes to the server.
+    // This ensures the Overseer hub always has the latest inventory view.
+    var _origSaveData = saveData;
+    saveData = function() {
+        _origSaveData.apply(this, arguments);
+        _pushInventoryToServer();
+    };
 
     try {
         craftSocket = io('', { transports: ['websocket', 'polling'] });
     } catch(e) { return; }
 
     craftSocket.on('connect', function() {
-        craftSocket.emit('player:join', { sessionCode: _sessionCode, playerHandle: _myHandle });
+        craftSocket.emit('player:join', {
+            sessionCode:  _sessionCode,
+            playerHandle: _myHandle,
+            initialData:  { inventory: inventory, equipment: playerData.equipment || {} }
+        });
     });
 
     craftSocket.on('session:joined', function() {
         craftSocketConnected = true;
         updateCustomRequestCalc();
+        // Push current state so the Overseer has an up-to-date view immediately
+        _pushInventoryToServer();
     });
 
     craftSocket.on('campaign:waiting', function() {
@@ -2285,6 +2330,75 @@ function initCraftSocket() {
     craftSocket.on('disconnect', function() {
         craftSocketConnected = false;
         updateCustomRequestCalc();
+    });
+
+    // ── REAL-TIME OVERSEER UPDATES ──────────────────────────────────────────
+    // Fires when the Overseer pushes a change to this player's data via the hub.
+    craftSocket.on('player:updated-by-overseer', function(payload) {
+        var field    = payload.field;
+        var value    = payload.value;
+        var snapshot = payload.snapshot;
+        var updated  = false;
+
+        if (field === 'all' && snapshot) {
+            // Full snapshot: merge everything into playerData
+            Object.assign(playerData, snapshot);
+            if (Array.isArray(snapshot.inventory)) {
+                inventory = snapshot.inventory.slice();
+                playerData.inventory = inventory.slice();
+            }
+            if (snapshot.equipment && typeof snapshot.equipment === 'object') {
+                equipment = normalizeEquipment(snapshot.equipment);
+                playerData.equipment = normalizeEquipment(equipment);
+            }
+            updated = true;
+        } else if (field === 'inventory' && Array.isArray(value)) {
+            inventory = value.slice();
+            playerData.inventory = inventory.slice();
+            updated = true;
+        } else if (field === 'equipment' && value && typeof value === 'object') {
+            equipment = normalizeEquipment(value);
+            playerData.equipment = normalizeEquipment(equipment);
+            updated = true;
+        } else if (field === 'special' && value && typeof value === 'object') {
+            playerData.special = value;
+            updated = true;
+        } else if (field) {
+            playerData[field] = value;
+            // Re-render for fields that affect carry capacity or visible status
+            updated = (field === 'hp' || field === 'maxHp' || field === 'debuffs' ||
+                       field === 'boosts' || field === 'characterName');
+        }
+
+        if (updated) {
+            // Persist to localStorage so other open tabs pick up the change
+            try {
+                localStorage.setItem(LS_INV, JSON.stringify(inventory));
+                localStorage.setItem(LS_EQ,  JSON.stringify(equipment));
+                localStorage.setItem(LS_PD,  JSON.stringify(playerData));
+            } catch(e) {}
+            renderAll();
+            _showInventorySyncToast('\u2B06 OVERSEER UPDATE APPLIED');
+        }
+    });
+
+    // ── XP update from server ───────────────────────────────────────────────
+    craftSocket.on('player:xp-updated', function(payload) {
+        if (!payload || typeof payload.xp !== 'number') return;
+        playerData.xp    = payload.xp;
+        playerData.level = payload.level || playerData.level;
+        try { localStorage.setItem(LS_PD, JSON.stringify(playerData)); } catch(e) {}
+        _showInventorySyncToast('\u26A1 XP UPDATED: ' + payload.xp);
+    });
+
+    // ── Health update from server ───────────────────────────────────────────
+    craftSocket.on('player:health-updated', function(payload) {
+        if (!payload) return;
+        if (typeof payload.hp         === 'number') playerData.hp        = payload.hp;
+        if (typeof payload.radiation  === 'number') playerData.radiation = payload.radiation;
+        if (typeof payload.tempHealth === 'number') playerData.tempHealth= payload.tempHealth;
+        if (Array.isArray(payload.debuffs))          playerData.debuffs  = payload.debuffs;
+        try { localStorage.setItem(LS_PD, JSON.stringify(playerData)); } catch(e) {}
     });
 
     // Server acknowledged the request was submitted
