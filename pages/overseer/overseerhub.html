@@ -4529,14 +4529,16 @@
         _refreshPoRadSickness(data.debuffs || []);
 
         // ── S.P.E.C.I.A.L. ───────────────────────────────────────────────────
+        // Use explicit number checks so that 0 (valid for Luck etc.) is
+        // preserved rather than replaced by the || 5 fallback.
         var sp = data.special || {};
-        _set('poSStr', sp.strength    || 5);
-        _set('poSPer', sp.perception  || 5);
-        _set('poSEnd', sp.endurance   || 5);
-        _set('poSCha', sp.charisma    || 5);
-        _set('poSInt', sp.intelligence|| 5);
-        _set('poSAgi', sp.agility     || 5);
-        _set('poSLck', sp.luck        || 5);
+        _set('poSStr', typeof sp.strength     === 'number' ? sp.strength     : 5);
+        _set('poSPer', typeof sp.perception   === 'number' ? sp.perception   : 5);
+        _set('poSEnd', typeof sp.endurance    === 'number' ? sp.endurance    : 5);
+        _set('poSCha', typeof sp.charisma     === 'number' ? sp.charisma     : 5);
+        _set('poSInt', typeof sp.intelligence === 'number' ? sp.intelligence : 5);
+        _set('poSAgi', typeof sp.agility      === 'number' ? sp.agility      : 5);
+        _set('poSLck', typeof sp.luck         === 'number' ? sp.luck         : 5);
 
         // ── Skills ───────────────────────────────────────────────────────────
         var skills = data.skills || {};
@@ -4782,14 +4784,20 @@
             OverseerSync.updatePlayer(handle, 'radiation',      parseInt(document.getElementById('poCharRad').value,    10) || 0);
             OverseerSync.updatePlayer(handle, 'tempHealth',     parseInt(document.getElementById('poCharTempHP').value, 10) || 0);
         } else if (section === 'special') {
+            // Use explicit parsing without || fallback so 0 (valid for Luck)
+            // is preserved rather than replaced by the minimum-5 default.
+            function _spInt(id, def) {
+                var v = parseInt(document.getElementById(id).value, 10);
+                return isNaN(v) ? def : v;
+            }
             OverseerSync.updatePlayer(handle, 'special', {
-                strength:    parseInt(document.getElementById('poSStr').value, 10) || 5,
-                perception:  parseInt(document.getElementById('poSPer').value, 10) || 5,
-                endurance:   parseInt(document.getElementById('poSEnd').value, 10) || 5,
-                charisma:    parseInt(document.getElementById('poSCha').value, 10) || 5,
-                intelligence:parseInt(document.getElementById('poSInt').value, 10) || 5,
-                agility:     parseInt(document.getElementById('poSAgi').value, 10) || 5,
-                luck:        parseInt(document.getElementById('poSLck').value, 10) || 5
+                strength:    _spInt('poSStr', 5),
+                perception:  _spInt('poSPer', 5),
+                endurance:   _spInt('poSEnd', 5),
+                charisma:    _spInt('poSCha', 5),
+                intelligence:_spInt('poSInt', 5),
+                agility:     _spInt('poSAgi', 5),
+                luck:        _spInt('poSLck', 5)
             });
         } else if (section === 'skills') {
             var skillsObj = {};

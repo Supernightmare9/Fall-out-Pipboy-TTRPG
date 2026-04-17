@@ -197,43 +197,49 @@ function loadSessionsFromDisk() {
 }
 
 /**
- * On first run (no *.json files present), seed a demo campaign and the
- * "Safe Haven" campaign so the Overseer has something to work with immediately.
- * Existing files are never overwritten.
+ * Seed default campaigns on first launch.  Each campaign is seeded
+ * independently – an existing file for one campaign never prevents another
+ * from being created.  Existing files are never overwritten.
+ *
+ * Safe Haven uses session code CAMPAIGN_001, which matches the campaign id
+ * "campaign_001" defined in assets/data/campaigns.js.  The login page stores
+ * the selected campaign id as PIPBOY_SESSION_CODE; the server upper-cases it
+ * when the Overseer joins, so "campaign_001" → "CAMPAIGN_001".
  */
 function seedDefaultCampaignsIfNeeded() {
-  const existing = fs.readdirSync(CAMPAIGNS_DIR).filter(f => f.endsWith('.json'));
-  if (existing.length > 0) return; // campaigns already exist – skip seeding
-
   // ── Demo campaign (VAULT01) uses the dev test player already in memory ──────
-  if (sessions[SEED_SESSION_CODE]) {
+  const vaultFile = path.join(CAMPAIGNS_DIR, SEED_SESSION_CODE + '.json');
+  if (!fs.existsSync(vaultFile) && sessions[SEED_SESSION_CODE]) {
     saveSessionToDisk(SEED_SESSION_CODE, sessions[SEED_SESSION_CODE]);
     console.log(`[persist] Seeded demo campaign '${SEED_SESSION_CODE}'.`);
   }
 
-  // ── Safe Haven campaign ─────────────────────────────────────────────────────
-  const SAFE_HAVEN_CODE    = 'SAFEHAVEN';
+  // ── Safe Haven campaign (session code matches campaigns.js id: campaign_001) ─
+  const SAFE_HAVEN_CODE    = 'CAMPAIGN_001';
   const SAFE_HAVEN_PLAYERS = ['David', 'Moe', 'Zach', 'Katie', 'Jade', 'Nikki', 'Dillon'];
-  const safeHaven = getOrCreateSession(SAFE_HAVEN_CODE);
-  safeHaven.campaignId = 'safe-haven';
-  for (const name of SAFE_HAVEN_PLAYERS) {
-    const handle = name.toLowerCase();
-    if (!safeHaven.players[handle]) {
-      // Use Dillon's pre-built demo data when seeding his account
-      const baseData = (handle === DILLON_PLAYER_HANDLE && DILLON_PLAYER_DATA)
-        ? Object.assign(defaultPlayerData(), DILLON_PLAYER_DATA, {
-            special: Object.assign({}, defaultPlayerData().special, DILLON_PLAYER_DATA.special),
-            skills:  Object.assign({}, defaultPlayerData().skills,  DILLON_PLAYER_DATA.skills)
-          })
-        : Object.assign(defaultPlayerData(), { name });
-      safeHaven.players[handle] = {
-        socketId: null,
-        data: baseData
-      };
+  const safeHavenFile = path.join(CAMPAIGNS_DIR, SAFE_HAVEN_CODE + '.json');
+  if (!fs.existsSync(safeHavenFile)) {
+    const safeHaven = getOrCreateSession(SAFE_HAVEN_CODE);
+    safeHaven.campaignId = 'campaign_001';
+    for (const name of SAFE_HAVEN_PLAYERS) {
+      const handle = name.toLowerCase();
+      if (!safeHaven.players[handle]) {
+        // Use Dillon's pre-built demo data when seeding his account
+        const baseData = (handle === DILLON_PLAYER_HANDLE && DILLON_PLAYER_DATA)
+          ? Object.assign(defaultPlayerData(), DILLON_PLAYER_DATA, {
+              special: Object.assign({}, defaultPlayerData().special, DILLON_PLAYER_DATA.special),
+              skills:  Object.assign({}, defaultPlayerData().skills,  DILLON_PLAYER_DATA.skills)
+            })
+          : Object.assign(defaultPlayerData(), { name });
+        safeHaven.players[handle] = {
+          socketId: null,
+          data: baseData
+        };
+      }
     }
+    saveSessionToDisk(SAFE_HAVEN_CODE, safeHaven);
+    console.log(`[persist] Seeded 'Safe Haven' campaign as '${SAFE_HAVEN_CODE}' (${SAFE_HAVEN_PLAYERS.length} players).`);
   }
-  saveSessionToDisk(SAFE_HAVEN_CODE, safeHaven);
-  console.log(`[persist] Seeded 'Safe Haven' campaign (${SAFE_HAVEN_PLAYERS.length} players).`);
 }
 
 // ── Campaign discovery endpoint ────────────────────────────────────────────────
