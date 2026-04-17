@@ -2610,6 +2610,9 @@
                     );
                     _updateStatsRadSicknessBanner(src.debuffs || []);
                 }
+                // Persist to localStorage so other open tabs (e.g. inventory.html)
+                // pick up overseer changes immediately via the storage event.
+                try { localStorage.setItem(lsKey('pipboyPlayerData'), JSON.stringify(playerData)); } catch(e) {}
             },
 
             // Canonical XP update pushed by server after any XP award
