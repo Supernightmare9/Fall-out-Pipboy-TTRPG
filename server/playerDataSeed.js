@@ -225,8 +225,11 @@ const DILLON_PLAYER_DATA = {
 
   // ── Character creation ────────────────────────────────────────────────────────
   // Race: Human — 28 SPECIAL points, no caps, saving throw free choice.
+  // statsLocked: true — SPECIAL allocation is finalized; the stats page treats
+  // these values as read-only and does not allow further SPECIAL adjustments.
   raceSelected: true,
   specialAllocationActive: false, // locked in, ready to play
+  statsLocked: true,
 
   baseRace: {
     name: 'Human',
