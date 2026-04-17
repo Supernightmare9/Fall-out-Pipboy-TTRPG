@@ -645,6 +645,7 @@
     <button class="hub-tab-btn" data-tab="items"   onclick="switchHubTab('items',this)"   role="tab" aria-selected="false">&#x1F4E6; ITEMS</button>
     <button class="hub-tab-btn" data-tab="perks"   onclick="switchHubTab('perks',this)"   role="tab" aria-selected="false">&#x2728; PERKS</button>
     <button class="hub-tab-btn" data-tab="combat"  onclick="switchHubTab('combat',this)"  role="tab" aria-selected="false">&#x2694; COMBAT</button>
+    <button class="hub-tab-btn" data-tab="audit"   onclick="switchHubTab('audit',this)"   role="tab" aria-selected="false">&#x1F4CB; AUDIT LOG</button>
 </div>
 
 <!-- HUB TAB PANELS WRAPPER -->
@@ -656,6 +657,11 @@
 <div id="hub-tab-players" class="hub-tab-panel" role="tabpanel">
 <div style="padding:20px 24px;max-width:1400px;margin:0 auto;">
 
+    <!-- LIVE PLAYER CARDS (top overview) -->
+    <div id="poLivePlayerCards" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;min-height:30px;">
+        <!-- Populated dynamically by poRenderLivePlayerCards() -->
+    </div>
+
     <!-- PLAYER SELECTOR -->
     <div class="player-selector-bar">
         <span class="player-selector-label">SELECT PLAYER:</span>
@@ -663,6 +669,10 @@
             <option value="">— No players connected —</option>
         </select>
         <span class="player-status-badge" id="poPlayerStatusBadge" style="display:none;">&#x25CF; ONLINE</span>
+        <span id="poPlayerOfflineBadge" style="display:none;font-size:10px;color:#ff6b6b;letter-spacing:1px;padding:4px 8px;border:1px solid #ff6b6b;">&#x25CB; OFFLINE</span>
+        <button class="cmd-btn" title="Refresh player list from server" onclick="poRefreshPlayers()">&#x21BA; REFRESH</button>
+        <button class="cmd-btn success" onclick="poShowAddPlayerDialog()" title="Add a new player to this session">&#x2795; ADD PLAYER</button>
+        <button class="cmd-btn danger" onclick="poRemoveSelectedPlayer()" title="Remove the selected player from this session">&#x2715; REMOVE PLAYER</button>
         <button class="cmd-btn success" onclick="poGiftItems()" title="Gift items to the selected player from the item pool">&#x1F381; GIFT ITEMS</button>
         <button class="cmd-btn danger" onclick="poConfirmReset()" title="Reset the current section for the selected player">&#x21BA; RESET SECTION</button>
     </div>
@@ -1672,6 +1682,36 @@
 
 </div><!-- /dashboard-content -->
 </div><!-- /hub-tab-combat -->
+
+<!-- ══════════════════════════════════════════════════════════════════
+     AUDIT LOG TAB
+══════════════════════════════════════════════════════════════════ -->
+<div id="hub-tab-audit" class="hub-tab-panel" role="tabpanel">
+<div style="padding:20px 24px;max-width:1200px;margin:0 auto;">
+    <div class="panel">
+        <div class="panel-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <span class="panel-title">&#x1F4CB; OVERSEER ACTION LOG &#x2014; AUDIT TRAIL</span>
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span id="auditEntryCount" style="font-size:10px;color:rgba(232,232,232,.4);letter-spacing:1px;">0 entries</span>
+                <button class="cmd-btn" onclick="auditClearLog()" title="Clear the visible audit log (does not affect server data)">&#x1F5D1; CLEAR LOG</button>
+                <button class="cmd-btn" onclick="auditExportLog()" title="Download audit log as text file">&#x2B07; EXPORT</button>
+            </div>
+        </div>
+        <div class="panel-body" style="padding:0;">
+            <div style="padding:8px 14px;background:rgba(0,0,0,.2);border-bottom:1px solid rgba(42,82,152,.3);font-size:10px;color:rgba(232,232,232,.4);letter-spacing:1px;display:flex;gap:20px;">
+                <span>&#x25A0; <span style="color:#d4a017">YELLOW</span> = Player edit / data change</span>
+                <span>&#x25A0; <span style="color:#00cc66">GREEN</span> = Player added / joined</span>
+                <span>&#x25A0; <span style="color:#ff3300">RED</span> = Player removed / disconnected</span>
+                <span>&#x25A0; <span style="color:#60a5fa">BLUE</span> = System / health event</span>
+            </div>
+            <div id="auditLogBody" style="min-height:300px;max-height:70vh;overflow-y:auto;font-family:'Courier New',monospace;font-size:11px;padding:10px 14px;line-height:1.7;">
+                <div style="color:rgba(232,232,232,.3);text-align:center;padding:30px 0;">No actions logged yet. Actions you perform will appear here.</div>
+            </div>
+        </div>
+    </div>
+</div>
+</div><!-- /hub-tab-audit -->
+
 </div><!-- /hub-tab-panels -->
 
 <!-- ADD ENEMY MODAL -->
@@ -3837,6 +3877,7 @@
             delete _syncPlayers[handle]._waiting;
             _persistPlayerUpdate(handle, _syncPlayers[handle]);
             addLog('SYNC: ' + handle + ' joined the session', 'green');
+            if (typeof auditLog === 'function') auditLog('Player joined session: ' + handle, 'green');
             // Debug: check for campaign ID mismatch
             if (campaignId && _campaignSessionId && campaignId !== _campaignSessionId) {
                 addLog('⚠ WARN: ' + handle + ' joined campaign "' + campaignId +
@@ -3871,6 +3912,23 @@
         onPlayerLeft: function (handle) {
             delete _syncPlayers[handle];
             addLog('SYNC: ' + handle + ' disconnected', 'red');
+            if (typeof auditLog === 'function') auditLog('Player disconnected from session: ' + handle, 'red');
+            renderSyncPlayers();
+        },
+
+        onPlayerAdded: function (handle, data) {
+            _syncPlayers[handle] = data || {};
+            addLog('SYNC: Player added to session: ' + handle, 'green');
+            if (typeof auditLog === 'function') auditLog('Overseer added player to session: ' + handle, 'green');
+            renderSyncPlayers();
+        },
+
+        onPlayerRemoved: function (handle) {
+            delete _syncPlayers[handle];
+            addLog('SYNC: Player removed from session: ' + handle, 'red');
+            if (typeof auditLog === 'function') auditLog('Overseer removed player from session: ' + handle, 'red');
+            // poPopulatePlayerSelect() is called by renderSyncPlayers() — it handles
+            // clearing the form if the removed player was selected.
             renderSyncPlayers();
         },
 
@@ -4036,6 +4094,88 @@
 </script>
 
 <!-- ══════════════════════════════════════════════════════════════════
+     AUDIT LOG JAVASCRIPT
+══════════════════════════════════════════════════════════════════ -->
+<script>
+(function() {
+    var _auditEntries = [];
+    var MAX_AUDIT_ENTRIES = 500;
+
+    var _COLOR_MAP = {
+        yellow: '#d4a017',
+        green:  '#00cc66',
+        red:    '#ff3300',
+        blue:   '#60a5fa',
+        white:  'rgba(232,232,232,0.85)'
+    };
+
+    function _ts() {
+        var d = new Date();
+        var pad = function(n) { return n < 10 ? '0' + n : String(n); };
+        return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+    }
+
+    function _renderAuditLog() {
+        var body = document.getElementById('auditLogBody');
+        if (!body) return;
+        var count = document.getElementById('auditEntryCount');
+        if (count) count.textContent = _auditEntries.length + ' entries';
+
+        if (_auditEntries.length === 0) {
+            body.innerHTML = '<div style="color:rgba(232,232,232,.3);text-align:center;padding:30px 0;">No actions logged yet. Actions you perform will appear here.</div>';
+            return;
+        }
+
+        var html = '';
+        for (var i = _auditEntries.length - 1; i >= 0; i--) {
+            var e = _auditEntries[i];
+            var col = _COLOR_MAP[e.color] || _COLOR_MAP.white;
+            html += '<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05);">'
+                + '<span style="color:rgba(232,232,232,.35);margin-right:8px;">[' + e.ts + ']</span>'
+                + '<span style="color:' + col + ';">' + _esc(e.msg) + '</span>'
+                + '</div>';
+        }
+        body.innerHTML = html;
+    }
+
+    function _esc(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    /**
+     * Add an entry to the audit log.
+     * @param {string} msg   Message text
+     * @param {string} color 'yellow'|'green'|'red'|'blue'|'white'
+     */
+    window.auditLog = function(msg, color) {
+        _auditEntries.push({ ts: _ts(), msg: msg, color: color || 'white' });
+        if (_auditEntries.length > MAX_AUDIT_ENTRIES) {
+            _auditEntries.splice(0, _auditEntries.length - MAX_AUDIT_ENTRIES);
+        }
+        _renderAuditLog();
+    };
+
+    window.auditClearLog = function() {
+        _auditEntries = [];
+        _renderAuditLog();
+    };
+
+    window.auditExportLog = function() {
+        if (_auditEntries.length === 0) { alert('No audit entries to export.'); return; }
+        var lines = _auditEntries.map(function(e) { return '[' + e.ts + '] ' + e.msg; }).join('\n');
+        var blob = new Blob([lines], { type: 'text/plain' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'overseer-audit-' + Date.now() + '.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    };
+}());
+</script>
+
+<!-- ══════════════════════════════════════════════════════════════════
      PLAYERS TAB JAVASCRIPT
 ══════════════════════════════════════════════════════════════════ -->
 <script>
@@ -4087,9 +4227,12 @@
         var prev = sel.value;
         for (var i = sel.options.length - 1; i > 0; i--) sel.remove(i);
         handles.forEach(function(h) {
+            var data = players[h] || {};
             var opt = document.createElement('option');
             opt.value = h;
-            opt.textContent = h;
+            var online = data.socketId ? true : (data._waiting ? true : false);
+            var indicator = online ? '● ' : '○ ';
+            opt.textContent = indicator + h + (data._waiting ? ' [WAITING]' : '');
             sel.appendChild(opt);
         });
 
@@ -4111,16 +4254,85 @@
             poClearPlayerForm();
             poShowToast('Player disconnected.', true);
         }
+
+        // Refresh the live player cards
+        poRenderLivePlayerCards();
+    };
+
+    // ── Render live player status cards above the form ────────────────────────
+    window.poRenderLivePlayerCards = function() {
+        var container = document.getElementById('poLivePlayerCards');
+        if (!container) return;
+
+        var players = _getLivePlayers();
+        var handles = Object.keys(players);
+
+        if (handles.length === 0) {
+            container.innerHTML = '<div style="color:rgba(232,232,232,.3);font-size:11px;letter-spacing:1px;padding:6px 0;">No players in session</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        handles.forEach(function(h) {
+            var data = players[h] || {};
+            var isOnline   = data.socketId ? true : false;
+            var isWaiting  = !!data._waiting;
+            var isSelected = h === _currentHandle;
+            var hp    = typeof data.hp    === 'number' ? data.hp    : 0;
+            var maxHp = typeof data.maxHp === 'number' ? data.maxHp : 100;
+            var hpPct = maxHp > 0 ? Math.min(100, Math.round((hp / maxHp) * 100)) : 0;
+            var hpColor = hpPct > 50 ? '#00cc66' : hpPct > 25 ? '#d4a017' : '#ff3300';
+
+            var card = document.createElement('div');
+            card.style.cssText = [
+                'display:flex', 'flex-direction:column', 'gap:3px',
+                'padding:8px 12px', 'min-width:130px', 'cursor:pointer',
+                'border:1px solid ' + (isSelected ? '#d4a017' : 'rgba(42,82,152,.5)'),
+                'background:' + (isSelected ? 'rgba(212,160,23,.08)' : 'rgba(13,32,69,.7)'),
+                'transition:all .15s'
+            ].join(';');
+
+            var onlineColor = isWaiting ? '#d4a017' : (isOnline ? '#00cc66' : '#666');
+            var onlineLabel = isWaiting ? '⏳ WAITING' : (isOnline ? '● ONLINE' : '○ OFFLINE');
+
+            card.innerHTML =
+                '<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">'
+                + '<span style="font-size:11px;font-weight:bold;color:' + (isSelected ? '#f0c040' : '#e8e8e8') + ';letter-spacing:1px;text-transform:uppercase;">' + _esc(h) + '</span>'
+                + '<span style="font-size:9px;color:' + onlineColor + ';letter-spacing:1px;">' + onlineLabel + '</span>'
+                + '</div>'
+                + '<div style="font-size:10px;color:rgba(232,232,232,.5);">HP: ' + hp + '/' + maxHp
+                    + ' &nbsp;|&nbsp; Lvl ' + (data.level || 1) + '</div>'
+                + '<div style="height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden;">'
+                    + '<div style="width:' + hpPct + '%;height:100%;background:' + hpColor + ';border-radius:2px;"></div>'
+                + '</div>';
+
+            card.addEventListener('click', function() {
+                var sel = document.getElementById('poPlayerSelect');
+                if (sel) { sel.value = h; }
+                poLoadPlayer();
+            });
+            card.addEventListener('mouseenter', function() {
+                if (h !== _currentHandle) card.style.borderColor = 'rgba(212,160,23,.5)';
+            });
+            card.addEventListener('mouseleave', function() {
+                if (h !== _currentHandle) card.style.borderColor = 'rgba(42,82,152,.5)';
+            });
+
+            container.appendChild(card);
+        });
     };
 
     // ── Load a player's live data into the form ───────────────────────────────
     window.poLoadPlayer = function() {
         var sel = document.getElementById('poPlayerSelect');
+        var badge = document.getElementById('poPlayerStatusBadge');
+        var offBadge = document.getElementById('poPlayerOfflineBadge');
         if (!sel || !sel.value) {
             _currentHandle = null;
             poClearPlayerForm();
-            var badge = document.getElementById('poPlayerStatusBadge');
             if (badge) badge.style.display = 'none';
+            if (offBadge) offBadge.style.display = 'none';
+            poRenderLivePlayerCards();
             return;
         }
 
@@ -4134,12 +4346,126 @@
         }
 
         _currentHandle = handle;
-        var badge = document.getElementById('poPlayerStatusBadge');
-        if (badge) badge.style.display = '';
+
+        // Show online/offline badge based on socketId presence
+        var isOnline = !!data.socketId || !!data._waiting;
+        if (badge) badge.style.display = isOnline ? '' : 'none';
+        if (offBadge) offBadge.style.display = isOnline ? 'none' : '';
 
         _fillForm(handle, data);
         _updateFooter('Viewing: ' + handle + ' — loaded at ' + new Date().toLocaleTimeString());
         poShowToast('Loaded player: ' + handle);
+        poRenderLivePlayerCards();
+    };
+
+    // ── Refresh player list from server ───────────────────────────────────────
+    window.poRefreshPlayers = function() {
+        if (typeof OverseerSync !== 'undefined' && OverseerSync.requestSnapshot) {
+            OverseerSync.requestSnapshot();
+            poShowToast('Refreshing player list from server…');
+            if (typeof auditLog === 'function') auditLog('Overseer requested a player snapshot refresh', 'blue');
+        } else {
+            poPopulatePlayerSelect();
+            poShowToast('Player list refreshed (offline mode).');
+        }
+    };
+
+    // ── Add player dialog ─────────────────────────────────────────────────────
+    window.poShowAddPlayerDialog = function() {
+        var oldPanel = document.getElementById('poAddPlayerPanel');
+        if (oldPanel) {
+            if (oldPanel.style.display !== 'none') { oldPanel.style.display = 'none'; return; }
+            oldPanel.parentNode.removeChild(oldPanel);
+        }
+
+        var panel = document.createElement('div');
+        panel.id = 'poAddPlayerPanel';
+        panel.style.cssText = [
+            'position:fixed', 'top:80px', 'left:50%', 'transform:translateX(-50%)',
+            'width:320px', 'background:var(--overseer-dark)',
+            'border:1px solid rgba(212,160,23,0.4)', 'padding:16px', 'z-index:1002',
+            'font-family:"Courier New",monospace', 'font-size:11px',
+            'box-shadow:0 4px 24px rgba(0,0,0,.8)'
+        ].join(';');
+
+        var inputStyle = 'background:rgba(0,0,0,.4);border:1px solid rgba(212,160,23,.3);color:#f0c040;'
+            + 'font-family:inherit;font-size:11px;padding:6px 8px;width:100%;box-sizing:border-box;';
+        var labelStyle = 'display:block;color:rgba(232,232,232,.5);font-size:10px;letter-spacing:1px;margin-bottom:4px;margin-top:8px;';
+
+        panel.innerHTML =
+            '<div style="color:var(--overseer-gold-bright);font-size:12px;letter-spacing:1px;margin-bottom:12px;font-weight:bold;">&#x2795; ADD PLAYER TO SESSION'
+            + '<button onclick="document.getElementById(\'poAddPlayerPanel\').style.display=\'none\';"'
+            + ' style="float:right;background:none;border:none;color:rgba(232,232,232,.5);cursor:pointer;font-size:13px;line-height:1;">&#x2715;</button></div>'
+            + '<label style="' + labelStyle + '">PLAYER HANDLE (USERNAME) *</label>'
+            + '<input id="poAddPlayer_handle" type="text" placeholder="e.g. Jade" style="' + inputStyle + '" autocomplete="off">'
+            + '<label style="' + labelStyle + '">CHARACTER NAME (optional)</label>'
+            + '<input id="poAddPlayer_charName" type="text" placeholder="e.g. Agent Jade" style="' + inputStyle + '">'
+            + '<label style="' + labelStyle + '">STARTING LEVEL</label>'
+            + '<input id="poAddPlayer_level" type="number" value="1" min="1" max="50" style="' + inputStyle + '">'
+            + '<label style="' + labelStyle + '">STARTING XP</label>'
+            + '<input id="poAddPlayer_xp" type="number" value="0" min="0" style="' + inputStyle + '">'
+            + '<div style="display:flex;gap:8px;margin-top:14px;">'
+            + '<button class="cmd-btn danger" onclick="document.getElementById(\'poAddPlayerPanel\').style.display=\'none\';" style="flex:1;">CANCEL</button>'
+            + '<button class="cmd-btn success" onclick="poConfirmAddPlayer();" style="flex:1;">&#x2714; ADD PLAYER</button>'
+            + '</div>';
+
+        document.body.appendChild(panel);
+        var inp = document.getElementById('poAddPlayer_handle');
+        if (inp) inp.focus();
+    };
+
+    window.poConfirmAddPlayer = function() {
+        var handleEl  = document.getElementById('poAddPlayer_handle');
+        var nameEl    = document.getElementById('poAddPlayer_charName');
+        var levelEl   = document.getElementById('poAddPlayer_level');
+        var xpEl      = document.getElementById('poAddPlayer_xp');
+
+        var handle = handleEl ? handleEl.value.trim() : '';
+        if (!handle) { poShowToast('Player handle is required.', true); return; }
+
+        var initialData = {};
+        var charName = nameEl ? nameEl.value.trim() : '';
+        if (charName) initialData.characterName = charName;
+        var level = parseInt((levelEl || {}).value, 10) || 1;
+        initialData.level = level;
+        initialData.xp    = parseInt((xpEl || {}).value, 10) || 0;
+
+        if (typeof OverseerSync !== 'undefined' && OverseerSync.addPlayer) {
+            OverseerSync.addPlayer(handle, initialData);
+            poShowToast('Adding player "' + handle + '" to session…');
+            if (typeof auditLog === 'function') auditLog('Overseer added player: ' + handle + (charName ? ' (' + charName + ')' : ''), 'green');
+        } else {
+            // Offline fallback: add to local live players mirror
+            if (!window._overseerLivePlayers) window._overseerLivePlayers = {};
+            window._overseerLivePlayers[handle] = Object.assign({ level: 1, xp: 0, hp: 100, maxHp: 100 }, initialData);
+            poPopulatePlayerSelect();
+            poShowToast('Player "' + handle + '" added (offline mode).');
+            if (typeof auditLog === 'function') auditLog('Overseer added player: ' + handle + ' (offline/local)', 'green');
+        }
+
+        var panel = document.getElementById('poAddPlayerPanel');
+        if (panel) panel.style.display = 'none';
+    };
+
+    // ── Remove currently selected player ─────────────────────────────────────
+    window.poRemoveSelectedPlayer = function() {
+        var handle = _currentHandle;
+        if (!handle) { poShowToast('No player selected.', true); return; }
+        if (!confirm('Remove player "' + handle + '" from this session?\n\nThis will delete their record from the server. This cannot be undone.')) return;
+
+        if (typeof OverseerSync !== 'undefined' && OverseerSync.removePlayer) {
+            OverseerSync.removePlayer(handle);
+            poShowToast('Removing player "' + handle + '"…');
+            if (typeof auditLog === 'function') auditLog('Overseer removed player: ' + handle, 'red');
+        } else {
+            // Offline fallback
+            if (window._overseerLivePlayers) delete window._overseerLivePlayers[handle];
+            _currentHandle = null;
+            poClearPlayerForm();
+            poPopulatePlayerSelect();
+            poShowToast('Player "' + handle + '" removed (offline mode).');
+            if (typeof auditLog === 'function') auditLog('Overseer removed player: ' + handle + ' (offline/local)', 'red');
+        }
     };
 
     // ── Fill all form sections with a player's live data ─────────────────────
@@ -4512,6 +4838,7 @@
 
         _updateFooter(section.toUpperCase() + ' saved — ' + new Date().toLocaleTimeString());
         poShowToast(section.toUpperCase() + ' saved for ' + handle);
+        if (typeof auditLog === 'function') auditLog('Overseer edited ' + section.toUpperCase() + ' for player: ' + handle, 'yellow');
     };
 
     window.poResetSection = function(section) {
@@ -4531,6 +4858,7 @@
         });
         _updateFooter('All sections saved — ' + new Date().toLocaleTimeString());
         poShowToast('All sections saved for ' + handle);
+        if (typeof auditLog === 'function') auditLog('Overseer saved ALL sections for player: ' + handle, 'yellow');
     };
 
     window.poConfirmReset = function() {
@@ -4665,6 +4993,7 @@
 
         var names = gifted.map(function(g) { return g.name + ' x' + g.quantity; }).join(', ');
         poShowToast('\u2714 Gifted ' + gifted.length + ' item(s) to ' + handle + ': ' + names.substring(0, 60));
+        if (typeof auditLog === 'function') auditLog('Overseer gifted items to ' + handle + ': ' + names.substring(0, 80), 'yellow');
         panel.style.display = 'none';
     };
 
@@ -4680,6 +5009,7 @@
         _updateXPBar(next, xpNext);
         OverseerSync.updatePlayer(handle, 'xp', next);
         poShowToast('Added ' + amount + ' XP to ' + handle + ' (now ' + next + ')');
+        if (typeof auditLog === 'function') auditLog('Overseer added ' + amount + ' XP to ' + handle + ' (total: ' + next + ')', 'yellow');
     };
 
     window.poHealFull = function() {
@@ -4695,6 +5025,7 @@
         _updateVitalBars(effectiveCap, maxHp, ap, maxAp, rad, 1000, temp);
         OverseerSync.applyHealthMutation(handle, 'heal', effectiveCap);
         poShowToast(handle + ' fully healed to ' + effectiveCap + ' HP (cap after ' + rad + ' rads).');
+        if (typeof auditLog === 'function') auditLog('Overseer fully healed ' + handle + ' → ' + effectiveCap + ' HP', 'blue');
     };
 
     window.poClearRads = function() {
@@ -4711,6 +5042,7 @@
         _refreshPoRadSickness([]);
         OverseerSync.applyHealthMutation(handle, 'removeRads', rad);
         poShowToast('Radiation cleared for ' + handle + '.');
+        if (typeof auditLog === 'function') auditLog('Overseer cleared ' + rad + ' rads from ' + handle, 'blue');
     };
 
     window.poAddInventoryItem = function() {
