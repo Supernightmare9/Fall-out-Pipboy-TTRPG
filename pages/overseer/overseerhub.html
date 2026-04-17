@@ -585,6 +585,9 @@
     <script src="../../assets/data/accounts.js"></script>
     <script src="../../assets/data/campaigns.js"></script>
     <script src="../../assets/data/pools/enemies.js"></script>
+    <script src="../../assets/data/pools/items.js"></script>
+    <script src="../../assets/data/pools/junk.js"></script>
+    <script src="../../assets/data/pools/perks.js"></script>
     <script src="../../assets/helpers/Managers/storageManager.js"></script>
     <script src="../../assets/helpers/mechanics/diceRoller.js"></script>
     <!-- fallout_stat_bonuses.js must be loaded before encounterBuilder.js so that
@@ -1092,6 +1095,8 @@
                 <div class="panel-header">
                     <span class="panel-title">&#x1F50E; ENEMY DETAILS &#x2014; <span id="epDetailEnemyName">FERAL GHOUL</span></span>
                     <div style="display:flex;gap:6px;">
+                        <button class="cmd-btn success" onclick="epAddToEncounter()" title="Add this enemy to the active combat encounter">&#x2694; ADD TO ENCOUNTER</button>
+                        <button class="cmd-btn" onclick="epAssignToPlayer()" title="Send this enemy info to a player">&#x1F465; ASSIGN TO PLAYER</button>
                         <button class="cmd-btn" onclick="epEditEnemy()">&#x270F; EDIT</button>
                         <button class="cmd-btn danger" onclick="epDeleteEnemy()">&#x1F5D1; DELETE</button>
                     </div>
@@ -1266,6 +1271,7 @@
                 <div class="panel-header">
                     <span class="panel-title">&#x1F50E; ITEM DETAILS &#x2014; <span id="ipDetailItemName">10MM PISTOL</span></span>
                     <div style="display:flex;gap:6px;">
+                        <button class="cmd-btn success" onclick="ipGiftToPlayer()" title="Gift this item to a player">&#x1F381; GIFT TO PLAYER</button>
                         <button class="cmd-btn" onclick="ipEditItem()">&#x270F; EDIT</button>
                         <button class="cmd-btn danger" onclick="ipDeleteItem()">&#x1F5D1; DELETE</button>
                     </div>
@@ -1417,6 +1423,7 @@
                 <div class="panel-header">
                     <span class="panel-title">&#x1F50E; PERK DETAILS &#x2014; <span id="ppDetailPerkName">&#x2014;</span></span>
                     <div style="display:flex;gap:6px;">
+                        <button class="cmd-btn success" onclick="ppAssignToPlayer()" title="Grant this perk to a player">&#x1F9EC; ASSIGN TO PLAYER</button>
                         <button class="cmd-btn" onclick="ppEditPerk()">&#x270F; EDIT</button>
                         <button class="cmd-btn danger" onclick="ppDeletePerk()">&#x1F5D1; DELETE</button>
                     </div>
@@ -2543,6 +2550,27 @@
         if(ae.status==='inactive')ae.status='active';
         addLog(tmpl.name+' added to encounter with '+hp+' HP','blue');
         closeAddEnemyModal();renderEnemyTracker();renderInitiativeTracker();save();
+    };
+
+    // Bridge: add any enemy object directly to encounter (used by Enemies Pool tab)
+    window._overseerAddEnemyToEncounter = function(tmpl) {
+        if (!_campaign) { addLog('Load a campaign first', 'red'); return false; }
+        var hp = tmpl.maxHp || tmpl.hp || 20;
+        var iid = uid();
+        var inst = {id:iid, templateId:tmpl.id, name:tmpl.name, currentHp:hp, maxHp:hp, ac:tmpl.ac||10, initiative:tmpl.initiative||10, abilities:tmpl.abilities||[], loot:tmpl.loot||[]};
+        var ae = _campaign.activeEncounter;
+        ae.enemies.push(inst);
+        if (ae.combatants.length === 0) {
+            (_campaign.players||[]).forEach(function(p,i){ae.combatants.push({id:'comb_p'+i,type:'player',characterId:p.characterId,name:p.characterName,initiative:10,currentTurn:false});});
+        }
+        ae.combatants.push({id:'comb_'+iid,type:'enemy',enemyInstanceId:iid,name:tmpl.name,initiative:tmpl.initiative||10,currentTurn:false,currentHp:hp,maxHp:hp});
+        ae.combatants.sort(function(a,b){return b.initiative-a.initiative;});
+        var hc = ae.combatants.some(function(c){return c.currentTurn;});
+        if (!hc && ae.combatants.length > 0) ae.combatants[0].currentTurn = true;
+        if (ae.status === 'inactive') ae.status = 'active';
+        addLog(tmpl.name + ' added to encounter with ' + hp + ' HP', 'blue');
+        renderEnemyTracker(); renderInitiativeTracker(); save();
+        return true;
     };
 
     window.exportCampaign=function(){
@@ -5237,6 +5265,34 @@
             .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    // ── Build array from static ENEMIES pool ─────────────────────────────────
+    function epBuildStaticPool() {
+        if (typeof ENEMIES === 'undefined' || !Array.isArray(ENEMIES)) return [];
+        return ENEMIES.map(function(e) {
+            return {
+                id: e.id, name: e.name, type: e.type || 'unknown',
+                difficulty: e.difficulty || 'common',
+                hp: e.hp || e.maxHp || 20, ac: e.ac || 10,
+                initiative: e.initiative || 5, damage: e.damage || '',
+                abilities: (e.abilities || []).slice(),
+                loot: (e.loot || []).slice(),
+                description: e.description || '', notes: e.notes || '', source: 'pool'
+            };
+        });
+    }
+
+    // ── Merge server pool with static base ───────────────────────────────────
+    // Server entries (custom or overseer-modified) take precedence by id.
+    function epMergeWithServer(staticData, serverData) {
+        var result = staticData.slice();
+        serverData.forEach(function(se) {
+            var idx = -1;
+            for (var i = 0; i < result.length; i++) { if (result[i].id === se.id) { idx = i; break; } }
+            if (idx !== -1) { result[idx] = se; } else { result.push(se); }
+        });
+        return result;
+    }
+
     // ── Autosave enemies pool to server ──────────────────────────────────────
     function epAutoSave() {
         var code = epGetSessionCode();
@@ -5417,6 +5473,7 @@
         epRenderList();
         window.epSelectEnemy(_epCurrentId);
         epShowToast('Enemy "' + name + '" saved.');
+        if (typeof auditLog === 'function') auditLog('Overseer saved enemy in pool: ' + name, 'yellow');
     };
 
     window.epDeleteEnemy = function() {
@@ -5430,6 +5487,86 @@
         epAutoSave();
         epRenderList();
         epShowToast('"' + eName + '" deleted.');
+        if (typeof auditLog === 'function') auditLog('Overseer deleted enemy from pool: ' + eName, 'red');
+    };
+
+    // ── Add selected enemy directly to active encounter ───────────────────────
+    window.epAddToEncounter = function() {
+        if (!_epCurrentId) { epShowToast('Select an enemy first.', true); return; }
+        var e = null;
+        for (var i = 0; i < _epEnemies.length; i++) { if (_epEnemies[i].id === _epCurrentId) { e = _epEnemies[i]; break; } }
+        if (!e) return;
+
+        if (typeof window._overseerAddEnemyToEncounter === 'function') {
+            var ok = window._overseerAddEnemyToEncounter(e);
+            if (ok) {
+                epShowToast('"' + e.name + '" added to encounter.');
+                if (typeof auditLog === 'function') auditLog('Overseer added enemy to encounter: ' + e.name, 'blue');
+            } else {
+                epShowToast('Load a campaign first (Combat tab).', true);
+            }
+        } else {
+            epShowToast('Load a campaign first (Combat tab).', true);
+        }
+    };
+
+    // ── Assign enemy info to a player (floating panel) ────────────────────────
+    window.epAssignToPlayer = function() {
+        if (!_epCurrentId) { epShowToast('Select an enemy first.', true); return; }
+        var e = null;
+        for (var i = 0; i < _epEnemies.length; i++) { if (_epEnemies[i].id === _epCurrentId) { e = _epEnemies[i]; break; } }
+        if (!e) return;
+
+        var livePlayers = (typeof window._overseerLivePlayers === 'object' && window._overseerLivePlayers)
+            ? Object.keys(window._overseerLivePlayers) : [];
+        if (livePlayers.length === 0) {
+            epShowToast('No live players connected.', true); return;
+        }
+
+        // Remove any existing panel
+        var old = document.getElementById('epAssignPanel');
+        if (old) { if (old._forEnemy === e.id && old.style.display !== 'none') { old.style.display = 'none'; return; } old.parentNode.removeChild(old); }
+
+        var panel = document.createElement('div');
+        panel.id = 'epAssignPanel';
+        panel._forEnemy = e.id;
+        panel.style.cssText = 'position:fixed;top:80px;right:20px;width:300px;background:var(--overseer-dark);border:1px solid rgba(255,51,0,0.35);padding:14px;z-index:1001;font-family:"Courier New",monospace;font-size:11px;box-shadow:0 4px 24px rgba(0,0,0,.7);';
+
+        var opts = livePlayers.map(function(h) { return '<option value="' + epEscHtml(h) + '">' + epEscHtml(h) + '</option>'; }).join('');
+        panel.innerHTML =
+            '<div style="color:var(--overseer-red-bright);font-size:12px;letter-spacing:1px;margin-bottom:10px;">&#x1F479; ASSIGN ENEMY &mdash; <span style="color:var(--overseer-gold);">' + epEscHtml(e.name) + '</span>'
+            + '<button onclick="document.getElementById(\'epAssignPanel\').style.display=\'none\';" style="float:right;background:none;border:none;color:rgba(232,232,232,.5);cursor:pointer;font-size:13px;line-height:1;">&#x2715;</button></div>'
+            + '<div style="margin-bottom:8px;color:rgba(232,232,232,.7);">Assign this enemy encounter to:</div>'
+            + '<select id="epAssignTarget" style="width:100%;background:rgba(0,0,0,.4);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:inherit;font-size:11px;padding:5px;margin-bottom:10px;">' + opts + '</select>'
+            + '<button class="cmd-btn success" style="width:100%;margin-bottom:6px;" onclick="epConfirmAssign(\'' + epEscHtml(e.id) + '\')">&#x2714; CONFIRM ASSIGN</button>'
+            + '<button class="cmd-btn" style="width:100%;" onclick="document.getElementById(\'epAssignPanel\').style.display=\'none\';">[CANCEL]</button>';
+        document.body.appendChild(panel);
+    };
+
+    window.epConfirmAssign = function(enemyId) {
+        var e = null;
+        for (var i = 0; i < _epEnemies.length; i++) { if (_epEnemies[i].id === enemyId) { e = _epEnemies[i]; break; } }
+        if (!e) return;
+        var sel = document.getElementById('epAssignTarget');
+        var handle = sel ? sel.value : '';
+        if (!handle) return;
+
+        if (typeof OverseerSync === 'undefined' || !OverseerSync.isConnected()) {
+            epShowToast('Server not connected.', true); return;
+        }
+
+        var playerData = (window._overseerLivePlayers && window._overseerLivePlayers[handle]) || {};
+        var trackedEnemies = Array.isArray(playerData.trackedEnemies) ? playerData.trackedEnemies.slice() : [];
+        // Add/update the enemy entry in the player's tracked enemies
+        var idx = -1;
+        for (var j = 0; j < trackedEnemies.length; j++) { if (trackedEnemies[j].id === e.id) { idx = j; break; } }
+        var entry = { id: e.id, name: e.name, hp: e.hp, ac: e.ac, difficulty: e.difficulty, type: e.type };
+        if (idx !== -1) { trackedEnemies[idx] = entry; } else { trackedEnemies.push(entry); }
+
+        OverseerSync.updatePlayer(handle, 'trackedEnemies', trackedEnemies);
+        epShowToast('"' + e.name + '" assigned to ' + handle + '.');
+        if (typeof auditLog === 'function') auditLog('Overseer assigned enemy "' + e.name + '" to player: ' + handle, 'yellow');
+        var panel = document.getElementById('epAssignPanel'); if (panel) panel.style.display = 'none';
     };
 
     window.epExportPool = function() {
@@ -5444,13 +5581,23 @@
         } catch(e) { epShowToast('Export failed: ' + e.message, true); }
     };
 
-    // ── Load pool from server ─────────────────────────────────────────────────
+    // ── Load pool from server, merging with static pool ───────────────────────
     window._loadEnemyPool = function(code) {
+        // Always seed from static ENEMIES pool first so tab is immediately useful
+        var staticBase = epBuildStaticPool();
+        if (_epEnemies.length === 0) {
+            _epEnemies = staticBase;
+            _epCurrentId = null;
+            epRenderList();
+        }
+
+        // Then fetch server customizations and merge
         fetch('/api/campaigns/' + code + '/pools')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data && data.pools && Array.isArray(data.pools.enemies)) {
-                    _epEnemies = data.pools.enemies;
+                    // Merge: server entries (including overseer-edited ones) override static by id
+                    _epEnemies = epMergeWithServer(staticBase, data.pools.enemies);
                     _epCurrentId = null;
                     epRenderList();
                 }
@@ -5466,6 +5613,14 @@
         clearTimeout(t._epTimer);
         t._epTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
     }
+
+    // ── Seed from static pool on page load (before campaign selection) ────────
+    document.addEventListener('DOMContentLoaded', function() {
+        if (_epEnemies.length === 0) {
+            _epEnemies = epBuildStaticPool();
+            epRenderList();
+        }
+    });
 }());
 </script>
 
@@ -5485,6 +5640,52 @@
         return String(s == null ? '' : s)
             .replace(/&/g,'&amp;').replace(/</g,'&lt;')
             .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Build array from static ITEMS pool + junk.js ─────────────────────────
+    function ipBuildStaticPool() {
+        var result = [];
+        // Items from items.js (window.ITEMS)
+        if (typeof ITEMS !== 'undefined' && Array.isArray(ITEMS)) {
+            ITEMS.forEach(function(item) {
+                result.push({
+                    id: item.id, itemId: item.id, name: item.name,
+                    type: item.type || 'misc', rarity: (item.rarity || 'common').toLowerCase(),
+                    weight: item.weight || 0, value: item.value || 0,
+                    damage: item.damage || '', properties: (item.properties || []).slice(),
+                    effects: item.effects || '', description: item.description || '',
+                    notes: '', source: 'pool'
+                });
+            });
+        }
+        // Junk items from junk.js (window.junkItems)
+        if (typeof window.junkItems !== 'undefined' && Array.isArray(window.junkItems)) {
+            window.junkItems.forEach(function(item, idx) {
+                var junkId = 'junk_' + (item.name || 'item').toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + idx;
+                result.push({
+                    id: junkId, itemId: junkId, name: item.name || 'Unknown Junk',
+                    type: 'junk', rarity: (item.rarity || 'common').toLowerCase(),
+                    weight: item.weight || 0, value: item.value || 0,
+                    damage: '', properties: item.components
+                        ? item.components.map(function(c) { return c.name + ' \xD7' + (c.qty||1); })
+                        : [],
+                    effects: item.type ? 'Junk type: ' + item.type : '',
+                    description: item.description || '', notes: '', source: 'pool'
+                });
+            });
+        }
+        return result;
+    }
+
+    // ── Merge server pool with static base ───────────────────────────────────
+    function ipMergeWithServer(staticData, serverData) {
+        var result = staticData.slice();
+        serverData.forEach(function(se) {
+            var idx = -1;
+            for (var i = 0; i < result.length; i++) { if (result[i].id === se.id) { idx = i; break; } }
+            if (idx !== -1) { result[idx] = se; } else { result.push(se); }
+        });
+        return result;
     }
 
     // ── Autosave items pool to server ─────────────────────────────────────────
@@ -5657,6 +5858,7 @@
         ipRenderList();
         window.ipSelectItem(_ipCurrentId);
         ipShowToast('Item "' + name + '" saved.');
+        if (typeof auditLog === 'function') auditLog('Overseer saved item in pool: ' + name, 'yellow');
     };
 
     window.ipDeleteItem = function() {
@@ -5670,6 +5872,78 @@
         ipAutoSave();
         ipRenderList();
         ipShowToast('"' + iName + '" deleted.');
+        if (typeof auditLog === 'function') auditLog('Overseer deleted item from pool: ' + iName, 'red');
+    };
+
+    // ── Gift selected item directly to a player ───────────────────────────────
+    window.ipGiftToPlayer = function() {
+        if (!_ipCurrentId) { ipShowToast('Select an item first.', true); return; }
+        var item = null;
+        for (var i = 0; i < _ipItems.length; i++) { if (_ipItems[i].id === _ipCurrentId) { item = _ipItems[i]; break; } }
+        if (!item) return;
+
+        var livePlayers = (typeof window._overseerLivePlayers === 'object' && window._overseerLivePlayers)
+            ? Object.keys(window._overseerLivePlayers) : [];
+        if (livePlayers.length === 0) {
+            ipShowToast('No live players connected.', true); return;
+        }
+
+        // Remove any existing panel
+        var old = document.getElementById('ipGiftPanel');
+        if (old) { if (old._forItem === item.id && old.style.display !== 'none') { old.style.display = 'none'; return; } old.parentNode.removeChild(old); }
+
+        var panel = document.createElement('div');
+        panel.id = 'ipGiftPanel';
+        panel._forItem = item.id;
+        panel.style.cssText = 'position:fixed;top:80px;right:20px;width:300px;background:var(--overseer-dark);border:1px solid rgba(74,222,128,0.35);padding:14px;z-index:1001;font-family:"Courier New",monospace;font-size:11px;box-shadow:0 4px 24px rgba(0,0,0,.7);';
+
+        var opts = livePlayers.map(function(h) { return '<option value="' + ipEscHtml(h) + '">' + ipEscHtml(h) + '</option>'; }).join('');
+        panel.innerHTML =
+            '<div style="color:var(--overseer-green);font-size:12px;letter-spacing:1px;margin-bottom:10px;">&#x1F381; GIFT ITEM &mdash; <span style="color:var(--overseer-gold);">' + ipEscHtml(item.name) + '</span>'
+            + '<button onclick="document.getElementById(\'ipGiftPanel\').style.display=\'none\';" style="float:right;background:none;border:none;color:rgba(232,232,232,.5);cursor:pointer;font-size:13px;line-height:1;">&#x2715;</button></div>'
+            + '<div style="margin-bottom:8px;color:rgba(232,232,232,.7);">Gift to player:</div>'
+            + '<select id="ipGiftTarget" style="width:100%;background:rgba(0,0,0,.4);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:inherit;font-size:11px;padding:5px;margin-bottom:8px;">' + opts + '</select>'
+            + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'
+            + '<label style="color:rgba(232,232,232,.7);">Qty:</label>'
+            + '<input type="number" id="ipGiftQty" value="1" min="1" max="99" style="width:60px;background:rgba(0,0,0,.4);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:inherit;font-size:11px;padding:4px 6px;">'
+            + '</div>'
+            + '<button class="cmd-btn success" style="width:100%;margin-bottom:6px;" onclick="ipConfirmGift(\'' + ipEscHtml(item.id) + '\')">&#x2714; GIFT ITEM</button>'
+            + '<button class="cmd-btn" style="width:100%;" onclick="document.getElementById(\'ipGiftPanel\').style.display=\'none\';">[CANCEL]</button>';
+        document.body.appendChild(panel);
+    };
+
+    window.ipConfirmGift = function(itemId) {
+        var item = null;
+        for (var i = 0; i < _ipItems.length; i++) { if (_ipItems[i].id === itemId) { item = _ipItems[i]; break; } }
+        if (!item) return;
+        var sel = document.getElementById('ipGiftTarget');
+        var handle = sel ? sel.value : '';
+        if (!handle) return;
+        var qtyInp = document.getElementById('ipGiftQty');
+        var qty = qtyInp ? Math.max(1, parseInt(qtyInp.value, 10) || 1) : 1;
+
+        if (typeof OverseerSync === 'undefined' || !OverseerSync.isConnected()) {
+            ipShowToast('Server not connected.', true); return;
+        }
+
+        var playerData = (window._overseerLivePlayers && window._overseerLivePlayers[handle]) || {};
+        var inv = Array.isArray(playerData.inventory) ? playerData.inventory.slice() : [];
+        // Find existing stack
+        var found = false;
+        for (var j = 0; j < inv.length; j++) {
+            if (inv[j].name === item.name) {
+                inv[j].qty = (inv[j].qty || 1) + qty;
+                found = true; break;
+            }
+        }
+        if (!found) {
+            inv.push({ name: item.name, type: item.type, qty: qty, weight: item.weight || 0, value: item.value || 0, description: item.description || '' });
+        }
+
+        OverseerSync.updatePlayer(handle, 'inventory', inv);
+        ipShowToast(qty + '\xD7 "' + item.name + '" gifted to ' + handle + '.');
+        if (typeof auditLog === 'function') auditLog('Overseer gifted ' + qty + '\xD7 "' + item.name + '" to player: ' + handle, 'yellow');
+        var panel = document.getElementById('ipGiftPanel'); if (panel) panel.style.display = 'none';
     };
 
     window.ipExportPool = function() {
@@ -5684,13 +5958,22 @@
         } catch(e) { ipShowToast('Export failed: ' + e.message, true); }
     };
 
-    // ── Load pool from server ─────────────────────────────────────────────────
+    // ── Load pool from server, merging with static pool ───────────────────────
     window._loadItemPool = function(code) {
+        // Seed from static pools immediately
+        var staticBase = ipBuildStaticPool();
+        if (_ipItems.length === 0) {
+            _ipItems = staticBase;
+            _ipCurrentId = null;
+            ipRenderList();
+        }
+
+        // Fetch server customizations and merge
         fetch('/api/campaigns/' + code + '/pools')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data && data.pools && Array.isArray(data.pools.items)) {
-                    _ipItems = data.pools.items;
+                    _ipItems = ipMergeWithServer(staticBase, data.pools.items);
                     _ipCurrentId = null;
                     ipRenderList();
                 }
@@ -5709,6 +5992,14 @@
         clearTimeout(t._ipTimer);
         t._ipTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
     }
+
+    // ── Seed from static pool on page load (before campaign selection) ────────
+    document.addEventListener('DOMContentLoaded', function() {
+        if (_ipItems.length === 0) {
+            _ipItems = ipBuildStaticPool();
+            ipRenderList();
+        }
+    });
 }());
 </script>
 
@@ -5728,6 +6019,38 @@
         return String(s == null ? '' : s)
             .replace(/&/g,'&amp;').replace(/</g,'&lt;')
             .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Build array from static PERKS_POOL ───────────────────────────────────
+    function ppBuildStaticPool() {
+        var pool = (typeof window.PERKS_POOL !== 'undefined') ? window.PERKS_POOL : [];
+        if (!Array.isArray(pool)) return [];
+        return pool.map(function(p) {
+            var prereqStr = '';
+            if (Array.isArray(p.prereqs) && p.prereqs.length > 0) {
+                prereqStr = p.prereqs.map(function(r) {
+                    if (typeof r === 'string') return r;
+                    return (r.code || '') + (r.value !== undefined ? ' ' + r.value : '');
+                }).join(', ');
+            }
+            return {
+                id: p.id, name: p.name,
+                levelReq: p.levelReq || 1, rank: p.rank || 1,
+                description: p.benefit || p.description || '',
+                prereqs: prereqStr, notes: '', source: 'pool'
+            };
+        });
+    }
+
+    // ── Merge server pool with static base ───────────────────────────────────
+    function ppMergeWithServer(staticData, serverData) {
+        var result = staticData.slice();
+        serverData.forEach(function(se) {
+            var idx = -1;
+            for (var i = 0; i < result.length; i++) { if (result[i].id === se.id) { idx = i; break; } }
+            if (idx !== -1) { result[idx] = se; } else { result.push(se); }
+        });
+        return result;
     }
 
     // ── Autosave perks pool to server ─────────────────────────────────────────
@@ -5854,6 +6177,7 @@
         ppRenderList();
         window.ppSelectPerk(_ppCurrentId);
         ppShowToast('Perk "' + name + '" saved.');
+        if (typeof auditLog === 'function') auditLog('Overseer saved perk in pool: ' + name, 'yellow');
     };
 
     window.ppDeletePerk = function() {
@@ -5867,6 +6191,63 @@
         ppAutoSave();
         ppRenderList();
         ppShowToast('"' + pName + '" deleted.');
+        if (typeof auditLog === 'function') auditLog('Overseer deleted perk from pool: ' + pName, 'red');
+    };
+
+    // ── Assign selected perk to a player ─────────────────────────────────────
+    window.ppAssignToPlayer = function() {
+        if (!_ppCurrentId) { ppShowToast('Select a perk first.', true); return; }
+        var p = null;
+        for (var i = 0; i < _ppPerks.length; i++) { if (_ppPerks[i].id === _ppCurrentId) { p = _ppPerks[i]; break; } }
+        if (!p) return;
+
+        var livePlayers = (typeof window._overseerLivePlayers === 'object' && window._overseerLivePlayers)
+            ? Object.keys(window._overseerLivePlayers) : [];
+        if (livePlayers.length === 0) {
+            ppShowToast('No live players connected.', true); return;
+        }
+
+        // Remove any existing panel
+        var old = document.getElementById('ppAssignPanel');
+        if (old) { if (old._forPerk === p.id && old.style.display !== 'none') { old.style.display = 'none'; return; } old.parentNode.removeChild(old); }
+
+        var panel = document.createElement('div');
+        panel.id = 'ppAssignPanel';
+        panel._forPerk = p.id;
+        panel.style.cssText = 'position:fixed;top:80px;right:20px;width:300px;background:var(--overseer-dark);border:1px solid rgba(212,160,23,0.4);padding:14px;z-index:1001;font-family:"Courier New",monospace;font-size:11px;box-shadow:0 4px 24px rgba(0,0,0,.7);';
+
+        var opts = livePlayers.map(function(h) { return '<option value="' + ppEscHtml(h) + '">' + ppEscHtml(h) + '</option>'; }).join('');
+        panel.innerHTML =
+            '<div style="color:var(--overseer-gold);font-size:12px;letter-spacing:1px;margin-bottom:10px;">&#x2728; ASSIGN PERK &mdash; <span style="color:var(--overseer-white);">' + ppEscHtml(p.name) + '</span>'
+            + '<button onclick="document.getElementById(\'ppAssignPanel\').style.display=\'none\';" style="float:right;background:none;border:none;color:rgba(232,232,232,.5);cursor:pointer;font-size:13px;line-height:1;">&#x2715;</button></div>'
+            + '<div style="margin-bottom:8px;color:rgba(232,232,232,.7);">Assign to player:</div>'
+            + '<select id="ppAssignTarget" style="width:100%;background:rgba(0,0,0,.4);border:1px solid var(--overseer-border);color:var(--overseer-white);font-family:inherit;font-size:11px;padding:5px;margin-bottom:10px;">' + opts + '</select>'
+            + '<button class="cmd-btn success" style="width:100%;margin-bottom:6px;" onclick="ppConfirmAssign(\'' + ppEscHtml(p.id) + '\')">&#x2714; ASSIGN PERK</button>'
+            + '<button class="cmd-btn" style="width:100%;" onclick="document.getElementById(\'ppAssignPanel\').style.display=\'none\';">[CANCEL]</button>';
+        document.body.appendChild(panel);
+    };
+
+    window.ppConfirmAssign = function(perkId) {
+        var p = null;
+        for (var i = 0; i < _ppPerks.length; i++) { if (_ppPerks[i].id === perkId) { p = _ppPerks[i]; break; } }
+        if (!p) return;
+        var sel = document.getElementById('ppAssignTarget');
+        var handle = sel ? sel.value : '';
+        if (!handle) return;
+
+        if (typeof OverseerSync === 'undefined' || !OverseerSync.isConnected()) {
+            ppShowToast('Server not connected.', true); return;
+        }
+
+        var playerData = (window._overseerLivePlayers && window._overseerLivePlayers[handle]) || {};
+        var perks = Array.isArray(playerData.perks) ? playerData.perks.slice() : [];
+        // Avoid duplicates
+        if (perks.indexOf(p.name) === -1) { perks.push(p.name); }
+
+        OverseerSync.updatePlayer(handle, 'perks', perks);
+        ppShowToast('"' + p.name + '" assigned to ' + handle + '.');
+        if (typeof auditLog === 'function') auditLog('Overseer assigned perk "' + p.name + '" to player: ' + handle, 'yellow');
+        var panel = document.getElementById('ppAssignPanel'); if (panel) panel.style.display = 'none';
     };
 
     window.ppExportPool = function() {
@@ -5881,13 +6262,22 @@
         } catch(e) { ppShowToast('Export failed: ' + e.message, true); }
     };
 
-    // ── Load pool from server ─────────────────────────────────────────────────
+    // ── Load pool from server, merging with static pool ───────────────────────
     window._loadPerkPool = function(code) {
+        // Seed from static PERKS_POOL immediately
+        var staticBase = ppBuildStaticPool();
+        if (_ppPerks.length === 0) {
+            _ppPerks = staticBase;
+            _ppCurrentId = null;
+            ppRenderList();
+        }
+
+        // Fetch server customizations and merge
         fetch('/api/campaigns/' + code + '/pools')
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 if (data && data.pools && Array.isArray(data.pools.perks)) {
-                    _ppPerks = data.pools.perks;
+                    _ppPerks = ppMergeWithServer(staticBase, data.pools.perks);
                     _ppCurrentId = null;
                     ppRenderList();
                 }
@@ -5903,6 +6293,14 @@
         clearTimeout(t._ppTimer);
         t._ppTimer = setTimeout(function(){ t.className = isError ? 'error' : ''; }, 3500);
     }
+
+    // ── Seed from static pool on page load (before campaign selection) ────────
+    document.addEventListener('DOMContentLoaded', function() {
+        if (_ppPerks.length === 0) {
+            _ppPerks = ppBuildStaticPool();
+            ppRenderList();
+        }
+    });
 }());
 </script>
 </body>
