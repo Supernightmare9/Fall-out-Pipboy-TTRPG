@@ -87,6 +87,8 @@
      *   onPlayerUpdate   {function} Called with (handle, field, value, snapshot)
      *   onPlayerLeft     {function} Called with (handle) when player disconnects
      *   onPlayerWaiting  {function} Called with (handle) when player is waiting for campaign
+     *   onPlayerAdded    {function} Called with (handle, data) when Overseer adds a player
+     *   onPlayerRemoved  {function} Called with (handle) when Overseer removes a player
      *   onSnapshot       {function} Called with { players } on snapshot response
      *   onCampaignStarted {function} Called with { campaignId, players } when campaign is started
      *   onCampaignEnded  {function} Called with { players } when campaign is ended
@@ -148,6 +150,20 @@
       // Player is holding in the waiting queue (no active campaign yet)
       _socket.on('overseer:player-waiting', function (payload) {
         if (typeof _opts.onPlayerWaiting === 'function') _opts.onPlayerWaiting(payload.handle, payload.data);
+      });
+
+      // Overseer added a new player to the session
+      _socket.on('overseer:player-added', function (payload) {
+        _setStatus('syncing', '⬤ OVERSEER SYNC: PLAYER ADDED — ' + payload.handle);
+        setTimeout(function () { _restoreConnectedStatus(); }, 1500);
+        if (typeof _opts.onPlayerAdded === 'function') _opts.onPlayerAdded(payload.handle, payload.data);
+      });
+
+      // Overseer removed a player from the session
+      _socket.on('overseer:player-removed', function (payload) {
+        _setStatus('syncing', '⬤ OVERSEER SYNC: PLAYER REMOVED — ' + payload.handle);
+        setTimeout(function () { _restoreConnectedStatus(); }, 1500);
+        if (typeof _opts.onPlayerRemoved === 'function') _opts.onPlayerRemoved(payload.handle);
       });
 
       _socket.on('overseer:snapshot', function (payload) {
@@ -250,6 +266,36 @@
         effectName:        String(effectName        || ''),
         effectDescription: String(effectDescription || '')
       });
+      _flashSync();
+    },
+
+    /**
+     * Add a new player to the current session.
+     * The server creates a player record (defaultPlayerData merged with initialData),
+     * persists it, and sends back an overseer:player-added confirmation + snapshot.
+     *
+     * @param {string} playerHandle  Handle (username) for the new player
+     * @param {object} [initialData] Optional partial player data to seed
+     */
+    addPlayer: function (playerHandle, initialData) {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:add-player', {
+        playerHandle: playerHandle,
+        initialData:  initialData || {}
+      });
+      _flashSync();
+    },
+
+    /**
+     * Remove a player from the current session.
+     * The server deletes the player record, notifies the player socket (if online),
+     * persists to disk, and sends a fresh snapshot.
+     *
+     * @param {string} playerHandle  Handle of the player to remove
+     */
+    removePlayer: function (playerHandle) {
+      if (!_socket || !_connected) return;
+      _socket.emit('overseer:remove-player', { playerHandle: playerHandle });
       _flashSync();
     },
 

@@ -1427,6 +1427,84 @@ io.on('connection', (socket) => {
     console.log(`[craft:reject] requestId=${requestId} for ${request.fromHandle} session=${sessionCode}`);
   });
 
+  // ── OVERSEER: add a new player to the session ─────────────────────────────
+  // Payload: { playerHandle: string, initialData?: object }
+  // Creates a new player record (with default data merged with any supplied
+  // initialData) and persists the session.  Responds with the created player
+  // and a fresh full-session snapshot.
+  socket.on('overseer:add-player', ({ playerHandle, initialData } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const handle = String(playerHandle || '').trim();
+    if (!handle) {
+      socket.emit('error:update', { message: 'playerHandle is required.' });
+      return;
+    }
+
+    if (session.players[handle]) {
+      socket.emit('error:update', { message: `Player "${handle}" already exists in session.` });
+      return;
+    }
+
+    session.players[handle] = {
+      socketId: null,
+      data: Object.assign(defaultPlayerData(), initialData || {})
+    };
+
+    saveSessionToDisk(sessionCode, session);
+
+    socket.emit('overseer:player-added', {
+      handle,
+      data: session.players[handle].data
+    });
+    socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
+
+    console.log(`[overseer:add-player] Added "${handle}" to session ${sessionCode}`);
+  });
+
+  // ── OVERSEER: remove a player from the session ─────────────────────────────
+  // Payload: { playerHandle: string }
+  // Removes the player record from the session, notifies the player socket (if
+  // connected), persists to disk, and sends a fresh snapshot to the Overseer.
+  socket.on('overseer:remove-player', ({ playerHandle } = {}) => {
+    const { role, sessionCode } = socket.data || {};
+    if (role !== 'overseer' || !sessionCode) return;
+
+    const session = sessions[sessionCode];
+    if (!session) return;
+
+    const handle = String(playerHandle || '').trim();
+    if (!handle) {
+      socket.emit('error:update', { message: 'playerHandle is required.' });
+      return;
+    }
+
+    const player = session.players[handle];
+    if (!player) {
+      socket.emit('error:update', { message: `Player "${handle}" not found in session.` });
+      return;
+    }
+
+    // Notify the player if they are online
+    if (player.socketId) {
+      io.to(player.socketId).emit('player:removed-from-session', {
+        message: 'You have been removed from this session by the Overseer.'
+      });
+    }
+
+    delete session.players[handle];
+    saveSessionToDisk(sessionCode, session);
+
+    socket.emit('overseer:player-removed', { handle });
+    socket.emit('overseer:snapshot', { players: allPlayersSnapshot(session) });
+
+    console.log(`[overseer:remove-player] Removed "${handle}" from session ${sessionCode}`);
+  });
+
   // ── Disconnect ─────────────────────────────────────────────────────────────
   socket.on('disconnect', () => {
     const { role, sessionCode, handle } = socket.data || {};
