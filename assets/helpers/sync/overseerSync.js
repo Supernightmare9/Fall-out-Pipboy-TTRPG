@@ -305,7 +305,8 @@
      * @param {string} field         Field to update, or 'all'
      * @param {*}      value         New value
      */
-    updatePlayer: function (playerHandle, field, value) {      if (!_socket || !_connected) return;
+    updatePlayer: function (playerHandle, field, value) {
+      if (!_socket || !_connected) return;
       _socket.emit('overseer:update-player', {
         playerHandle: playerHandle,
         field:        field,
