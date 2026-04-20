@@ -13,9 +13,97 @@ const ITEMS = [
     rarity: "common",
     weight: 2.5,
     value: 75,
-    damage: "1d8",
+    damage: "1d4",
     description: "A reliable semi-automatic pistol chambered in 10mm. A staple sidearm of the wasteland.",
     properties: ["Ranged", "Semi-Auto", "10mm Ammo"]
+  },
+  {
+    id: "item_hunting rifle",
+    name: "Hunting Rifle",
+    type: "weapon",
+    rarity: "uncommon",
+    weight: 6,
+    value: 100,
+    damage: "1d6",
+    description: "A sturdy bolt-action rifle, excellent for long-range hunting or sniping.",
+    properties: ["Ranged", "Semi-Auto", ".308 Ammo"]
+  },
+  {
+    id: "item_combat shoutgun",
+    name: "Combat Shotgun",
+    type: "weapon",
+    rarity: "uncommon",
+    weight: 7,
+    vaule: 100,
+    damage: "4d4",
+    description: "A high-capacity, semi-auto shotgun designed for close-quarters devastation.",
+    properties: ["Ranged", "Semi-Auto", "Shotgun Shells"]
+  },
+  {
+    id: "item_laser rifle",
+    name: "Laser Rifle",
+    type: "weapon",
+    rarity: "uncommon",
+    weight: 8,
+    value: 75,
+    damage: "1d8",
+    description: "A precision energy weapon that fires a focused beam of light",
+    properties: ["Ranged", "Semi-Auto", "Microfusion Cells"]
+  },
+  {
+    id: "item_plasma rifle",
+    name: "Plasma Rifle",
+    type: "weapon",
+    rarity: "uncommon",
+    weight: 8,
+    value: 75,
+    damage: "1d8",
+    description: "Fires a bolt of superheated plasma that can melt through armor.",
+    properties: ["Ranged", "Semi-Auto", "Microfusion Cells"]
+  },
+  {
+    id: "item_fat man",
+    name: "Fat Man",
+    type: "weapon",
+    rarity: "rare",
+    weight: 30,
+    value: 250,
+    damage: "6d12",
+    description: "A portable catapult for launching devastating mini-nukes.",
+    properties: ["Ranged", "Semi-Auto", "Mini Nukes"]
+  },
+  {
+    id: "item_power fist",
+    name: "Power Fist",
+    type: "weapon",
+    rarity: "rare",
+    weight: 30,
+    value: 150,
+    damage: "4d8",
+    description: "A pneumatic gauntlet that delivers a crushing, mechanized punch.",
+    properties: ["Melee", "One-Handed", "Kenetic Amplifier"]
+  },
+  {
+    id: "item_ripper",
+    name: "Ripper",
+    type: "weapon",
+    rarirty: "rare",
+    weight: 6,
+    value: 150,
+    damage: "3d6",
+    description: "A handheld chainsaw blade that makes short work of soft tissue.",
+    properties: ["Melee", "One-Handed", "Shredding"]
+  },
+  {
+    id: "item_.44 magnum",
+    name: ".44 Magnum",
+    type: "weapon",
+    rarity: "uncommon",
+    weight: 4,
+    value: 50,
+    damage: "2d6+1",
+    description: "A legendary heavy revolver capable of taking down large targets.",
+    properties: ["Ranged", "Semi-Auto", ".44 Ammo"]
   },
   {
     id: "item_combat_rifle_1",
